@@ -1,0 +1,488 @@
+
+#top-fixed-menu{
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100vw;
+    height: 8em;
+    padding: 1em 2.5em 1em 2.5em;
+    
+    z-index: 100;
+    #fixed-menu-logo img{
+        max-width: 10em;
+        min-width: 8em;
+        width: 100%;
+    }
+    #fixed-menu-buttons{
+        display: flex;
+        gap: 2em;
+        .buttons-fixed-menu{
+            width: 8em;
+            height: 3em;
+            font-size: 1.2em;
+            font-family: 'poppins',sans-serif;
+            color: var(--color-text-primary);
+            border-radius: var(--border-radius-mid);
+            transition: 0.7s;
+            font-weight: 500;
+            &:hover{
+                opacity: 0.7;
+                transition: 0.7s;
+            }
+        }
+        #buttons-support{
+            border: 4px solid var(--main-color-purple);
+        }
+        #buttons-login{
+            color: var(--white-color);
+            background-color: var(--main-color-purple);
+        }
+    }
+}
+
+main{
+    width: 100%;
+    background-color: var(--secundary-color);
+    padding-top: 8em;
+    #introduce-section{
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 15em);
+        background-color: var(--secundary-color);
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        flex-direction: column;
+        gap: 2em;
+        z-index: 10;
+        -webkit-box-shadow: 0px 10px 36px 7px var(--secundary-color);
+        -moz-box-shadow: 0px 10px 36px 7px var(--secundary-color);
+        box-shadow: 0px 10px 36px 7px var(--secundary-color);
+        #introduce-title{
+            font-family: 'poppins',sans-serif;
+            color: var(--secundary-color-purple);
+            font-weight: 600;
+            font-size: 3.1em;
+            text-align: center;
+        }
+        #introduce-resume-containner{
+            width: 50%;
+            #introduce-resume{
+                font-family: 'poppins',sans-serif;
+                color: var(--color-text-primary);
+                font-weight: 400;
+                font-size: 1.1em;
+                text-align: center;
+            }
+        }
+        #introduce-button-containner{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            #introduce-button{
+                width: 12em;
+                height: 5em;
+                transition: 0.7s;
+                font-family: 'poppins',sans-serif;
+                color: var(--color-text-primary);
+                font-weight: 400;
+                font-size: 1.1em;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: var(--border-radius-min);
+                background-color: var(--secundary-color-purple);
+                -webkit-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                -moz-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                &:hover{
+                    transition: 0.7s;
+                    opacity: 0.8;
+                }
+            }
+        }
+    }
+
+    #plans-section{
+        position: relative;
+        width: 100%;
+        height: calc(100vh + 8em);
+        background-color: var(--primary-color);
+        -webkit-box-shadow: 0px 10px 36px 7px var(--primary-color);
+        -moz-box-shadow: 0px 10px 36px 7px var(--primary-color);
+        box-shadow: 0px 10px 36px 7px var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-around;
+        z-index: 9;
+        padding: 5em;
+        #plans-title-containner{
+            width: 70%;
+            #plans-title{
+                font-family: 'poppins',sans-serif;
+                color: var(--color-text-primary);
+                font-weight: 500;
+                font-size: 2.6em;
+                text-align: center;
+            }
+        }
+        #plans-row-containner{
+            width: 100%;
+            height: 100%;
+            padding: 1em;
+            #plans-row{
+                width: 100%;
+                display: flex;
+                justify-content: space-evenly;
+                height: 100%;
+                align-items: end;
+                gap: 2em;
+                
+                .plans-col{
+                    border-radius: var(--border-radius-min);
+                    width: 20em;
+                    height: 30em;
+                    min-width: 20em;
+                    min-height: 30em;
+                    background-color: var(--tertiary-color);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    .plans-col-top-fit{
+                        width: calc(100%);
+                        position: relative;
+                        height: 1em;
+                        border-radius: var(--border-radius-min) var(--border-radius-min) 0 0;
+                        background-color: var(--secundary-color-purple);
+                    }
+                    .plans-col-wrap{
+                        width: 100%;
+                        height: 100%;
+                        padding: 1em;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-around;
+                    }
+                    .plans-col-mini-title{
+                        width: 100%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        .mini-title{
+                            width: auto;
+                            font-size: 1.1em;
+                            color: var(--white-color);
+                            font-family: 'ubuntu',sans-serif;
+                            padding-bottom: 0.5em; 
+                            border-bottom: 1px solid var(--secundary-color-purple);
+                            display: inline-block;
+                        }
+                    }
+                    .plans-col-precos-containner{
+                        display: flex;
+                        justify-content: center;
+                        align-items: end;
+                        gap: 0.5em;
+                        margin: 1em;
+                        .precos-moeda,.precos-valor{
+                            font-size: 2.2em;
+                            font-weight: 600;
+                            color: var(--white-color);
+                            font-family: 'ubuntu',sans-serif;
+                        }
+                        .precos-tempo{
+                            font-size: 1.1em;
+                            font-weight: 300;
+                            color: var(--white-color);
+                            font-family: 'ubuntu',sans-serif;
+                        }
+                    }
+                    .plans-col-beneficios{
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1.5em;
+                        align-items: center;
+                        justify-content: center;
+                        .beneficios-title{
+                            font-size: 1.2em;
+                            font-weight: 500;
+                            color: var(--white-color);
+                            font-family: 'ubuntu',sans-serif;
+                        }
+                        .beneficios-list{
+                            text-align: center;
+                            list-style-type: disc;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            flex-direction: column;
+                            gap: 0.5em;
+                            .beneficios-list-item{
+                                width: fit-content;
+                                text-align: center;
+                                font-size: 0.9em;
+                                font-weight: 300;
+                                color: var(--white-color);
+                                font-family: 'ubuntu',sans-serif;
+                            }
+                        }
+                    }
+                    .plans-col-button{
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        .button-assinar{
+                            width: 10em;
+                            height: 4em;
+                            transition: 0.7s;
+                            font-family: 'poppins',sans-serif;
+                            color: var(--white-color);
+                            font-weight: 400;
+                            font-size: 1.1em;
+                            text-align: center;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            border-radius: var(--border-radius-min);
+                            background-color: var(--secundary-color-purple);
+                            -webkit-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                            -moz-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                            box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
+                            &:hover{
+                                transition: 0.7s;
+                                opacity: 0.8;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #comunity-section{
+        position: relative;
+        width: 100%;
+        height: calc(100vh + 8em);
+        background-color: var(--secundary-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 5em;
+        .comunity-containners{
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            height: 90%;
+            gap: 1em;
+
+        }
+        .comunity-titles{
+            font-family: 'poppins',sans-serif;
+            color: var(--color-text-primary);
+            font-weight: 600;
+            font-size: 2.6em;
+            text-align: center;
+        }
+        #comunity-description{
+            font-family: 'poppins',sans-serif;
+            color: var(--color-text-primary);
+            font-weight: 400;
+            font-size: 1.3em;
+            text-align: start;
+        }
+        #discord-iframe{
+            width: 80%;
+            max-width: 30em;
+            height: 80%;
+        }
+        #comuniny-description-containnner{
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+    footer{
+        position: relative;
+        width: 100%;
+        height: 15em;
+        z-index: 8;
+        background-color: var(--primary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        -webkit-box-shadow: 10px 0px 36px 7px var(--primary-color);
+        -moz-box-shadow: 10px 0px 36px 7px var(--primary-color);
+        box-shadow: 10px 0px 36px 7px var(--primary-color);
+        padding: 1em;
+        #left-containner{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            #redes-containner{
+                display: flex;
+                gap: 1em;
+                .redes-icon svg{
+                    width: 3em;
+                }
+            }
+            
+            #footer-logo-img{
+                width: 10em;
+    
+            }
+        }
+        #mid-containner{
+            height: 100%;
+            display: flex;
+            align-items: end;
+            #direitos-reservados{
+                font-family: 'Raleway',sans-serif;
+                color: var(--text-gray-color-primary);
+                font-weight: 300;
+                font-size: 1em;
+                text-align: center;
+            }
+        }
+        #rigth-containner{
+            display: flex;
+            align-items: center;
+            gap: 2.5em;
+            .rigth-containners{
+                flex-direction: column;
+                display: flex;
+                width: 10em;
+                align-items: end;
+                gap: 1em;
+            }
+            #sections-containner{
+                align-items: center;
+            }
+            .rigth-list-title{
+                font-family: 'ubuntu',sans-serif;
+                color: var(--color-text-primary);
+                font-weight: 400;
+                font-size: 1.2em;
+                text-wrap: nowrap;
+                width: 100%;
+                text-align: start;
+                
+            }
+            .rigth-list{
+                list-style-type: disc;
+                display: flex;
+                flex-direction: column;
+                gap: 0.6em;
+            }
+            .rigth-itens{
+                font-family: 'ubuntu',sans-serif;
+                color: var(--text-gray-color-primary);
+                font-weight: 300;
+                font-size: 1em;
+                &:hover{
+                    text-decoration: underline;
+                }
+            }
+        }
+        
+    }
+}
+
+#mid-col{
+    margin-bottom: 10em;
+    
+}
+#mid-col::before{
+    content: "Popular";
+    position: absolute;
+    z-index: 99;
+    margin-left: 13em;
+    margin-top: -3em;
+    border-radius: var(--border-radius-max);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 6em;
+    height: 6em;
+    font-family: 'ubuntu',sans-serif;
+    color: var(--white-color);
+    font-weight: 500;
+    font-size: 1.2em;
+    background-color: var(--main-color-purple);
+}
+
+@media screen and (max-width:1080px) {
+    #plans-section{
+        height: fit-content !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.5em !important;
+
+    }
+    #plans-row{
+        flex-direction: column !important;
+        gap: 5em !important;
+        justify-content: center !important;
+        align-items: center !important;
+        #mid-col{
+            margin-bottom: 0em !important;
+        }
+    }
+    #plans-title-containner{
+        width: 100% !important; 
+    
+    }
+
+    #comunity-section{
+        
+        height: fit-content !important;
+        gap: 5em !important;
+        flex-direction: column !important;
+        .comunity-containners{
+            width: 100% !important;
+        }
+        #discord-iframe{
+            height: 30em !important;
+        }
+    }
+}
+
+@media screen and (max-width:800px) {
+    #introduce-section{
+        gap: 4em !important;
+        height: max-content !important;
+        padding: 4em;
+    }
+    #introduce-section, #introduce-resume-containner{
+        width: 100% !important;
+    }
+    .buttons-fixed-menu{
+        width: 6.5em !important;
+        height: 2.5em !important;
+    }
+    #rigth-containner{
+        flex-direction: column;
+    }
+    #footer-logo-img{
+        width: 7em !important;
+    }
+    .redes-icon svg {
+        width: 2em !important;
+    }
+    #direitos-reservados{
+        font-size: 0.8em !important;
+    }
+    footer{
+        height: fit-content !important;
+        gap: 1em;
+    }
+    #top-fixed-menu{
+        gap: 1em;
+    }
+}

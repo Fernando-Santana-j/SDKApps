@@ -1,0 +1,96 @@
+#Noti_container { 
+    width: 200px; 
+    position: fixed; 
+    top: 0; 
+    right: 0;
+    z-index: 9999999999999999999999999;
+    margin: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+
+}
+#Noti_container ion-icon {
+    font-size: large;
+}
+.Noti_success {
+    padding: 10px 10px;
+    background: #01B940;
+    color: white;
+    width: 100%;
+    margin: 6px 0px;
+    border-radius: 3px;
+}
+.Noti_warning {
+    padding: 10px 10px;
+    background: #ffc400;
+    color: #836400;
+    width: 100%;
+    margin: 6px 0px;
+    border-radius: 3px;
+}
+.Noti_danger {
+    padding: 10px 10px;
+    background: #F91E00;
+    color: #ffffff;
+    width: 100%;
+    margin: 6px 0px;
+    border-radius: 3px;
+}
+
+@keyframes Noti_animation {
+    0% {
+        transform: scale(0.5);
+    }
+
+    50% {
+        transform: scale(1.07);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@-webkit-keyframes Noti_animation {
+    0% {
+        transform: scale(0.5);
+    }
+
+    50% {
+        transform: scale(1.07);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.timer_progress {
+    height: 2px;
+    background-color: rgba(255, 245, 245, 0.7);
+    position: absolute;
+    margin-top: -8px;
+}
+
+@keyframes timer_progress_animation {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+        transform: rotate(0deg);
+    }
+}
+
+@-webkit-keyframes timer_progress_animation {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+        transform: rotate(0deg);
+    }
+}

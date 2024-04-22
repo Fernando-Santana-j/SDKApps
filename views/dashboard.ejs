@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>SDK - Dashboard</title>
+    <link rel="stylesheet" href="<%= host %>/public/css/dashboard.css">
+    
+<body>
+    <div  id="body-containner">
+
+        <div id="containner">
+            <%- include('./reusable/topHeader.ejs',{user:user}) %>
+            <main id="main-containner">
+                <div id="mid-content">
+                    <div id="mid-content-title">
+                        Selecione um Servidor
+                    </div>
+                    <div id="mid-content-legends">
+                        <div id="legends-title">
+                            Estados do servidores:
+                        </div>
+                        <div id="legends-itens-containner">
+                            <div class="legends-itens">
+                                <div class="legends-itens-color" style="background-color: var(--red-color)"></div>
+                                <div class="legends-itens-text">Inativo</div>
+                            </div>
+                            <div class="legends-itens">
+                                <div class="legends-itens-color" style="background-color: var(--attention-color)"></div>
+                                <div class="legends-itens-text">Pendente</div>
+                            </div>
+                            <div class="legends-itens">
+                                <div class="legends-itens-color" style="background-color: var(--green-color)"></div>
+                                <div class="legends-itens-text">Ativo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="servers-containner">
+                    <div id="servers-row">
+                        <% servers.forEach(element => { %>
+                            <a href="/<%= element.isPaymented == true ? 'server' : element.assinante == true ? "subscription/get" : "payment"%>/<%= element.id %>" class="server-col">
+                                <div class="server-col-status <%= element.isPaymented == true ? 'greenColor' : element.assinante == true ? 'attentionColor' :"redColor"%>"></div>
+                                <div class="server-col-content">
+                                    <img class="server-col-pic" src="<%= element.server_pic %>">
+                                    <p class="server-col-name"><%= element.name %></p>
+                                    <p class="server-col-situation"><%= element.tipo %></p>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <%- include('./reusable/script.ejs') %>
+    <script src="<%= host %>/public/js/dashboard.js"></script>
+</body>
+</html>

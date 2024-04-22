@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>SDK - redirect</title>
+</head>
+<body>
+    <script>
+        try {
+            window.location = 'discord://';
+        } catch (error) {
+            window.close();
+        }
+    </script>
+</body>
+</html>

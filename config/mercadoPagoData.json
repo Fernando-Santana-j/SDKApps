@@ -1,0 +1,20 @@
+{
+    "payer": {
+        "email": "clienteinbiza@gmail.com",
+        "first_name": "Paula",
+        "last_name": "Guimaraes",
+        "identification": {
+            "type": "CPF",
+            "number": "07944777984"
+        },
+        "address": {
+            "zip_code": "06233200",
+            "street_name": "Av. das NaÃƒÂ§oes Unidas",
+            "street_number": "3003",
+            "neighborhood": "Bonfim",
+            "city": "Osasco",
+            "federal_unit": "SP"
+        }
+    },
+    "notification_url": "https://game-violently-kitten.ngrok-free.app"
+}

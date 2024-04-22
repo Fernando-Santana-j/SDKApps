@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>SDK - Página não encontrada</title>
+    <link rel="stylesheet" href="<%= host %>/public/css/NotFoundPage.css">
+</head>
+<body>
+    <div id="body-containner">
+        <div id="containner">
+            <main id="main-containner">
+                <div id="logo" class="flex-center">
+                    <img src="<%= host %>/public/img/logo-color-1.png">
+                </div>
+                <div id="texts">
+                    <h1>Pagina não Encontrada</h1>
+                    <p>A pagina que você esta tentando acessar não pode ser encontrada!</p>
+                </div>
+                <div id="buttons">
+                    <a href="/" id="inicio">Início</a>
+                    <a href="/support" id="ajuda">Ajuda</a>
+                </div>
+            </main>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+</body>
+</html>

@@ -1,0 +1,140 @@
+#main-containner {
+    position: relative;
+    top: 5em;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100% - 5em);
+}
+
+#mid-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 3em;
+
+    #mid-content-title {
+        color: var(--color-text-primary);
+        font-family: 'poppins', sans-serif;
+        font-size: 2.5em;
+        font-weight: 500;
+    }
+
+    #mid-content-legends {
+        margin-top: 3em;
+        display: flex;
+        flex-direction: column;
+        width: 25em;
+        height: 7em;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        background-color: var(--tertiary-color);
+        border-radius: var(--border-radius-min);
+
+        #legends-title {
+            color: var(--white-color);
+            font-family: 'poppins', sans-serif;
+            font-size: 1.5em;
+            font-weight: 400;
+        }
+
+        #legends-itens-containner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5em;
+
+            .legends-itens {
+                display: flex;
+                gap: 0.5em;
+                justify-content: center;
+                align-items: center;
+
+                .legends-itens-color {
+                    width: 2em;
+                    height: 2em;
+                    border-radius: var(--border-radius-min);
+                }
+
+                .legends-itens-text {
+                    color: var(--white-color);
+                    font-family: 'poppins', sans-serif;
+                    font-size: 0.9em;
+                    font-weight: 200;
+                }
+            }
+        }
+    }
+}
+
+#servers-containner {
+    width: 100%;
+    margin-top: 4em;
+    padding: 4em;
+    height: calc(100% - 332px);
+    background-color: var(--secundary-color);
+    -webkit-box-shadow: 0px -6px 40px 5px var(--secundary-color);
+    -moz-box-shadow: 0px -6px 40px 5px var(--secundary-color);
+    box-shadow: 0px -6px 40px 5px var(--secundary-color);
+
+    #servers-row {
+        overflow: auto;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 2em;
+        .server-col {
+            width: 15em;
+            height: 9em;
+            border-radius: var(--border-radius-min);
+            background-color: var(--primary-color);
+            display: flex;
+            flex-direction: column;
+            .server-col-status {
+                border-radius: var(--border-radius-min) var(--border-radius-min) 0 0;
+                width: 100%;
+                height: 0.6em;
+            }
+            .server-col-content {
+                width: 100%;
+                padding-left: 1em;
+                padding-right: 1em;
+                display: flex;
+                height: 100%;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                .server-col-pic {
+                    width: 4em;
+                    height: 4em;
+                    border-radius: var(--border-radius-max);
+                }
+                .server-col-name{
+                    margin-top: 0.5em;
+                    color: var(--color-text-primary);
+                    font-family: 'poppins', sans-serif;
+                    font-size: 1.2em;
+                    font-weight: 400;  
+                    width: 100%;
+                    text-align: center;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    text-wrap: nowrap;
+                }
+                .server-col-situation{
+                    color: var(--color-text-primary);
+                    font-family: 'poppins', sans-serif;
+                    font-size: 0.8em;
+                    font-weight: 200; 
+                }
+            }
+        }
+    }
+}

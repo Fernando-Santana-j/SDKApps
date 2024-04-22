@@ -1,0 +1,116 @@
+header{
+    width: 18em;
+    position: fixed;
+    top: 5em;
+    border-top: 1px solid var(--secundary-color-purple);
+    height: calc(100vh - 5em);
+    background-color: var(--menu-color);
+    padding: 1em;
+    z-index: 99;
+    #header-containner{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        margin-top: 1em;
+        #header-up-content{
+            display: flex;
+            gap: 1em;
+            width: 100%;
+            justify-content: center;
+            #header-up-server{
+                width: 13em;
+                padding: 1em;
+                height: 4.5em;
+                border-radius: var(--border-radius-mid);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.6em;
+                background-color: var(--tertiary-color);
+                transition: 0.7s;
+                opacity: 1;
+                cursor: pointer;
+                user-select: none;
+                -webkit-user-drag: none;
+                &:hover{
+                    opacity: 0.8;
+                    transition: 0.7s;
+                }
+                #header-up-server-pic img{
+                    width: 3.5em;
+                    height: 3.5em;
+                    border-radius: var(--border-radius-max);
+                }
+                #header-up-server-name{
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    color: var(--white-color);
+                    font-family: 'poppins',sans-serif;
+                    text-wrap: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+            }
+        }  
+    }
+}
+
+
+#header-nav-content{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: left;
+    margin-top: 5em;
+    padding: 0.5em;
+    #header-nav-list{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        .header-nav-list-link{
+            padding: 0.6em;
+            transition: 0.7s;
+            user-select: none;
+            -webkit-user-drag: none;
+            border-radius: var(--border-radius-mid);
+            &:hover{
+                transition: 0.7s;
+                background-color: var(--hover-color);
+            }
+            .header-nav-list-item{
+                display: flex;
+                align-items: center;
+                gap: 0.6em;
+                .list-item-icon{
+                    width: 2.5em;
+                
+                }
+                .list-item-name{
+                    font-size: large;
+                    color: var(--color-text-primary);
+                    font-family: 'ubuntu',sans-serif;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+}
+
+#header-menu{
+    position: fixed;
+    top: 5.5em;
+    left: 1em;
+    width: 3em;
+    z-index: 9999;
+    transition: 0.7s;
+    opacity: 1;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    &:hover{
+        opacity: 0.7;
+        transition: 0.7s;
+    }
+}

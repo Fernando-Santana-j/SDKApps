@@ -1,0 +1,41 @@
+quando for trocar as contas da stripe se lembrar de cadastrar e colocar os codigos do produtos da assinatura novamente
+e de trocar os tokens alem de cadastrar os produtos os precos e alterar via codigo os ids dos precos alem de comprimir as imagem e colocar 1 como fundo do produto
+
+
+fazer sitema para quando o usuario estiver na tela inicial e tiver logado apenas redirecionar para o dashboard ao inves de logar dnv
+
+
+// subustituir o embends pelo codigo abaixo quando tiver usando as imagens:
+// const attachment = new MessageAttachment('URL_DA_IMAGEM');
+// files: [attachment] no lugar do embends
+
+
+
+
+
+
+fazer com que o dono do discord possa aprovar um carrinho usando um comando slash no canal do carrinho
+
+
+
+
+
+
+
+
+
+
+    // subustituir o embends pelo codigo abaixo quando tiver usando as imagens:
+    // const attachment = new MessageAttachment('URL_DA_IMAGEM');
+    // files: [attachment] no lugar do embends
+    // embeds: [
+    //     new Discord.EmbedBuilder()
+    //         .setTitle(produto.productName)
+    //         .setDescription(produto.producDesc)
+    //         .setAuthor({ name: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`})
+    //         .setThumbnail(`${process.env.HOST}${produto.productLogo}`)
+    //         .setFooter({ text: DiscordServer.name, iconURL: 'https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp'  })
+    //         .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps'})
+    //         .setTimestamp()
+    //         .setColor("#6E58C7")
+    // ],

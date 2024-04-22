@@ -1,0 +1,136 @@
+#main-containner {
+    width: calc(100% - 18em);
+    position: relative;
+    top: 5em;
+    left: 18em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+
+}
+
+#main-content {
+    width: 80%;
+    margin-top: 3em;
+}
+
+#bot-config-containner {
+    width: 100%;
+
+    #title-rest-bot-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2em;
+        #title-bot-config{
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            font-family: 'poppins';
+        }
+        #reset-bot-config-button-content {
+            #reset-bot-config-button {
+                font-size: 1.2em;
+                font-weight: 400;
+                color: var(--color-text-primary);
+                font-family: 'poppins';
+                border: none;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                padding-left: 1em;
+                padding-right: 1em;
+                background: transparent;
+                height: 3.5em;
+                border-radius: var(--border-radius-mid);
+                border: 3px solid var(--red-color);
+                transition: 0.7s;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 0.8;
+                    transition: 0.7s;
+                }
+            }
+        }
+    }
+}
+
+#bot-config-content{
+    margin-top: 3em;
+    display: flex;
+    gap: 1em;
+    justify-content: space-between;
+
+}
+
+.plan-config-inputs-containner:nth-child(1n + 2){
+    margin-top: 17px;
+}
+
+#plan-config-containner{
+    margin-top: 5em;
+    #title-plan-config{
+        margin-bottom: 2em;
+        text-align: left;
+        font-size: 2.2em;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        font-family: 'poppins';
+    }
+}
+
+#plan-config-content{
+    margin-top: 2em;
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+}
+
+
+#buttons-containner{
+    margin-top: 7em;
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+    .button-padrao{
+        width: 20em !important;
+    }
+}
+
+#save-configs{
+    background-color: var(--tertiary-color) !important;
+    border: 3px solid var(--secundary-color-purple);
+}
+
+#confimCancelSubscription{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    left: 0;
+    top: 0;
+    #confimCancelSubscription-content{
+        width: 40em;
+        height: 15em;
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: var(--border-radius-mid);
+        background-color: var(--tertiary-color);
+    }
+    #confirm-buttons{
+        margin-top: 1em;
+        width: 90%;
+        display: flex;
+        justify-content: space-between;
+        gap: 1em;
+    }
+}

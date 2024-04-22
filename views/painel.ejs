@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>SDK - <%= server.name %></title>
+    <link rel="stylesheet" href="<%= host %>/public/css/painel.css">
+</head>
+<body>
+    <div id="body-containner">
+
+        <div id="containner">
+            <%- include('./reusable/header.ejs',{index:1}) %>
+            <main id="main-containner">
+                <div id="main-content">
+                    <div id="vendas-chart-containner">
+                        <h1 class="title-col">Numero de vendas na semana:</h1>
+                        <div id="charts-content">
+                            <div id="vendas-completas-chart"></div>
+                            <div id="vendas-canceladas-chart"></div>
+                        </div>
+                    </div>
+                    <div id="others-col-containner">
+                        <div id="bot-situation-containner">
+                            <h1 class="title-col">Situação atual do bot:</h1>
+                            <div id="bot-situation-content">
+                                <div class="bot-contents" id="vendas-situation-content">
+                                    <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Vendas Ativa</p>
+                                    <button class="bot-contents-button" id="vendas-modify" style="background-color: var(--red-color);">Desativar Vendas</button>
+                                </div>
+                                <div class="bot-contents" id="bot-act-content">
+                                    <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Bot Ativo</p>
+                                    <button class="bot-contents-button" id="bot-modify" style="background-color: var(--red-color);">Desativar Bot</button>
+                                </div>
+                                
+                            </div>
+                            <p id="mensage-sup-bot">Caso esteja tendo problemas com o bot contate o &nbsp;<a href="/support" style="text-decoration: underline;"> suporte</a>!</p>
+                        </div>
+                        <div id="signature-situation-containner">
+                            <h1 class="title-col">Seu plano expira em:</h1>
+                            <div id="signature-situation">
+                                <div id="signature-situation-dates">
+                                    <p id="signature-situation-days">
+
+                                    </p>
+                                    <p id="signature-situation-date">
+
+                                    </p>
+                                </div>
+                                <button id="signature-situation-button">Renovar Agora</button>
+                            </div>
+                            <p id="notify-signature">
+                                Notificar pelo discord 3 dias antes!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        converterExpiracao(parseInt('<%= server.subscriptionData.expires_at %>'))
+                
+        function converterExpiracao(tempoUnix) {
+            const tempoUnixConvert = new Date(tempoUnix * 1000);
+            let dataExp = tempoUnixConvert.toLocaleDateString(); 
+            const hoje = new Date();
+            const diferencaEmMilissegundos = tempoUnixConvert - hoje;
+            const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24)); // Convertendo milissegundos para dias
+            document.getElementById('signature-situation-days').innerText = diasRestantes + ' Dias restantes'
+            document.getElementById('signature-situation-date').innerText = dataExp
+        }
+    </script>
+    <%- include('./reusable/script.ejs') %>
+    <script src="<%= host %>/public/js/painel.js"></script>
+    <input type="file" name="" dire id="">
+</body>
+</html>
