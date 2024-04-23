@@ -448,7 +448,7 @@ module.exports = (Discord, client) => {
                     
                     await DiscordChannel.delete()
                     let analytics = await db.findOne({colecao:'analytics', doc:interaction.guildId})
-                    if (analytics && analytics.error == false) {
+                    if (analytics.error == false) {
                         db.update('analytics',interaction.guildId,{
                             "vendas canceladas": parseInt( analytics["vendas canceladas"]) + 1
                         })
@@ -667,7 +667,7 @@ module.exports.sendProductPayment = async (params, id,type) => {
 
                 let analytics = await  db.findOne({colecao:"analytics",doc:serverData.id})
                 
-                if (analytics && analytics.error == false) {
+                if (analytics.error == false) {
                     let vendasComple = analytics['vendas completas']
                     await vendasComple.push(Date.now())
                     db.update('analytics',serverData.id,{

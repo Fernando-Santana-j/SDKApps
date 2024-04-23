@@ -122,13 +122,12 @@ app.get('/dashboard', async (req, res) => {
     if (req.session.uid) {
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
         let server = await functions.reqServerByTime(user, functions.findServers)
-
         let servidoresEnd = []
         for (let i = 0; i < server.length; i++) {
             let element = server[i]
 
             let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
-            if (Findserver) {
+            if (Findserver.error == false) {
                 servidoresEnd.push(Findserver)
             } else {
                 servidoresEnd.push(element)
