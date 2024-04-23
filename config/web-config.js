@@ -15,5 +15,6 @@ module.exports = {
     stripe:process.env.STRIPE,
     iban:process.env.IBAN,
     stripeAccount:process.env.STRIPEACCOUNT,
-    host:process.env.HOST
+    host:process.env.HOST,
+    discordGuildUrl: "https://discord.com/oauth2/authorize?client_id=1210894508028338197&permissions=8&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2Fcallback%2Fguild&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&guild_id=${req.params.serverID}&disable_guild_select=true"
 }

@@ -12,36 +12,40 @@ module.exports = {
         }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
         if (server) {
-            const assinatura = await stripe.subscriptions.retrieve(server.subscription);
-            if (assinatura) {
-                const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
-                const hoje = new Date();
-                const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-                const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
-                if (server.payment_status == "paused") {
-                    res.redirect('/dashboard')
-                    return
-                }
-                switch (assinatura.status) {
-                    case 'active':
-                        if (diasRestantes <= 3) {
-                            req.query.lastdays = diasRestantes
-                        }
-                        next()
-                        break;
-                    case 'canceled':
-                        await db.update('servers', req.params.id, {
-                            assinante: false,
-                            payment_status: "cancel",
-                            isPaymented: false
-                        })
+            try {
+                const assinatura = await stripe.subscriptions.retrieve(server.subscription);
+                if (assinatura) {
+                    const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
+                    const hoje = new Date();
+                    const diferencaEmMilissegundos = tempoUnixConvert - hoje;
+                    const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
+                    if (server.payment_status == "paused") {
                         res.redirect('/dashboard')
-                        break;
-                    default:
-                        next()
-                        break;
+                        return
+                    }
+                    switch (assinatura.status) {
+                        case 'active':
+                            if (diasRestantes <= 3) {
+                                req.query.lastdays = diasRestantes
+                            }
+                            next()
+                            break;
+                        case 'canceled':
+                            await db.update('servers', req.params.id, {
+                                assinante: false,
+                                payment_status: "cancel",
+                                isPaymented: false
+                            })
+                            res.redirect('/dashboard')
+                            break;
+                        default:
+                            next()
+                            break;
+                    }
+                } else {
+                    res.redirect('/')
                 }
-            } else {
+            } catch (error) {
                 res.redirect('/')
             }
         } else {
