@@ -259,6 +259,12 @@ app.get('/server/:id',functions.subscriptionStatus, async (req, res) => {
         res.redirect('/dashboard')
         return
     }
+
+    let ana = await db.findOne({colecao:"analytics",doc:req.params.id})
+
+    let test = await functions.getDatesLast7Days(ana["vendas completas"])
+    
+
     res.render('painel', { host: `${req.protocol}://${req.hostname}`, user: user, server: server })
 })
 

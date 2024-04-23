@@ -8,21 +8,28 @@ const axios = require('axios')
 const { Payment, MercadoPagoConfig } = require('mercadopago');
 const mercadoPagoData = require('./config/mercadoPagoData.json')
 
+
+let lastPaymentsSends = []
+
 router.post('/mercadopago/webhook', async (req, res) => {
     try {
-        if (req.body.action == 'payment.created') {
+        if (req.body.action == 'payment.updated') {
             let id = await req.body.data.id
             let params = await req.query
-            if (params) {
+            if (params || !lastPaymentsSends.includes(id)) {
                 axios.get(`https://api.mercadolibre.com/collections/notifications/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${params.token}`
                     }
                 }).then(async (doc) => {
-                    // if (doc.data.collection.status === "approved") {
-                    require("./Discord/discordIndex").sendProductPayment(params, id,'pix')
-
-                    // }
+                    if (doc.data.collection.status === "approved") {
+                        try {
+                            lastPaymentsSends.push(id)
+                            require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
                 })
             }
         }

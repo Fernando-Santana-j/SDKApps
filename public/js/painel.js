@@ -19,7 +19,7 @@ function completeChart(lastDays, colorsBack) {
         series: [{
             name: "Vendas",
             color: '#6E58C7',
-            data: [10, 41, 35, 51, 49, 62, 69]
+            data: [0, 0, 0, 0, 0, 0, 0]
         }],
         chart: {
             type: 'line',
@@ -78,7 +78,7 @@ function cancelChart(lastDays, colorsBack) {
         series: [{
             name: "Canceladas",
             color: '#6E58C7',
-            data: [10, 41, 35, 51, 49, 62, 69]
+            data: [0, 0, 0, 0, 0, 0, 0] // valores
         }],
         chart: {
             type: 'line',

@@ -30,10 +30,10 @@ module.exports = {
                         next()
                         break;
                     case 'canceled':
-                        await db.update('servers',req.params.id,{
-                            assinante:false,
-                            payment_status:"cancel",
-                            isPaymented:false
+                        await db.update('servers', req.params.id, {
+                            assinante: false,
+                            payment_status: "cancel",
+                            isPaymented: false
                         })
                         res.redirect('/dashboard')
                         break;
@@ -41,7 +41,7 @@ module.exports = {
                         next()
                         break;
                 }
-            }else{
+            } else {
                 res.redirect('/')
             }
         } else {
@@ -153,6 +153,31 @@ module.exports = {
         return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     },
 
-    
+    getDatesLast7Days: async (dates) => {
+        function converterDataParaUnix(data) {
+            return Math.floor(data.getTime() / 1000); // Divide por 1000 para converter milissegundos em segundos
+        }
+        const datasUltimosSeteDias = [];
+        console.log(dates);
+        // Iterar sobre os últimos 7 dias
+        for (let i = 0; i < 7; i++) {
+            const dataDia = new Date();
+            dataDia.setDate(dataDia.getDate() - i); // Define a data para o dia correspondente
+
+            // Converte a data para Unix timestamp
+            const timestampDia = converterDataParaUnix(dataDia);
+
+            // Verifica se o timestamp corresponde a uma data no array original
+            if (dates.includes(timestampDia)) {
+                datasUltimosSeteDias.push(timestampDia); // Adiciona o timestamp ao array de datas dos últimos 7 dias
+            }
+        }
+        console.log(datasUltimosSeteDias);
+        datasUltimosSeteDias.forEach(timestamp => {
+            console.log(new Date(timestamp * 1000)); // Multiplica por 1000 para converter segundos em milissegundos
+        });
+        return datasUltimosSeteDias
+    }
+
 
 }

@@ -101,6 +101,9 @@ module.exports = (Discord, client) => {
                     let product = await server.products.find(product => product.productID == interaction.customId.replace('comprar_', ''))
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
                     if (!product || !server || product.estoque.length <= 0 ) {
+                        db.update('analytics',interaction.guildId,{
+                            "cancelados estoque": firestore.FieldValue.increment(1)
+                        })
                         await interaction.reply({content: `⚠️| O produto selecionado está sem estoque!`,ephemeral: true})
                         return
                     }
@@ -601,6 +604,7 @@ module.exports.sendProductPayment = async (params, id,type) => {
                 })
 
             });
+            console.log(fields);
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
@@ -664,13 +668,15 @@ module.exports.sendProductPayment = async (params, id,type) => {
                 let analytics = await  db.findOne({colecao:"analytics",doc:serverData.id})
                 
                 if (analytics && analytics.error == false) {
+                    let vendasComple = analytics['vendas completas']
+                    await vendasComple.push(Date.now())
                     db.update('analytics',serverData.id,{
                         "pagamentos":{
                             "PIX": type == "pix" ? parseInt(analytics["pagamentos"]["PIX"]) + 1 : parseInt(analytics["pagamentos"]["PIX"]),
                             "card": type == "stripe" ? parseInt(analytics["pagamentos"]["card"]) + 1 : parseInt(analytics["pagamentos"]["card"]),
                             "boleto": 0,
                         },
-                        "vendas completas": parseInt(analytics["vendas completas"]) + 1
+                        "vendas completas": vendasComple
                     })
                     
                 }else{
