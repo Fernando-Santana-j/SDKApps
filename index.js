@@ -114,7 +114,7 @@ client.on("interactionCreate", async (interaction) => {
 
 app.get('/', async (req, res) => {
 
-    res.render('index', { host: `${req.protocol}://${req.hostname}`, isloged: req.session.uid ? true : false, error: req.query.error ? req.query.error : '' })
+    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, error: req.query.error ? req.query.error : '' })
 })
 
 
@@ -134,7 +134,7 @@ app.get('/dashboard', async (req, res) => {
                 servidoresEnd.push(element)
             }
         }
-        res.render('dashboard', { host: `${req.protocol}://${req.hostname}`, user: user, servers: servidoresEnd })
+        res.render('dashboard', { host: `${webConfig.host}`, user: user, servers: servidoresEnd })
 
 
     } else {
@@ -234,7 +234,7 @@ app.get('/payment/:id', async (req, res) => {
         return
     }
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    res.render('payment', { host: `${req.protocol}://${req.hostname}`, user: user })
+    res.render('payment', { host: `${webConfig.host}`, user: user })
 })
 
 
@@ -265,7 +265,7 @@ app.get('/server/:id',functions.subscriptionStatus, async (req, res) => {
     let test = await functions.getDatesLast7Days(ana["vendas completas"])
     
 
-    res.render('painel', { host: `${req.protocol}://${req.hostname}`, user: user, server: server })
+    res.render('painel', { host: `${webConfig.host}`, user: user, server: server })
 })
 
 
@@ -296,7 +296,7 @@ app.get('/server/sales/:id',functions.subscriptionStatus, async (req, res) => {
 
     const textChannels = channels.filter(channel => channel.type === 0);
 
-    res.render('sales', { host: `${req.protocol}://${req.hostname}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
+    res.render('sales', { host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
 })
 
 
@@ -310,7 +310,7 @@ app.get('/addbot/:serverID', (req, res) => {
 })
 
 
-// host:`${req.protocol}://${req.hostname}`,
+// host:`${webConfig.host}`,
 
 
 
@@ -327,7 +327,7 @@ app.get('/server/personalize/:id',functions.subscriptionStatus, async (req, res)
         return
     }
 
-    res.render('personalize', { host: `${req.protocol}://${req.hostname}`, user: user, server: server })
+    res.render('personalize', { host: `${webConfig.host}`, user: user, server: server })
 })
 
 app.get('/server/analytics/:id',functions.subscriptionStatus, async (req, res) => {
@@ -339,7 +339,7 @@ app.get('/server/analytics/:id',functions.subscriptionStatus, async (req, res) =
         return
     }
 
-    res.render('analytics', { host: `${req.protocol}://${req.hostname}`, user: user, server: server })
+    res.render('analytics', { host: `${webConfig.host}`, user: user, server: server })
 })
 
 
@@ -352,7 +352,7 @@ app.get('/server/permissions/:id',functions.subscriptionStatus, async (req, res)
         return
     }
 
-    res.render('perms', { host: `${req.protocol}://${req.hostname}`, user: user, server: server })
+    res.render('perms', { host: `${webConfig.host}`, user: user, server: server })
 })
 
 
@@ -375,7 +375,7 @@ app.get('/server/config/:id',functions.subscriptionStatus, async (req, res) => {
         const channels = guild.channels.cache;
 
         const textChannels = channels.filter(channel => channel.type === 0);
-        res.render('config', { host: `${req.protocol}://${req.hostname}`, user: user, channels: textChannels, server: server })
+        res.render('config', { host: `${webConfig.host}`, user: user, channels: textChannels, server: server })
     } catch (error) {
 
     }
@@ -388,12 +388,12 @@ app.get('/server/config/:id',functions.subscriptionStatus, async (req, res) => {
 
 
 app.get('/redirect/sucess', (req, res) => {
-    res.render('redirect', { host: `${req.protocol}://${req.hostname}` })
+    res.render('redirect', { host: `${webConfig.host}` })
 })
 
 
 app.get('/redirect/cancel', (req, res) => {
-    res.render('redirect', { host: `${req.protocol}://${req.hostname}` })
+    res.render('redirect', { host: `${webConfig.host}` })
 })
 
 
@@ -486,7 +486,7 @@ app.use('/', produtoRoutes);
 
 
 app.use((req, res, next) => {
-    res.status(404).render('NotFoundPage.ejs', { host: `${req.protocol}://${req.hostname}` })
+    res.status(404).render('NotFoundPage.ejs', { host: `${webConfig.host}` })
 });
 
 //TODO------------Listen--------------
