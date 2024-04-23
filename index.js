@@ -306,7 +306,7 @@ app.get('/addbot/:serverID', (req, res) => {
         res.redirect(`/server/${req.params.serverID}`)
         return
     }
-    res.redirect(`https://discord.com/oauth2/authorize?client_id=1210894508028338197&permissions=8&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2Fcallback%2Fguild&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&guild_id=${req.params.serverID}&disable_guild_select=true`)
+    res.redirect(webConfig.discordGuildUrl)
 })
 
 
