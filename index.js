@@ -305,7 +305,7 @@ app.get('/addbot/:serverID', (req, res) => {
         res.redirect(`/server/${req.params.serverID}`)
         return
     }
-    res.redirect(webConfig.discordGuildUrl)
+    res.redirect(`${webConfig.discordGuildUrl}&guild_id=${req.params.serverID}&disable_guild_select=true`)
 })
 
 
