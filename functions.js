@@ -189,12 +189,7 @@ module.exports = {
                         let time = (parseFloat(server.err.response.data.retry_after) * 1000)
                         return setTimeout(async () => {
                             let newServer = await functions(token)
-                            if (newServer.error) {
-                                await verifyServer(newServer)
-                            } else {
-                                resolve(newServer)
-                            }
-
+                            resolve(newServer)
                         }, time)
 
                     } else {

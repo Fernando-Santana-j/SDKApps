@@ -122,6 +122,10 @@ app.get('/dashboard', async (req, res) => {
     if (req.session.uid) {
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
         let server = await functions.reqServerByTime(user, functions.findServers)
+        if (server.error) {
+            res.redirect('/')
+            return
+        }
         let servidoresEnd = []
         for (let i = 0; i < server.length; i++) {
             let element = server[i]
