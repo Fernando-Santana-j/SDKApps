@@ -181,27 +181,31 @@ module.exports = {
         return servidoresFiltrados
     },
     reqServerByTime: async (token, functions) => {
-        let promise = await new Promise(async (resolve, reject) => {
-            verifyServer(await functions(token))
-            async function verifyServer(server) {
-                if (server.error) {
-                    let time = (parseFloat(server.err.response.data.retry_after) * 1000)
-                    return setTimeout(async () => {
-                        let newServer = await functions(token)
-                        if (newServer.error) {
-                            await verifyServer(newServer)
-                        } else {
-                            resolve(newServer)
-                        }
+        try {
+            let promise = await new Promise(async (resolve, reject) => {
+                verifyServer(await functions(token))
+                async function verifyServer(server) {
+                    if (server.error) {
+                        let time = (parseFloat(server.err.response.data.retry_after) * 1000)
+                        return setTimeout(async () => {
+                            let newServer = await functions(token)
+                            if (newServer.error) {
+                                await verifyServer(newServer)
+                            } else {
+                                resolve(newServer)
+                            }
 
-                    }, time)
+                        }, time)
 
-                } else {
-                    resolve(server)
+                    } else {
+                        resolve(server)
+                    }
                 }
-            }
-        })
-        return await promise
+            })
+            return await promise
+        } catch (error) {
+            console.log(error);
+        }
     },
     pausarAssinatura: async (subscriptionID, stripe) => {
         try {
