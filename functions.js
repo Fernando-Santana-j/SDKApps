@@ -2,15 +2,115 @@ const axios = require('axios')
 const sharp = require('sharp');
 const fs = require('fs');
 const stripe = require('stripe')(require('./config/web-config').stripe);
-const db = require('./Firebase/models')
+const db = require('./Firebase/models');
 
 module.exports = {
+    verifyPermissions: async (user, server, Discord, client) => {
+        try {
+            let serverDB = await db.findOne({ colecao: "servers", doc: server })
+            if (!serverDB) {
+                return { error: true, err: "server not found" };
+            }
+            const guild = await client.guilds.cache.get(server);
+            if (!guild) {
+                return { error: true, err: "server not found" };
+            }
+
+            const member = await guild.members.cache.get(user);
+
+            if (!member) {
+                return { error: true, err: "member not found" };
+            }
+
+            if (guild.ownerId == member.user.id) {
+                return {
+                    error: false, perms: {
+                        owner: true,
+                        botEdit: true,
+                        paymentEdit: true,
+                        commands: true,
+                        commandsAllChannel: true,
+                    }
+                }
+            }
+            if (serverDB.permissions) {
+
+
+                const memberRoles = await member.roles.cache;
+
+                if (memberRoles.size > 1) {
+                    const UserRolesPerms = await serverDB.permissions.filter(role => memberRoles.has(role.id));
+                    if (UserRolesPerms.length > 0) {
+                        let totalPerms = {}
+                        await UserRolesPerms.forEach((element) => {
+                            let perms = element.perms
+                            if (perms.botEdit == true) {
+                                totalPerms.botEdit = true
+                            }
+                            if (perms.paymentEdit == true) {
+                                totalPerms.paymentEdit = true
+                            }
+                            if (perms.commands == true) {
+                                totalPerms.commands = true
+                            }
+                            if (perms.commandsAllChannel == true) {
+                                totalPerms.commandsAllChannel = true
+                            }
+                        })
+                        if (!('botEdit' in totalPerms)) {
+                            totalPerms.botEdit = false
+                        }
+                        if (!('paymentEdit' in totalPerms)) {
+                            totalPerms.paymentEdit = false
+                        }
+                        if (!('commands' in totalPerms)) {
+                            totalPerms.commands = false
+                        }
+                        if (!('commandsAllChannel' in totalPerms)) {
+                            totalPerms.commandsAllChannel = false
+                        }
+                        totalPerms.owner = false
+                        return { error: false, perms: totalPerms }
+                    } else {
+                        return {
+                            error: false, perms: {
+                                botEdit: true,
+                                paymentEdit: false,
+                                commands: true,
+                                commandsAllChannel: false,
+                                owner: false
+                            }
+                        }
+                    }
+                } else {
+                    console.log(`${member.user.username} não possui cargos.`);
+                    return { error: true, err: "user not roles" };
+                }
+            } else {
+                return {
+                    error: false, perms: {
+                        botEdit: true,
+                        paymentEdit: false,
+                        commands: true,
+                        commandsAllChannel: false,
+                        owner: false
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error);
+            return { error: true, err: error }
+        }
+    },
     subscriptionStatus: async (req, res, next) => {
         if (!req.params.id || !req.session.uid) {
             res.redirect('/')
             return
         }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
+        if ("vitalicio" in server && server.vitalicio == true) {
+            next()
+        }
         if (server) {
             try {
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);

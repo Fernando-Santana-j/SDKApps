@@ -169,7 +169,6 @@ app.get('/auth/callback', async (req, res) => {
                 ...headers
             }
         }).then((res) => { return res.data }).catch((err) => console.error(err));
-
         await db.create('users', userResponse.id, {
             id: userResponse.id,
             username: userResponse.username,
@@ -259,6 +258,16 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
         return
     }
 
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+    if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botEdit == false) {
+        res.redirect('/dashboard?botedit=false')
+        return
+    }
+
     let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
 
     let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
@@ -266,9 +275,6 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
 
     res.render('painel', { host: `${webConfig.host}`, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
-
-
-
 
 
 app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
@@ -280,6 +286,16 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     }
     if (server.assinante == false || server.isPaymented == false) {
         res.redirect('/dashboard')
+        return
+    }
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botConfig == false) {
+        res.redirect(`/server/${serverID}`)
         return
     }
     let bankData = server.bankData ? server.bankData : null
@@ -295,7 +311,7 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
 
     const textChannels = channels.filter(channel => channel.type === 0);
 
-    res.render('sales', { host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
+    res.render('sales', { perms: verifyPerms.perms, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
 })
 
 
@@ -343,6 +359,7 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
 
 
 app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res) => {
+
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
@@ -351,7 +368,27 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
         return
     }
 
-    res.render('perms', { host: `${webConfig.host}`, user: user, server: server })
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if (verifyPerms.error == false && verifyPerms.perms.owner == false) {
+        res.redirect(`/server/${serverID}`)
+        return
+    }
+
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    let roles = guild.roles.cache
+    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false)
+    res.render('perms', { host: `${webConfig.host}`, user: user, server: server, roles: JSON.stringify(rolesFilter) })
 })
 
 
@@ -475,10 +512,94 @@ app.post('/config/change', async (req, res) => {
         }
         res.status(200).json({ success: true })
     } catch (error) {
-        res.status(200).json({ success: false,data:'Erro ao salvar as configurações' })
+        res.status(200).json({ success: false, data: 'Erro ao salvar as configurações' })
         console.log(error);
     }
 })
+
+
+app.post('/perms/changeOne', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        let roleID = await req.body.roleID
+        if (!server || !roleID) {
+            return
+        }
+        if (!('permissions' in server)) {
+            await db.update('servers', req.body.serverID, {
+                permissions: [
+                    {
+                        id:roleID,
+                        perms: {
+                            botEdit: true,
+                            paymentEdit: false,
+                            commands: true,
+                            commandsAllChannel: false,
+                        }
+                    }
+                ]
+            })
+        }
+        server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+
+        let permissions = server.permissions
+        let rolePermission = permissions.find(element=>element.id == roleID)
+        let index = permissions.findIndex(element=>element.id == roleID)
+
+        rolePermission.perms[await req.body.item] = await req.body.value
+
+        permissions[index] = rolePermission
+
+        console.log(permissions);
+        await db.update('servers', req.body.serverID, {
+            permissions: permissions
+        })
+
+    } catch (error) {
+
+    }
+})
+
+app.post('/perms/get', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        let roleID = await req.body.roleID
+        if (!server || !roleID) {
+            return
+        }
+        if (!('permissions' in server)) {
+            res.status(200).json({ success: true, data: {
+                botEdit: true,
+                paymentEdit: false,
+                commands: true,
+                commandsAllChannel: false,
+                owner: false
+            } })
+            return 
+        }
+        let rolePermission = server.permissions.find(element=>element.id == roleID)
+        let roleData
+        if (rolePermission) {
+            roleData = rolePermission.perms 
+        }else{
+            roleData = {
+                botEdit: true,
+                paymentEdit: false,
+                commands: true,
+                commandsAllChannel: false,
+                owner: false
+            }
+        }
+        res.status(200).json({ success: true, data: roleData})
+
+    } catch (error) {
+        console.log(error);
+        res.status(200).json({ success: false })
+    }
+})
+
+
+
 
 
 //TODO Mercado Pago
@@ -496,7 +617,7 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
-const { doc } = require("firebase/firestore");
+const { Filter } = require("firebase-admin/firestore");
 
 app.use('/', produtoRoutes);
 

@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title></title>
-    <link rel="stylesheet" href="<%= host %>/public/css/">
+    <link rel="stylesheet" href="<%= host %>/public/css/perms.css">
 </head>
 <body>
     <div id="body-containner">
@@ -11,11 +11,41 @@
         <div id="containner">
             <%- include('./reusable/header.ejs',{index:5}) %>
             <main id="main-containner">
-                
+                <div id="main-content">
+                    <div id="roles-containner">
+                        <div id="roles-content">
+                            <div id="roles-top-text">
+                                <h1 class="title-col">Cargos</h1>
+                                <p class="desc-col">Clique no cargo que deseja editar as permissões!</p>
+                            </div>
+                            <div id="roles-row">
+                                <div class="linha" style="margin-bottom: 1em;"></div>
+                                <% JSON.parse(roles).forEach(element => { %>
+                                    <div class="roles-col">
+                                        <span data-roleID="<%= element.id %>" class="text-role-col" data-color="<%= element.color %>"><%= element.name %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="permissions-containner">
+                        <div id="permissions-content">
+                            <div id="permissions-top-text">
+                                <h1 class="title-col">Permissões</h1>
+                                <p class="desc-col">As opção marcadas são alteradas automaticamente no sistema!</p>
+                            </div>
+                            <div id="permissions-row">
+                                <p class="title-col" style="width: 100%; height: 100%; min-height: calc(100vh - 13em); display: flex; justify-content: center; text-align: center; align-items: center;">
+                                    Clique em algum cargo para comecar a editar
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/"></script>
+    <script src="<%= host %>/public/js/perms.js"></script>
 </body>
 </html>

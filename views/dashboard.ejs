@@ -52,8 +52,19 @@
             </main>
         </div>
     </div>
+
+    
     
     <%- include('./reusable/script.ejs') %>
     <script src="<%= host %>/public/js/dashboard.js"></script>
+    <script>
+        const botedit = new URLSearchParams(new URL(location.href).search).get('botedit',0)
+        console.log(botedit);
+        if (botedit == 'false') {
+            errorNotify('Você não tem permissão para editar o bot!')
+            const novaURL = window.location.protocol + '//' + window.location.host + window.location.pathname
+            window.history.pushState({ path: novaURL }, '', novaURL);
+        }
+    </script>
 </body>
 </html>

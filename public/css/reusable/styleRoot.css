@@ -248,15 +248,15 @@ a {
     transition: .4s;
 }
 
-#checkbox:checked+.slider {
+#checkbox:checked+.slider,#perm-commands-checkbox:checked+.slider,#perm-commandsAllChannel-checkbox:checked+.slider,#perm-botEdit-checkbox:checked+.slider,#perm-paymentEdit-checkbox:checked+.slider {
     background-color: var(--main-color-purple);
 }
 
-#checkbox:focus+.slider {
+#checkbox:focus+.slider , #perm-commands-checkbox:focus+.slider,#perm-commandsAllChannel-checkbox:focus+.slider,#perm-botEdit-checkbox:focus+.slider,#perm-paymentEdit-checkbox:focus+.slider  {
     box-shadow: 0 0 1px var(--main-color-purple);
 }
 
-#checkbox:checked+.slider:before {
+#checkbox:checked+.slider:before,#perm-commands-checkbox:checked+.slider:before,#perm-commandsAllChannel-checkbox:checked+.slider:before,#perm-botEdit-checkbox:checked+.slider:before,#perm-paymentEdit-checkbox:checked+.slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);

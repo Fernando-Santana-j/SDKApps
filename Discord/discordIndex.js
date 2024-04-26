@@ -96,6 +96,16 @@ module.exports = (Discord, client) => {
             try {
                 var DiscordServer = await client.guilds.cache.get(interaction.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
+                let verifyPerms = await functions.verifyPermissions(interaction.user.id,interaction.guildId,Discord,client)
+                if (verifyPerms.error == true) {
+                    return
+                }
+                if (verifyPerms.perms.owner == false && verifyPerms.perms.command == false) {
+                    interaction.reply({content:'Você não tem permissão para executar comandos',ephemeral: true})
+                    return
+                }
+
+                
                 // interacao do botao de compra de um produto
                 if (interaction.customId.includes('comprar')) {
                     let server = await db.findOne({colecao:"servers",doc:interaction.guildId})

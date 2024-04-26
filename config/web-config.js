@@ -8,7 +8,7 @@ module.exports = {
     },
     port: process.env.PORT || 3000,
     // serviceAccount: JSON.parse(process.env.SERVICEACCOUNT),
-    serviceAccount: require('./fireabse.json'),
+    serviceAccount: require('./firebase.json'),
     secret:process.env.CLIENTSECRET,
     clientId:process.env.CLIENTID,
     redirect:process.env.REDIRECTURL,
