@@ -71,6 +71,10 @@
         }
     </script>
     <%- include('./reusable/script.ejs') %>
+    <script>
+        let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))
+        let comprasCanceladas = JSON.parse(("<%= comprasCanceladas %>").replace(/&#34;/g, '"'))
+    </script>
     <script src="<%= host %>/public/js/painel.js"></script>
 </body>
 </html>

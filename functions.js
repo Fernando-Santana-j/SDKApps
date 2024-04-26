@@ -157,30 +157,27 @@ module.exports = {
         return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     },
 
-    getDatesLast7Days: async (dates) => {
-        function converterDataParaUnix(data) {
-            return Math.floor(data.getTime() / 1000); // Divide por 1000 para converter milissegundos em segundos
+    getDatesLast7Days: async (dates, formatdate) => {
+        if (!Array.isArray(dates)) {
+            return
         }
-        const datasUltimosSeteDias = [];
-        console.log(dates);
-        // Iterar sobre os últimos 7 dias
-        for (let i = 0; i < 7; i++) {
-            const dataDia = new Date();
-            dataDia.setDate(dataDia.getDate() - i); // Define a data para o dia correspondente
-
-            // Converte a data para Unix timestamp
-            const timestampDia = converterDataParaUnix(dataDia);
-
-            // Verifica se o timestamp corresponde a uma data no array original
-            if (dates.includes(timestampDia)) {
-                datasUltimosSeteDias.push(timestampDia); // Adiciona o timestamp ao array de datas dos últimos 7 dias
-            }
-        }
-        console.log(datasUltimosSeteDias);
-        datasUltimosSeteDias.forEach(timestamp => {
-            console.log(new Date(timestamp * 1000)); // Multiplica por 1000 para converter segundos em milissegundos
+        let getLast7Days = () => [...Array(7)].map((_, i) => {
+            const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+            return `${('0' + date.getDate()).slice(-2)}/${('0' + (date.getMonth() + 1)).slice(-2)}`;
         });
-        return datasUltimosSeteDias
+        const contagemDatas = {};
+        await getLast7Days().forEach(async data1 => {
+            const datasIguais = await dates.filter(data2 => data2.startsWith(data1));
+            const contagem = datasIguais.length;
+            contagemDatas[data1] = contagem;
+        });
+        return contagemDatas
+    },
+    formatDate: async (data) => {
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+        return dia + '/' + mes + '/' + ano;
     }
 
 

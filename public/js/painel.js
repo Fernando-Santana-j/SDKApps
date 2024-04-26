@@ -11,15 +11,15 @@ let getLast7Days = () => [...Array(7)].map((_, i) => {
 let colorsBack = [getComputedStyle(document.querySelector(`[data-theme=${document.body.getAttribute('data-theme')}]`)).getPropertyValue('--color-text-primary'), getComputedStyle(document.querySelector(`[data-theme=${document.body.getAttribute('data-theme')}]`)).getPropertyValue('--text-gray-color-primary')]
 
 
-
-
+let comprasConcluidasArray = Object.values(comprasConcluidas)
+let comprasCanceladasArray = Object.values(comprasCanceladas)
 completeChart(getLast7Days(), colorsBack)
 function completeChart(lastDays, colorsBack) {
     var options = {
         series: [{
             name: "Vendas",
             color: '#6E58C7',
-            data: [0, 0, 0, 0, 0, 0, 0]
+            data: comprasConcluidasArray
         }],
         chart: {
             type: 'line',
@@ -78,7 +78,7 @@ function cancelChart(lastDays, colorsBack) {
         series: [{
             name: "Canceladas",
             color: '#6E58C7',
-            data: [0, 0, 0, 0, 0, 0, 0] // valores
+            data: comprasCanceladasArray// valores
         }],
         chart: {
             type: 'line',

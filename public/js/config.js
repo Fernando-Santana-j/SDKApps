@@ -2,13 +2,30 @@ let serverID = location.pathname.replace('/server/config/', "")
 
 
 document.getElementById('save-configs').addEventListener('click', async () => {
-    let lastPlan = document.getElementById('planInfo').textContent
-    let newPlan = document.getElementById('plan-config-newplan').textContent.replace('Plano ')
-
-    if (lastPlan != newPlan) {
-
+    const opcoes = document.getElementById('bot-config-channel-list').querySelectorAll('option');
+    let channelID = null;
+    console.log(1);
+    await opcoes.forEach(option => {
+        if (option.value === document.getElementById('bot-config-channel').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+    console.log(channelID);
+    let session = await fetch('/config/change', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID: serverID,
+            noticeChannel:channelID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Configurações salvas!')
+    } else {
+        errorNotify(session.data)
     }
-
 })
 
 document.getElementById('changePaymentMethod').addEventListener('click', async () => {
@@ -24,7 +41,7 @@ document.getElementById('changePaymentMethod').addEventListener('click', async (
         }).then(response => { return response.json() })
         if (session.success == true) {
             console.log(session);
-            
+
             successNotify('Você sera redirecionado para a pagina de cadastro de novo pagamento!')
             setInterval(async () => {
                 window.open(session.data, "_blank");

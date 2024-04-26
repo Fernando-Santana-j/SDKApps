@@ -1,2 +1,6 @@
 /.env
 node_modules
+
+config/firebase.json
+
+config/product.json

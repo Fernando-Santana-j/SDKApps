@@ -237,7 +237,7 @@ app.get('/payment/:id', async (req, res) => {
 })
 
 
-app.get('/server/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     const guilds = client.guilds.cache;
     const isBotInServer = guilds.has(serverID);
@@ -259,19 +259,19 @@ app.get('/server/:id',functions.subscriptionStatus, async (req, res) => {
         return
     }
 
-    let ana = await db.findOne({colecao:"analytics",doc:req.params.id})
+    let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
 
-    let test = await functions.getDatesLast7Days(ana["vendas completas"])
-    
+    let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
+    let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
 
-    res.render('painel', { host: `${webConfig.host}`, user: user, server: server })
+    res.render('painel', { host: `${webConfig.host}`, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
 
 
 
-app.get('/server/sales/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
@@ -302,7 +302,7 @@ app.get('/server/sales/:id',functions.subscriptionStatus, async (req, res) => {
 
 app.get('/addbot/:serverID', (req, res) => {
     if (!req.params.serverID) {
-        res.redirect(`/server/${req.params.serverID}`)
+        res.redirect(`/`)
         return
     }
     res.redirect(`${webConfig.discordGuildUrl}&guild_id=${req.params.serverID}&disable_guild_select=true`)
@@ -317,7 +317,7 @@ app.get('/addbot/:serverID', (req, res) => {
 
 
 
-app.get('/server/personalize/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
@@ -329,7 +329,7 @@ app.get('/server/personalize/:id',functions.subscriptionStatus, async (req, res)
     res.render('personalize', { host: `${webConfig.host}`, user: user, server: server })
 })
 
-app.get('/server/analytics/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
@@ -342,7 +342,7 @@ app.get('/server/analytics/:id',functions.subscriptionStatus, async (req, res) =
 })
 
 
-app.get('/server/permissions/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
@@ -355,7 +355,7 @@ app.get('/server/permissions/:id',functions.subscriptionStatus, async (req, res)
 })
 
 
-app.get('/server/config/:id',functions.subscriptionStatus, async (req, res) => {
+app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
     try {
         let serverID = req.params.id
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -424,14 +424,15 @@ app.post('/accout/delete', async (req, res) => {
                     }
                 }
             }
-            
+
+
             await stripe.subscriptions.cancel(server.subscription)
             if (server.bankData && server.bankData.accountID) {
                 await stripe.accounts.del(server.bankData.accountID)
             }
-            db.delete('servers',req.body.serverID)
+            db.delete('servers', req.body.serverID)
             res.status(200).json({ success: true })
-        }else{
+        } else {
             res.status(200).json({ success: false, data: 'Erro ao tentar deletar a conta!' })
         }
 
@@ -442,19 +443,41 @@ app.post('/accout/delete', async (req, res) => {
 })
 
 
-app.post("/config/notify",async(req,res)=>{
-    let server = await db.findOne({colecao:"servers", doc:req.body.serverID})
-    let newconfigs = {}
-    if (server.configs) {
-        server.configs.sendPaymentStatus = true
-        newconfigs = server.configs
-    }else{
-        newconfigs.sendPaymentStatus = true
+app.post("/config/notify", async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        let newconfigs = {}
+        if (server.configs) {
+            server.configs.sendPaymentStatus = true
+            newconfigs = server.configs
+        } else {
+            newconfigs.sendPaymentStatus = true
+        }
+        db.update("servers", req.body.serverID, {
+            configs: newconfigs
+        })
+        res.status(200).json({ success: true })
+    } catch (error) {
+        res.status(200).json({ success: false })
     }
-    db.update("servers",req.body.serverID,{
-        configs:newconfigs
-    })
+})
 
+
+app.post('/config/change', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server.error == false) {
+            let configs = server.configs
+            configs.noticeChannel = req.body.noticeChannel
+            db.update('servers', req.body.serverID, {
+                configs: configs
+            })
+        }
+        res.status(200).json({ success: true })
+    } catch (error) {
+        res.status(200).json({ success: false,data:'Erro ao salvar as configurações' })
+        console.log(error);
+    }
 })
 
 

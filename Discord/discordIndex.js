@@ -9,6 +9,7 @@ const botConfig = require('../config/bot-config.js');
 const { doc } = require('firebase/firestore');
 const { default: firebase } = require('firebase/compat/app');
 const { firestore } = require('firebase-admin');
+const functions = require('../functions.js');
 
 const client = new Discord.Client({ intents: botConfig.intents })
 
@@ -449,13 +450,15 @@ module.exports = (Discord, client) => {
                     await DiscordChannel.delete()
                     let analytics = await db.findOne({colecao:'analytics', doc:interaction.guildId})
                     if (analytics.error == false) {
+                        let vendasCancel = await analytics["vendas canceladas"]
+                        await vendasCancel.push(await functions.formatDate(new Date()))
                         db.update('analytics',interaction.guildId,{
-                            "vendas canceladas": parseInt( analytics["vendas canceladas"]) + 1
+                            "vendas canceladas": await vendasCancel
                         })
                     }
                 }
 
-
+            
 
 
                 if (interaction.customId.includes('remove')) {
@@ -669,7 +672,7 @@ module.exports.sendProductPayment = async (params, id,type) => {
                 
                 if (analytics.error == false) {
                     let vendasComple = analytics['vendas completas']
-                    await vendasComple.push(Date.now())
+                    await vendasComple.push(await functions.formatDate(new Date()))
                     db.update('analytics',serverData.id,{
                         "pagamentos":{
                             "PIX": type == "pix" ? parseInt(analytics["pagamentos"]["PIX"]) + 1 : parseInt(analytics["pagamentos"]["PIX"]),
@@ -689,8 +692,8 @@ module.exports.sendProductPayment = async (params, id,type) => {
                         "cancelados estoque": 0,
                         "pagamentos":payment,
                         "reebolsos": 0 ,
-                        "vendas canceladas": 0,
-                        "vendas completas":1
+                        "vendas canceladas": [],
+                        "vendas completas":[await functions.formatDate(new Date())]
                     })
                 }
             } catch (error) {

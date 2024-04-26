@@ -16,7 +16,7 @@ router.post('/subscription/create', async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
-                price: req.body.plan == 1 ? 'price_1OrVB6EVoMwYkZ6cka5ECjZS' : req.body.plan == 2 ? 'price_1OrVB6EVoMwYkZ6clVeJeYvA' : 'price_1OrVB6EVoMwYkZ6cA6b0YNrL',
+                price: req.body.plan == 1 ? webConfig.product1 : req.body.plan == 2 ? webConfig.product2 : webConfig.product3,
                 quantity: 1,
             }],
             mode: 'subscription',
