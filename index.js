@@ -166,8 +166,7 @@ app.get('/auth/callback', async (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept-Encoding': 'application/x-www-form-urlencoded'
                 };
-                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
-                    res.redirect('/logout')    
+                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => { 
                 console.error(err)})
                 if (!response) {
                     res.redirect('/logout')
@@ -179,7 +178,6 @@ app.get('/auth/callback', async (req, res) => {
                         ...headers
                     }
                 }).then((res) => { return res.data }).catch((err) => {
-                    res.redirect('/logout')
                     console.error(err)
                 });
                 await db.create('users', userResponse.id, {
@@ -204,16 +202,21 @@ app.get('/auth/callback', async (req, res) => {
 
 
 app.get('/logout', async (req, res) => {
-    if (req.session.uid) {
-        const sessionID = req.session.id;
-        req.sessionStore.destroy(sessionID, (err) => {
-            if (err) {
-                return console.error(err)
-            } else {
-                res.redirect('/')
-            }
-        })
-
+    try {
+        if (req.session.uid) {
+            const sessionID = req.session.id;
+            req.sessionStore.destroy(sessionID, (err) => {
+                if (err) {
+                    return console.error(err)
+                } else {
+                    res.redirect('/')
+                }
+            })
+        }else{
+            res.redirect('/')
+        }
+    } catch (error) {
+        res.redirect('/')
     }
 })
 
