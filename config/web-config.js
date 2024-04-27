@@ -18,5 +18,6 @@ module.exports = {
     host:process.env.HOST,
     product1: require('./product.json').product1,
     product2:require('./product.json').product2,
-    product3:require('./product.json').product3
+    product3:require('./product.json').product3,
+    loginURL: 'https://discord.com/oauth2/authorize?client_id=1210894508028338197&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2Fcallback&scope=identify+guilds+email+guilds.join'
 }

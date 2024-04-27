@@ -122,20 +122,36 @@ app.get('/dashboard', async (req, res) => {
     if (req.session.uid) {
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
         let server = await functions.reqServerByTime(user, functions.findServers)
-        if (server.error) {
-            res.redirect('/')
-            return
-        }
         let servidoresEnd = []
-        for (let i = 0; i < server.length; i++) {
-            let element = server[i]
-
-            let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
-            if (Findserver.error == false) {
-                servidoresEnd.push(Findserver)
-            } else {
-                servidoresEnd.push(element)
+        if (server.error) {
+            if (user.lastServers) {
+                for (let index = 0; index < user.lastServers.length; index++) {
+                    const element = user.lastServers[index];
+                    let Findserver = await db.findOne({ colecao: 'servers', doc: element })
+                    if (Findserver.error == false) {
+                        servidoresEnd.push(Findserver)
+                    }
+                }
+            }else{
+                res.redirect('/')
             }
+        }else{
+            let lastServers = []
+            for (let i = 0; i < server.length; i++) {
+                let element = server[i]
+    
+                let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
+                if (Findserver.error == false) {
+                    servidoresEnd.push(Findserver)
+                    lastServers.push(Findserver.id)
+                } else {
+                    servidoresEnd.push(element)
+                }
+                
+            }
+            db.update('users',user.id,{
+                lastServers:lastServers
+            })
         }
         res.render('dashboard', { host: `${webConfig.host}`, user: user, servers: servidoresEnd })
 
@@ -146,6 +162,34 @@ app.get('/dashboard', async (req, res) => {
 })
 
 
+
+app.get('/auth/verify/:acesstoken', async (req, res) => {
+    let param = req.params.acesstoken
+    if (param) {
+        try {
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept-Encoding': 'application/x-www-form-urlencoded'
+            };
+            let userResponse = await axios.get('https://discord.com/api/users/@me', {
+                headers: {
+                    Authorization: `Bearer ${param}`,
+                    ...headers
+                }
+            }).then((res) => { return res.data })
+            if (userResponse) {
+                req.session.uid = userResponse.id
+                res.redirect('/dashboard')
+            }else{
+                res.redirect(webConfig.loginURL)
+            }
+        } catch (error) {
+            res.redirect(webConfig.loginURL)
+        }
+    } else {
+        res.redirect(webConfig.loginURL)
+    }
+})
 
 app.get('/auth/callback', async (req, res) => {
     try {
@@ -166,8 +210,9 @@ app.get('/auth/callback', async (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept-Encoding': 'application/x-www-form-urlencoded'
                 };
-                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => { 
-                console.error(err)})
+                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
+                    console.error(err)
+                })
                 if (!response) {
                     res.redirect('/logout')
                     return
@@ -212,7 +257,7 @@ app.get('/logout', async (req, res) => {
                     res.redirect('/')
                 }
             })
-        }else{
+        } else {
             res.redirect('/')
         }
     } catch (error) {
@@ -421,7 +466,7 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
 
 
 
-app.get('/help',(req,res)=>{
+app.get('/help', (req, res) => {
     res.redirect('https://discord.com/channels/1210714138838568960/1210927599669485648')
 })
 
