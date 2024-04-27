@@ -166,7 +166,9 @@ app.get('/auth/callback', async (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Accept-Encoding': 'application/x-www-form-urlencoded'
                 };
-                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => console.error(err))
+                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
+                    res.redirect('/logout')    
+                console.error(err)})
                 if (!response) {
                     res.redirect('/logout')
                     return
@@ -176,7 +178,10 @@ app.get('/auth/callback', async (req, res) => {
                         Authorization: `Bearer ${response.data.access_token}`,
                         ...headers
                     }
-                }).then((res) => { return res.data }).catch((err) => console.error(err));
+                }).then((res) => { return res.data }).catch((err) => {
+                    res.redirect('/logout')
+                    console.error(err)
+                });
                 await db.create('users', userResponse.id, {
                     id: userResponse.id,
                     username: userResponse.username,
