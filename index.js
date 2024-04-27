@@ -148,69 +148,77 @@ app.get('/dashboard', async (req, res) => {
 
 
 app.get('/auth/callback', async (req, res) => {
-    if (!req.query.code) {
-        res.redirect('/?error="Não foi possivel fazer login tente novamente!"')
-    } else {
-        let param = new URLSearchParams({
-            client_id: webConfig.clientId,
-            client_secret: webConfig.secret,
-            grant_type: 'authorization_code',
-            code: req.query.code,
-            redirect_uri: webConfig.redirect
-        })
-        const headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept-Encoding': 'application/x-www-form-urlencoded'
-        };
-        const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => console.error(err))
-        if (!response) {
-            res.redirect('/?error="Não foi possivel fazer login tente novamente!"')
-            return
-        }
-        let userResponse = await axios.get('https://discord.com/api/users/@me', {
-            headers: {
-                Authorization: `Bearer ${response.data.access_token}`,
-                ...headers
+    try {
+        if (!req.query.code) {
+            res.redirect('/logout')
+        } else {
+            let param = new URLSearchParams({
+                client_id: webConfig.clientId,
+                client_secret: webConfig.secret,
+                grant_type: 'authorization_code',
+                code: req.query.code,
+                redirect_uri: webConfig.redirect
+            })
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept-Encoding': 'application/x-www-form-urlencoded'
+            };
+            const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => console.error(err))
+            if (!response) {
+                res.redirect('/logout')
+                return
             }
-        }).then((res) => { return res.data }).catch((err) => console.error(err));
-        await db.create('users', userResponse.id, {
-            id: userResponse.id,
-            username: userResponse.username,
-            profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
-            displayName: userResponse.global_name,
-            email: userResponse.email,
-            access_token: response.data.access_token
-        })
+            let userResponse = await axios.get('https://discord.com/api/users/@me', {
+                headers: {
+                    Authorization: `Bearer ${response.data.access_token}`,
+                    ...headers
+                }
+            }).then((res) => { return res.data }).catch((err) => console.error(err));
+            await db.create('users', userResponse.id, {
+                id: userResponse.id,
+                username: userResponse.username,
+                profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
+                displayName: userResponse.global_name,
+                email: userResponse.email,
+                access_token: response.data.access_token
+            })
 
-        req.session.uid = userResponse.id
+            req.session.uid = userResponse.id
 
-        res.redirect('/dashboard')
+            res.redirect('/dashboard')
+        }
+    } catch (error) {
+        res.redirect('/logout')
     }
 })
 app.get('/auth/callback/guild', async (req, res) => {
-    if (!req.query.code) {
-        res.redirect('/dashboard')
-    } else {
-        let param = new URLSearchParams({
-            client_id: webConfig.clientId,
-            client_secret: webConfig.secret,
-            grant_type: 'authorization_code',
-            code: req.query.code,
-            redirect_uri: webConfig.redirect + '/guild'
-        })
-        const headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept-Encoding': 'application/x-www-form-urlencoded'
-        };
-        const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => console.error(err))
-        if (!response) {
+    try {
+        if (!req.query.code) {
             res.redirect('/dashboard')
-            return
+        } else {
+            let param = new URLSearchParams({
+                client_id: webConfig.clientId,
+                client_secret: webConfig.secret,
+                grant_type: 'authorization_code',
+                code: req.query.code,
+                redirect_uri: webConfig.redirect + '/guild'
+            })
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept-Encoding': 'application/x-www-form-urlencoded'
+            };
+            const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => console.error(err))
+            if (!response) {
+                res.redirect('/dashboard')
+                return
+            }
+            await db.update('servers', req.query.guild_id, {
+                access_token: response.data.access_token
+            })
+            res.redirect(`/server/${req.query.guild_id}`)
         }
-        await db.update('servers', req.query.guild_id, {
-            access_token: response.data.access_token
-        })
-        res.redirect(`/server/${req.query.guild_id}`)
+    } catch (error) {
+        res.redirect('/logout')
     }
 })
 
@@ -533,7 +541,7 @@ app.post('/perms/changeOne', async (req, res) => {
             await db.update('servers', req.body.serverID, {
                 permissions: [
                     {
-                        id:roleID,
+                        id: roleID,
                         perms: {
                             botEdit: true,
                             paymentEdit: false,
@@ -547,8 +555,8 @@ app.post('/perms/changeOne', async (req, res) => {
         server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
 
         let permissions = server.permissions
-        let rolePermission = permissions.find(element=>element.id == roleID)
-        let index = permissions.findIndex(element=>element.id == roleID)
+        let rolePermission = permissions.find(element => element.id == roleID)
+        let index = permissions.findIndex(element => element.id == roleID)
 
         rolePermission.perms[await req.body.item] = await req.body.value
 
@@ -572,20 +580,22 @@ app.post('/perms/get', async (req, res) => {
             return
         }
         if (!('permissions' in server)) {
-            res.status(200).json({ success: true, data: {
-                botEdit: true,
-                paymentEdit: false,
-                commands: true,
-                commandsAllChannel: false,
-                owner: false
-            } })
-            return 
+            res.status(200).json({
+                success: true, data: {
+                    botEdit: true,
+                    paymentEdit: false,
+                    commands: true,
+                    commandsAllChannel: false,
+                    owner: false
+                }
+            })
+            return
         }
-        let rolePermission = server.permissions.find(element=>element.id == roleID)
+        let rolePermission = server.permissions.find(element => element.id == roleID)
         let roleData
         if (rolePermission) {
-            roleData = rolePermission.perms 
-        }else{
+            roleData = rolePermission.perms
+        } else {
             roleData = {
                 botEdit: true,
                 paymentEdit: false,
@@ -594,7 +604,7 @@ app.post('/perms/get', async (req, res) => {
                 owner: false
             }
         }
-        res.status(200).json({ success: true, data: roleData})
+        res.status(200).json({ success: true, data: roleData })
 
     } catch (error) {
         console.log(error);
