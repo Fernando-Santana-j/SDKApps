@@ -421,7 +421,9 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
 
 
 
-
+app.get('/help',(req,res)=>{
+    res.redirect('https://discord.com/channels/1210714138838568960/1210927599669485648')
+})
 
 
 
