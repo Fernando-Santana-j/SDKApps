@@ -16,7 +16,6 @@ module.exports = {
     iban:process.env.IBAN,
     stripeAccount:process.env.STRIPEACCOUNT,
     host:process.env.HOST,
-    discordGuildUrl: "https://discord.com/oauth2/authorize?client_id=1210894508028338197&permissions=8&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2Fcallback%2Fguild&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update",
     product1: require('./product.json').product1,
     product2:require('./product.json').product2,
     product3:require('./product.json').product3
