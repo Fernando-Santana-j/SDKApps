@@ -132,14 +132,14 @@ app.get('/dashboard', async (req, res) => {
                         servidoresEnd.push(Findserver)
                     }
                 }
-            }else{
+            } else {
                 res.redirect('/')
             }
-        }else{
+        } else {
             let lastServers = []
             for (let i = 0; i < server.length; i++) {
                 let element = server[i]
-    
+
                 let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
                 if (Findserver.error == false) {
                     servidoresEnd.push(Findserver)
@@ -147,10 +147,10 @@ app.get('/dashboard', async (req, res) => {
                 } else {
                     servidoresEnd.push(element)
                 }
-                
+
             }
-            db.update('users',user.id,{
-                lastServers:lastServers
+            db.update('users', user.id, {
+                lastServers: lastServers
             })
         }
         res.render('dashboard', { host: `${webConfig.host}`, user: user, servers: servidoresEnd })
@@ -180,7 +180,7 @@ app.get('/auth/verify/:acesstoken', async (req, res) => {
             if (userResponse) {
                 req.session.uid = userResponse.id
                 res.redirect('/dashboard')
-            }else{
+            } else {
                 res.redirect(webConfig.loginURL)
             }
         } catch (error) {
@@ -401,7 +401,24 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
         return
     }
 
-    res.render('analytics', { host: `${webConfig.host}`, user: user, server: server })
+    let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
+
+    let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
+    let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
+    let canceladosEstoque = JSON.stringify(await functions.getDatesLast7Days(analytics["cancelados estoque"], functions.formatDate))
+    let reebolsos = JSON.stringify(await functions.getDatesLast7Days(analytics["reebolsos"], functions.formatDate))
+    let paymentMetod
+    if (analytics.pagamentos) {
+        paymentMetod = analytics.pagamentos
+    } else {
+        paymentMetod = {
+            "PIX": 0,
+            "card": 0,
+            "boleto": 0,
+        }
+    }
+    paymentMetod = JSON.stringify(paymentMetod)
+    res.render('analytics', { host: `${webConfig.host}`, user: user, server: server, paymentMetod: paymentMetod, canceladosEstoque: canceladosEstoque, reebolsos: reebolsos, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 

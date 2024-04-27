@@ -1,0 +1,50 @@
+#main-containner{
+    width: calc(100% - 18em);
+    position: relative;
+    top: 5em;
+    left: 18em;
+    display: flex;
+    height: 105%;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+}
+#main-content{
+    width: 70%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    justify-content: space-between;
+    #vendas-chart-containner,#paymentMethod-conteinner,#cancelEstoque-reebolsos-containner  {
+        width: 100%;
+
+        padding: 1em;
+        display: flex;
+        flex-direction: column;
+        border-radius: var(--border-radius-min);
+        background-color: var(--secundary-color);
+        .charts-content{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            gap: 1em;
+            justify-content: space-around;
+            align-items: center;
+
+            #payment-chart,#estoque-chart,#reebolso-chart,#vendas-canceladas-chart,#vendas-completas-chart{
+                width: 40%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+    }
+}
+#charts-containner{
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    margin-top: 1em;
+    justify-content: space-between;
+}

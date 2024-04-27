@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title></title>
-    <link rel="stylesheet" href="<%= host %>/public/css/">
+    <link rel="stylesheet" href="<%= host %>/public/css/analytics.css">
 </head>
 <body>
     <div id="body-containner">
@@ -11,11 +11,37 @@
         <div id="containner">
             <%- include('./reusable/header.ejs',{index:4}) %>
             <main id="main-containner">
-                
+                <div id="main-content">
+                    <div id="vendas-chart-containner">
+                        <h1 class="title-col">Estatisticas de vendas:</h1>
+                        <div id="charts-containner">
+                            <div class="charts-content">
+                                <div id="vendas-completas-chart"></div>
+                                <div id="vendas-canceladas-chart"></div>
+                            </div>
+                            <div class="charts-content">
+                                <div id="estoque-chart"></div>
+                                <div id="reebolso-chart"></div>
+                            </div>
+                            <div class="charts-content">
+                                <div id="payment-chart"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/"></script>
+    <script>
+        let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))
+        let comprasCanceladas = JSON.parse(("<%= comprasCanceladas %>").replace(/&#34;/g, '"'))
+        let reebolsos = JSON.parse(("<%= reebolsos %>").replace(/&#34;/g, '"'))
+        let canceladosEstoque = JSON.parse(("<%= canceladosEstoque %>").replace(/&#34;/g, '"'))
+        let paymentMetod = JSON.parse(("<%= paymentMetod %>").replace(/&#34;/g, '"'))
+    </script>
+    <script src="<%= host %>/public/js/analytics.js"></script>
+    
 </body>
 </html>

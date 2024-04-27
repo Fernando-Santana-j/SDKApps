@@ -258,7 +258,7 @@ module.exports = {
 
     getDatesLast7Days: async (dates, formatdate) => {
         if (!Array.isArray(dates)) {
-            return
+            dates = []
         }
         let getLast7Days = () => [...Array(7)].map((_, i) => {
             const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);

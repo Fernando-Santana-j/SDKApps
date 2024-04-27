@@ -96,26 +96,44 @@ module.exports = (Discord, client) => {
             try {
                 var DiscordServer = await client.guilds.cache.get(interaction.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
-                let verifyPerms = await functions.verifyPermissions(interaction.user.id,interaction.guildId,Discord,client)
+                let verifyPerms = await functions.verifyPermissions(interaction.user.id, interaction.guildId, Discord, client)
                 if (verifyPerms.error == true) {
                     return
                 }
                 if (verifyPerms.perms.owner == false && verifyPerms.perms.command == false) {
-                    interaction.reply({content:'Você não tem permissão para executar comandos',ephemeral: true})
+                    interaction.reply({ content: 'Você não tem permissão para executar comandos', ephemeral: true })
                     return
                 }
 
-                
+
                 // interacao do botao de compra de um produto
                 if (interaction.customId.includes('comprar')) {
-                    let server = await db.findOne({colecao:"servers",doc:interaction.guildId})
+                    let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
                     let product = await server.products.find(product => product.productID == interaction.customId.replace('comprar_', ''))
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
-                    if (!product || !server || product.estoque.length <= 0 ) {
-                        db.update('analytics',interaction.guildId,{
-                            "cancelados estoque": firestore.FieldValue.increment(1)
-                        })
-                        await interaction.reply({content: `⚠️| O produto selecionado está sem estoque!`,ephemeral: true})
+                    if (!product || !server || product.estoque.length <= 0) {
+                        let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
+
+                        if (analytics.error == false) {
+                            let canceladosEstoque = analytics['cancelados estoque']
+                            await canceladosEstoque.push(await functions.formatDate(new Date()))
+                            db.update('analytics', serverData.id, {
+                                "cancelados estoque": canceladosEstoque
+                            })
+                        } else {
+                            db.create('analytics', serverData.id, {
+                                "cancelados estoque": [await functions.formatDate(new Date())],
+                                "pagamentos": {
+                                    "PIX": 0,
+                                    "card": 0,
+                                    "boleto": 0,
+                                },
+                                "reebolsos": [],
+                                "vendas canceladas": [],
+                                "vendas completas": []
+                            })
+                        }
+                        await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
                         return
                     }
                     if (findChannel) {
@@ -456,19 +474,19 @@ module.exports = (Discord, client) => {
                 if (interaction.customId == 'cancel') {
                     carrinhos[interaction.user.id] = null
                     paymentMetod[interaction.user.id] = null
-                    
+
                     await DiscordChannel.delete()
-                    let analytics = await db.findOne({colecao:'analytics', doc:interaction.guildId})
+                    let analytics = await db.findOne({ colecao: 'analytics', doc: interaction.guildId })
                     if (analytics.error == false) {
                         let vendasCancel = await analytics["vendas canceladas"]
                         await vendasCancel.push(await functions.formatDate(new Date()))
-                        db.update('analytics',interaction.guildId,{
+                        db.update('analytics', interaction.guildId, {
                             "vendas canceladas": await vendasCancel
                         })
                     }
                 }
 
-            
+
 
 
                 if (interaction.customId.includes('remove')) {
@@ -540,7 +558,7 @@ module.exports = (Discord, client) => {
 module.exports.carrinhos = carrinhos
 
 
-module.exports.sendPaymentStatus = async (serverID,tentativas,dias) => {
+module.exports.sendPaymentStatus = async (serverID, tentativas, dias) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: serverID })
         var DiscordServer = await client.guilds.cache.get(serverID);
@@ -554,7 +572,7 @@ module.exports.sendPaymentStatus = async (serverID,tentativas,dias) => {
 
 
 
-module.exports.sendProductPayment = async (params, id,type) => {
+module.exports.sendProductPayment = async (params, id, type) => {
     var DiscordServer = await client.guilds.cache.get(params.serverID);
     let findChannel = DiscordServer.channels.cache.find(c => c.topic === params.userID)
     let serverData = await db.findOne({ colecao: "servers", doc: params.serverID })
@@ -678,32 +696,32 @@ module.exports.sendProductPayment = async (params, id,type) => {
                     files: fields
                 });
 
-                let analytics = await  db.findOne({colecao:"analytics",doc:serverData.id})
-                
+                let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
+
                 if (analytics.error == false) {
                     let vendasComple = analytics['vendas completas']
                     await vendasComple.push(await functions.formatDate(new Date()))
-                    db.update('analytics',serverData.id,{
-                        "pagamentos":{
+                    db.update('analytics', serverData.id, {
+                        "pagamentos": {
                             "PIX": type == "pix" ? parseInt(analytics["pagamentos"]["PIX"]) + 1 : parseInt(analytics["pagamentos"]["PIX"]),
                             "card": type == "stripe" ? parseInt(analytics["pagamentos"]["card"]) + 1 : parseInt(analytics["pagamentos"]["card"]),
                             "boleto": 0,
                         },
                         "vendas completas": vendasComple
                     })
-                    
-                }else{
+
+                } else {
                     let payment = {
                         "PIX": type == "pix" ? 1 : 0,
                         "card": type == "stripe" ? 1 : 0,
                         "boleto": 0,
                     }
-                    db.create('analytics',serverData.id,{
-                        "cancelados estoque": 0,
-                        "pagamentos":payment,
-                        "reebolsos": 0 ,
+                    db.create('analytics', serverData.id, {
+                        "cancelados estoque": [],
+                        "pagamentos": payment,
+                        "reebolsos": [],
                         "vendas canceladas": [],
-                        "vendas completas":[await functions.formatDate(new Date())]
+                        "vendas completas": [await functions.formatDate(new Date())]
                     })
                 }
             } catch (error) {
@@ -728,26 +746,44 @@ module.exports.sendProductPayment = async (params, id,type) => {
             })
             if (type == 'pix') {
                 try {
-                    
+
                     await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
                         headers: {
                             Authorization: `Bearer ${params.token}`
                         }
                     })
-                
+
                 } catch (error) { }
-            }else{
+            } else {
                 try {
                     await stripe.refunds.create({
                         payment_intent: id,
                     });
                 } catch (error) {
-                    
+
                 }
             }
-            db.update('analytics',serverData.id,{
-                "cancelados estoque": firestore.FieldValue.increment(1)
-            })
+            let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
+
+            if (analytics.error == false) {
+                let reebolsos = analytics['reebolsos']
+                await reebolsos.push(await functions.formatDate(new Date()))
+                db.update('analytics', serverData.id, {
+                    "reebolsos": reebolsos
+                })
+            } else {
+                db.create('analytics', serverData.id, {
+                    "cancelados estoque": [],
+                    "pagamentos": {
+                        "PIX": 0,
+                        "card": 0,
+                        "boleto": 0,
+                    },
+                    "reebolsos": [await functions.formatDate(new Date())],
+                    "vendas canceladas": [],
+                    "vendas completas": []
+                })
+            }
         }
     }
 }
