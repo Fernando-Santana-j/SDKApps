@@ -513,6 +513,10 @@ function productsConfig() {
                     formData.append('serverID', serverID);
                     formData.append('productID', productID);
                     formData.append('price', parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')));
+                    if (parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')) < 100) {
+                        errorNotify('O valor do produto não pode ser menor que R$ 1,00')
+                        return
+                    }
                     if (document.getElementById('backGround-input-edit').files[0]) {
                         formData.append('backGround', document.getElementById('backGround-input-edit').files[0]);
                     }
@@ -752,6 +756,10 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
     formData.append('producDesc', document.getElementById('product-desc').value.trim());
     formData.append('serverID', serverID);
     formData.append('price', parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')));
+    if (parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')) < 100) {
+        errorNotify('O valor do produto não pode ser menor que R$ 1,00')
+        return
+    }
     if (document.getElementById('image-input').files[0]) {
         formData.append('backGround', document.getElementById('image-input').files[0]);
     }

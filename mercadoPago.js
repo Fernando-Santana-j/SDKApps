@@ -13,23 +13,26 @@ let lastPaymentsSends = []
 
 router.post('/mercadopago/webhook', async (req, res) => {
     try {
-        if (req.body.action == 'payment.updated') {
+        if (req.body.action == 'payment.created') {
             let id = await req.body.data.id
             let params = await req.query
+            console.log('1',lastPaymentsSends);
             if (params || !lastPaymentsSends.includes(id)) {
                 axios.get(`https://api.mercadolibre.com/collections/notifications/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${params.token}`
                     }
+                
                 }).then(async (doc) => {
-                    if (doc.data.collection.status === "approved") {
+                    // if (doc.data.collection.status === "approved") {
                         try {
                             lastPaymentsSends.push(id)
+                            console.log('2',lastPaymentsSends);
                             require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
                         } catch (error) {
                             console.log(error);
                         }
-                    }
+                    // }
                 })
             }
         }

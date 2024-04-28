@@ -334,7 +334,7 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     }
 
     if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botConfig == false) {
-        res.redirect(`/server/${serverID}`)
+        res.redirect(`/dashboard`)
         return
     }
     let bankData = server.bankData ? server.bankData : null
@@ -523,7 +523,7 @@ app.post('/accout/delete', async (req, res) => {
                         })
                         console.log(prod);
                     } catch (error) {
-                        console.log(error);
+                        
                     }
                 }
             }
@@ -685,7 +685,6 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
-const { Filter } = require("firebase-admin/firestore");
 
 app.use('/', produtoRoutes);
 

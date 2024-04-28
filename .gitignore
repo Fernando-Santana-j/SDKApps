@@ -4,3 +4,5 @@ node_modules
 
 config/web-config.js
 config
+mercadoPagoData.json
+uploads

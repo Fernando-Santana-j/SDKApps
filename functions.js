@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const stripe = require('stripe')(require('./config/web-config').stripe);
 const db = require('./Firebase/models');
+const webConfig = require('./config/web-config')
 
 module.exports = {
     verifyPermissions: async (user, server, Discord, client) => {
@@ -110,9 +111,24 @@ module.exports = {
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
         if ("vitalicio" in server && server.vitalicio == true) {
             next()
+            return
         }
         if (server) {
             try {
+                if ('bankData' in server) {
+                    let account = await stripe.accounts.retrieve(server.bankData.accountID);
+                    if (account.payouts_enabled == false || account.requirements.disabled_reason != null ) {
+                        let accountLink = await stripe.accountLinks.create({
+                            account: account.id,
+                            return_url: `${webConfig.host}/server/sales/${server.id}`,
+                            refresh_url: `${webConfig.host}/accountLink/${account.id}/${server.id}`,
+                            type: 'account_onboarding',
+                        });
+                        res.redirect(accountLink.url)
+                        return
+                    }
+                }
+
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
                     const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
@@ -145,7 +161,9 @@ module.exports = {
                 } else {
                     res.redirect('/')
                 }
+
             } catch (error) {
+                console.log(error);
                 res.redirect('/')
             }
         } else {

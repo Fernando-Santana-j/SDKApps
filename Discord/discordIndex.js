@@ -106,12 +106,14 @@ module.exports = (Discord, client) => {
                 }
 
 
+            
                 // interacao do botao de compra de um produto
                 if (interaction.customId.includes('comprar')) {
                     let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
                     let product = await server.products.find(product => product.productID == interaction.customId.replace('comprar_', ''))
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
-                    if (!product || !server || product.estoque.length <= 0) {
+                    if (!product || server.error == true || product.estoque.length <= 0) {
+                        await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
                         let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
 
                         if (analytics.error == false) {
@@ -133,7 +135,7 @@ module.exports = (Discord, client) => {
                                 "vendas completas": []
                             })
                         }
-                        await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
+                        
                         return
                     }
                     if (findChannel) {
@@ -166,9 +168,6 @@ module.exports = (Discord, client) => {
                             return
                         } else {
                             carrinhos[interaction.user.id].push(interaction.customId.replace('comprar_', ''))
-                        }
-                        if (interaction.replied) {
-                            interaction.deleteReply()
                         }
 
                         interaction.reply({
@@ -212,9 +211,6 @@ module.exports = (Discord, client) => {
                             }]
                         })
                         if (newChannel) {
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
                             await interaction.reply({
                                 content: `🛒 | Criando o Carrinho...`,
                                 ephemeral: true
@@ -242,9 +238,6 @@ module.exports = (Discord, client) => {
                                 });
                             }, 2500);
                         } else {
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
                             return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                         }
                         if (!carrinhos[interaction.user.id]) {
@@ -322,9 +315,6 @@ module.exports = (Discord, client) => {
                             return
                         }
                         if (!paymentMetod[interaction.user.id]) {
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
                             const sentMessage = await interaction.reply('Selecione algum metodo de pagamento primeiro!');
                             setTimeout(() => {
                                 sentMessage.delete();
@@ -382,9 +372,6 @@ module.exports = (Discord, client) => {
                                 success_url: `${process.env.HOST}/redirect/sucess`,
                                 cancel_url: `${process.env.HOST}/redirect/cancel`,
                             });
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
                             interaction.reply({
                                 content: ` `,
                                 embeds: [
@@ -550,7 +537,7 @@ module.exports = (Discord, client) => {
             }
         })
     } catch (error) {
-
+        console.log(error);
     }
 }
 
@@ -635,14 +622,13 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 })
 
             });
-            console.log(fields);
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
 
             try {
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
-                dono.send({
+                await dono.send({
                     embeds: [
                         new Discord.EmbedBuilder()
                             .setTitle(`Nova compra no servidor: ${DiscordServer.name}`)
@@ -661,7 +647,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     ],
                     files: fields
                 }).catch(() => { })
-                user.send({
+                dono.send({files:fields}).catch(() => { })
+
+                await user.send({
                     embeds: [
                         new Discord.EmbedBuilder()
                             .setTitle('📦 | Sua entrega chegou!')
@@ -670,8 +658,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             .setColor("#6E58C7")
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
-                    files: fields
                 }).catch(() => { })
+                user.send({files:fields}).catch(() => { })
                 const fetched = await findChannel.messages.fetch({ limit: 100 });
                 findChannel.bulkDelete(fetched);
                 findChannel.send({
@@ -726,6 +714,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             } catch (error) {
                 console.log(error);
+                console.log(fields);
             }
 
         } else {
@@ -735,15 +724,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         .setTitle(`${DiscordServer.name} | Reembolso`)
                         .setDescription(`Você Recebeu Reembolso porque alguem comprou primeiro!`)
                 ]
-            }).then(() => {
-                setTimeout(() => {
-                    try {
-                        findChannel.delete()
-                    } catch (error) {
-
-                    }
-                }, 10000);
-            })
+            }).catch(() => {})
             if (type == 'pix') {
                 try {
 
