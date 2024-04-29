@@ -24,7 +24,6 @@ const cors = require('cors');
 
 
 const stripe = require('stripe')(require('./config/web-config').stripe);
-const csrf = require('csurf');
 
 
 //TODO------------Configs--------------
