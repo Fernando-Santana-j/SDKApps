@@ -28,7 +28,7 @@ const stripe = require('stripe')(require('./config/web-config').stripe);
 
 
 //TODO------------Configs--------------
-
+const app = express();
 
 const corsOptions = {
     origin: 'https://api.mercadopago.com'
@@ -69,7 +69,7 @@ client.slashCommands = new Discord.Collection();
 client.login(botConfig.discordToken)
 
 
-const app = express();
+
 
 app.use(session(webConfig.session));
 app.use(cookieParser());
