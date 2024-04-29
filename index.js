@@ -31,23 +31,6 @@ const csrf = require('csurf');
 const app = express();
 
 
-
-
-const csrfProtection = csrf();
-// Middleware para desabilitar CSRF para o endpoint do Mercado Pago
-const disableCSRF = (req, res, next) => {
-    // Verifique se a solicitação é para o endpoint do Mercado Pago
-    if (req.hostname === 'api.mercadopago.com') {
-        // Desabilite o CSRF
-        req.csrfToken = () => '';
-    }
-    next();
-};
-
-// Use o middleware do csurf e o middleware personalizado para desabilitar o CSRF
-app.use(csrfProtection);
-app.use(disableCSRF);
-
 const corsOptions = {
     origin: 'https://api.mercadopago.com'
 };
