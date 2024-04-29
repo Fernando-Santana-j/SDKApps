@@ -106,7 +106,7 @@ module.exports = (Discord, client) => {
                 }
 
 
-            
+
                 // interacao do botao de compra de um produto
                 if (interaction.customId.includes('comprar')) {
                     let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
@@ -135,7 +135,7 @@ module.exports = (Discord, client) => {
                                 "vendas completas": []
                             })
                         }
-                        
+
                         return
                     }
                     if (findChannel) {
@@ -405,6 +405,9 @@ module.exports = (Discord, client) => {
                                     external_reference: interaction.user.id,
                                     payer: mercadoPagoData.payer,
                                     notification_url: `${mercadoPagoData.notification_url}/mercadopago/webhook?userID=${interaction.user.id}&serverID=${interaction.guildId}&token=${serverData.bankData.mercadoPagoToken}&carrinhos=${JSON.stringify(carrinho)}`,
+                                    metadata: {
+                                        test: 123
+                                    }
                                 };
                                 payment.create({ body }).then(async (response) => {
                                     const cpc = response.point_of_interaction.transaction_data.qr_code
@@ -447,16 +450,19 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId == 'pixCancel') {
-                    interaction.deferReply();
-                    interaction.deleteReply();
-                    require('./createCartMessage')(Discord, client, {
-                        serverID: interaction.guild.id,
-                        user: interaction.user,
-                        member: interaction.member,
-                        channelID: await DiscordChannel.id,
-                        edit: true
-                    })
+                    try {
+                        require('./createCartMessage')(Discord, client, {
+                            serverID: interaction.guild.id,
+                            user: interaction.user,
+                            member: interaction.member,
+                            channelID: await DiscordChannel.id,
+                            edit: true
+                        })
+                    } catch (error) {
+                        console.log(error);
+                    }
                 }
+
 
                 if (interaction.customId == 'cancel') {
                     carrinhos[interaction.user.id] = null
@@ -520,8 +526,6 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId == 'back') {
-                    interaction.deferReply();
-                    interaction.deleteReply();
                     require('./createCartMessage')(Discord, client, {
                         serverID: interaction.guild.id,
                         user: interaction.user,
@@ -645,9 +649,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             .setColor("#6E58C7")
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
-                    files: fields
                 }).catch(() => { })
-                dono.send({files:fields}).catch(() => { })
+                dono.send({ files: fields }).catch(() => { })
 
                 await user.send({
                     embeds: [
@@ -659,7 +662,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
                 }).catch(() => { })
-                user.send({files:fields}).catch(() => { })
+                user.send({ files: fields }).catch(() => { })
                 const fetched = await findChannel.messages.fetch({ limit: 100 });
                 findChannel.bulkDelete(fetched);
                 findChannel.send({
@@ -724,7 +727,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         .setTitle(`${DiscordServer.name} | Reembolso`)
                         .setDescription(`Você Recebeu Reembolso porque alguem comprou primeiro!`)
                 ]
-            }).catch(() => {})
+            }).catch(() => { })
             if (type == 'pix') {
                 try {
 

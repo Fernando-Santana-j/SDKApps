@@ -9,37 +9,33 @@ const { Payment, MercadoPagoConfig } = require('mercadopago');
 const mercadoPagoData = require('./config/mercadoPagoData.json')
 
 
-let lastPaymentsSends = []
-
 router.post('/mercadopago/webhook', async (req, res) => {
+    let resposta = req.body
+    let params = req.query
+    res.status(202).json({t:1})
     try {
-        if (req.body.action == 'payment.created') {
-            let id = await req.body.data.id
-            let params = await req.query
-            console.log('1',lastPaymentsSends);
+        if (resposta.action == 'payment.updated') {
+            let id = await resposta.data.id
             if (params || !lastPaymentsSends.includes(id)) {
                 axios.get(`https://api.mercadolibre.com/collections/notifications/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${params.token}`
                     }
-                
                 }).then(async (doc) => {
-                    // if (doc.data.collection.status === "approved") {
+                    if (doc.data.collection.status === "approved") {
                         try {
-                            lastPaymentsSends.push(id)
-                            console.log('2',lastPaymentsSends);
                             require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
                         } catch (error) {
                             console.log(error);
                         }
-                    // }
+                    }
+                
                 })
             }
         }
     } catch (error) {
-
+        console.log(error);
     }
-    res.status(200)
 })
 
 
@@ -54,7 +50,7 @@ router.post('/mercadopago/add', async (req, res) => {
             payment_method_id: 'pix',
             external_reference: '',
             payer: mercadoPagoData.payer,
-            notification_url: mercadoPagoData.notification_url + '/test',
+            // notification_url: mercadoPagoData.notification_url + '/test',
         };
         let test = await payment.create({ body })
         if (test) {
