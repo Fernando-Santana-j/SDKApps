@@ -29,6 +29,13 @@ const stripe = require('stripe')(require('./config/web-config').stripe);
 
 //TODO------------Configs--------------
 
+
+const corsOptions = {
+    origin: 'https://api.mercadopago.com'
+};
+app.use(cors(corsOptions));
+
+
 require('dotenv').config()
 
 const client = new Discord.Client({ intents: botConfig.intents })
@@ -523,7 +530,7 @@ app.post('/accout/delete', async (req, res) => {
                         })
                         console.log(prod);
                     } catch (error) {
-                        
+
                     }
                 }
             }
