@@ -24,16 +24,13 @@ const cors = require('cors');
 
 
 const stripe = require('stripe')(require('./config/web-config').stripe);
-
+const csrf = require('csurf');
 
 
 //TODO------------Configs--------------
 const app = express();
 
-const corsOptions = {
-    origin: 'https://api.mercadopago.com'
-};
-app.use(cors(corsOptions));
+
 
 
 const csrfProtection = csrf();
@@ -51,6 +48,10 @@ const disableCSRF = (req, res, next) => {
 app.use(csrfProtection);
 app.use(disableCSRF);
 
+const corsOptions = {
+    origin: 'https://api.mercadopago.com'
+};
+app.use(cors(corsOptions));
 
 
 require('dotenv').config()
