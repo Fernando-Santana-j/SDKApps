@@ -47,6 +47,9 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
         if (!server.bankData) {
             return res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
         }
+        if (isNaN(parseInt(req.body.price))) {
+            return res.status(200).json({ success: false, data: 'Preço invalido!' })
+        }
         const product = await stripe.products.create({
             name: req.body.productName,
             description: req.body.producDesc,

@@ -2,36 +2,44 @@
 let serverID = location.pathname.replace('/server/sales/', "")
 
 
-loadBanks();
-async function loadBanks() {
-    try {
-        const response = await fetch('https://brasilapi.com.br/api/banks/v1');
-        const banks = await response.json();
-        banks.forEach(bank => {
-            if (bank.code != null) {
-                const option = new Option(bank.code + " - " + bank.name, bank.code)
-                document.getElementById('bank-input-list').appendChild(option);
-            }
-        });
-    } catch (error) {
-        console.error('Erro ao carregar os bancos:', error);
+if (document.getElementById('bank-input-list')) {
+    loadBanks();
+    async function loadBanks() {
+        try {
+            const response = await fetch('https://brasilapi.com.br/api/banks/v1');
+            const banks = await response.json();
+            banks.forEach(bank => {
+                if (bank.code != null) {
+                    const option = new Option(bank.code + " - " + bank.name, bank.code)
+                    document.getElementById('bank-input-list').appendChild(option);
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao carregar os bancos:', error);
+        }
     }
 }
 
 
-document.getElementById('cpf-input').addEventListener('input', (e) => {
-    let cpf = e.target.value.replace(/\D/g, '');
-    cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
-    cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
-    cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    e.target.value = cpf;
-});
-document.getElementById('account-number').addEventListener('input', (e) => {
-    let numeroConta = e.target.value.replace(/\D/g, '');
-    numeroConta = numeroConta.replace(/(\d{8})(\d{1})/, '$1-$2');
-    e.target.value = numeroConta;
-})
 
+
+if (document.getElementById('cpf-input')) {
+    document.getElementById('cpf-input').addEventListener('input', (e) => {
+        let cpf = e.target.value.replace(/\D/g, '');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = cpf;
+    });
+}
+if (document.getElementById('account-number')) {
+    document.getElementById('account-number').addEventListener('input', (e) => {
+        let numeroConta = e.target.value.replace(/\D/g, '');
+        numeroConta = numeroConta.replace(/(\d{8})(\d{1})/, '$1-$2');
+        e.target.value = numeroConta;
+    })
+
+}
 
 
 async function verifyData(name, cpf, bank, numero, agencia) {
@@ -44,11 +52,11 @@ async function verifyData(name, cpf, bank, numero, agencia) {
     }
     if (name.trim().length < 1) {
         errorNotify('Escreva seu nome primeiro!')
-        return false 
+        return false
     }
     if (cpf.trim().length <= 13) {
         errorNotify('Escreva seu CPF primeiro!')
-        return false 
+        return false
     }
     if (bank.trim().length < 1 || findbank == undefined || findbank == null) {
         errorNotify('Coloque o nome do seu banco primeiro!')
@@ -65,151 +73,166 @@ async function verifyData(name, cpf, bank, numero, agencia) {
     return true
 }
 
+if (document.getElementById('save-button')) {
+    document.getElementById('save-button').addEventListener('click', async () => {
+        let name = document.getElementById('complete-name').value
+        let cpf = document.getElementById('cpf-input').value
+        let bank = document.getElementById('bank-name-input').value
+        let numero = document.getElementById('account-number').value
+        let agencia = document.getElementById('bank-agenc').value
+        let verify = await verifyData(name, cpf, bank, numero, agencia)
+        if (verify == false) { return }
 
-document.getElementById('save-button').addEventListener('click', async () => {
-    let name = document.getElementById('complete-name').value
-    let cpf = document.getElementById('cpf-input').value
-    let bank = document.getElementById('bank-name-input').value
-    let numero = document.getElementById('account-number').value
-    let agencia = document.getElementById('bank-agenc').value
-    let verify = await verifyData(name, cpf, bank, numero, agencia)
-    if (verify == false) { return }
 
-
-    await $.ajax({
-        traditional: true,
-        url: '/addDadosBanc',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            name: name,
-            cpf: cpf,
-            bank: bank,
-            numero: numero,
-            agencia: agencia,
-            serverID: serverID
-        }),
-        dataType: 'json',
-        success: function (response) {
-            console.log(response);
-            if (response.success == true) {
-                successNotify('Dados Bancarios Salvos!')
-                if (response.data) {
-                    successNotify('Vamos te redirecionar para concluir o seu primeiro cadastro!')
-                    setTimeout(() => {
-                        location.href = response.data
-                    }, 800);
+        await $.ajax({
+            traditional: true,
+            url: '/addDadosBanc',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                name: name,
+                cpf: cpf,
+                bank: bank,
+                numero: numero,
+                agencia: agencia,
+                serverID: serverID
+            }),
+            dataType: 'json',
+            success: function (response) {
+                console.log(response);
+                if (response.success == true) {
+                    successNotify('Dados Bancarios Salvos!')
+                    if (response.data) {
+                        successNotify('Vamos te redirecionar para concluir o seu primeiro cadastro!')
+                        setTimeout(() => {
+                            location.href = response.data
+                        }, 800);
+                    }
+                } else {
+                    errorNotify("Erro ao salvar os dados bancarios verifique se digitou corretamente os dados!")
                 }
-            } else {
-                errorNotify("Erro ao salvar os dados bancarios verifique se digitou corretamente os dados!")
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-        }
-    })
-
-})
-
-document.getElementById('add-pix-popup-close-button').addEventListener('click',()=>{
-    document.getElementById('add-pix-popup-cotainner').style.display ='none'
-})
-document.getElementById('add-pix-popup-close').addEventListener('click',()=>{
-    document.getElementById('add-pix-popup-cotainner').style.display ='none'
-})
-
-document.getElementById('pix-add-button').addEventListener('click',()=>{
-    document.getElementById('add-pix-popup-cotainner').style.display ='flex'
-})
-document.getElementById('add-pix-button').addEventListener('click', async () => {
-    let token = document.getElementById('add-pix-popup-input').value
-    document.getElementById('add-pix-popup-input').value = ''
-    console.log(token);
-    await $.ajax({
-        traditional: true,
-        url: '/mercadopago/add',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            serverID: serverID,
-            token:token
-        }),
-        dataType: 'json',
-        success: function (response) {
-            console.log(response);
-            if (response.success == true) {
-                successNotify(response.data)
-            } else {
-                errorNotify(response.data)
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-        }
-    })
-})
-
-document.getElementById('desativar-pix-button').addEventListener('click',async()=>{
-    await $.ajax({
-        traditional: true,
-        url: '/mercadopago/desative',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            serverID: serverID,
-        }),
-        dataType: 'json',
-        success: function (response) {
-            if (response.success == true) {
-                successNotify(response.data)
-            } else {
-                errorNotify(response.data)
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-        }
-    })
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-document.getElementById('alt-button').addEventListener('click', async () => {
-    try {
-        let session = await fetch('/account/modify', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        })
+
+    })
+}
+
+if (document.getElementById('add-pix-popup-close-button')) {
+    document.getElementById('add-pix-popup-close-button').addEventListener('click', () => {
+        document.getElementById('add-pix-popup-cotainner').style.display = 'none'
+    })
+}
+if (document.getElementById('add-pix-popup-close')) {
+    document.getElementById('add-pix-popup-close').addEventListener('click', () => {
+        document.getElementById('add-pix-popup-cotainner').style.display = 'none'
+    })
+}
+if (document.getElementById('pix-add-button')) {
+
+    document.getElementById('pix-add-button').addEventListener('click', () => {
+        document.getElementById('add-pix-popup-cotainner').style.display = 'flex'
+    })
+}
+if (document.getElementById('add-pix-button')) {
+    document.getElementById('add-pix-button').addEventListener('click', async () => {
+        let token = document.getElementById('add-pix-popup-input').value
+        document.getElementById('add-pix-popup-input').value = ''
+        console.log(token);
+        await $.ajax({
+            traditional: true,
+            url: '/mercadopago/add',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                serverID: serverID,
+                token: token
+            }),
+            dataType: 'json',
+            success: function (response) {
+                console.log(response);
+                if (response.success == true) {
+                    successNotify(response.data)
+                } else {
+                    errorNotify(response.data)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        })
+    })
+
+}
+
+if (document.getElementById('desativar-pix-button')) {
+    document.getElementById('desativar-pix-button').addEventListener('click', async () => {
+        await $.ajax({
+            traditional: true,
+            url: '/mercadopago/desative',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
                 serverID: serverID,
             }),
-        }).then(response => { return response.json() })
-        if (session.success == true) {
-            successNotify('Você sera redirecionado para a pagina de cadastro de novo pagamento!')
-            setInterval(async () => {
-                location.href = session.data
-            }, 3000)
-        } else {
-            errorNotify(session.data)
+            dataType: 'json',
+            success: function (response) {
+                if (response.success == true) {
+                    successNotify(response.data)
+                } else {
+                    errorNotify(response.data)
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        })
+    })
+
+
+
+}
+
+
+
+
+
+
+
+
+
+if (document.getElementById('alt-button')) {
+    document.getElementById('alt-button').addEventListener('click', async () => {
+        try {
+            let session = await fetch('/account/modify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    serverID: serverID,
+                }),
+            }).then(response => { return response.json() })
+            if (session.success == true) {
+                successNotify('Você sera redirecionado para a pagina de cadastro de novo pagamento!')
+                setInterval(async () => {
+                    location.href = session.data
+                }, 3000)
+            } else {
+                errorNotify(session.data)
+            }
+        } catch (error) {
+            console.log(error);
+            errorNotify('Erro ao redirecionar para a pagina de pagamento!')
         }
-    } catch (error) {
-        console.log(error);
-        errorNotify('Erro ao redirecionar para a pagina de pagamento!')
-    }
-})
+    })
+}
+
+
+
+
 
 
 
@@ -236,7 +259,7 @@ document.getElementById('alt-button').addEventListener('click', async () => {
 
 
 
-document.getElementById('estoque-config-add-button').addEventListener('click',()=>{
+document.getElementById('estoque-config-add-button').addEventListener('click', () => {
     let numberEstoque = document.getElementById('estoque-config-row').childElementCount + 1
     var novoDiv = document.createElement("div");
     novoDiv.classList.add("estoque-config-col");
@@ -278,8 +301,8 @@ document.getElementById('estoque-config-add-button').addEventListener('click',()
 
 addNewData()
 function addNewData() {
-    document.querySelectorAll('.estoque-config-new-data-button').forEach((element)=>{
-        element.addEventListener('click',()=>{
+    document.querySelectorAll('.estoque-config-new-data-button').forEach((element) => {
+        element.addEventListener('click', () => {
             let DocumentCol = element.parentElement.parentElement
             let estoque = DocumentCol.getAttribute('data-index')
             let ESTQcontainner = DocumentCol.querySelector('.estoque-config-inputs-containner')
@@ -311,7 +334,7 @@ function addNewData() {
 
 
 
-document.addEventListener('click', async(event) => {
+document.addEventListener('click', async (event) => {
     const target = event.target;
     if (target.closest('.estoque-config-exclud-input')) {
         const parentDiv = target.closest('.estoque-config-inputs');
@@ -364,11 +387,11 @@ document.addEventListener('click', async(event) => {
         if (productData.success == true) {
             successNotify('Produto apagado')
             getProducts()
-        }else{
+        } else {
             errorNotify(productData.data)
         }
         document.getElementById('produtos-config-containner').style.display = 'none'
-        
+
     }
 });
 
@@ -376,7 +399,7 @@ document.addEventListener('click', async(event) => {
 
 
 
-productsConfig() 
+productsConfig()
 function productsConfig() {
     document.querySelectorAll('.produtos-configure-button').forEach(element => {
         element.addEventListener('click', async () => {
@@ -397,14 +420,14 @@ function productsConfig() {
                     const valorReal = numeroCentavos / 100;
                     return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 }
-                document.getElementById('confirm-exclud-produto-containner').setAttribute('data-id',productID)
+                document.getElementById('confirm-exclud-produto-containner').setAttribute('data-id', productID)
                 document.getElementById('product-price-edit').value = formatarMoeda(data.price)
                 document.getElementById('product-desc-edit').value = data.producDesc
                 document.getElementById('product-name-edit').value = data.productName
                 document.getElementById('logo-preview-edit').src = location.origin + data.productLogo
                 document.getElementById('backGround-preview-edit').src = data.backGround == null ? 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg' : location.origin + data.backGround
                 document.getElementById('produtos-config-containner').style.display = 'flex'
-                document.getElementById('edit-estoque-inputs-containner').innerHTML = '' 
+                document.getElementById('edit-estoque-inputs-containner').innerHTML = ''
 
                 for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
                     document.getElementById('edit-estoque-inputs-containner').innerHTML += `
@@ -420,9 +443,9 @@ function productsConfig() {
                         </div>
                     `
                 }
-                
 
-                document.getElementById('send-mensage-edit').addEventListener('click',async()=>{
+
+                document.getElementById('send-mensage-edit').addEventListener('click', async () => {
                     await fetch('/product/mensage', {
                         method: 'POST',
                         headers: {
@@ -433,29 +456,29 @@ function productsConfig() {
                             serverID: serverID,
                             channelID: data.channel
                         }),
-                    }).then(response => { return response.json() }).then((res)=>{
+                    }).then(response => { return response.json() }).then((res) => {
                         if (res.success == true) {
                             successNotify(res.data)
-                        }else{
+                        } else {
                             errorNotify(res.data)
                         }
                     })
                 })
 
 
-                document.getElementById('new-estoque-create').addEventListener('click',async()=>{
+                document.getElementById('new-estoque-create').addEventListener('click', async () => {
                     let row = document.querySelector('#edit-estoque-inputs-containner')
-                    var EstoqueData =  {
-                        estoque:data.estoque.length + 1,
+                    var EstoqueData = {
+                        estoque: data.estoque.length + 1,
                         conteudo: []
                     }
-                   
-                    Array.from(row.children).forEach((element,index)=>{
+
+                    Array.from(row.children).forEach((element, index) => {
                         var title = element.querySelector('input[name="edit-estoque-title-input"]').value;
                         var content = element.querySelector('input[name="edit-estoque-content-input"]').value;
-                        EstoqueData.conteudo.push({index: index + 1, title: title, content: content })
+                        EstoqueData.conteudo.push({ index: index + 1, title: title, content: content })
                     })
-                    
+
                     await fetch('/product/estoqueAdd', {
                         method: 'POST',
                         headers: {
@@ -466,7 +489,7 @@ function productsConfig() {
                             serverID: serverID,
                             estoque: EstoqueData
                         }),
-                    }).then(response => { return response.json() }).then((res)=>{
+                    }).then(response => { return response.json() }).then((res) => {
                         if (res.success == true) {
                             data.estoque.push(EstoqueData)
                             for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
@@ -484,25 +507,25 @@ function productsConfig() {
                                 `
                             }
                             successNotify('Estoque adicionado!')
-                        }else{
+                        } else {
                             errorNotify(res.data)
                         }
                     })
-                    
+
                 })
 
-                
-                
+
+
                 document.getElementById('produtos-config-background').addEventListener('click', () => {
                     document.getElementById('produtos-config-containner').style.display = 'none'
                 })
                 document.getElementById('close-button-popup-config-produc').addEventListener('click', () => {
                     document.getElementById('produtos-config-containner').style.display = 'none'
                 })
-                
-    
-                
-    
+
+
+
+
                 document.getElementById('product-save-edit-button').addEventListener('click', () => {
                     var formData = new FormData();
                     if (document.getElementById('logo-input-edit').files[0]) {
@@ -537,10 +560,10 @@ function productsConfig() {
                             if (response.success) {
                                 successNotify('Produto Alterado!')
                                 getProducts()
-                            }else{
+                            } else {
                                 errorNotify(response.data)
                             }
-    
+
                         },
                         error: function (xhr, status, error) {
                             console.error(error);
@@ -555,7 +578,7 @@ function productsConfig() {
 
 
 async function getProducts() {
-    setTimeout(async()=>{
+    setTimeout(async () => {
         let productData = await fetch('/product/get', {
             method: 'POST',
             headers: {
@@ -590,10 +613,10 @@ async function getProducts() {
                     <div class="linha"></div>
                 `
             })
-            productsConfig() 
+            productsConfig()
         }
-    },1000)
-    
+    }, 1000)
+
 }
 
 document.getElementById('product-price').addEventListener('input', () => {
@@ -715,7 +738,7 @@ function clearCadastroProduct() {
 }
 
 
-document.getElementById("product-cadastro-content").addEventListener("submit", function(event) {
+document.getElementById("product-cadastro-content").addEventListener("submit", function (event) {
     event.preventDefault();
     if (!document.getElementById('logo-input').files[0]) {
         return errorNotify('Nenhuma logo foi inserida!')
@@ -724,17 +747,17 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
     // coletar os dados do estoque
     let row = document.querySelector('#product-cadastro-containner #estoque-config-row')
     var EstoqueData = [];
-   
-    Array.from(row.children).forEach((element,index)=>{
+
+    Array.from(row.children).forEach((element, index) => {
         let inputsContainner = element.querySelector('.estoque-config-inputs-containner')
         let model = {
-            estoque:index + 1,
+            estoque: index + 1,
             conteudo: []
         }
-        Array.from(inputsContainner.children).forEach((inputs,indexinput)=>{
+        Array.from(inputsContainner.children).forEach((inputs, indexinput) => {
             var title = inputs.querySelector('input[name="estoque-title-input"]').value;
             var content = inputs.querySelector('input[name="estoque-content-input"]').value;
-            model.conteudo.push({index: indexinput + 1, title: title, content: content })
+            model.conteudo.push({ index: indexinput + 1, title: title, content: content })
         })
         EstoqueData.push(model)
     })
@@ -765,7 +788,7 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
     }
 
     clearCadastroProduct()
-    
+
     $.ajax({
         traditional: true,
         url: '/product/create',
@@ -777,7 +800,7 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
             if (response.success) {
                 successNotify('Produto criado!')
                 getProducts()
-            }else{
+            } else {
                 errorNotify(response.data)
             }
 
