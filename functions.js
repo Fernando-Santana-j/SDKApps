@@ -109,10 +109,7 @@ module.exports = {
             return
         }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
-        if ("vitalicio" in server && server.vitalicio == true) {
-            next()
-            return
-        }
+        
         if (server) {
             try {
                 if ('bankData' in server) {
@@ -128,7 +125,10 @@ module.exports = {
                         return
                     }
                 }
-
+                if ("vitalicio" in server && server.vitalicio == true) {
+                    next()
+                    return
+                }
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
                     const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);

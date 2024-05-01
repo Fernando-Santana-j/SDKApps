@@ -32,14 +32,6 @@ const botConfig = require('../config/bot-config.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
-// client.once('ready', () => {
-// require('../Discord/createProductMessage.js')(Discord, client, {
-// channelID: '1210907838998781964',
-// serverID: '1210907838558240829',
-// productID:'35125'
-// })
-// })
-
 
 router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {

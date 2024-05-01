@@ -217,7 +217,7 @@ if (document.getElementById('alt-button')) {
             }).then(response => { return response.json() })
             if (session.success == true) {
                 successNotify('Você sera redirecionado para a pagina de cadastro de novo pagamento!')
-                setInterval(async () => {
+                setTimeout(async () => {
                     location.href = session.data
                 }, 3000)
             } else {

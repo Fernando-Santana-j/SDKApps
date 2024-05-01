@@ -83,6 +83,8 @@
     }
 }
 
+
+
 #plan-config-content{
     margin-top: 2em;
     display: flex;
@@ -133,4 +135,33 @@
         justify-content: space-between;
         gap: 1em;
     }
+}
+
+
+#title-other-config{
+    margin-bottom: 2em;
+    text-align: left;
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+}
+
+#other-config-containner{
+    margin-top: 5em;
+
+}
+#other-config-block-containner{
+    display: flex;
+    gap: 2em;
+    justify-content: center;
+    align-items: center;
+}
+#other-config-content{
+    margin-top: 2em;
+}
+
+#block-bank-button{
+    width: 15em;
+    margin-top: 17px;
 }

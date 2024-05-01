@@ -590,6 +590,47 @@ app.post('/config/change', async (req, res) => {
     }
 })
 
+app.post('/config/blockbank',async(req,res)=>{
+    try {
+        let bank = req.body.bank
+        let possiveisBanks = ['Banco Inter S.A.',"Picpay Serviços S.A."]
+        if (!possiveisBanks.includes(bank)) {
+            res.status(200).json({ success: false, data:'Banco invalido!' })
+            return
+        }
+
+        let server = await db.findOne({colecao:"servers",doc:req.body.serverID})
+
+        if (!server) {
+            res.status(200).json({ success: false, data:'Erro ao bloquear o banco!' })
+            return
+        }
+
+        let blockBank = []
+        if ('blockBank' in server) {
+            blockBank = server.blockBank
+        }
+
+        if (blockBank.includes(bank)) {
+            res.status(200).json({ success: false, data:'Este banco ja foi bloqueado!' })
+            return 
+        }
+
+
+        blockBank.push(bank)
+
+        db.update('servers',req.body.serverID,{
+            blockBank:blockBank
+        })
+        res.status(200).json({ success: true })
+    } catch (error) {
+        console.log(error);
+        res.status(200).json({ success: false, data:'Erro ao bloquear o banco!' })
+    }
+
+
+})
+
 
 app.post('/perms/changeOne', async (req, res) => {
     try {

@@ -12,27 +12,47 @@ const mercadoPagoData = require('./config/mercadoPagoData.json')
 router.post('/mercadopago/webhook', async (req, res) => {
     let resposta = req.body
     let params = req.query
-    res.status(202).json({t:1})
+    let server = await db.findOne({ colecao: 'servers', doc: params.serverID })
+    console.log(resposta);
     try {
         if (resposta.action == 'payment.updated') {
             let id = await resposta.data.id
-            if (params || !lastPaymentsSends.includes(id)) {
-                axios.get(`https://api.mercadolibre.com/collections/notifications/${id}`, {
+            if (params) {
+                axios.get(`https://api.mercadopago.com/v1/payments/${id}`, {
                     headers: {
                         'Authorization': `Bearer ${params.token}`
                     }
                 }).then(async (doc) => {
-                    if (doc.data.collection.status === "approved") {
-                        try {
-                            require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
-                        } catch (error) {
-                            console.log(error);
+                    if (doc.data.status === "approved") {
+                        let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
+
+                        if ('blockBank' in server && server.blockBank.includes(bank)) {
+                            try {
+                                await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
+                                    headers: {
+                                        Authorization: `Bearer ${params.token}`
+                                    }
+                                })
+                                require("./Discord/discordIndex").sendDiscordMensageChannel(params.serverID,null,'Reembolso',`Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`,params.userID,false)
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        } else {
+                            try {
+                                require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
+                            } catch (error) {
+                                console.log(error);
+                            }
                         }
+
                     }
-                
+
+                }).catch(err => {
+                    console.log(err);
                 })
             }
         }
+        res.sendStatus(200)
     } catch (error) {
         console.log(error);
     }

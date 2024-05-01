@@ -43,7 +43,7 @@ document.getElementById('changePaymentMethod').addEventListener('click', async (
             console.log(session);
 
             successNotify('Você sera redirecionado para a pagina de cadastro de novo pagamento!')
-            setInterval(async () => {
+            setTimeout(async () => {
                 window.open(session.data, "_blank");
             }, 3000)
         } else {
@@ -77,8 +77,41 @@ document.getElementById('confirmCancelSubscription').addEventListener('click', a
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify('Sua assinatura foi cancelada iremos te redirecionar!')
-        setInterval(async () => {
+        setTimeout(async () => {
             location.href = '/'
         }, 1000)
+    }
+})
+
+
+
+
+document.getElementById('block-bank-button').addEventListener('click',async()=>{
+    let bankInput = document.getElementById('other-config-block-bank').value
+    if (bankInput.length < 1) {
+        errorNotify('Primeiro selecione o banco que deseja bloquear!')
+        return
+    }
+    let possiveisBanks = ['Banco Inter S.A.',"Picpay Serviços S.A."]
+
+    if (!possiveisBanks.includes(bankInput)) {
+        errorNotify('Selecione um banco valido!')
+        return
+    }
+    let blockBank = await fetch('/config/blockbank', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID: serverID,
+            bank:bankInput
+        }),
+    }).then(response => { return response.json() })
+    if (blockBank.success == true) {
+        bankInput = ''
+        successNotify('Banco bloqueado com sucesso!')
+    }else{
+        errorNotify(blockBank.data)
     }
 })

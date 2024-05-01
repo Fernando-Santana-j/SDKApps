@@ -181,7 +181,7 @@ document.getElementById('signature-situation-button').addEventListener('click', 
         console.log(session);
 
         successNotify('Você sera redirecionado para a pagina do stripe!')
-        setInterval(async () => {
+        setTimeout(async () => {
             window.open(session.data, "_blank");
         }, 3000)
     } else {

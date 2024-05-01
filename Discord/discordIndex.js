@@ -771,3 +771,29 @@ module.exports.sendProductPayment = async (params, id, type) => {
         }
     }
 }
+
+
+
+module.exports.sendDiscordMensageChannel = async (server,channel,title, mensage, user, deleteChannel = false)=>{
+    var DiscordServer = await client.guilds.cache.get(server);
+    var DiscordChannel
+    if (user) {
+        DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
+    }else{
+        DiscordChannel = await DiscordServer.channels.cache.get(channel)
+    }
+    await DiscordChannel.send({
+        embeds: [
+            new Discord.EmbedBuilder()
+                .setTitle(`${DiscordServer.name} | ${title}`)
+                .setDescription(mensage)
+                .setColor("#6E58C7")
+        ]
+    }).catch(() => { })
+
+    if (deleteChannel == true) {
+        setTimeout(()=>{
+            DiscordChannel.delete()
+        },5000)
+    }
+}

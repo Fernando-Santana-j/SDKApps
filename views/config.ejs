@@ -2,7 +2,7 @@
 <html>
 <head>
     <%- include('./reusable/head.ejs') %>
-    <title></title>
+    <title>SDK - Config</title>
     <link rel="stylesheet" href="<%= host %>/public/css/config.css">
 </head>
 <body>
@@ -52,7 +52,7 @@
                         <div id="plan-config-content">
                             <div class="plan-config-inputs-containner" >
                                 <label class="lable-padrao" for="plan-config-newplan">Trocar de plano</label>
-                                <input required type="text" disabled data-currentPlan="<%= server.plan %>" value="Plano <%= server.plan %>" class="input-padrao" list="plan-config-newplan-list" placeholder="Idioma" id="plan-config-newplan">
+                                <input required type="text" disabled data-currentPlan="<%= server.plan %>" value="Plano <%= server.plan %>" class="input-padrao" list="plan-config-newplan-list" placeholder="Plano" id="plan-config-newplan">
                                 <datalist id="plan-config-newplan-list">
                                     <option value="Plano 1" >R$ 9,99</option>
                                     <option value="Plano 2" >R$ 14,99</option>
@@ -77,6 +77,26 @@
                         </div>
                         
                     </div>
+                    <div id="other-config-containner">
+                        <h1 id="title-other-config">Outras opções</h1>
+                        <div class="linha"></div>
+                        <div id="other-config-content">
+                            <div id="other-config-block-containner" >
+                                <div id="other-config-block-content">
+                                    <label class="lable-padrao" for="other-config-block-bank">Bloquear banco</label>
+                                    <input type="text" class="input-padrao" list="other-config-block-bank-list" placeholder="Banco" id="other-config-block-bank">
+                                    <datalist id="other-config-block-bank-list">
+                                        <option value="Banco Inter S.A." >Inter</option>
+                                        <option value="Picpay Serviços S.A." >PicPay</option>
+                                    </datalist>
+                                </div>
+                                <button id="block-bank-button" class="button-padrao redColor">Bloquear</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
                     <div id="buttons-containner">
                         <button class="button-padrao" id="save-configs">Salvar</button>
                         <button class="button-padrao redColor" id="cancel-configs">Cancelar</button>
