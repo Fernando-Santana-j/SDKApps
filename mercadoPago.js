@@ -13,7 +13,6 @@ router.post('/mercadopago/webhook', async (req, res) => {
     let resposta = req.body
     let params = req.query
     let server = await db.findOne({ colecao: 'servers', doc: params.serverID })
-    console.log(resposta);
     try {
         if (resposta.action == 'payment.updated') {
             let id = await resposta.data.id

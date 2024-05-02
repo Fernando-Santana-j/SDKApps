@@ -759,7 +759,10 @@ client.on('ready', () => {
 
 
 app.listen(webConfig.port, () => {
-    console.log(`[WEB] Servidor rodando na porta ${webConfig.port}`);
+    const dataHora = new Date();
+    const formatado = d => ('0' + d).slice(-2);
+    const dataHoraFormatada = `${formatado(dataHora.getDate())}/${formatado(dataHora.getMonth() + 1)}/${dataHora.getFullYear()} ${formatado(dataHora.getHours())}:${formatado(dataHora.getMinutes())}:${formatado(dataHora.getSeconds())}`;
+    console.log(`${dataHoraFormatada} [WEB] Servidor rodando na porta ${webConfig.port}`);
 });
 
 

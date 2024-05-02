@@ -37,10 +37,12 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (!server.bankData) {
-            return res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
+            res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
+            return
         }
-        if (isNaN(parseInt(req.body.price))) {
-            return res.status(200).json({ success: false, data: 'Preço invalido!' })
+        if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
+            res.status(200).json({ success: false, data: 'Preço invalido!' })
+            return 
         }
         const product = await stripe.products.create({
             name: req.body.productName,
@@ -104,13 +106,20 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'bacKGround', maxCount: 1 }]), async (req, res) => {
     let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
     if (!server.bankData) {
-        return res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
+        res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
+        return 
     }
     let productID = req.body.productID
     var produto = await server.products.find(product => product.productID == productID)
     var index = await server.products.findIndex(product => product.productID == productID)
-    if (produto == null || index < 0) {
-        return res.status(200).json({ success: false, data: 'Nenhum produto encontrado' })
+    if (produto == null || index < 0 || produto == undefined) {
+        res.status(200).json({ success: false, data: 'Nenhum produto encontrado' })
+        return
+    }
+
+    if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
+        res.status(200).json({ success: false, data: 'Preço incorreto!' })
+        return 
     }
 
     let logo = null
@@ -154,10 +163,10 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     let produtos = server.products
 
     produto.productName = req.body.productName,
-        produto.producDesc = req.body.producDesc,
-        produto.estoque = req.body.estoque,
-        produto.price = req.body.price,
-        produto.priceID = price.id
+    produto.producDesc = req.body.producDesc,
+    produto.estoque = req.body.estoque,
+    produto.price = req.body.price,
+    produto.priceID = price.id
     if (logo != null) {
         produto.productLogo = logo
     }
@@ -167,6 +176,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
 
 
     produtos[index] = produto;
+
 
     db.update('servers', req.body.serverID, {
         products: produtos
@@ -279,6 +289,10 @@ router.post('/product/estoqueAdd', async (req, res) => {
             let product = await produtos.find(product => product.productID == productID)
             var index = await produtos.findIndex(product => product.productID == productID)
             let estoqueADD = req.body.estoque
+            if (!productID || !produtos || !product || index < 0 || !index || !estoqueADD ) {
+                res.status(200).json({ success: false, data: 'Erro ao adicionar estoque' })
+            }
+            
             await product.estoque.push(estoqueADD)
 
             produtos[index] = product
