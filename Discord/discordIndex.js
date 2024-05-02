@@ -721,6 +721,16 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
 
         } else {
+            if (type == 'aprovado') {
+                await findChannel.send({
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                            .setTitle(`${DiscordServer.name} | Falta de estoque`)
+                            .setDescription(`Não foi possivel aprovar o carrinho por falta de estoque!`)
+                    ]
+                }).catch(() => { })
+                return
+            }
             await findChannel.send({
                 embeds: [
                     new Discord.EmbedBuilder()
