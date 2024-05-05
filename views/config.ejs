@@ -36,9 +36,18 @@
                                 </datalist>
                             </div>
                             <div class="bot-config-inputs-containner" id="bot-config-notice-channel">
-                                <label class="lable-padrao" for="bot-config-idioma">Canal para as noticias do bot</label>
+                                <label class="lable-padrao" for="bot-config-channel">Canal para as noticias do bot</label>
                                 <input required type="text" class="input-padrao" list="bot-config-channel-list" placeholder="canal" id="bot-config-channel">
                                 <datalist id="bot-config-channel-list">
+                                    <% channels.forEach(element => { %>
+                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                    <% }) %>
+                                </datalist>
+                            </div>
+                            <div class="bot-config-inputs-containner" id="bot-config-buy-channel">
+                                <label class="lable-padrao" for="bot-config-channel-buy">Canal para exibir compras para o publico</label>
+                                <input required type="text" class="input-padrao" list="bot-config-channel-list" placeholder="canal" id="bot-config-channel-buy">
+                                <datalist id="bot-config-channel-buy-list">
                                     <% channels.forEach(element => { %>
                                         <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
                                     <% }) %>

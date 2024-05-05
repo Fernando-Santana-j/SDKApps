@@ -302,10 +302,9 @@ router.post('/product/estoqueAdd', async (req, res) => {
             })
             res.status(200).json({ success: true, data: '' })
         } else {
-            res.status(200).json({ success: false, data: '' })
+            res.status(200).json({ success: true, data: '' })
         }
     } catch (error) {
-        res.status(200).json({ success: false, data: '' })
         console.log(error);
     }
 })

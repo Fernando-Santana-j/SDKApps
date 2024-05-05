@@ -577,8 +577,16 @@ app.post('/config/change', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server.error == false) {
-            let configs = server.configs
+            let configs = {
+                noticeChannel:null,
+                publicBuyChannel:null
+            }
+            if ('configs' in server) {
+                configs = server.configs
+            }
+            configs.publicBuyChannel
             configs.noticeChannel = req.body.noticeChannel
+            configs.publicBuyChannel = req.body.publicBuyChannel
             db.update('servers', req.body.serverID, {
                 configs: configs
             })
@@ -733,7 +741,6 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
-
 app.use('/', produtoRoutes);
 
 

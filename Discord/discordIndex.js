@@ -687,6 +687,34 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     files: fields
                 });
 
+                if ('configs' in serverData && 'publicBuyChannel' in serverData.configs && serverData.configs.publicBuyChannel ) {
+                    let findChannelPublic = DiscordServer.channels.cache.find(c => c.id === serverData.configs.publicBuyChannel)
+                    let fieldsPublic = { name: `Carrinho:`, value: `\n` }
+                    let valorTotal = 0
+                    await carrinho.forEach(async(element,index) => {
+                        var product = await serverData.products.find(product => product.productID == element)
+                        valorTotal = valorTotal + parseInt(product.price)
+                        fieldsPublic.value += `${index + 1} - ${product.productName}\n`
+                    });
+                    let allfieldsPublic = [ { name: '\u200B', value: '\u200B' },
+                    { name: 'Cliente:', value: user.username, inline: true },
+                    { name: 'Valor total:', value: await functions.formatarMoeda(valorTotal), inline: true },
+                    fieldsPublic,
+                    { name: 'Data e hora da compra', value: dataHoraFormatada },
+                    { name: '\u200B', value: '\u200B' }]
+                    findChannelPublic.send({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setTitle(`🛍️ | Nova compra!`)
+                                .setDescription(`Uma nova compra foi feita abaixo está os dados da compra:`)
+                                .addFields(...allfieldsPublic)
+                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                                .setColor("#6E58C7")
+                                .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                        ],
+                    })
+                }
+
                 let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
 
                 if (analytics.error == false) {

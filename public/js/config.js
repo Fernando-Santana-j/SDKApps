@@ -4,13 +4,21 @@ let serverID = location.pathname.replace('/server/config/', "")
 document.getElementById('save-configs').addEventListener('click', async () => {
     const opcoes = document.getElementById('bot-config-channel-list').querySelectorAll('option');
     let channelID = null;
-    console.log(1);
+    
     await opcoes.forEach(option => {
         if (option.value === document.getElementById('bot-config-channel').value) {
             channelID = option.getAttribute('data-channel');
         }
     });
-    console.log(channelID);
+
+    let channelIDBuy = null
+    const opcoesBuy = document.getElementById('bot-config-channel-buy-list').querySelectorAll('option');
+    await opcoesBuy.forEach(option => {
+        if (option.value === document.getElementById('bot-config-channel-buy').value) {
+            channelIDBuy = option.getAttribute('data-channel');
+        }
+    });
+
     let session = await fetch('/config/change', {
         method: 'POST',
         headers: {
@@ -18,7 +26,8 @@ document.getElementById('save-configs').addEventListener('click', async () => {
         },
         body: JSON.stringify({
             serverID: serverID,
-            noticeChannel:channelID
+            noticeChannel:channelID,
+            publicBuyChannel:channelIDBuy
         }),
     }).then(response => { return response.json() })
     if (session.success == true) {
@@ -26,6 +35,11 @@ document.getElementById('save-configs').addEventListener('click', async () => {
     } else {
         errorNotify(session.data)
     }
+})
+
+document.getElementById('cancel-configs').addEventListener('click',()=>{
+    document.getElementById('bot-config-channel').value = ''
+    document.getElementById('bot-config-channel-buy').value = ''
 })
 
 document.getElementById('changePaymentMethod').addEventListener('click', async () => {
