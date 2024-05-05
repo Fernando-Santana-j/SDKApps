@@ -2,99 +2,102 @@ const db = require('../Firebase/models')
 require('dotenv').config()
 const stripe = require('stripe')(require('../config/web-config').stripe);
 module.exports = async (Discord, client, data) => {
-    const DiscordServer = await client.guilds.cache.get(data.serverID);
-    const DiscordChannel = await DiscordServer.channels.cache.get(data.channelID)
-    let user = data.user.id
-    var serverData = await db.findOne({ colecao: "servers", doc: await data.serverID })
-    let paymentFields = [
-        new Discord.StringSelectMenuOptionBuilder()
-            .setLabel('Cartão')
-            .setDescription('Pagamento usado mundialmente!')
-            .setValue('card'),
-        new Discord.StringSelectMenuOptionBuilder()
-            .setLabel('Boleto')
-            .setDescription('Devido ao tempo de processamento, pode demorar até 3 dias para ser aprovado!')
-            .setValue('boleto')
-    ]
-    if (serverData.bankData && serverData.bankData.mercadoPagoToken && serverData.bankData.mercadoPagoToken != '') {
-        paymentFields.unshift(await new Discord.StringSelectMenuOptionBuilder()
-        .setLabel('PIX')
-        .setDescription('Método mais comum de pagamento no Brasil!')
-        .setValue('PIX'))
-    }
-    const row = new Discord.ActionRowBuilder().addComponents(
-        new Discord.StringSelectMenuBuilder()
-            .setCustomId('payment')
-            .setPlaceholder('Selecione o método de pagamento desejado!')
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions(...paymentFields)
-    )
-    const row2 = new Discord.ActionRowBuilder()
-        .addComponents(
-            new Discord.ButtonBuilder()
-                .setCustomId(`confirm`)
-                .setLabel('Confirmar')
-                .setStyle('3'),
+    try {
+        const DiscordServer = await client.guilds.cache.get(data.serverID);
+        const DiscordChannel = await DiscordServer.channels.cache.get(data.channelID)
+        let user = data.user.id
+        var serverData = await db.findOne({ colecao: "servers", doc: await data.serverID })
+        let paymentFields = [
+            new Discord.StringSelectMenuOptionBuilder()
+                .setLabel('Cartão')
+                .setDescription('Pagamento usado mundialmente!')
+                .setValue('card'),
+            new Discord.StringSelectMenuOptionBuilder()
+                .setLabel('Boleto')
+                .setDescription('Devido ao tempo de processamento, pode demorar até 3 dias para ser aprovado!')
+                .setValue('boleto')
+        ]
+        if (serverData.bankData && serverData.bankData.mercadoPagoToken && serverData.bankData.mercadoPagoToken != '') {
+            paymentFields.unshift(await new Discord.StringSelectMenuOptionBuilder()
+                .setLabel('PIX')
+                .setDescription('Método mais comum de pagamento no Brasil!')
+                .setValue('PIX'))
+        }
+        const row = new Discord.ActionRowBuilder().addComponents(
+            new Discord.StringSelectMenuBuilder()
+                .setCustomId('payment')
+                .setPlaceholder('Selecione o método de pagamento desejado!')
+                .setMinValues(1)
+                .setMaxValues(1)
+                .addOptions(...paymentFields)
         )
-        .addComponents(
+        const row2 = new Discord.ActionRowBuilder()
+            .addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId(`confirm`)
+                    .setLabel('Confirmar')
+                    .setStyle('3'),
+            )
+            .addComponents(
 
-            new Discord.ButtonBuilder()
-                .setCustomId('cancel')
-                .setLabel('Cancelar')
-                .setStyle('4')
-        ).addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId('cancel')
+                    .setLabel('Cancelar')
+                    .setStyle('4')
+            ).addComponents(
 
-            new Discord.ButtonBuilder()
-                .setCustomId(`remove`)
-                .setLabel('Remover produto')
-                .setStyle('4')
-        );
+                new Discord.ButtonBuilder()
+                    .setCustomId(`remove`)
+                    .setLabel('Remover produto')
+                    .setStyle('4')
+            );
 
-    let fields = []
-    let carrinhos = require('./discordIndex').carrinhos
-    
-    if (carrinhos[user]) {
-        await carrinhos[user].forEach(async (element,index) => {
+        let fields = []
+        let carrinhos = require('./discordIndex').carrinhos
 
-            let produto = await serverData.products.find(product => product.productID == element)
-            const valorReal = produto.price / 100;
-            let valorFormatado = valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            fields.push({ name: `${index + 1} - ${produto.productName}`, value: valorFormatado },)
-        });
-    }else{
-        DiscordChannel.delete()
-        return
-    }
-    let contentEmbend = {
-        embeds: [
-            new Discord.EmbedBuilder()
-                .setTitle('Selecione abaixo o metodo de pagamento depois confirme para gerar o seu link de pagamento!')
-                .setDescription(`Clique em cancelar caso desista de fazer a compra.
+        if (carrinhos[user]) {
+            await carrinhos[user].forEach(async (element, index) => {
+                let produto = await serverData.products.find(product => product.productID == element)
+                const valorReal = produto.price / 100;
+                let valorFormatado = valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                fields.push({ name: `${index + 1} - ${produto.productName}`, value: valorFormatado },)
+            });
+        } else {
+            DiscordChannel.delete()
+            return
+        }
+        let contentEmbend = {
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle('Selecione abaixo o metodo de pagamento depois confirme para gerar o seu link de pagamento!')
+                    .setDescription(`Clique em cancelar caso desista de fazer a compra.
 
                 Abaixo são os itens do seu carrinho.`)
 
-                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
-                .addFields(...[{ name: '\u200B', value: '\u200B' },...fields,{ name: '\u200B', value: '\u200B' },])
-                .setColor("#6E58C7")
-                .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
-                .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-        ],
-        components: [row, row2],
-        files:[]
-    }
-    
-    if (data.edit == true) {
-        const botMessages = await DiscordChannel.messages.cache.filter(msg => msg.author.id === client.user.id);
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                    .addFields(...[{ name: '\u200B', value: '\u200B' }, ...fields, { name: '\u200B', value: '\u200B' },])
+                    .setColor("#6E58C7")
+                    .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
+                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+            ],
+            components: [row, row2],
+            files: []
+        }
 
-        // Pegue a última mensagem enviada pelo bot
-        const lastBotMessage = await botMessages.first();
-        lastBotMessage.edit(contentEmbend)
-    }else{
-        let embed = await DiscordChannel.send(contentEmbend);
-    }
-    
+        if (data.edit == true) {
+            const botMessages = await DiscordChannel.messages.cache.filter(msg => msg.author.id === client.user.id);
 
+            // Pegue a última mensagem enviada pelo bot
+            const lastBotMessage = await botMessages.first();
+            lastBotMessage.edit(contentEmbend)
+        } else {
+            let embed = await DiscordChannel.send(contentEmbend);
+        }
+
+
+    } catch (error) {
+
+    }
 
 
     //remove product

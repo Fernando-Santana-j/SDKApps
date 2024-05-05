@@ -144,31 +144,31 @@ module.exports = (Discord, client) => {
                             await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
                             return
                         }
-                        if (carrinhos[interaction.user.id].includes(interaction.customId.replace('comprar_', ''))) {
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
-                            interaction.reply({
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor("#C21010")
-                                        .setTitle(`⚠️| Este produto ja esta no seu carrinho!`)
-                                ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('🛒・Ir para o Carrinho')
-                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                                        )
-                                ],
-                                ephemeral: true
-                            })
-                            return
-                        } else {
-                            carrinhos[interaction.user.id].push(interaction.customId.replace('comprar_', ''))
-                        }
+                        // if (carrinhos[interaction.user.id].includes(interaction.customId.replace('comprar_', ''))) {
+                        //     if (interaction.replied) {
+                        //         interaction.deleteReply()
+                        //     }
+                        //     interaction.reply({
+                        //         embeds: [
+                        //             new Discord.EmbedBuilder()
+                        //                 .setColor("#C21010")
+                        //                 .setTitle(`⚠️| Este produto ja esta no seu carrinho!`)
+                        //         ],
+                        //         components: [
+                        //             new Discord.ActionRowBuilder()
+                        //                 .addComponents(
+                        //                     new Discord.ButtonBuilder()
+                        //                         .setStyle(5)
+                        //                         .setLabel('🛒・Ir para o Carrinho')
+                        //                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                        //                 )
+                        //         ],
+                        //         ephemeral: true
+                        //     })
+                        //     return
+                        // } else {
+                        carrinhos[interaction.user.id].push(interaction.customId.replace('comprar_', ''))
+                        // }
 
                         interaction.reply({
                             embeds: [
