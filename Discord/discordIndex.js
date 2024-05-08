@@ -789,27 +789,29 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     let allfieldsPublic = [{ name: 'Valor total:', value: "`" + price + "`", inline: true },fieldsPublic,]
                     let userPic = await user.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 });
                     let findChannelProduct = DiscordServer.channels.cache.find(c => c.topic === carrinho[0])
-                    findChannelPublic.send({
-                        embeds: [
-                            new Discord.EmbedBuilder()
-                                .setTitle(`🛍️ | Nova compra!`)
-                                .setDescription(`Uma nova compra foi feita abaixo está os dados da compra:`)
-                                .addFields(...allfieldsPublic)
-                                .setAuthor({ name: user.globalName, iconURL: userPic })
-                                .setColor("#6E58C7")
-                                .setTimestamp()
-                                .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
-                        ],
-                        components: [
-                            new Discord.ActionRowBuilder()
-                                .addComponents(
-                                    new Discord.ButtonBuilder()
-                                        .setStyle(5)
-                                        .setLabel('📤・Ir para o produto')
-                                        .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
-                                )
-                        ],
-                    })
+                    if (findChannelProduct) {
+                        findChannelPublic.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle(`🛍️ | Nova compra!`)
+                                    .setDescription(`Uma nova compra foi feita abaixo está os dados da compra:`)
+                                    .addFields(...allfieldsPublic)
+                                    .setAuthor({ name: user.globalName, iconURL: userPic })
+                                    .setColor("#6E58C7")
+                                    .setTimestamp()
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
+                            ],
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(5)
+                                            .setLabel('📤・Ir para o produto')
+                                            .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
+                                    )
+                            ],
+                        })
+                    }
                 }
                 
                 let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
