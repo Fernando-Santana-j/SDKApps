@@ -985,6 +985,30 @@
 
     }
 }
+
+
+#add-estoque-txt-containner{
+    width: 100%;
+    #add-estoque-txt-content{
+        padding: 2em;
+        display: flex;
+        gap: 1.5em;
+        margin-bottom: 0.5em;
+    }
+    #add-estoque-text-file{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 3em !important;
+
+    }
+    #add-estoque-text-file{
+        margin-top: 18px;
+    }
+}
+
+
+
 @media screen and (max-width:800px) {
     
 }

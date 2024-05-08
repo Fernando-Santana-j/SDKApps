@@ -29,6 +29,8 @@ const upload = multer({ storage });
 
 let Discord = require('discord.js')
 const botConfig = require('../config/bot-config.js');
+const { error } = require('console');
+const { rejects } = require('assert');
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
@@ -42,7 +44,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
         }
         if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
             res.status(200).json({ success: false, data: 'Preço invalido!' })
-            return 
+            return
         }
         const product = await stripe.products.create({
             name: req.body.productName,
@@ -97,7 +99,6 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 
         res.status(200).json({ success: true, data: model })
     } catch (error) {
-        res.status(200).json({ success: false, data: 'Não foi possivel criar o produto' })
         console.log(error);
     }
 
@@ -107,7 +108,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
     if (!server.bankData) {
         res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
-        return 
+        return
     }
     let productID = req.body.productID
     var produto = await server.products.find(product => product.productID == productID)
@@ -119,7 +120,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
 
     if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
         res.status(200).json({ success: false, data: 'Preço incorreto!' })
-        return 
+        return
     }
 
     let logo = null
@@ -163,10 +164,10 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     let produtos = server.products
 
     produto.productName = req.body.productName,
-    produto.producDesc = req.body.producDesc,
-    produto.estoque = req.body.estoque,
-    produto.price = req.body.price,
-    produto.priceID = price.id
+        produto.producDesc = req.body.producDesc,
+        produto.estoque = produtos.estoque,
+        produto.price = req.body.price,
+        produto.priceID = price.id
     if (logo != null) {
         produto.productLogo = logo
     }
@@ -256,31 +257,52 @@ router.post('/product/getOne', async (req, res) => {
         let product = await server.products.find(product => product.productID == productID)
         if (product) {
             res.status(200).json({ success: true, data: product })
-        } else {
-            res.status(200).json({ success: false, data: '' })
         }
 
     } catch (error) {
-        res.status(200).json({ success: false, data: '' })
         console.log(error);
     }
 })
 
 router.post('/product/get', async (req, res) => {
-    try {
-        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-        if (server) {
-            res.status(200).json({ success: true, data: server.products })
-        } else {
-            res.status(200).json({ success: false, data: '' })
+    let verify = await new Promise(async (resolve, reject) => {
+        try {
+            let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+            if (server) {
+                resolve({
+                    err: false,
+                    error: null,
+                    data: server.products
+                })
+            } else {
+                reject({
+                    err: true,
+                    error: 'not server',
+                    data: null
+                })
+            }
+        } catch (error) {
+            reject({
+                err: true,
+                error: error,
+                data: null
+            })
         }
-    } catch (error) {
-        res.status(200).json({ success: false, data: '' })
-        console.log(error);
-    }
+    }).then(result => {
+        if (result.err == false && !res.headersSent) {
+            res.status(200).json({ success: true, data: result.data })
+        }
+    }).catch(err => {
+        console.log(err);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: "error" })
+        }
+
+    })
+
 })
 
-router.post('/product/estoqueAdd', async (req, res) => {
+router.post('/estoque/txt', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (server) {
@@ -288,25 +310,102 @@ router.post('/product/estoqueAdd', async (req, res) => {
             let produtos = server.products
             let product = await produtos.find(product => product.productID == productID)
             var index = await produtos.findIndex(product => product.productID == productID)
-            let estoqueADD = req.body.estoque
-            if (!productID || !produtos || !product || index < 0 || !index || !estoqueADD ) {
-                res.status(200).json({ success: false, data: 'Erro ao adicionar estoque' })
-            }
+            let file = req.body.txt
+            let title = req.body.title
+
             
-            await product.estoque.push(estoqueADD)
+            if (index != -1 && product && file && title) {
+                let finalEstoqueArr = []
 
-            produtos[index] = product
+                if (product.estoque) {
+                    finalEstoqueArr = product.estoque
+                }
+                
+                
+                await file.forEach(element => {
+                    finalEstoqueArr.push({
+                        conteudo:[
+                            {
+                                title: title,
+                                content:element
+                            }
+                        ]
+                    })
+                });
 
-            db.update('servers', req.body.serverID, {
-                products: produtos
-            })
-            res.status(200).json({ success: true, data: '' })
-        } else {
-            res.status(200).json({ success: true, data: '' })
+                produtos[index] = product
+
+                db.update('servers',req.body.serverID,{
+                    products: produtos
+                })
+            }
+            if (!res.headersSent) {
+                res.status(200).json({success:true})
+            }
+        }else{
+            if (!res.headersSent) {
+                res.status(200).json({success:false})
+            } 
         }
     } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({success:false})
+        }
         console.log(error);
     }
+})
+
+router.post('/product/estoqueAdd', async (req, res) => {
+    let verify = await new Promise(async (resolve, reject) => {
+        try {
+            let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+            if (server) {
+                let productID = req.body.productID
+                let produtos = server.products
+                let product = await produtos.find(product => product.productID == productID)
+                var index = await produtos.findIndex(product => product.productID == productID)
+                let estoqueADD = req.body.estoque
+                if (!productID || !produtos || !product || index == -1 || !estoqueADD) {
+                    reject({
+                        err: false
+                    })
+                }
+
+                await product.estoque.push(estoqueADD)
+
+                produtos[index] = product
+
+                db.update('servers', req.body.serverID, {
+                    products: produtos
+                })
+                resolve({
+                    err: false,
+                    error: null
+                })
+            } else {
+                reject({
+                    err: true,
+                    error: 'not server'
+                })
+            }
+        } catch (error) {
+            reject({
+                error: true,
+                err: error
+            })
+        }
+    }).then(result => {
+        if (result.err == false && !res.headersSent) {
+            res.status(200).json({ success: true, data: "" })
+        }
+    }).catch(err => {
+        console.log(err);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: "erro ao adicionar estoque" })
+        }
+
+    })
+
 })
 
 

@@ -393,6 +393,270 @@ document.addEventListener('click', async (event) => {
         document.getElementById('produtos-config-containner').style.display = 'none'
 
     }
+
+
+
+
+    //produto Config
+
+
+    if (target.closest('.produtos-configure-button')) {
+        let element = target.closest('.produtos-configure-button')
+        var productID = element.getAttribute('data-id')
+        let productData = await fetch('/product/getOne', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productID: productID,
+                serverID: serverID
+            }),
+        }).then(response => { return response.json() })
+        if (productData.success == true) {
+            let data = productData.data
+            function formatarMoeda(numeroCentavos) {
+                const valorReal = numeroCentavos / 100;
+                return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+            document.getElementById('confirm-exclud-produto-containner').setAttribute('data-id', productID)
+            document.getElementById('product-price-edit').value = formatarMoeda(data.price)
+            document.getElementById('product-desc-edit').value = data.producDesc
+            document.getElementById('product-name-edit').value = data.productName
+            document.getElementById('logo-preview-edit').src = location.origin + data.productLogo
+            document.getElementById('backGround-preview-edit').src = data.backGround == null ? 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg' : location.origin + data.backGround
+            document.getElementById('produtos-config-containner').style.display = 'flex'
+            document.getElementById('edit-estoque-inputs-containner').innerHTML = ''
+            document.getElementById('produtos-config-content').setAttribute('data-product', productID)
+            for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
+                document.getElementById('edit-estoque-inputs-containner').innerHTML += `
+                    <div class="estoque-config-inputs">
+                        <div class="estoque-config-input-content-title">
+                            <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
+                            <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                        </div>
+                        <div class="estoque-config-input-content-conteudo">
+                            <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
+                            <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                        </div>
+                    </div>
+                `
+            }
+            if (data.estoqueModel.conteudo.length == 1) {
+                document.getElementById('add-estoque-txt-containner').style.marginTop = '2em'
+                document.getElementById('add-estoque-txt-containner').style.marginBottom = '3em'
+                document.getElementById('add-estoque-txt-containner').innerHTML = `
+                    <h1 class="title-col">Adicionar estoque por txt!</h1>
+                    <div id="add-estoque-txt">
+                        <div id="add-estoque-txt-content">
+                            <div style="display: flex; flex-direction: column; width: 100%;">
+                                <label for="input-title-txt" class="lable-padrao">Titulo dos itens do txt</label>
+                                <input type="text" required id="input-title-txt" class="input-padrao" value='${data.estoqueModel.conteudo[0].title}'>
+                            </div>
+
+                            <label type="button" class="main-button-product" for="add-txt-input-file" id="add-estoque-text-file">Adiconar arquivo txt!</label>
+                            <input multiple="false" type="file" hidden accept=".txt" id="add-txt-input-file">
+                        </div>
+                        <button type="button" class="main-button-product" id="new-estoque-text">Adiconar estoque por txt!</button>
+                    </div>
+                `
+            }
+
+        }
+    }
+    if (target.closest('#new-estoque-text')) {
+        const fileInput = document.getElementById('add-txt-input-file');
+        const files = fileInput.files;
+        if (document.getElementById('input-title-txt').value.length <= 0) {
+            errorNotify('Adicione um titulo primeiro')
+            return
+        }
+        if (files.length > 0) {
+            let file = files[0]
+            if (file.name.toLowerCase().endsWith('.txt')) {
+                const reader = new FileReader();
+
+                reader.onload = async function (event) {
+                    const conteudo = event.target.result;
+                    const linhas = conteudo.split('\n');
+                    for (let index = 0; index < linhas.length; index++) {
+                        linhas[index] = linhas[index].replace(/\r/g, '');
+                    }
+                    let productID = document.getElementById('produtos-config-content').getAttribute('data-product')
+                    let productData = await fetch('/estoque/txt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            productID: productID,
+                            serverID: serverID,
+                            txt:linhas,
+                            title:document.getElementById('input-title-txt').value
+                        }),
+                    }).then(response => { return response.json() })
+                    if (productData.success == true) {
+                        successNotify('Estoque adicionado!')
+                    }else{
+                        errorNotify('Erro ao adicionar estoque!')
+                    }
+                };
+                reader.readAsText(file);
+
+            } else {
+                errorNotify('O arquivo não e um txt valido!')
+            }
+        } else {
+            errorNotify('Adicione um arquivo txt primeiro!')
+        }
+    }
+    if (target.closest('#product-save-edit-button')) {
+        let productID = document.getElementById('produtos-config-content').getAttribute('data-product')
+        var formData = new FormData();
+        if (document.getElementById('logo-input-edit').files[0]) {
+            formData.append('productLogo', document.getElementById('logo-input-edit').files[0]);
+        }
+        formData.append('productName', document.getElementById('product-name-edit').value.trim());
+        formData.append('producDesc', document.getElementById('product-desc-edit').value.trim());
+        formData.append('serverID', serverID);
+        formData.append('productID', productID);
+        formData.append('price', parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')));
+        if (parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')) < 100) {
+            errorNotify('O valor do produto não pode ser menor que R$ 1,00')
+            return
+        }
+        if (document.getElementById('backGround-input-edit').files[0]) {
+            formData.append('backGround', document.getElementById('backGround-input-edit').files[0]);
+        }
+        document.getElementById('product-price-edit').value = ''
+        document.getElementById('product-desc-edit').value = ''
+        document.getElementById('product-name-edit').value = ''
+        document.getElementById('logo-input-edit').value = ''
+        document.getElementById('backGround-input-edit').value = ''
+        document.getElementById('produtos-config-containner').style.display = 'none'
+        $.ajax({
+            traditional: true,
+            url: '/product/update',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    successNotify('Produto Alterado!')
+                    getProducts()
+                } else {
+                    errorNotify(response.data)
+                }
+
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        })
+
+    }
+    if (target.closest('#send-mensage-edit')) {
+        let productID = document.getElementById('produtos-config-content').getAttribute('data-product')
+        let productData = await fetch('/product/getOne', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productID: productID,
+                serverID: serverID
+            }),
+        }).then(response => { return response.json() })
+        if (productData.success == true) {
+            let data = productData.data
+            await fetch('/product/mensage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productID: productID,
+                    serverID: serverID,
+                    channelID: data.channel
+                }),
+            }).then(response => { return response.json() }).then((res) => {
+                if (res.success == true) {
+                    successNotify("Mensagem enviada")
+                } else {
+                    errorNotify(res.data)
+                }
+            })
+        }
+    }
+
+    if (target.closest('#produtos-config-background') || target.closest('#close-button-popup-config-produc')) {
+        document.getElementById('produtos-config-containner').style.display = 'none'
+    }
+
+    if (target.closest('#new-estoque-create')) {
+        let productID = document.getElementById('produtos-config-content').getAttribute('data-product')
+        let row = document.querySelector('#edit-estoque-inputs-containner')
+        let productData = await fetch('/product/getOne', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productID: productID,
+                serverID: serverID
+            }),
+        }).then(response => { return response.json() })
+        if (productData.success == true) {
+            let data = productData.data
+            var EstoqueData = {
+                estoque: data.estoque.length + 1,
+                conteudo: []
+            }
+
+            Array.from(row.children).forEach((element, index) => {
+                var title = element.querySelector('input[name="edit-estoque-title-input"]').value;
+                var content = element.querySelector('input[name="edit-estoque-content-input"]').value;
+                EstoqueData.conteudo.push({ index: index + 1, title: title, content: content })
+            })
+
+            await fetch('/product/estoqueAdd', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    productID: productID,
+                    serverID: serverID,
+                    estoque: EstoqueData
+                }),
+            }).then(response => { return response.json() }).then((res) => {
+                if (res.success == true) {
+                    for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
+                        document.getElementById('edit-estoque-inputs-containner').innerHTML = `
+                            <div class="estoque-config-inputs">
+                                <div class="estoque-config-input-content-title">
+                                    <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
+                                    <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                                </div>
+                                <div class="estoque-config-input-content-conteudo">
+                                    <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
+                                    <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                                </div>
+                            </div>
+                        `
+                    }
+                    successNotify('Estoque adicionado!')
+                    getProducts()
+                } else {
+                    errorNotify(res.data)
+                }
+            })
+        }
+
+
+
+    }
 });
 
 
@@ -402,176 +666,7 @@ document.addEventListener('click', async (event) => {
 productsConfig()
 function productsConfig() {
     document.querySelectorAll('.produtos-configure-button').forEach(element => {
-        element.addEventListener('click', async () => {
-            var productID = element.getAttribute('data-id')
-            let productData = await fetch('/product/getOne', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    productID: productID,
-                    serverID: serverID
-                }),
-            }).then(response => { return response.json() })
-            if (productData.success == true) {
-                let data = productData.data
-                function formatarMoeda(numeroCentavos) {
-                    const valorReal = numeroCentavos / 100;
-                    return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                }
-                document.getElementById('confirm-exclud-produto-containner').setAttribute('data-id', productID)
-                document.getElementById('product-price-edit').value = formatarMoeda(data.price)
-                document.getElementById('product-desc-edit').value = data.producDesc
-                document.getElementById('product-name-edit').value = data.productName
-                document.getElementById('logo-preview-edit').src = location.origin + data.productLogo
-                document.getElementById('backGround-preview-edit').src = data.backGround == null ? 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg' : location.origin + data.backGround
-                document.getElementById('produtos-config-containner').style.display = 'flex'
-                document.getElementById('edit-estoque-inputs-containner').innerHTML = ''
 
-                for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
-                    document.getElementById('edit-estoque-inputs-containner').innerHTML += `
-                        <div class="estoque-config-inputs">
-                            <div class="estoque-config-input-content-title">
-                                <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                                <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
-                            </div>
-                            <div class="estoque-config-input-content-conteudo">
-                                <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                                <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
-                            </div>
-                        </div>
-                    `
-                }
-
-
-                document.getElementById('send-mensage-edit').addEventListener('click', async () => {
-                    await fetch('/product/mensage', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            productID: productID,
-                            serverID: serverID,
-                            channelID: data.channel
-                        }),
-                    }).then(response => { return response.json() }).then((res) => {
-                        if (res.success == true) {
-                            successNotify(res.data)
-                        } else {
-                            errorNotify(res.data)
-                        }
-                    })
-                })
-
-
-                document.getElementById('new-estoque-create').addEventListener('click', async () => {
-                    let row = document.querySelector('#edit-estoque-inputs-containner')
-                    var EstoqueData = {
-                        estoque: data.estoque.length + 1,
-                        conteudo: []
-                    }
-
-                    Array.from(row.children).forEach((element, index) => {
-                        var title = element.querySelector('input[name="edit-estoque-title-input"]').value;
-                        var content = element.querySelector('input[name="edit-estoque-content-input"]').value;
-                        EstoqueData.conteudo.push({ index: index + 1, title: title, content: content })
-                    })
-
-                    await fetch('/product/estoqueAdd', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            productID: productID,
-                            serverID: serverID,
-                            estoque: EstoqueData
-                        }),
-                    }).then(response => { return response.json() }).then((res) => {
-                        if (res.success == true) {
-                            data.estoque.push(EstoqueData)
-                            for (let index = 0; index < data.estoqueModel.conteudo.length; index++) {
-                                document.getElementById('edit-estoque-inputs-containner').innerHTML = `
-                                    <div class="estoque-config-inputs">
-                                        <div class="estoque-config-input-content-title">
-                                            <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                                            <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
-                                        </div>
-                                        <div class="estoque-config-input-content-conteudo">
-                                            <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                                            <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
-                                        </div>
-                                    </div>
-                                `
-                            }
-                            successNotify('Estoque adicionado!')
-                        } else {
-                            errorNotify(res.data)
-                        }
-                    })
-
-                })
-
-
-
-                document.getElementById('produtos-config-background').addEventListener('click', () => {
-                    document.getElementById('produtos-config-containner').style.display = 'none'
-                })
-                document.getElementById('close-button-popup-config-produc').addEventListener('click', () => {
-                    document.getElementById('produtos-config-containner').style.display = 'none'
-                })
-
-
-
-
-                document.getElementById('product-save-edit-button').addEventListener('click', () => {
-                    var formData = new FormData();
-                    if (document.getElementById('logo-input-edit').files[0]) {
-                        formData.append('productLogo', document.getElementById('logo-input-edit').files[0]);
-                    }
-                    formData.append('productName', document.getElementById('product-name-edit').value.trim());
-                    formData.append('producDesc', document.getElementById('product-desc-edit').value.trim());
-                    formData.append('serverID', serverID);
-                    formData.append('productID', productID);
-                    formData.append('price', parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')));
-                    if (parseInt(document.getElementById('product-price-edit').value.replace(/[^\d,]/g, '').replace(',', '').replace('R$ ', '')) < 100) {
-                        errorNotify('O valor do produto não pode ser menor que R$ 1,00')
-                        return
-                    }
-                    if (document.getElementById('backGround-input-edit').files[0]) {
-                        formData.append('backGround', document.getElementById('backGround-input-edit').files[0]);
-                    }
-                    document.getElementById('product-price-edit').value = ''
-                    document.getElementById('product-desc-edit').value = ''
-                    document.getElementById('product-name-edit').value = ''
-                    document.getElementById('logo-input-edit').value = ''
-                    document.getElementById('backGround-input-edit').value = ''
-                    document.getElementById('produtos-config-containner').style.display = 'none'
-                    $.ajax({
-                        traditional: true,
-                        url: '/product/update',
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function (response) {
-                            if (response.success) {
-                                successNotify('Produto Alterado!')
-                                getProducts()
-                            } else {
-                                errorNotify(response.data)
-                            }
-
-                        },
-                        error: function (xhr, status, error) {
-                            console.error(error);
-                        }
-                    })
-                })
-            }
-        })
     })
 }
 
@@ -613,7 +708,6 @@ async function getProducts() {
                     <div class="linha"></div>
                 `
             })
-            productsConfig()
         }
     }, 1000)
 

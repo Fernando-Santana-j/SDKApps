@@ -240,6 +240,7 @@ module.exports = async (Discord, client, data) => {
             components: [row]
         });
         try {
+            DiscordChannel.setTopic(data.productID)
             produto.mensageID = embed.id
     
             produtos[index] = produto;
