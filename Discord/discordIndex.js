@@ -117,16 +117,16 @@ module.exports = (Discord, client) => {
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
                     if (!product || server.error == true || product.estoque.length <= 0) {
                         await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
-                        let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
+                        let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
 
                         if (analytics.error == false) {
                             let canceladosEstoque = analytics['cancelados estoque']
                             await canceladosEstoque.push(await functions.formatDate(new Date()))
-                            db.update('analytics', serverData.id, {
+                            db.update('analytics', server.id, {
                                 "cancelados estoque": canceladosEstoque
                             })
                         } else {
-                            db.create('analytics', serverData.id, {
+                            db.create('analytics', server.id, {
                                 "cancelados estoque": [await functions.formatDate(new Date())],
                                 "pagamentos": {
                                     "PIX": 0,
@@ -675,7 +675,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
         if (result == true) {
             async function createTextContentFromObjects(objectsArray) {
-                console.log(objectsArray);
                 let textContent = '';
 
                 await objectsArray.forEach(obj => {
