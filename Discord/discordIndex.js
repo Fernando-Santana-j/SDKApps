@@ -705,7 +705,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                 if (fetchedMessage) {
                                     let totalEstoque = []
                                     if (product.estoque.length > 0) {
-                                        for (let index2 = 0; index2 < product.estoque.length; index2++) {
+                                        let estoque = product.estoque.length > 25 ? 25 : produto.estoque.length
+                                        for (let index2 = 0; index2 < estoque; index2++) {
                                             let indexSring1 = `${index2 + 1}`
                                             if (index == 0) {
                                                 totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)

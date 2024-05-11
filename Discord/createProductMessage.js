@@ -237,7 +237,8 @@ module.exports = async (Discord2, client, data) => {
         const attachment = new Discord.AttachmentBuilder(buffer, { name: 'ProductImage.jpeg' })
         let totalEstoque = []
         if (produto.estoque.length > 0) {
-            for (let index = 0; index < produto.estoque.length; index++) {
+            let estoque = produto.estoque.length > 25 ? 25 : produto.estoque.length
+            for (let index = 0; index < estoque; index++) {
                 let indexSring1 = `${index + 1}`
                 if (index == 0) {
                     totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)

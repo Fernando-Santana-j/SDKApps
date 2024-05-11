@@ -259,7 +259,6 @@ router.post('/product/delete', async (req, res) => {
 router.post('/product/getOne', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-
         let productID = req.body.productID
         let product = await server.products.find(product => product.productID == productID)
         if (product) {
