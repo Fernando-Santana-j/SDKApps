@@ -194,7 +194,7 @@ router.post('/addDadosBanc', async (req, res) => {
         }
 
         const numeroConta = numeroBanco + "-" + agencia
-        if (server.bankData) {
+        if (server.bankData && server.bankData.bankID) {
             res.status(200).json({ success: false, data: "Você ja tem uma conta bancaria cadastrata!" })
         } else {
             const account = await stripe.accounts.create({
@@ -242,13 +242,15 @@ router.post('/addDadosBanc', async (req, res) => {
                 refresh_url: `${webConfig.host}/accountLink/${account.id}/${req.body.serverID}`,
                 type: 'account_onboarding',
             });
+            let server = await db.findOne({colecao:'servers',doc:req.body.serverID})
             db.update('servers', req.body.serverID, {
                 bankData: {
                     userRef: req.session.uid,
                     nome: req.body.name,
                     cpf: req.body.cpf,
                     accountID: account.id,
-                    bankID: bank.id
+                    bankID: bank.id,
+                    mercadoPagoToken:server.bankData && server.bankData.mercadoPagoToken ? server.bankData.mercadoPagoToken : null
                 }
             })
             res.status(200).json({ success: true, data: accountLink.url })
@@ -262,7 +264,7 @@ router.post('/addDadosBanc', async (req, res) => {
 router.post('/account/modify', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-        if (server.bankData) {
+        if (server.bankData && server.bankData.bankID) {
             const accountLink = await stripe.accountLinks.create({
                 account: server.bankData.accountID,
                 refresh_url: `${webConfig.host}/server/sales/${req.body.serverID}`,

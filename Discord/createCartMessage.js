@@ -7,21 +7,26 @@ module.exports = async (Discord, client, data) => {
         const DiscordChannel = await DiscordServer.channels.cache.get(data.channelID)
         let user = data.user.id
         var serverData = await db.findOne({ colecao: "servers", doc: await data.serverID })
-        let paymentFields = [
-            new Discord.StringSelectMenuOptionBuilder()
-                .setLabel('Cartão')
-                .setDescription('Pagamento usado mundialmente!')
-                .setValue('card'),
-            new Discord.StringSelectMenuOptionBuilder()
-                .setLabel('Boleto')
-                .setDescription('Devido ao tempo de processamento, pode demorar até 3 dias para ser aprovado!')
-                .setValue('boleto')
-        ]
+        let paymentFields = []
         if (serverData.bankData && serverData.bankData.mercadoPagoToken && serverData.bankData.mercadoPagoToken != '') {
-            paymentFields.unshift(await new Discord.StringSelectMenuOptionBuilder()
+            paymentFields.unshift(
+                await new Discord.StringSelectMenuOptionBuilder()
                 .setLabel('PIX')
                 .setDescription('Método mais comum de pagamento no Brasil!')
-                .setValue('PIX'))
+                .setValue('PIX')
+            )
+        }
+        if (serverData.bankData && serverData.bankData.bankID) {
+            paymentFields.push(
+                await new Discord.StringSelectMenuOptionBuilder()
+                    .setLabel('Cartão')
+                    .setDescription('Pagamento usado mundialmente!')
+                    .setValue('card'),
+                await new Discord.StringSelectMenuOptionBuilder()
+                    .setLabel('Boleto')
+                    .setDescription('Devido ao tempo de processamento, pode demorar até 3 dias para ser aprovado!')
+                    .setValue('boleto')
+            )
         }
         const row = new Discord.ActionRowBuilder().addComponents(
             new Discord.StringSelectMenuBuilder()
@@ -57,10 +62,10 @@ module.exports = async (Discord, client, data) => {
 
         if (carrinhos[user]) {
             await carrinhos[user].forEach(async (element, index) => {
-                let produto = await serverData.products.find(product => product.productID == element)
+                let produto = await serverData.products.find(product => product.productID == element.product)
                 const valorReal = produto.price / 100;
                 let valorFormatado = valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                fields.push({ name: `${index + 1} - ${produto.productName}`, value: valorFormatado },)
+                fields.push({ name: `${index + 1} - ${produto.productName} - ${element.quantidade}x`, value: valorFormatado },)
             });
         } else {
             DiscordChannel.delete()

@@ -127,25 +127,25 @@
                                 <div id="pagamentos-content">
                                     <div class="inputs-containner" id="complete-name-content">
                                         <label class="lable-padrao" for="complete-name">Nome completo</label>
-                                        <input type="text" value="<%= bankData ? bankData.nome : '' %>" class="input-padrao" placeholder="Nome completo" id="complete-name" >
+                                        <input type="text" value="<%= bankData && bankData.bankID ? bankData.nome : '' %>" class="input-padrao" placeholder="Nome completo" id="complete-name" >
                                     </div>
                                     <div class="inputs-containner" id="cpf-content">
                                         <label class="lable-padrao" for="cpf-input">CPF</label>
-                                        <input type="<%= bankData ? 'password' : 'text' %>" value="<%= bankData ? bankData.cpf : '' %>" placeholder="EX: 000.000.000-00" minlength="14" class="input-padrao" maxlength="14" id="cpf-input" >
+                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.cpf : '' %>" placeholder="EX: 000.000.000-00" minlength="14" class="input-padrao" maxlength="14" id="cpf-input" >
                                     </div>
                                     <div class="inputs-containner" id="bank-name-content">
                                         <label class="lable-padrao" for="bank-name-input">Nome do banco</label>
-                                        <input type="<%= bankData ? 'password' : 'text' %>" value="<%= bankData ? bankData.banco : '' %>"  class="input-padrao"  list="bank-input-list" placeholder="Pesquise o banco..." id="bank-name-input">
+                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.banco : '' %>"  class="input-padrao"  list="bank-input-list" placeholder="Pesquise o banco..." id="bank-name-input">
                                         <datalist id="bank-input-list"></datalist>
                                     </div>
                                     <div class="inputs-containner" id="account-number-content">
                                         <label class="lable-padrao" for="account-number">Número da conta</label>
-                                        <input type="<%= bankData ? 'password' : 'text' %>" value="<%= bankData ? bankData.numero : '' %>"  class="input-padrao" placeholder="EX: 00000000-0" maxlength="10" minlength="10" id="account-number" >
+                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.numero : '' %>"  class="input-padrao" placeholder="EX: 00000000-0" maxlength="10" minlength="10" id="account-number" >
                                     </div>
                                     <div id="last-input-containner">
                                         <div class="inputs-containner" style="width: 50% !important;" id="account-number-content">
                                             <label class="lable-padrao" for="account-number">Número da agencia</label>
-                                            <input type="<%= bankData ? 'password' : 'text' %>" value="<%= bankData ? bankData.agencia : '' %>"  class="input-padrao"  placeholder="EX: 0000" maxlength="4" minlength="4" id="bank-agenc" >
+                                            <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.agencia : '' %>"  class="input-padrao"  placeholder="EX: 0000" maxlength="4" minlength="4" id="bank-agenc" >
                                         </div>
                                         <div id="terms-check-content">
                                             <label for="terms-check">Concorda com os termos de uso?</label>
@@ -157,8 +157,8 @@
                                     </div>
                                     <div id="buttons-payment-content">
                                         <div id="save-button-content">
-                                            <input type="button" id="save-button" class="save-alt-button <%= bankData ? 'hide' : '' %>" value="Salvar">
-                                            <input type="button" id="alt-button" class="save-alt-button <%= bankData ? '' : 'hide' %>" value="Alterar">
+                                            <input type="button" id="save-button" class="save-alt-button <%= bankData && bankData.bankID ? 'hide' : '' %>" value="Salvar">
+                                            <input type="button" id="alt-button" class="save-alt-button <%= bankData && bankData.bankID ? '' : 'hide' %>" value="Alterar">
                                         </div>
                                         <button id="pix-add-button" title="Adicione o seu token mercado pago para receber PIX!">Adicionar PIX</button>
                                     </div>

@@ -12,11 +12,11 @@ let fontBold = path.join(__dirname, "..", '/public/font/Poppins/Poppins-Bold.ttf
 registerFont(fontNormal, { family: 'Poppins' });
 registerFont(fontSemiBold, { family: 'Poppins_Semi' })
 registerFont(fontBold, { family: 'Poppins_Bold' })
-
-module.exports = async (Discord, client, data) => {
+let Discord = require('discord.js')
+module.exports = async (Discord2, client, data) => {
 
     try {
-        async function createImage(title, description, background, icon, price, estoque,pix) {
+        async function createImage(title, description, background, icon, price, estoque,pix,stripe) {
             try {
                 function wrapText(context, text, x, y, maxWidth, fontSize) {
                     let words = text.split(' ');
@@ -175,14 +175,15 @@ module.exports = async (Discord, client, data) => {
                     ctx.drawImage(pixLogo, containerPositionX + 50, containerPositionY + 120, 100, 100);
                 }
     
-                let cartaoLogoFS = fs.readFileSync(path.join(__dirname,'..','public/img/cartao.png'))
-                let cartaoLogo = await loadImage(cartaoLogoFS, { quality: 1 });
-                ctx.drawImage(cartaoLogo, containerPositionX + 250, containerPositionY + 120, 100, 100);
-    
-                let boletoLogoFS = fs.readFileSync(path.join(__dirname,'..','public/img/boleto.png'))
-                let boletoLogo = await loadImage(boletoLogoFS, { quality: 1 });
-                ctx.drawImage(boletoLogo, containerPositionX + 450, containerPositionY + 120, 100, 100);
-    
+                if (stripe) {
+                    let cartaoLogoFS = fs.readFileSync(path.join(__dirname,'..','public/img/cartao.png'))
+                    let cartaoLogo = await loadImage(cartaoLogoFS, { quality: 1 });
+                    ctx.drawImage(cartaoLogo, containerPositionX + 250, containerPositionY + 120, 100, 100);
+        
+                    let boletoLogoFS = fs.readFileSync(path.join(__dirname,'..','public/img/boleto.png'))
+                    let boletoLogo = await loadImage(boletoLogoFS, { quality: 1 });
+                    ctx.drawImage(boletoLogo, containerPositionX + 450, containerPositionY + 120, 100, 100);
+                }
     
                 //texto
                 ctx.font = '38px Poppins_Semi,sans-serif';
@@ -215,15 +216,14 @@ module.exports = async (Discord, client, data) => {
                 console.log(error);
             }
         }
-        const row = new Discord.ActionRowBuilder().addComponents(
-            new Discord.ButtonBuilder()
-                .setCustomId(`comprar_${data.productID}`)
-                .setLabel('Comprar')
-                .setStyle('3'),
-        )
-    
         const DiscordServer = await client.guilds.cache.get(data.serverID);
         const DiscordChannel = await DiscordServer.channels.cache.get(data.channelID);
+
+        if (data.edit == true ) {
+            const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
+            await DiscordChannel.bulkDelete(fetched)
+        }
+
         let serverId = await data.serverID
         let serverDb = await db.findOne({ colecao: 'servers', doc: serverId })
         let produtos = await serverDb.products
@@ -233,11 +233,39 @@ module.exports = async (Discord, client, data) => {
         var index = await serverDb.products.findIndex(product => product.productID == productId)
         let preco = await (produto.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         let background = fs.readFileSync(produto.backGround == null ? path.join(__dirname, "..", 'public/img/LOGOFUNDO.png') : path.join(__dirname, "..",  produto.backGround))
-        let buffer = await createImage(produto.productName, produto.producDesc, background, produto.productLogo, await preco, produto.estoque.length,serverDb.bankData.mercadoPagoToken ? true : false)
+        let buffer = await createImage(produto.productName, produto.producDesc, background, produto.productLogo, await preco, produto.estoque.length,serverDb.bankData.mercadoPagoToken ? true : false, serverDb.bankData.bankID ? true : false)
         const attachment = new Discord.AttachmentBuilder(buffer, { name: 'ProductImage.jpeg' })
+        let totalEstoque = []
+        if (produto.estoque.length > 0) {
+            for (let index = 0; index < produto.estoque.length; index++) {
+                let indexSring1 = `${index + 1}`
+                if (index == 0) {
+                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)
+                }else{
+                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1),)
+                }
+                
+            }
+        }
         let embed = await DiscordChannel.send({
             files: [attachment],
-            components: [row]
+            components: [
+                new Discord.ActionRowBuilder().addComponents(
+                    new Discord.StringSelectMenuBuilder()
+                        .setCustomId(`qntProduct_${data.productID}`)
+                        .setPlaceholder('Selecione a quantidade!')
+                        .setMinValues(1)
+                        .setMaxValues(1)
+                        .addOptions(...totalEstoque)
+                        .setDisabled(produto.estoque.length <= 0 ? true : false)
+                ),
+                new Discord.ActionRowBuilder().addComponents(
+                    new Discord.ButtonBuilder()
+                        .setCustomId(`comprar_${data.productID}`)
+                        .setLabel('Comprar')
+                        .setStyle('3'),
+                )
+            ]
         });
         try {
             DiscordChannel.setTopic(data.productID)
@@ -255,7 +283,7 @@ module.exports = async (Discord, client, data) => {
     
     
     } catch (error) {
-        
+        console.log(error);
     }
 
 };

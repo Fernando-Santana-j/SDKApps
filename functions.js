@@ -109,10 +109,13 @@ module.exports = {
             return
         }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
-        
+        if ("vitalicio" in server && server.vitalicio == true) {
+            next()
+            return
+        }
         if (server) {
             try {
-                if ('bankData' in server) {
+                if ('bankData' in server && server.bankData.bankID) {
                     let account = await stripe.accounts.retrieve(server.bankData.accountID);
                     if (account.payouts_enabled == false || account.requirements.disabled_reason != null ) {
                         let accountLink = await stripe.accountLinks.create({
@@ -125,10 +128,7 @@ module.exports = {
                         return
                     }
                 }
-                if ("vitalicio" in server && server.vitalicio == true) {
-                    next()
-                    return
-                }
+                
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
                     const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);

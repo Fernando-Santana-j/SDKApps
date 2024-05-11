@@ -10,7 +10,6 @@ const { doc } = require('firebase/firestore');
 const { default: firebase } = require('firebase/compat/app');
 const { firestore } = require('firebase-admin');
 const functions = require('../functions.js');
-
 const client = new Discord.Client({ intents: botConfig.intents })
 
 
@@ -22,6 +21,7 @@ var paymentMetod = {}
 var excludItemSec = {}
 var carrinhos = {}
 var sendProduct = {}
+var preCarrinhos = {}
 
 
 module.exports = (Discord, client) => {
@@ -32,9 +32,6 @@ module.exports = (Discord, client) => {
             const paymentFee = Math.ceil(valor * 0.04 + 0.40);
             const netAmount = valor - paymentFee;
             return netAmount;
-        }
-        async function verifyExpireCart(guild, channel, user) {
-
         }
         async function deleteExpiredCart(guild, interection, deleteChannel) {
             try {
@@ -109,9 +106,21 @@ module.exports = (Discord, client) => {
                 }
 
 
+                if (interaction.customId && interaction.customId.includes('qntProduct')) {
+                    if (!preCarrinhos[interaction.user.id]) {
+                        preCarrinhos[interaction.user.id] = []
+                    }
+                    preCarrinhos[interaction.user.id].push({
+                        product: interaction.customId.replace('qntProduct_', ""),
+                        quantidade: interaction.values[0]
+                    })
+                    interaction.deferReply();
+                    interaction.deleteReply()
+                }
+
 
                 // interacao do botao de compra de um produto
-                if (interaction.customId.includes('comprar')) {
+                if (interaction.customId && interaction.customId.includes('comprar')) {
                     let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
                     let product = await server.products.find(product => product.productID == interaction.customId.replace('comprar_', ''))
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
@@ -141,38 +150,33 @@ module.exports = (Discord, client) => {
 
                         return
                     }
+                    async function findUniCarrinhos() {
+                        let prodid = await interaction.customId.replace('comprar_', '')
+                        let findItem
+                        if (preCarrinhos[interaction.user.id]) {
+                            findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
+                        } else {
+                            findItem = null
+                        }
+                        if (!carrinhos[interaction.user.id]) {
+                            carrinhos[interaction.user.id] = []
+                        }
+                        if (findItem) {
+                            carrinhos[interaction.user.id].push(findItem)
+                        } else {
+                            carrinhos[interaction.user.id].push({
+                                product: prodid,
+                                quantidade: 1
+                            })
+                        }
+                    }
                     if (findChannel) {
                         if (!carrinhos[interaction.user.id]) {
                             interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
                             await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
                             return
                         }
-                        // if (carrinhos[interaction.user.id].includes(interaction.customId.replace('comprar_', ''))) {
-                        //     if (interaction.replied) {
-                        //         interaction.deleteReply()
-                        //     }
-                        //     interaction.reply({
-                        //         embeds: [
-                        //             new Discord.EmbedBuilder()
-                        //                 .setColor("#C21010")
-                        //                 .setTitle(`⚠️| Este produto ja esta no seu carrinho!`)
-                        //         ],
-                        //         components: [
-                        //             new Discord.ActionRowBuilder()
-                        //                 .addComponents(
-                        //                     new Discord.ButtonBuilder()
-                        //                         .setStyle(5)
-                        //                         .setLabel('🛒・Ir para o Carrinho')
-                        //                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                        //                 )
-                        //         ],
-                        //         ephemeral: true
-                        //     })
-                        //     return
-                        // } else {
-                        carrinhos[interaction.user.id].push(interaction.customId.replace('comprar_', ''))
-                        // }
-
+                        findUniCarrinhos()
                         interaction.reply({
                             embeds: [
                                 new Discord.EmbedBuilder()
@@ -243,35 +247,7 @@ module.exports = (Discord, client) => {
                         } else {
                             return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                         }
-                        if (!carrinhos[interaction.user.id]) {
-                            carrinhos[interaction.user.id] = []
-                        }
-                        if (carrinhos[interaction.user.id].includes(interaction.customId.replace('comprar_', ''))) {
-                            if (interaction.replied) {
-                                interaction.deleteReply()
-                            }
-                            interaction.reply({
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor("#C21010")
-                                        .setTitle(`⚠️| Você já possui um carrinho aberto!`)
-                                        .setDescription(`Adicionamos esse produto ao seu carrinho!`)
-                                ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('🛒・Ir para o Carrinho')
-                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                                        )
-                                ],
-                                ephemeral: true
-                            })
-                            return
-                        } else {
-                            carrinhos[interaction.user.id].push(interaction.customId.replace('comprar_', ''))
-                        }
+                        findUniCarrinhos()
                         require('./createCartMessage')(Discord, client, {
                             serverID: interaction.guild.id,
                             user: interaction.user,
@@ -305,7 +281,7 @@ module.exports = (Discord, client) => {
                     interaction.deleteReply()
                 }
 
-                if (interaction.customId.includes('confirm')) {
+                if (interaction.customId && interaction.customId.includes('confirm')) {
                     try {
                         if (!carrinhos[interaction.user.id]) {
                             if (interaction.replied) {
@@ -331,18 +307,24 @@ module.exports = (Discord, client) => {
                         async function getLineItemsAndPrice(carrinho, server) {
                             let line_items = []
                             let total = 0
+                            let isProduct1n = false
                             for (let index = 0; index < carrinho.length; index++) {
                                 const element = carrinho[index];
-                                let produto = await server.products.find(product => product.productID == element)
+                                let produto = await server.products.find(product => product.productID == element.product)
+                                if (parseInt(produto.price) < 100) {
+                                    isProduct1n = true
+                                }
                                 line_items.push({
                                     price: produto.priceID,
-                                    quantity: 1,
+                                    quantity: parseInt(carrinho[index].quantidade),
                                 })
-                                total = total + parseInt(produto.price)
+                                let subtotal = (parseInt(produto.price) * parseInt(carrinho[index].quantidade))
+                                total = total + subtotal
                             }
                             return {
                                 lineItems: line_items,
-                                total: total
+                                total: total,
+                                isProduct1n: isProduct1n
                             }
                         }
 
@@ -376,7 +358,7 @@ module.exports = (Discord, client) => {
                                 cancel_url: `${process.env.HOST}/redirect/cancel`,
                             });
                             interaction.reply({
-                                content: ` `,
+                                content: getData.isProduct1n == true ? '⚠️ 1 ou mais produtos tem o valor inferior a 1 real no pix para cobrir as taxas do cartão temos que reajustar o valor para no minimo 1 real' : '',
                                 embeds: [
                                     new Discord.EmbedBuilder()
                                         .setColor("#6E58C7")
@@ -407,11 +389,15 @@ module.exports = (Discord, client) => {
                                     payment_method_id: 'pix',
                                     external_reference: interaction.user.id,
                                     payer: mercadoPagoData.payer,
-                                    notification_url: `${mercadoPagoData.notification_url}/mercadopago/webhook?userID=${interaction.user.id}&serverID=${interaction.guildId}&token=${serverData.bankData.mercadoPagoToken}&carrinhos=${JSON.stringify(carrinho)}`,
+                                    notification_url: `${mercadoPagoData.notification_url}/mercadopago/webhook?token=${serverData.bankData.mercadoPagoToken}`,
                                     metadata: {
-                                        test: 123
+                                        userID: interaction.user.id,
+                                        serverID:interaction.guildId,
+                                        carrinhos:JSON.stringify(carrinho),
+                                        token: serverData.bankData.mercadoPagoToken
                                     }
                                 };
+
                                 payment.create({ body }).then(async (response) => {
                                     const cpc = response.point_of_interaction.transaction_data.qr_code
                                     const buffer = Buffer.from(response.point_of_interaction.transaction_data.qr_code_base64, "base64");
@@ -485,7 +471,7 @@ module.exports = (Discord, client) => {
 
 
 
-                if (interaction.customId.includes('remove')) {
+                if (interaction.customId && interaction.customId.includes('remove')) {
                     if (!carrinhos[interaction.user.id]) {
                         await DiscordChannel.delete()
                         return
@@ -501,7 +487,8 @@ module.exports = (Discord, client) => {
                     let userID = interaction.user.id
                     if (excludItemSec[userID]) {
                         if (carrinhos[userID]) {
-                            let indexToRemove = await carrinhos[userID].indexOf(excludItemSec[userID]);
+                            let idProd = excludItemSec[userID]
+                            let indexToRemove = await carrinhos[userID].findIndex(element => element.product == idProd);
                             if (indexToRemove !== -1) {
                                 await carrinhos[userID].splice(indexToRemove, 1);
                                 if (carrinhos[userID].length <= 0) {
@@ -642,7 +629,6 @@ module.exports.sendPaymentStatus = async (serverID, tentativas, dias) => {
         var DiscordServer = await client.guilds.cache.get(serverID);
         let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
         dono.send(`Faltam ${tentativas ? tentativas + " tentativas" : dias + " dias"} para expirar sua assinatura`)
-        console.log('test');
     } catch (error) {
         console.log(error);
     }
@@ -658,13 +644,12 @@ module.exports.sendProductPayment = async (params, id, type) => {
         let carrinho = JSON.parse(params.carrinhos)
         let result = await new Promise((resolve, reject) => {
             const promises = carrinho.map(async (element) => {
-                const produto = serverData.products.find(product => product.productID == element);
-                if (!produto || produto.estoque.length <= 0) {
+                const produto = serverData.products.find(product => product.productID == element.product);
+                if (!produto || produto.estoque.length < element.quantidade) {
                     return false;
                 }
                 return true;
             });
-
             Promise.all(promises)
                 .then(results => {
                     const hasNoStock = results.some(result => !result);
@@ -698,19 +683,81 @@ module.exports.sendProductPayment = async (params, id, type) => {
             const user = await client.users.fetch(params.userID);
             let fields = []
             await carrinho.forEach(async (element, index) => {
-                var product = await serverData.products.find(product => product.productID == element)
-                var productIndex = await serverData.products.findIndex(product => product.productID == element)
-                let estoqueData = await serverData.products[productIndex].estoque
+                for (let index = 0; index < parseInt(element.quantidade); index++) {
+                    try {
+                        var product = await serverData.products.find(product => product.productID == element.product)
+                        var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
+                        let estoqueData = await serverData.products[productIndex].estoque
+                        let buffer = await sendTextBufferToDiscordChannel(estoqueData[0].conteudo);
+                        fields.push({ attachment: buffer, name: `${product.productName}.txt` },)
+                        await estoqueData.splice(0, 1);
+                        product.estoque = estoqueData
+                        serverData.products[productIndex] = product
 
-                let buffer = await sendTextBufferToDiscordChannel(estoqueData[0].conteudo);
-                fields.push({ attachment: buffer, name: `${product.productName}.txt` },)
-                await estoqueData.splice(0, 1);
-                product.estoque = estoqueData
-                serverData.products[productIndex] = product
+                        await db.update('servers', serverData.id, {
+                            products: serverData.products
+                        })
+                        if (index == parseInt(element.quantidade) - 1) {
+                            try {
+                                let DiscordServer = await client.guilds.cache.get(serverData.id);
+                                let findProductChannel = DiscordServer.channels.cache.find(c => c.id === product.channel)
+                                const fetchedMessage = await findProductChannel.messages.fetch(product.mensageID);
+                                if (fetchedMessage) {
+                                    let totalEstoque = []
+                                    if (product.estoque.length > 0) {
+                                        for (let index2 = 0; index2 < product.estoque.length; index2++) {
+                                            let indexSring1 = `${index2 + 1}`
+                                            if (index == 0) {
+                                                totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)
+                                            } else {
+                                                totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1),)
+                                            }
+    
+                                        }
+                                    }
+                                    
+                                    fetchedMessage.edit({
+                                        components: [
+                                            new Discord.ActionRowBuilder().addComponents(
+                                                new Discord.StringSelectMenuBuilder()
+                                                    .setCustomId(`qntProduct_${product.productID}`)
+                                                    .setPlaceholder('Selecione a quantidade!')
+                                                    .setMinValues(1)
+                                                    .setMaxValues(1)
+                                                    .addOptions(...totalEstoque)
+                                                    .setDisabled(product.estoque.length <= 0 ? true : false)
+                                            ),
+                                            new Discord.ActionRowBuilder().addComponents(
+                                                new Discord.ButtonBuilder()
+                                                    .setCustomId(`comprar_${product.productID}`)
+                                                    .setLabel('Comprar')
+                                                    .setStyle('3'),
+                                            )
+                                        ]
+                                    })
+                                }else{
+                                    require('../Discord/createProductMessage.js')(Discord, client, {
+                                        channelID: product.channel,
+                                        serverID: params.serverID,
+                                        productID: element.product,
+                                        edit: true
+                                    })
+                                }
 
-                db.update('servers', serverData.id, {
-                    products: serverData.products
-                })
+                            } catch (error) {
+                                require('../Discord/createProductMessage.js')(Discord, client, {
+                                    channelID: product.channel,
+                                    serverID: params.serverID,
+                                    productID: element.product,
+                                    edit: true
+                                })
+                            }
+                        }
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
 
             });
             const dataHoraAtual = new Date();
@@ -774,13 +821,15 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     files: fields
                 });
 
+
+
                 if ('configs' in serverData && 'publicBuyChannel' in serverData.configs && serverData.configs.publicBuyChannel) {
                     try {
                         let findChannelPublic = DiscordServer.channels.cache.find(c => c.id === serverData.configs.publicBuyChannel)
                         let fieldsPublic = { name: `Carrinho:`, value: '' }
                         let valorTotal = 0
                         await carrinho.forEach(async (element, index) => {
-                            var product = await serverData.products.find(product => product.productID == element)
+                            var product = await serverData.products.find(product => product.productID == element.product)
                             valorTotal = valorTotal + parseInt(product.price)
                             fieldsPublic.value += `${index + 1} - ${product.productName}\n`
                         });
@@ -788,8 +837,18 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         let price = await functions.formatarMoeda(valorTotal)
                         let allfieldsPublic = [{ name: 'Valor total:', value: "`" + price + "`", inline: true }, fieldsPublic,]
                         let userPic = await user.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 });
-                        let findChannelProduct = DiscordServer.channels.cache.find(c => c.topic === carrinho[0])
+                        let findChannelProduct = DiscordServer.channels.cache.find(c => c.topic === carrinho[0].product)
+                        let commp = {}
                         if (findChannelProduct) {
+                            commp.components = [new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('📤・Ir para o produto')
+                                        .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
+                                )]
+                        }
+                        if (findChannelPublic) {
                             findChannelPublic.send({
                                 embeds: [
                                     new Discord.EmbedBuilder()
@@ -801,19 +860,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                         .setTimestamp()
                                         .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
                                 ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('📤・Ir para o produto')
-                                                .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
-                                        )
-                                ],
+                                ...commp
                             })
                         }
                     } catch (error) {
-                        console.log("LogPublicError",error);
+                        console.log("LogPublicError", error);
                     }
                 }
 
@@ -845,6 +896,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         "vendas completas": [await functions.formatDate(new Date())]
                     })
                 }
+                carrinhos[params.userID] = null
             } catch (error) {
                 console.log(error);
                 console.log(fields);
@@ -908,32 +960,46 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     "vendas completas": []
                 })
             }
+            carrinhos[params.userID] = null
         }
+        try {
+            setTimeout(async () => {
+                var DiscordServer2 = await client.guilds.cache.get(params.serverID);
+                let findChannel2 = await DiscordServer2.channels.cache.find(c => c.topic === params.userID)
+                if (findChannel2) {
+                    findChannel2.delete().catch((err) => { })
+                }
+            }, 20000)
+        } catch (error) { }
     }
 }
 
 
 
 module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false) => {
-    var DiscordServer = await client.guilds.cache.get(server);
-    var DiscordChannel
-    if (user) {
-        DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
-    } else {
-        DiscordChannel = await DiscordServer.channels.cache.get(channel)
-    }
-    await DiscordChannel.send({
-        embeds: [
-            new Discord.EmbedBuilder()
-                .setTitle(`${DiscordServer.name} | ${title}`)
-                .setDescription(mensage)
-                .setColor("#6E58C7")
-        ]
-    }).catch(() => { })
+    try {
+        var DiscordServer = await client.guilds.cache.get(server);
+        var DiscordChannel
+        if (user) {
+            DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
+        } else {
+            DiscordChannel = await DiscordServer.channels.cache.get(channel)
+        }
+        await DiscordChannel.send({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle(`${DiscordServer.name} | ${title}`)
+                    .setDescription(mensage)
+                    .setColor("#6E58C7")
+            ]
+        }).catch(() => { })
 
-    if (deleteChannel == true) {
-        setTimeout(() => {
-            DiscordChannel.delete()
-        }, 5000)
+        if (deleteChannel == true) {
+            setTimeout(() => {
+                DiscordChannel.delete()
+            }, 5000)
+        }
+    } catch (error) {
+        console.log('sendDiscordMensageChannelERROR: ', error);
     }
 }

@@ -220,13 +220,17 @@
         <p id="profile-display-name"><%= user.displayName %></p>
     </div>
     <div id="top-header-profile-options" style="display: none;">
-        <a href="/logout" id="top-header-profile-options-logout">
+        <a id="top-header-profile-options-logout">
             sair
         </a>
     </div>
 </div>
 
 <script>
+    document.getElementById('top-header-profile-options-logout').addEventListener('click',()=>{
+        localStorage.setItem('access_token',null)
+        location.href = '/logout'
+    })
     let isopen = false
     document.getElementById('top-header-theme').addEventListener('click',()=>{
         if (document.body.getAttribute('data-theme') == 'light') {

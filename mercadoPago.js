@@ -12,7 +12,6 @@ const mercadoPagoData = require('./config/mercadoPagoData.json')
 router.post('/mercadopago/webhook', async (req, res) => {
     let resposta = req.body
     let params = req.query
-    let server = await db.findOne({ colecao: 'servers', doc: params.serverID })
     try {
         if (resposta.action == 'payment.updated') {
             let id = await resposta.data.id
@@ -22,6 +21,14 @@ router.post('/mercadopago/webhook', async (req, res) => {
                         'Authorization': `Bearer ${params.token}`
                     }
                 }).then(async (doc) => {
+                    let metadata = {
+                        serverID:doc.data.metadata.server_id,
+                        carrinhos:doc.data.metadata.carrinhos,
+                        token:doc.data.metadata.token,
+                        userID: doc.data.metadata.user_id
+                    }
+                    
+                    let server = await db.findOne({ colecao: 'servers', doc: metadata.serverID })
                     if (doc.data.status === "approved") {
                         let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
 
@@ -32,13 +39,13 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                         Authorization: `Bearer ${params.token}`
                                     }
                                 })
-                                require("./Discord/discordIndex").sendDiscordMensageChannel(params.serverID,null,'Reembolso',`Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`,params.userID,false)
+                                require("./Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID,null,'Reembolso',`Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`,params.userID,false)
                             } catch (error) {
                                 console.log(error);
                             }
                         } else {
                             try {
-                                require("./Discord/discordIndex").sendProductPayment(params, id, 'pix')
+                                require("./Discord/discordIndex").sendProductPayment(metadata, id, 'pix')
                             } catch (error) {
                                 console.log(error);
                             }
@@ -57,7 +64,6 @@ router.post('/mercadopago/webhook', async (req, res) => {
     }
 })
 
-
 router.post('/mercadopago/add', async (req, res) => {
     try {
         let token = await (req.body.token).trim()
@@ -74,7 +80,10 @@ router.post('/mercadopago/add', async (req, res) => {
         let test = await payment.create({ body })
         if (test) {
             let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
-            let bankData = await server.bankData
+            let bankData = {}
+            if (server.bankData) {
+                bankData = server.bankData
+            }
             bankData.mercadoPagoToken = token
             db.update('servers', req.body.serverID, {
                 bankData: bankData

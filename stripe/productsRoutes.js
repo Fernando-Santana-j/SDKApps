@@ -42,17 +42,17 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
             return
         }
-        if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
-            res.status(200).json({ success: false, data: 'Preço invalido!' })
-            return
-        }
+        // if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
+        //     res.status(200).json({ success: false, data: 'Preço invalido!' })
+        //     return
+        // }
         const product = await stripe.products.create({
             name: req.body.productName,
             description: req.body.producDesc,
         });
 
         const price = await stripe.prices.create({
-            unit_amount: req.body.price,
+            unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
             currency: 'brl',
             product: product.id,
         });
@@ -118,10 +118,10 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
         return
     }
 
-    if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
-        res.status(200).json({ success: false, data: 'Preço incorreto!' })
-        return
-    }
+    // if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
+    //     res.status(200).json({ success: false, data: 'Preço incorreto!' })
+    //     return
+    // }
 
     let logo = null
     if (req.files.productLogo) {
@@ -152,8 +152,9 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     await stripe.prices.update(lastPrice, {
         active: false,
     });
+
     const price = await stripe.prices.create({
-        unit_amount: req.body.price,
+        unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
         currency: 'brl',
         product: productID,
     });
@@ -164,10 +165,10 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     let produtos = server.products
 
     produto.productName = req.body.productName,
-        produto.producDesc = req.body.producDesc,
-        produto.estoque = produtos.estoque,
-        produto.price = req.body.price,
-        produto.priceID = price.id
+    produto.producDesc = req.body.producDesc,
+    produto.estoque = produtos.estoque,
+    produto.price = req.body.price,
+    produto.priceID = price.id
     if (logo != null) {
         produto.productLogo = logo
     }
@@ -181,6 +182,12 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
 
     db.update('servers', req.body.serverID, {
         products: produtos
+    })
+    require('../Discord/createProductMessage.js')(Discord, client, {
+        channelID: produto.channel,
+        serverID: req.body.serverID,
+        productID: productID,
+        edit:true
     })
     res.status(200).json({ success: true, data: '' })
 })
@@ -234,7 +241,7 @@ router.post('/product/delete', async (req, res) => {
             const DiscordChannel = DiscordServer.channels.cache.get(produto.channel);
 
             DiscordChannel.messages.fetch(produto.mensageID).then((res) => {
-                res.delete()
+                res.delete().then((res)=>{}).catch((err)=>{})
             })
         } catch (error) {
             console.log(error);
@@ -338,6 +345,12 @@ router.post('/estoque/txt', async (req, res) => {
                 db.update('servers',req.body.serverID,{
                     products: produtos
                 })
+                require('../Discord/createProductMessage.js')(Discord, client, {
+                    channelID: product.channel,
+                    serverID: req.body.serverID,
+                    productID: req.body.productID,
+                    edit:true
+                })
             }
             if (!res.headersSent) {
                 res.status(200).json({success:true})
@@ -378,6 +391,12 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 db.update('servers', req.body.serverID, {
                     products: produtos
                 })
+                require('../Discord/createProductMessage.js')(Discord, client, {
+                    channelID: product.channel,
+                    serverID: req.body.serverID,
+                    productID: req.body.productID,
+                    edit:true
+                })
                 resolve({
                     err: false,
                     error: null
@@ -415,6 +434,7 @@ router.post('/product/mensage', (req, res) => {
             channelID: req.body.channelID,
             serverID: req.body.serverID,
             productID: req.body.productID,
+            edit:true
         })
         res.status(200).json({ success: true, data: 'Mensagem Enviada!' })
     } catch (error) {

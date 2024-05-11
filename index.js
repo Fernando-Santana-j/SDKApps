@@ -117,6 +117,14 @@ client.on("interactionCreate", async (interaction) => {
 })
 
 
+client.on(Events.ShardError, error => {
+	console.error('A websocket connection encountered an error:', error);
+});
+
+process.on('unhandledRejection', error => {
+	console.error('Unhandled promise rejection:', error);
+});
+
 //TODO------------WEB PAGE--------------
 
 app.get('/', async (req, res) => {
@@ -541,6 +549,7 @@ app.post('/accout/delete', async (req, res) => {
                 await stripe.accounts.del(server.bankData.accountID)
             }
             db.delete('servers', req.body.serverID)
+            db.delete('analytics', req.body.serverID)
             res.status(200).json({ success: true })
         } else {
             res.status(200).json({ success: false, data: 'Erro ao tentar deletar a conta!' })
