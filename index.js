@@ -91,8 +91,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-
-
 //TODO------------Clients discord--------------
 
 client.on("interactionCreate", async (interaction) => {
