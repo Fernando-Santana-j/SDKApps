@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Personalizar</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/">
+    <link rel="stylesheet" href="<%= host %>/public/css/personalize.css">
 </head>
 <body>
     <div id="body-containner">
@@ -11,11 +11,43 @@
         <div id="containner">
             <%- include('./reusable/header.ejs',{index:3}) %>
             <main id="main-containner">
-                
+                <h1 class="title-col">Modifique o seu bot da maneira que desejar!</h1>
+                <p class="desc-col">As alterações são salvas assim que modificadas!</p>
+                <div id="main-content-row">
+                    <div class="itens-col">
+                        <h1 class="title-col">Cor destaque!</h1>
+                        <p class="desc-col">Isso modifica as cores principais quando o bot enviar uma mensagem!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <label for="color-dest-input" id="color-dest-preview"></label>
+                            <input type="color" id="color-dest-input" hidden>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Cargo de comprador!</h1>
+                        <p class="desc-col">⚠ O cargo do bot tem que está acima do cargo que sera dado ao usuario!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="cargos-input-list" placeholder="Pesquise o cargo..." id="cargos-name-input">
+                            <datalist id="cargos-input-list">
+                                <% cargos.forEach(element => { %>
+                                    <option data-cargos="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button id="saveCargoPay" class="button-padrao">Salvar Cargo</button>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
+    <div>
+        <div id="serverData" data-server="<%= JSON.stringify(server) %>"></div>
+        <script>
+            let server = JSON.parse(document.getElementById('serverData').getAttribute('data-server'))
+        </script>
+    </div>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/"></script>
+    <script src="<%= host %>/public/js/personalize.js"></script>
 </body>
 </html>

@@ -248,6 +248,10 @@ module.exports = async (Discord2, client, data) => {
                 
             }
         }
+        if (totalEstoque.length > 25) {
+            const numToRemove = totalEstoque.length - 25;
+            await totalEstoque.splice(-numToRemove);
+        }
         let embed = await DiscordChannel.send({
             files: [attachment],
             components: [

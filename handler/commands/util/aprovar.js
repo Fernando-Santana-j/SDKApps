@@ -12,12 +12,12 @@ module.exports = {
                 try {
                     let carrinhos = require("../../../Discord/discordIndex").carrinhos
                     let carrinho = carrinhos[DiscordChannel.topic]
+                    interaction.reply('Compra Aprovada!')
                     await require("../../../Discord/discordIndex").sendProductPayment({
                         serverID:interaction.guildId,
                         userID:DiscordChannel.topic,
                         carrinhos:JSON.stringify(carrinho),
                     }, null, 'aprovado')
-                    interaction.reply('Compra Aprovada!')
                 } catch (error) {
                     console.log(error);
                 }

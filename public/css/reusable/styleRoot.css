@@ -62,6 +62,15 @@
 
 }
 
+.main-color-purple {
+    background-color: var(--main-color-purple) !important;
+}
+.secundary-color-purple {
+    background-color: var(--secundary-color-purple) !important;
+}
+.tert-color-purple {
+    background-color: var(tert-color-purple) !important;
+}
 .greenColor {
     background-color: var(--green-color) !important;
 }

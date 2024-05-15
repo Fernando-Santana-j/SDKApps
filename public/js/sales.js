@@ -2,6 +2,11 @@
 let serverID = location.pathname.replace('/server/sales/', "")
 
 
+
+document.getElementById('add-pix-popup-tutorial').addEventListener('click',()=>{
+    window.open('https://www.youtube.com/watch?v=jK4JmvWDvAc',"_blank")
+})
+
 if (document.getElementById('bank-input-list')) {
     loadBanks();
     async function loadBanks() {

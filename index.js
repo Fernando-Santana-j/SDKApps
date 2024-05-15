@@ -116,11 +116,11 @@ client.on("interactionCreate", async (interaction) => {
 
 
 client.on(Events.ShardError, error => {
-	console.error('A websocket connection encountered an error:', error);
+    console.error('A websocket connection encountered an error:', error);
 });
 
 process.on('unhandledRejection', error => {
-	console.error('Unhandled promise rejection:', error);
+    console.error('Unhandled promise rejection:', error);
 });
 
 //TODO------------WEB PAGE--------------
@@ -402,7 +402,25 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
         return
     }
 
-    res.render('personalize', { host: `${webConfig.host}`, user: user, server: server })
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const roles = guild.roles.cache;
+    const filteredRoles = roles.filter(role => {
+        return role.name !== '@everyone' && role.managed !== true;
+    });
+    const roleObjects = filteredRoles.map(role => {
+        return {
+            name: role.name,
+            id: role.id
+        };
+    });
+
+    res.render('personalize', { host: `${webConfig.host}`, cargos: roleObjects, user: user, server: server })
 })
 
 app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
@@ -585,8 +603,8 @@ app.post('/config/change', async (req, res) => {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server.error == false) {
             let configs = {
-                noticeChannel:null,
-                publicBuyChannel:null
+                noticeChannel: null,
+                publicBuyChannel: null
             }
             if ('configs' in server) {
                 configs = server.configs
@@ -605,19 +623,19 @@ app.post('/config/change', async (req, res) => {
     }
 })
 
-app.post('/config/blockbank',async(req,res)=>{
+app.post('/config/blockbank', async (req, res) => {
     try {
         let bank = req.body.bank
-        let possiveisBanks = ['Banco Inter S.A.',"Picpay Serviços S.A."]
+        let possiveisBanks = ['Banco Inter S.A.', "Picpay Serviços S.A."]
         if (!possiveisBanks.includes(bank)) {
-            res.status(200).json({ success: false, data:'Banco invalido!' })
+            res.status(200).json({ success: false, data: 'Banco invalido!' })
             return
         }
 
-        let server = await db.findOne({colecao:"servers",doc:req.body.serverID})
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
 
         if (!server) {
-            res.status(200).json({ success: false, data:'Erro ao bloquear o banco!' })
+            res.status(200).json({ success: false, data: 'Erro ao bloquear o banco!' })
             return
         }
 
@@ -627,20 +645,20 @@ app.post('/config/blockbank',async(req,res)=>{
         }
 
         if (blockBank.includes(bank)) {
-            res.status(200).json({ success: false, data:'Este banco ja foi bloqueado!' })
-            return 
+            res.status(200).json({ success: false, data: 'Este banco ja foi bloqueado!' })
+            return
         }
 
 
         blockBank.push(bank)
 
-        db.update('servers',req.body.serverID,{
-            blockBank:blockBank
+        db.update('servers', req.body.serverID, {
+            blockBank: blockBank
         })
         res.status(200).json({ success: true })
     } catch (error) {
         console.log(error);
-        res.status(200).json({ success: false, data:'Erro ao bloquear o banco!' })
+        res.status(200).json({ success: false, data: 'Erro ao bloquear o banco!' })
     }
 
 
@@ -729,7 +747,43 @@ app.post('/perms/get', async (req, res) => {
     }
 })
 
+app.post('/personalize/change',async(req,res)=>{
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let Newpersonalize = {
+                colorDest:null,
+                cargoPay:null
+            }
+            if ('personalize' in server) {
+                Newpersonalize = server.personalize
+            }
 
+            if ('colorDest' in req.body) {
+                Newpersonalize.colorDest = req.body.colorDest
+            }
+            if ('cargoPay' in req.body) {
+                Newpersonalize.cargoPay = req.body.cargoPay
+            }
+
+            db.update('servers',req.body.serverID,{
+                personalize:Newpersonalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({success:true,})
+            }
+        }else{
+            if (!res.headersSent) {
+                res.status(200).json({success:false,data:'Erro ao tentar recuperar o servidor!'})
+            }
+        }
+    } catch (error) {
+        console.log("PersonalizeChangeERROR: ",error);
+        if (!res.headersSent) {
+            res.status(200).json({success:false,data:'Erro ao tentar mudar a personalização!'})
+        }
+    }
+})
 
 
 
