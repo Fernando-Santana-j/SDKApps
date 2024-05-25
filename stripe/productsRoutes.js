@@ -338,7 +338,7 @@ router.post('/estoque/txt', async (req, res) => {
                         ]
                     })
                 });
-
+                finalEstoqueArr = await finalEstoqueArr.filter(linha => linha.conteudo[0].content.length > 0)
                 produtos[index] = product
 
                 db.update('servers',req.body.serverID,{

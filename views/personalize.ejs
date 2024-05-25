@@ -37,6 +37,26 @@
                             <button id="saveCargoPay" class="button-padrao">Salvar Cargo</button>
                         </div>
                     </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Nome do bot!</h1>
+                        <p class="desc-col">Nome de exibição do bot em seu servidor!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" placeholder="Nome" id="bot-name-input">
+                            <button id="saveBotName" class="button-padrao">Salvar Nome</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Avatar do bot!</h1>
+                        <p class="desc-col">Imagem de exibição do bot em seu servidor!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <label id="lableAvatar" for="avatarBotPerso">
+                                <img src="<%= host %>/public/img/LOGOFUNDO.png" id="avatarPreview">
+                                <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="avatarBotPerso">
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
@@ -47,6 +67,7 @@
             let server = JSON.parse(document.getElementById('serverData').getAttribute('data-server'))
         </script>
     </div>
+    <%- include('./reusable/chatLive.ejs',{user:user}) %>
     <%- include('./reusable/script.ejs') %>
     <script src="<%= host %>/public/js/personalize.js"></script>
 </body>

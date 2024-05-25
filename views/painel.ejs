@@ -70,6 +70,7 @@
             document.getElementById('signature-situation-date').innerText = dataExp
         }
     </script>
+    <%- include('./reusable/chatLive.ejs',{user:user}) %>
     <%- include('./reusable/script.ejs') %>
     <script>
         let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))

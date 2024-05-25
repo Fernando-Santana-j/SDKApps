@@ -1,17 +1,15 @@
-const { json } = require('body-parser');
 const db = require('../Firebase/models')
+const dataBase = require('../Firebase/db.js')
 const stripe = require('stripe')(require('../config/web-config').stripe);
 require('dotenv').config()
 const { Payment, MercadoPagoConfig } = require('mercadopago');
 const Discord = require("discord.js");
 const mercadoPagoData = require('../config/mercadoPagoData.json');
 const botConfig = require('../config/bot-config.js');
-const { doc } = require('firebase/firestore');
-const { default: firebase } = require('firebase/compat/app');
-const { firestore } = require('firebase-admin');
 const functions = require('../functions.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 var ncp = require("copy-paste");
+const { doc } = require('firebase/firestore');
 
 client.login(botConfig.discordToken)
 
@@ -22,7 +20,8 @@ var excludItemSec = {}
 var carrinhos = {}
 var sendProduct = {}
 var preCarrinhos = {}
-
+let ticketOptions = {}
+let cupomOptions = {}
 
 module.exports = (Discord, client) => {
 
@@ -46,9 +45,44 @@ module.exports = (Discord, client) => {
             }
         }
 
+        //ticket
+        client.on('messageCreate', async message => {
+
+            try {
+                var DiscordServer = await client.guilds.cache.get(message.guildId);
+                var DiscordChannel = await DiscordServer.channels.cache.get(message.channelId)
+                if (DiscordChannel && DiscordChannel.topic && DiscordChannel.topic.includes('prot-')) {
+                    let ticket = await db.findOne({ colecao: 'tickets', doc: DiscordChannel.topic })
+                    if (ticket && message.channel.id == ticket.channel) {
+                        if (message.content && message.content != '') {
+                            const user = await client.users.fetch(message.author.id);
+                            let userPic = await user.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 });
+                            let ticketMensages = ticket.mensages
+                            await ticketMensages.push({ content: message.content, userPic: userPic, typeUser: null, author: message.author.username, userID: message.author.id, timestamp: message.createdTimestamp })
+                            db.update('tickets', DiscordChannel.topic, {
+                                mensages: ticketMensages
+                            })
+                        } else {
+                            let mensagem = message.embeds[0].data
+                            let fields = mensagem.fields
+                            const user = await client.users.fetch(fields[3].value);
+                            let userPic = await user.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 });
+                            let ticketMensages = ticket.mensages
+                            await ticketMensages.push({ content: mensagem.description, userPic: userPic, typeUser: fields[1].value, author: fields[2].value, userID: fields[3].value, timestamp: message.createdTimestamp })
+                            db.update('tickets', DiscordChannel.topic, {
+                                mensages: ticketMensages
+                            })
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        });
 
         client.on('interactionCreate', async (interaction) => {
             try {
+
                 var DiscordServer = await client.guilds.cache.get(interaction.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
                 let verifyPerms = await functions.verifyPermissions(interaction.user.id, interaction.guildId, Discord, client)
@@ -100,15 +134,15 @@ module.exports = (Discord, client) => {
                                 new Discord.EmbedBuilder()
                                     .setTitle('Selecione abaixo o item que deseja excluir!')
                                     .setDescription(`Clique em cancelar caso desista de excluir um item!`)
-                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                                     .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
                                     .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
                                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                             ],
                             components: [row, row2]
-                        }).then((res)=>{
+                        }).then((res) => {
 
-                        }).catch((err)=>{
+                        }).catch((err) => {
                             console.log(err);
                         })
                     } catch (error) {
@@ -135,7 +169,7 @@ module.exports = (Discord, client) => {
                 if (interaction.customId && interaction.customId.includes('comprar')) {
                     let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
                     let product = await server.products.find(product => product.productID == interaction.customId.replace('comprar_', ''))
-                    let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id)
+                    let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
                     if (!product || server.error == true || product.estoque.length <= 0) {
                         await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
                         let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
@@ -189,11 +223,11 @@ module.exports = (Discord, client) => {
                             return
                         }
                         let prodid = await interaction.customId.replace('comprar_', '')
-                        let findProductCart = await carrinhos[interaction.user.id].find((item)=>item.product == prodid)
-                        let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item)=>item.product == prodid)
+                        let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
+                        let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
                         if (findProductCart) {
                             carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
-                        }else{
+                        } else {
                             findUniCarrinhos()
                         }
 
@@ -225,9 +259,21 @@ module.exports = (Discord, client) => {
                         })
 
                     } else {
+                        let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
+                        if (!categoria) {
+                            categoria = await DiscordServer.channels.create({
+                                name: 'carrinhos',
+                                type: Discord.ChannelType.GuildCategory,
+                                permissionOverwrites: [{
+                                    id: DiscordServer.roles.everyone,
+                                    deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+                                }]
+                            });
+                        }
                         const newChannel = await DiscordServer.channels.create({
                             name: `🛒・Carrinho・${interaction.user.username}`,
                             type: 0,
+                            parent: categoria,
                             topic: interaction.user.id,
                             permissionOverwrites: [{
                                 id: interaction.user.id,
@@ -292,7 +338,7 @@ module.exports = (Discord, client) => {
                     let desc = await lastBotMessage.embeds[0].data.description
                     let code = await desc.replace('Pix Copiar e Colar:', "").replace(/\*/g, '').replace(/\```/g, '').trim()
                     ncp.copy(code)
-                    interaction.reply({content:'✅ | Codigo copiado para a area de transferencia.',ephemeral: true})
+                    interaction.reply({ content: '✅ | Codigo copiado para a area de transferencia.', ephemeral: true })
                 }
 
 
@@ -337,14 +383,27 @@ module.exports = (Discord, client) => {
                             for (let index = 0; index < carrinho.length; index++) {
                                 const element = carrinho[index];
                                 let produto = await server.products.find(product => product.productID == element.product)
+                                let price = null
+                                // if (cupomOptions[interaction.user.id]) {
+                                //     let findCupom = serverData.cupons.find(cupom => cupom.code == cupomOptions[interaction.user.id])
+                                //     if (findCupom && findCupom.productRef == produto.productID) {
+                                //         price = parseInt(produto.priceID) - (findCupom.type == 'porcent' ? parseInt(produto.priceID) * (parseInt(findCupom.value) / 100) : parseInt(findCupom.value))
+                                //     }else{
+                                //         price = produto.priceID
+                                //     }
+                                // }else{
+                                //     price = produto.priceID
+                                // }
+
                                 if (parseInt(produto.price) < 100) {
                                     isProduct1n = true
                                 }
+
                                 line_items.push({
                                     price: produto.priceID,
                                     quantity: parseInt(carrinho[index].quantidade),
                                 })
-                                let subtotal = (parseInt(produto.price) * parseInt(carrinho[index].quantidade))
+                                let subtotal = (parseInt(price) * parseInt(carrinho[index].quantidade))
                                 total = total + subtotal
                             }
                             return {
@@ -356,6 +415,7 @@ module.exports = (Discord, client) => {
 
 
                         let getData = await getLineItemsAndPrice(carrinho, serverData)
+
                         if (!getData || !getData.lineItems || !getData.total) {
                             return
                         }
@@ -370,7 +430,7 @@ module.exports = (Discord, client) => {
                                     user: interaction.user.id,
                                     products: JSON.stringify(carrinho),
                                     serverID: interaction.guildId,
-                                    channelID: interaction.channelId
+                                    channelID: interaction.channelId,
                                 },
                                 payment_intent_data: {
                                     transfer_data: {
@@ -420,7 +480,7 @@ module.exports = (Discord, client) => {
                                         userID: interaction.user.id,
                                         serverID: interaction.guildId,
                                         carrinhos: JSON.stringify(carrinho),
-                                        token: serverData.bankData.mercadoPagoToken
+                                        token: serverData.bankData.mercadoPagoToken,
                                     }
                                 };
 
@@ -435,9 +495,9 @@ module.exports = (Discord, client) => {
                                             new Discord.EmbedBuilder()
                                                 .setTitle('Pague o seu carrinho pelo qrcode ou pelo pix copiar e colar abaixo!')
                                                 .setDescription(`Pix Copiar e Colar:
-                                                    ${'**```'+ cpc + '```**'}`)
+                                                    ${'**```' + cpc + '```**'}`)
                                                 .setImage('attachment://qrcodepix.png')
-                                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                                         ],
                                         components: [new Discord.ActionRowBuilder()
@@ -448,7 +508,7 @@ module.exports = (Discord, client) => {
                                                     .setStyle('4')
                                             )],
                                         files: [attachment],
-                                        components:[new Discord.ActionRowBuilder()
+                                        components: [new Discord.ActionRowBuilder()
                                             .addComponents(
                                                 new Discord.ButtonBuilder()
                                                     .setCustomId(`copyPix`)
@@ -500,7 +560,7 @@ module.exports = (Discord, client) => {
                         })
                     }
                 }
-                
+
                 if (interaction.customId && interaction.customId.includes('remove')) {
                     if (!carrinhos[interaction.user.id]) {
                         await DiscordChannel.delete()
@@ -592,8 +652,8 @@ module.exports = (Discord, client) => {
                                                 .setTitle(`🛍️ | Você recebeu um produto!`)
                                                 .setDescription(`Você recebeu um novo produto de ${SendUser.globalName}`)
                                                 .addFields(...fields)
-                                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
-                                                .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7' )
+                                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
+                                                .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
                                                 .setTimestamp()
                                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
                                         ],
@@ -604,7 +664,7 @@ module.exports = (Discord, client) => {
                                                     .setTitle(`✅ | Produto enviado!`)
                                                     .setDescription(`Você enviou um produto para ${user.globalName} Abaixo esta uma copia do que foi enviado:`)
                                                     .addFields(...fields)
-                                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                                                     .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
                                                     .setTimestamp()
                                                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
@@ -636,6 +696,110 @@ module.exports = (Discord, client) => {
                     }
                 }
 
+
+                if (interaction.customId == 'idiomaTicket') {
+                    if (!ticketOptions[interaction.user.id]) {
+                        ticketOptions[interaction.user.id] = {}
+                    }
+                    ticketOptions[interaction.user.id].idioma = interaction.values[0]
+                    interaction.deferReply();
+                    interaction.deleteReply()
+                }
+                if (interaction.customId == 'motivoTicket') {
+                    if (!ticketOptions[interaction.user.id]) {
+                        ticketOptions[interaction.user.id] = {}
+                    }
+                    ticketOptions[interaction.user.id].motivo = interaction.values[0]
+                    interaction.deferReply();
+                    interaction.deleteReply()
+                }
+
+                if (interaction.customId && interaction.customId.includes('closeTicket')) {
+                    let protocolo = interaction.customId.replace('closeTicket-', "")
+                    let findChannel = DiscordServer.channels.cache.find(c => c.topic == protocolo)
+                    if (findChannel) {
+                        try {
+                            findChannel.delete()
+                            dataBase.collection('tickets').doc(protocolo).delete()
+                        } catch (error) { }
+
+                    } else {
+                        interaction.reply('Não foi possivel localizar o ticket!')
+                    }
+                }
+
+                if (interaction.customId == 'createTicket') {
+                    if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].idioma || !ticketOptions[interaction.user.id].motivo) {
+                        interaction.reply({ content: "Adicione o idioma e o motivo primeiro!", ephemeral: true })
+                    } else {
+                        let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
+                        if (findChannel) {
+                            interaction.reply({
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setColor("#C21010")
+                                        .setTitle(`⚠️| Você já possui um ticket aberto!`)
+                                        .setDescription(`Clique no botão abaixo para ir ate ele!`)
+                                ],
+                                components: [
+                                    new Discord.ActionRowBuilder()
+                                        .addComponents(
+                                            new Discord.ButtonBuilder()
+                                                .setStyle(5)
+                                                .setLabel('🎫・Ir para o Ticket')
+                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                                        )
+                                ],
+                                ephemeral: true
+                            })
+                        } else {
+                            require('./newTicketFunction')(client, interaction, ticketOptions[interaction.user.id])
+                        }
+
+                    }
+
+                }
+
+                if (interaction.customId == 'cupomADD') {
+                    if (cupomOptions[interaction.user.id]) {
+                        interaction.reply({ content: "Você ja tem um cupom ativo!", ephemeral: true })
+                        return
+                    }
+                    let cupomCode = await interaction.fields.fields.get('cupomtext').value
+                    let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+                    let cupom = server.cupons.find(cupom => cupom.code == cupomCode)
+                    if (cupom && cupom.active == true) {
+                        cupomOptions[interaction.user.id] = ''
+                        cupomOptions[interaction.user.id] = cupomCode
+                        interaction.deferReply();
+                        interaction.deleteReply()
+                    } else {
+                        interaction.reply({ content: "Esse cupom não existe ou esta expirado!", ephemeral: true })
+                        return
+                    }
+                }
+
+                if (interaction.customId == 'cupombutton') {
+                    if (cupomOptions[interaction.user.id]) {
+                        interaction.reply({ content: "Você ja tem um cupom ativo!", ephemeral: true })
+                        return
+                    }
+                    const modal = new Discord.ModalBuilder()
+                        .setCustomId('cupomADD')
+                        .setTitle('Adicionar cupom');
+
+                    modal.addComponents(
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('cupomtext')
+                                .setLabel("insira o codigo do cupom abaixo!")
+                                .setStyle(Discord.TextInputStyle.Short)
+                        )
+                    );
+
+                    await interaction.showModal(modal);
+                }
+
             } catch (error) {
                 console.log(error);
             }
@@ -664,7 +828,7 @@ module.exports.sendPaymentStatus = async (serverID, tentativas, dias) => {
 
 module.exports.sendProductPayment = async (params, id, type) => {
     var DiscordServer = await client.guilds.cache.get(params.serverID);
-    let findChannel = DiscordServer.channels.cache.find(c => c.topic === params.userID)
+    let findChannel = DiscordServer.channels.cache.find(c => c.topic === params.userID && c.name && c.name.includes('🛒・carrinho・'))
     let serverData = await db.findOne({ colecao: "servers", doc: params.serverID })
     if (DiscordServer && findChannel && serverData) {
         let carrinho = JSON.parse(params.carrinhos)
@@ -791,6 +955,10 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
                                             }
                                         }
+                                        if (totalEstoque.length > 25) {
+                                            const numToRemove = totalEstoque.length - 25;
+                                            await totalEstoque.splice(-numToRemove);
+                                        }
                                         fetchedMessage.edit({
                                             components: [
                                                 new Discord.ActionRowBuilder().addComponents(
@@ -810,6 +978,12 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                                 )
                                             ]
                                         }).catch((err) => {
+                                            require('../Discord/createProductMessage.js')(Discord, client, {
+                                                channelID: product.channel,
+                                                serverID: params.serverID,
+                                                productID: element.product,
+                                                edit: true
+                                            })
                                             console.log(err);
                                         })
                                     } else {
@@ -872,7 +1046,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                 { name: '\u200B', value: '\u200B' },
                                 ...fields
                             )
-                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                             .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
@@ -882,7 +1056,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         new Discord.EmbedBuilder()
                             .setTitle('📦 | Sua entrega chegou!')
                             .setDescription(`Abaixo estão os dados da sua entrega:`)
-                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                             .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                             .addFields(...fields)
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
@@ -895,7 +1069,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         new Discord.EmbedBuilder()
                             .setTitle('📦 | Sua entrega chegou!')
                             .setDescription(`Enviamos a entrega no seu privado caso não tenha recebido o seu privado pode esta bloqueado então tenha certeza de baixar os arquivos antes que o carrinho seja fechado`)
-                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                            .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                             .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                             .addFields(...fields)
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
@@ -966,7 +1140,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         await member.roles.add(role)
 
                     } catch (error) {
-                        
+
                     }
                 }
 
@@ -1017,6 +1191,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             }, 20000)
         } catch (error) { }
+
     }
 }
 
@@ -1024,7 +1199,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false) => {
     try {
-        let serverData = await db.findOne({colecao:'servers',doc:server})
+        let serverData = await db.findOne({ colecao: 'servers', doc: server })
         var DiscordServer = await client.guilds.cache.get(server);
         var DiscordChannel
         if (user) {

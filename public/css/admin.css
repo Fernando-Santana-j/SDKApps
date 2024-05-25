@@ -1,0 +1,243 @@
+#main-containner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5em;
+
+}
+
+#main-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1.5em;
+}
+
+.containner-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 2em;
+    width: 100%;
+    height: 30em;
+}
+
+#find-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 1em;
+}
+
+.infos-dec {
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    width: 100%;
+    text-align: start;
+    font-size: 1.4em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:first-child {
+        margin-top: 0.5em;
+    }
+}
+
+.infos-dec-span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin-left: 0.5em;
+}
+
+#search-input-containner {
+    margin-bottom: 1em;
+}
+
+#suporte-containner {
+    width: 100%;
+    margin-top: 5em;
+    height: 50em;
+}
+
+#suporte-content {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    #tickets-open-containner {
+        width: 20%;
+        border-right: 1px solid var(--secundary-color);
+        height: 100%;
+        overflow: auto;
+        #ticket-open-row {
+            display: flex;
+            flex-direction: column;
+            padding: 1em;
+            height: 100%;
+            gap: 1em;
+            .ticket-open-col {
+                width: 100%;
+                padding-top: 1em;
+                padding-bottom: 1em;
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 2em;
+                cursor: pointer;
+                border-radius: var(--border-radius-mid);
+                .ticket-open-col-image img{
+                    width: 5em;
+                    height: 5em;
+                    border-radius: var(--border-radius-max);
+                }
+                .ticket-open-col-texts{
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.6em;
+                }
+                .ticket-open-col-name,.ticket-open-col-date {
+                    width: 100%;
+                    text-align: start;
+                    font-family: 'poppins';
+                }
+                .ticket-open-col-name{
+                    font-size: 1.2em;
+                    font-weight: 500;
+                    color: var(--color-text-primary);
+                }
+                .ticket-open-col-date{
+                    font-size: 0.8em;
+                    color: var(--text-gray-color-primary);
+                    font-weight: 300;
+                }
+                &:hover{
+                    background-color: var(--menu-color);
+                }
+            }
+        }
+    }
+}
+
+
+#ticket-mensages-containner{
+    width: 100%;
+    overflow: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1em;
+    #ticket-mensage-content{
+        display: flex;
+        flex-direction: column;
+        gap: 1.5em;
+        flex: 1;
+        padding: 1em;
+    }
+    .mensage-ticket-content{
+        width: 90%;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+    .mensage-ticket-containner{
+        width: 100%;
+        display: flex;
+        justify-content: start;
+    }
+    .mensage-ticket{
+        width: fit-content;
+        max-width: 60%;
+        overflow: hidden;
+        padding: 1em;
+        background-color: var(--menu-color);
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 1em;
+        border-radius: var(--border-radius-mid);
+        .mensage-ticket-image img{
+            width: 3.5em;
+            height: 3.5em;
+            border-radius: var(--border-radius-max);
+        }
+        .mensage-ticket-text{
+            width: 100%;
+            overflow-wrap: break-word;
+        }
+        .mensage-ticket-content{
+            display: flex;
+            gap: 1em;
+        }
+        .mensage-ticket-name{
+            
+            text-align: start;
+            font-family: 'poppins';
+            font-size: 1em;
+            font-weight: 400;
+            color: var(--color-text-primary);
+        }
+        .mensage-ticket-date{
+            text-align: start;
+            font-family: 'poppins';
+            font-size: 0.8em;
+            font-weight: 300;
+            color: var(--text-gray-color-primary);
+        }
+        .mensage-ticket-text{
+            width: 100%;
+            text-align: start;
+            font-family: 'poppins';
+            font-size: 1.1em;
+            font-weight: 400;
+            color: var(--color-text-primary);
+        }
+    }
+}
+.myMensage{
+    justify-content: end !important; 
+    .mensage-ticket{
+        background-color: rgb(85, 61, 170) !important;
+    }
+}
+
+#input-ticket-mensage{
+    width: 100%;
+    display: flex;
+    height: 3em;
+    gap: 1em;
+    position: relative;
+    #input-mensage{
+        flex: 1;
+        height: fit-content !important;
+    }
+    #send-mensage-ticket{
+        width: 3em;
+        height: 3em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+}
+#ticket-mensage-sub-containner{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1em;
+}
+
+#send-mensage-ticket *,#send-mensage-ticket path, #send-mensage-ticket g{
+    fill: var(--color-text-primary) !important;
+}
