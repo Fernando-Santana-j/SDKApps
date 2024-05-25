@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - development
 name: 🚀 Deploy website on push
 jobs:
   web-deploy:
@@ -10,11 +11,19 @@ jobs:
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v2.3.2
-    
-    - name: 📂 Sync files
+
+    - name: 📂 Sync files to Production
+      if: github.ref == 'refs/heads/main'
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with:
-        server: ${{ secrets.ftp_host }}
-        username: ${{ secrets.ftp_name }}
-        password: ${{ secrets.ftp_password }}
-
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_NAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+    
+    - name: 📂 Sync files to Development
+      if: github.ref == 'refs/heads/development'
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_DEVNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
