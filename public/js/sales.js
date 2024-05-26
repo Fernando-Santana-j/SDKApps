@@ -484,6 +484,7 @@ document.addEventListener('click', async (event) => {
                 reader.onload = async function (event) {
                     const conteudo = event.target.result;
                     let linhas = conteudo.split('\n').map(linha => linha.replace(/\r/g, '').trim()).filter(linha => linha.length > 0);
+                    console.log(linhas);
                     let productID = document.getElementById('produtos-config-content').getAttribute('data-product')
                     let productData = await fetch('/estoque/txt', {
                         method: 'POST',

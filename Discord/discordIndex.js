@@ -1007,7 +1007,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             }
                         }
 
-                    } else {
+                    } else {  
                         refound()
                         return
                     }
@@ -1018,13 +1018,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     await db.update('servers', serverData.id, {
                         products: serverData.products
                     })
-
-
                 } catch (error) {
                     console.log(error);
                 }
-
-
             });
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
