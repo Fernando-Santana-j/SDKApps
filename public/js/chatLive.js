@@ -1,6 +1,5 @@
 let chatIsOpen = false
 let countMensages = 0
-let servidor = '1210907838558240829'
 let app = null
 let db = null
 let ticketProt = null
@@ -116,7 +115,7 @@ async function sendMensage() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            guildId: servidor,
+            guildId: ticket.serverID,
             channelId: ticket.channel,
             userID:userID,
             content: content,
@@ -155,6 +154,7 @@ document.getElementById('chat-icon-containner').addEventListener('click', () => 
         countMensages = 0
         let conte = document.getElementById('chat-mensages-content')
         conte.scrollTop = conte.scrollHeight;
+        document.getElementById('chat-icon-containner').classList.remove('newMensage')
     } else {
         chatIsOpen = false
         chatContainner.style.display = "none"

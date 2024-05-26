@@ -480,6 +480,42 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
 })
 
 
+app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => {
+
+    let serverID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    if (server.assinante == false || server.isPaymented == false) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
+        res.redirect(`/server/${serverID}`)
+        return
+    }
+
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
+
+    res.render('ticket', { host: `${webConfig.host}`, user: user, server: server, channels: textChannels,})
+})
+
+
 app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
     try {
         let serverID = req.params.id

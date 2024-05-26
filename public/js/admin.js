@@ -4,7 +4,6 @@ let ticketIndex = {
 }
 let app = null
 let db = null
-let servidor = '1210907838558240829'
 
 
 init()
@@ -133,7 +132,7 @@ async function sendMensage() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            guildId: servidor,
+            guildId: ticket.serverID,
             channelId: ticket.channel,
             userID:user,
             content: content,
