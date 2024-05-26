@@ -329,14 +329,17 @@ router.post('/estoque/txt', async (req, res) => {
                 
                 
                 await file.forEach(element => {
-                    finalEstoqueArr.push({
-                        conteudo:[
-                            {
-                                title: title,
-                                content:element
-                            }
-                        ]
-                    })
+                    element = element.trim()
+                    if (element && element != '' && element != null && element != undefined) {
+                        finalEstoqueArr.push({
+                            conteudo:[
+                                {
+                                    title: title,
+                                    content:element
+                                }
+                            ]
+                        })   
+                    }
                 });
                 finalEstoqueArr = await finalEstoqueArr.filter(linha => linha.conteudo[0].content.length > 0)
                 produtos[index] = product
