@@ -50,12 +50,17 @@ module.exports = async (Discord, client, data) => {
                     .setLabel('Cancelar')
                     .setStyle('4')
             ).addComponents(
-
                 new Discord.ButtonBuilder()
                     .setCustomId(`remove`)
                     .setLabel('Remover produto')
                     .setStyle('4')
-            );
+            )
+            // .addComponents(
+            //     new Discord.ButtonBuilder()
+            //         .setCustomId(`cupombutton`)
+            //         .setLabel('Adicionar Cupom')
+            //         .setStyle('1')
+            // );
 
         let fields = []
         let carrinhos = require('./discordIndex').carrinhos
@@ -87,9 +92,8 @@ module.exports = async (Discord, client, data) => {
                     .setTitle('Selecione abaixo o metodo de pagamento depois confirme para gerar o seu link de pagamento!')
                     .setDescription(`Clique em cancelar caso desista de fazer a compra.
 
-                Abaixo são os itens do seu carrinho.`)
-
-                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/sdkapps' })
+                        Abaixo são os itens do seu carrinho.`)
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                     .addFields(...[...fields, { name: '\u200B', value: '\u200B' },])
                     .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                     .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)

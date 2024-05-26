@@ -209,6 +209,7 @@
             </main>
         </div>
     </div>
+    <%- include('./reusable/chatLive.ejs',{user:user}) %>
     <%- include('./reusable/script.ejs') %>
     <div>
         <script>
@@ -216,7 +217,7 @@
             if (localStorage.getItem('access_token')) {
                 discordUrl = `/auth/verify/${localStorage.getItem('access_token')}`
             }else{
-                discordUrl = "https://discord.com/oauth2/authorize?client_id=1210894508028338197&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2Fcallback&scope=identify+guilds+email+guilds.join"
+                discordUrl = "/redirect/discord"
             }
              
             let isloged = '<%= isloged %>'

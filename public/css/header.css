@@ -85,8 +85,8 @@ header{
                 gap: 0.6em;
                 .list-item-icon{
                     width: 2.5em;
-                
                 }
+                
                 .list-item-name{
                     font-size: large;
                     color: var(--color-text-primary);

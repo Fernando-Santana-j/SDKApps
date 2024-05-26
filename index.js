@@ -1,6 +1,7 @@
 //TODO-------------importes------------
 const Discord = require("discord.js");
 const { Events, GatewayIntentBits } = require('discord.js');
+const rpc = require('discord-rpc')
 const db = require('./Firebase/models.js')
 const dataBase = require('./Firebase/db.js')
 const express = require('express')
@@ -126,8 +127,7 @@ process.on('unhandledRejection', error => {
 //TODO------------WEB PAGE--------------
 
 app.get('/', async (req, res) => {
-
-    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, error: req.query.error ? req.query.error : '' })
+    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user:{id:req.session.uid ? req.session.uid : null}, error: req.query.error ? req.query.error : '' })
 })
 
 
@@ -378,17 +378,10 @@ app.get('/addbot/:serverID', (req, res) => {
     if (isBotInServer) {
         res.redirect(`/server/${req.body.serverID}`)
     } else {
-        res.redirect(`https://discord.com/oauth2/authorize?client_id=1210894508028338197&permissions=8&response_type=code&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&redirect_uri=${process.env.DISCORDURI}&guild_id=${req.params.serverID}&disable_guild_select=true`)
+        res.redirect(`https://discord.com/oauth2/authorize?client_id=${webConfig.clientId}&permissions=8&response_type=code&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&redirect_uri=${process.env.DISCORDURI}&guild_id=${req.params.serverID}&disable_guild_select=true`)
     }
 
 })
-
-
-
-// host:`${webConfig.host}`,
-
-
-
 
 
 
@@ -487,6 +480,42 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
 })
 
 
+app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => {
+
+    let serverID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    if (server.assinante == false || server.isPaymented == false) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
+        res.redirect(`/server/${serverID}`)
+        return
+    }
+
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
+
+    res.render('ticket', { host: `${webConfig.host}`, user: user, server: server, channels: textChannels,})
+})
+
+
 app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
     try {
         let serverID = req.params.id
@@ -530,8 +559,19 @@ app.get('/redirect/cancel', (req, res) => {
 })
 
 
+app.get('/redirect/discord',(req,res)=>{
+    res.redirect(webConfig.loginURL)
+})
 
 
+
+app.get('/adm', (req, res) => {
+    res.render('admin', { host: `${webConfig.host}` })
+})
+
+app.post('/firebase/configs', (req, res) => {
+    res.status(200).json({ success: true, projectId: require('./config/firebase.json').project_id, data: require('./config/firebase.json') })
+})
 
 app.post('/accout/delete', async (req, res) => {
     try {
@@ -747,13 +787,70 @@ app.post('/perms/get', async (req, res) => {
     }
 })
 
-app.post('/personalize/change',async(req,res)=>{
+app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        var DiscordServer = await client.guilds.cache.get(req.body.serverID);
+        if (server && DiscordServer) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o bot!' })
+            }
+            return
+            if (req.file && DiscordServer.members.me) {
+                const uploadedFile = req.file;
+                const filePath = uploadedFile.path;
+                console.log(uploadedFile);
+                fs.readFile(filePath, (err, data) => {
+                    if (err) {
+                        console.error('Erro ao ler o arquivo:', err);
+                        return res.status(500).send('Erro ao processar o arquivo');
+                    }
+                    console.log(data);
+                    const base64String = `data:image/jpeg;base64,${data.toString('base64')}`;
+                    DiscordServer.members.me.displayAvatarURL(base64String)
+                    fs.unlink(filePath, (err) => {
+                        if (err) {
+                            console.error('Erro ao apagar o arquivo original:', err);
+                            return { error: true, err: err }
+                        } else {
+                            return null
+                        }
+                    });
+                    res.status(200).json({ success: true });
+                });
+
+            } else {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o bot!' })
+                }
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log("PersonalizeChangeERROR: ", error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/change', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
+            if (req.body.botName) {
+                var DiscordServer = await client.guilds.cache.get(req.body.serverID)
+                DiscordServer.members.me.setNickname(req.body.botName)
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, })
+                }
+                return
+            }
             let Newpersonalize = {
-                colorDest:null,
-                cargoPay:null
+                colorDest: null,
+                cargoPay: null
             }
             if ('personalize' in server) {
                 Newpersonalize = server.personalize
@@ -766,26 +863,97 @@ app.post('/personalize/change',async(req,res)=>{
                 Newpersonalize.cargoPay = req.body.cargoPay
             }
 
-            db.update('servers',req.body.serverID,{
-                personalize:Newpersonalize
+            db.update('servers', req.body.serverID, {
+                personalize: Newpersonalize
             })
             if (!res.headersSent) {
-                res.status(200).json({success:true,})
+                res.status(200).json({ success: true, })
             }
-        }else{
+        } else {
             if (!res.headersSent) {
-                res.status(200).json({success:false,data:'Erro ao tentar recuperar o servidor!'})
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
             }
         }
     } catch (error) {
-        console.log("PersonalizeChangeERROR: ",error);
+        console.log("PersonalizeChangeERROR: ", error);
         if (!res.headersSent) {
-            res.status(200).json({success:false,data:'Erro ao tentar mudar a personalização!'})
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
         }
     }
 })
 
 
+app.post('/send/discordMensage', async (req, res) => {
+    try {
+        var DiscordServer = await client.guilds.cache.get(req.body.guildId);
+        var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelId)
+        const user = await client.users.fetch(req.body.userID);
+        let ticket = await db.findOne({ colecao: 'tickets', doc: req.body.protocolo })
+        const libreTranslateUrl = 'https://libretranslate.de/translate';
+        let textTranslate = req.body.content
+        if (req.body.trad) {
+            const translateText = async (text, targetLang) => {
+                try {
+                    const response = await axios.post(libreTranslateUrl, {
+                        q: text,
+                        source: 'auto',
+                        target: targetLang,
+                        format: "text"
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+    
+                    return response.data.translatedText;
+                } catch (error) {
+                    return null;
+                }
+            };
+    
+            let resposta = await translateText(req.body.content, ticket.idioma).then(translatedText => {return translatedText});
+            if (resposta && resposta != null) {
+                textTranslate = resposta
+            }
+        }
+        
+
+        DiscordChannel.send({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle('Nova mensagem!')
+                    .setDescription(`\n${textTranslate}\n`)
+                    .addFields({ name: '\u200B', value: '\u200B' },{ name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`,inline:true },{name:"Nome do usuario", value:user.username,inline:true},{name:"ID do usuario", value:user.id,inline:true})
+                    .setColor('#6E58C7')
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
+                    .setTimestamp()
+                    
+            ]
+        })
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Mensagem enviada!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar enviar a mensagem!' })
+        }
+        console.log(error);
+    }
+})
+
+
+app.post('/verify/adm',(req,res)=>{
+    if (req.body.pass == process.env.ADMINPASS && req.body.userID == process.env.ADMINLOGIN) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: req.body.userID})
+        }
+    }else{
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar enviar a mensagem!' })
+        }
+    }
+})
 
 //TODO Mercado Pago
 
@@ -802,6 +970,7 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
+
 app.use('/', produtoRoutes);
 
 
