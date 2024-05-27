@@ -26,7 +26,7 @@ async function init(params) {
             doc.docChanges().forEach((change, index) => {
                 let data = change.doc.data()
                 if (change.type === "removed" && change.doc.id && change.doc.id.includes(userID)) {
-                    var parentElement = document.getElementById("chat-up-containner");
+                    var parentElement = document.getElementById("chat-containner");
                     while (parentElement.firstChild) {
                         parentElement.removeChild(parentElement.firstChild);
                     }
@@ -67,6 +67,7 @@ async function init(params) {
                     let dateForm = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
                     if (change.doc.id && change.doc.id.includes(userID)) {
                         ticketProt = change.doc.id
+
                         data.mensages.forEach((element,index)=>{
                             countMensages++
                             if (chatIsOpen == false) {
@@ -104,10 +105,25 @@ async function init(params) {
 }
 
 async function sendMensage() {
-    
+    let content = document.getElementById('chat-input-mensage').value
+
+    if (content.trim().length <= 0) {
+        errorNotify('Digite algo antes...')
+        return 
+    }
+
+    if (!ticketProt) {
+        errorNotify('Você não tem nenhum ticket aberto!')
+        return 
+    }
+
     let ticket = await db.collection("tickets").doc(ticketProt).get()
     ticket = await ticket.data()
-    let content = document.getElementById('chat-input-mensage').value
+    if (!ticket) {
+        errorNotify('Erro ao obter o ticket!')
+        return 
+    }
+    
     document.getElementById('chat-input-mensage').value = ''
     let session = await fetch('/send/discordMensage', {
         method: 'POST',
@@ -149,7 +165,7 @@ document.getElementById('chat-top-close').addEventListener('click', () => {
 document.getElementById('chat-icon-containner').addEventListener('click', () => {
     let chatContainner = document.getElementById('chat-containner')
     if (chatContainner.style.display == "none") {
-        chatContainner.style.display = "block"
+        chatContainner.style.display = "flex"
         chatIsOpen = true
         countMensages = 0
         let conte = document.getElementById('chat-mensages-content')

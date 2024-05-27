@@ -150,15 +150,25 @@ module.exports = (Discord, client) => {
                     }
                 }
 
-
                 if (interaction.customId && interaction.customId.includes('qntProduct')) {
                     if (!preCarrinhos[interaction.user.id]) {
                         preCarrinhos[interaction.user.id] = []
                     }
-                    preCarrinhos[interaction.user.id].push({
-                        product: interaction.customId.replace('qntProduct_', ""),
-                        quantidade: interaction.values[0]
-                    })
+                    let value = await interaction.values[0]
+                    let product = await interaction.customId.replace('qntProduct_', "")
+                    let findCart = await preCarrinhos[interaction.user.id].find(element => element.product == product)
+                    let findIndexCart = await preCarrinhos[interaction.user.id].findIndex(element => element.product == product)
+                    preCarrinhos[interaction.user.id]
+                    if (findCart) {
+                        preCarrinhos[interaction.user.id][findIndexCart].quantidade = parseInt(value)
+                        console.log(preCarrinhos[interaction.user.id][findIndexCart]);
+                    }else{
+                        preCarrinhos[interaction.user.id].push({
+                            product: product,
+                            quantidade: value
+                        })
+                    }
+                    
                     interaction.deferReply();
                     interaction.deleteReply()
                 }
@@ -354,6 +364,7 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId && interaction.customId.includes('confirm')) {
+                    console.log(1);
                     try {
                         if (!carrinhos[interaction.user.id]) {
                             if (interaction.replied) {
@@ -383,7 +394,7 @@ module.exports = (Discord, client) => {
                             for (let index = 0; index < carrinho.length; index++) {
                                 const element = carrinho[index];
                                 let produto = await server.products.find(product => product.productID == element.product)
-                                let price = null
+                                let price = parseInt(produto.price)
                                 // if (cupomOptions[interaction.user.id]) {
                                 //     let findCupom = serverData.cupons.find(cupom => cupom.code == cupomOptions[interaction.user.id])
                                 //     if (findCupom && findCupom.productRef == produto.productID) {
@@ -395,7 +406,7 @@ module.exports = (Discord, client) => {
                                 //     price = produto.priceID
                                 // }
 
-                                if (parseInt(produto.price) < 100) {
+                                if (price < 100) {
                                     isProduct1n = true
                                 }
 
@@ -404,7 +415,7 @@ module.exports = (Discord, client) => {
                                     quantity: parseInt(carrinho[index].quantidade),
                                 })
                                 let subtotal = (parseInt(price) * parseInt(carrinho[index].quantidade))
-                                total = total + subtotal
+                                total = parseInt(total) + parseInt( subtotal)
                             }
                             return {
                                 lineItems: line_items,
@@ -415,7 +426,7 @@ module.exports = (Discord, client) => {
 
 
                         let getData = await getLineItemsAndPrice(carrinho, serverData)
-
+                        console.log(getData);
                         if (!getData || !getData.lineItems || !getData.total) {
                             return
                         }
@@ -447,7 +458,7 @@ module.exports = (Discord, client) => {
                                 content: getData.isProduct1n == true ? '⚠️ 1 ou mais produtos tem o valor inferior a 1 real no pix para cobrir as taxas do cartão temos que reajustar o valor para no minimo 1 real' : '',
                                 embeds: [
                                     new Discord.EmbedBuilder()
-                                        .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                        .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                                         .setTitle(`💕 | Produto Criado!`)
                                         .setDescription(`<@${interaction.user.id}> **Acesse o link abaixo para fazer o pagamento do seu produto.**`)
                                 ],
@@ -519,7 +530,6 @@ module.exports = (Discord, client) => {
                                     })
                                 }).catch((error) => {
                                     console.error(error);
-                                    // Lidar com erros aqui
                                 });
                             } catch (error) {
                                 console.log(error);
@@ -527,7 +537,6 @@ module.exports = (Discord, client) => {
                         }
                     } catch (error) {
                         console.log(error);
-
                     }
                 }
 
