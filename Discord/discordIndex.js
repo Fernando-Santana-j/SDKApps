@@ -151,10 +151,13 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId && interaction.customId.includes('qntProduct')) {
+                    let value = await interaction.values[0]
+                    if (value == null) {
+                        return
+                    }
                     if (!preCarrinhos[interaction.user.id]) {
                         preCarrinhos[interaction.user.id] = []
                     }
-                    let value = await interaction.values[0]
                     let product = await interaction.customId.replace('qntProduct_', "")
                     let findCart = await preCarrinhos[interaction.user.id].find(element => element.product == product)
                     let findIndexCart = await preCarrinhos[interaction.user.id].findIndex(element => element.product == product)
