@@ -124,7 +124,38 @@ process.on('unhandledRejection', error => {
     console.error('Unhandled promise rejection:', error);
 });
 
+
+
+
+
+
+
+
 //TODO------------WEB PAGE--------------
+
+//TODO Mercado Pago
+
+const mercadoPago = require('./mercadoPago.js')
+app.use('/', mercadoPago);
+
+//TODO STRIPE ROUTES
+
+const stripeRoutes = require('./stripe/stripeRoutes.js');
+
+app.use('/', stripeRoutes);
+
+
+//TODO PRODUTOS ROUTES
+
+const produtoRoutes = require('./stripe/productsRoutes.js');
+
+app.use('/', produtoRoutes);
+
+
+
+
+
+
 
 app.get('/', async (req, res) => {
     res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user:{id:req.session.uid ? req.session.uid : null}, error: req.query.error ? req.query.error : '' })
@@ -955,23 +986,7 @@ app.post('/verify/adm',(req,res)=>{
     }
 })
 
-//TODO Mercado Pago
 
-const mercadoPago = require('./mercadoPago.js')
-app.use('/', mercadoPago);
-
-//TODO STRIPE ROUTES
-
-const stripeRoutes = require('./stripe/stripeRoutes.js');
-
-app.use('/', stripeRoutes);
-
-
-//TODO PRODUTOS ROUTES
-
-const produtoRoutes = require('./stripe/productsRoutes.js');
-
-app.use('/', produtoRoutes);
 
 
 

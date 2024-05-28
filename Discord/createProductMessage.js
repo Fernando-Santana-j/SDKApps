@@ -252,6 +252,9 @@ module.exports = async (Discord2, client, data) => {
             const numToRemove = totalEstoque.length - 25;
             await totalEstoque.splice(-numToRemove);
         }
+        if (totalEstoque.length <= 0) {
+            totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel('Sem estoque').setValue('null').setDefault(true),)
+        }
         let embed = await DiscordChannel.send({
             files: [attachment],
             components: [
