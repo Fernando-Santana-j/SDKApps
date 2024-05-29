@@ -9,8 +9,6 @@ const botConfig = require('../config/bot-config.js');
 const functions = require('../functions.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 var ncp = require("copy-paste");
-const { doc } = require('firebase/firestore');
-const { name } = require('ejs');
 
 client.login(botConfig.discordToken)
 
