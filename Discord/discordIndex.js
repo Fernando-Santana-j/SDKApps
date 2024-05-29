@@ -10,6 +10,7 @@ const functions = require('../functions.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 var ncp = require("copy-paste");
 const { doc } = require('firebase/firestore');
+const { name } = require('ejs');
 
 client.login(botConfig.discordToken)
 
@@ -922,22 +923,28 @@ module.exports.sendProductPayment = async (params, id, type) => {
         }
 
         if (result == true) {
-            async function createTextContentFromObjects(objectsArray) {
-                let textContent = '';
-
+            async function createTextContentFromObjects(objectsArray,prodName) {
+                let prefieldArr = []
                 await objectsArray.forEach(async (obj, index) => {
                     await obj.forEach((line, index2) => {
-                        textContent += `${line.title}: ${line.content}\n`;
+                        let prefield = {name:'\u200B',value: ""}
+                        if (index == 0) {
+                            prefield.name += `${prodName} : `
+                        }
+                        prefield.name += line.title
+                        prefield.value += "``" + line.content  +"``"
+                        prefieldArr.push(prefield)
                     })
                 });
 
-                return textContent;
+                return prefieldArr;
             }
 
 
             const user = await client.users.fetch(params.userID);
             let fields = []
-            await carrinho.forEach(async (element, index) => {
+            for (let index = 0; index < carrinho.length; index++) {
+                const element = carrinho[index];
                 try {
                     var product = await serverData.products.find(product => product.productID == element.product)
                     var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
@@ -995,7 +1002,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                                 productID: element.product,
                                                 edit: true
                                             })
-                                            console.log(err);
+                                            
                                         })
                                     } else {
                                         require('../Discord/createProductMessage.js')(Discord, client, {
@@ -1007,7 +1014,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                     }
 
                                 } catch (error) {
-                                    console.log(error);
+                                    
                                     require('../Discord/createProductMessage.js')(Discord, client, {
                                         channelID: product.channel,
                                         serverID: params.serverID,
@@ -1022,8 +1029,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         refound()
                         return
                     }
-                    let content = await createTextContentFromObjects(arrayCarrinhoProd);
-                    fields.push({ name: "**" + product.productName + ': **', value: "```" + content + "```" },)
+                    let content = await createTextContentFromObjects(arrayCarrinhoProd,product.productName);
+                    fields = [...fields,...content]
                     product.estoque = estoqueData
                     serverData.products[productIndex] = product
                     await db.update('servers', serverData.id, {
@@ -1032,12 +1039,21 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 } catch (error) {
                     console.log(error);
                 }
-            });
+            }
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
-
+            
+            
+            
 
             try {
+               
+
+
+                const concatenatedString = await fields.map(obj => obj.value.replace(/``/g,'')).join('\n');
+                console.log(concatenatedString);
+                const buffer = Buffer.from(concatenatedString, 'utf-8');
+                const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
                 await dono.send({
                     embeds: [
@@ -1058,6 +1074,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
                 }).catch(() => { })
+                dono.send({ files: [attachment] }).catch(()=>{});
                 await user.send({
                     embeds: [
                         new Discord.EmbedBuilder()
@@ -1069,8 +1086,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                     ],
                 }).catch(() => { })
-                const fetched = await findChannel.messages.fetch({ limit: 100 });
-                findChannel.bulkDelete(fetched)
+                user.send({ files: [attachment] }).catch(()=>{});
+                const fetched = await findChannel.messages.fetch({ limit: 100 }).then(()=>{}).catch(()=>{});
+                findChannel.bulkDelete(fetched).then(()=>{}).catch(()=>{})
                 findChannel.send({
                     embeds: [
                         new Discord.EmbedBuilder()
@@ -1092,7 +1110,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             )
                     ],
                 });
-
+                findChannel.send({ files: [attachment] }).catch(()=>{});
 
 
                 if ('configs' in serverData && 'publicBuyChannel' in serverData.configs && serverData.configs.publicBuyChannel) {
