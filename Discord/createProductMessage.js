@@ -220,8 +220,10 @@ module.exports = async (Discord2, client, data) => {
         const DiscordChannel = await DiscordServer.channels.cache.get(data.channelID);
 
         if (data.edit == true ) {
-            const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
-            await DiscordChannel.bulkDelete(fetched)
+            try {
+                const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
+                await DiscordChannel.bulkDelete(fetched)
+            } catch (error) {}
         }
 
         let serverId = await data.serverID

@@ -166,10 +166,9 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
         let produtos = server.products
 
         produto.productName = req.body.productName,
-            produto.producDesc = req.body.producDesc,
-            produto.estoque = produtos.estoque,
-            produto.price = req.body.price,
-            produto.priceID = price.id
+        produto.producDesc = req.body.producDesc,
+        produto.price = req.body.price,
+        produto.priceID = price.id
         if (logo != null) {
             produto.productLogo = logo
         }
@@ -179,7 +178,6 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
 
 
         produtos[index] = produto;
-
 
         db.update('servers', req.body.serverID, {
             products: produtos
