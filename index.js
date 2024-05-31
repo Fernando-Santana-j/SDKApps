@@ -800,7 +800,6 @@ app.post('/perms/changeOne', async (req, res) => {
 
         permissions[index] = rolePermission
 
-        console.log(permissions);
         await db.update('servers', req.body.serverID, {
             permissions: permissions
         })
