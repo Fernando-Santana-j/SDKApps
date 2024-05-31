@@ -707,14 +707,14 @@ module.exports = (Discord, client) => {
                 }
 
 
-                if (interaction.customId == 'idiomaTicket') {
-                    if (!ticketOptions[interaction.user.id]) {
-                        ticketOptions[interaction.user.id] = {}
-                    }
-                    ticketOptions[interaction.user.id].idioma = interaction.values[0]
-                    interaction.deferReply();
-                    interaction.deleteReply()
-                }
+                // if (interaction.customId == 'idiomaTicket') {
+                //     if (!ticketOptions[interaction.user.id]) {
+                //         ticketOptions[interaction.user.id] = {}
+                //     }
+                //     ticketOptions[interaction.user.id].idioma = interaction.values[0]
+                //     interaction.deferReply();
+                //     interaction.deleteReply()
+                // }
                 if (interaction.customId == 'motivoTicket') {
                     if (!ticketOptions[interaction.user.id]) {
                         ticketOptions[interaction.user.id] = {}
@@ -739,8 +739,8 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId == 'createTicket') {
-                    if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].idioma || !ticketOptions[interaction.user.id].motivo) {
-                        interaction.reply({ content: "Adicione o idioma e o motivo primeiro!", ephemeral: true })
+                    if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].motivo) {
+                        interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
                     } else {
                         let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
                         if (findChannel) {

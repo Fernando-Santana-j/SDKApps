@@ -1,0 +1,84 @@
+#main-containner {
+    width: calc(100% - 18em);
+    position: relative;
+    top: 5em;
+    left: 18em;
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+    min-height: calc(100vh - 5em);
+    
+}
+#main-content-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: calc(100vh - 12em);
+    gap: 2em;
+    padding: 1em;
+    padding-right: 3em;
+    padding-left: 3em;
+    margin-top: 5em;
+}
+
+.itens-col{
+    padding: 1em;
+    min-width: 26em;
+    max-width: 32em;
+    height: max-content;
+    display: flex;
+    
+    flex-direction: column;
+    border-radius: var(--border-radius-mid);
+    background-color: var(--tertiary-color);
+}
+.itens-content-col{
+    flex: 1;
+    margin-top: 1.5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+#save-channel-ticket{
+    margin-top: 1.5em;
+}
+
+#add-ticket-motivo{
+    margin-top: 1.5em;
+}
+#motivo-name-ticket{
+    margin-bottom: 1em;
+}
+#motivos-config-row{
+    display: flex;
+    padding: 1em;
+    flex-direction: column;
+    gap: 1em;
+}
+.motivos-index-col{
+    display: flex;
+    align-items: center;
+    max-height: 4em;
+    gap: 0.8em;
+    justify-content: space-between;
+    .motivo-index-col-title{
+        width: 100%;
+        text-wrap: nowrap;
+        max-height: 4em;
+        word-wrap: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 1.2em;
+        font-weight: 400;
+        color: var(--color-text-primary);
+        font-family: 'poppins';
+    }
+    .motivo-index-config-button{
+        height: 3em !important;
+        width: fit-content !important;
+    }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title></title>
+    <link rel="stylesheet" href="<%= host %>/public/css/ticket.css">
+</head>
+<body>
+    <div id="body-containner">
+        <div id="config-motivo-popup-cotainner">
+
+        </div>
+        <div id="containner">
+            <%- include('./reusable/header.ejs',{index:6}) %>
+            <main id="main-containner">
+                <h1 class="title-col">Seu bot de tickets pessoal!</h1>
+                <p class="desc-col">Um bot de tickets completo e integrado com o sistema de vendas!</p>
+                <div id="main-content-row">
+                    <div class="itens-col">
+                        <h1 class="title-col">Canal do ticket!</h1>
+                        <p class="desc-col">Selecione qual canal ira aparecer a mensagem do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="bot-ticket-channel-list" placeholder="selecione o canal..." id="bot-ticket-channel">
+                            <datalist id="bot-ticket-channel-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button class="button-padrao" id="save-channel-ticket">Salvar</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Motivo!</h1>
+                        <p class="desc-col">Adicione os motivos do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <label class="lable-padrao" for="bot-config-channel">Nome do motivo</label>
+                            <input required type="text" class="input-padrao" placeholder="EX: Duvida, Suporte..." id="motivo-name-ticket">
+                            <label class="lable-padrao" for="bot-config-channel">Descrição do motivo</label>
+                            <textarea class="input-padrao" style="height: 6em !important;" placeholder="EX: Problema com uma compra!..." required id="motivo-desc-ticket"></textarea>
+                            <button class="button-padrao" id="add-ticket-motivo">Adicionar motivo</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Configurar motivos!</h1>
+                        <p class="desc-col">Configure os motivos do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div id="motivos-config-row">
+                            <% ticketOptions.motivos.forEach(element => { %>
+                                <div data-motivoID="<%= element.id %>" class="motivos-index-col">
+                                    <p title="<%= element.title %>" class="motivo-index-col-title"><%= element.title %></p>
+                                    <button class="button-padrao motivo-index-config-button">Configurar</button>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>          
+            </main>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="<%= host %>/public/js/ticket.js"></script>
+</body>
+</html>

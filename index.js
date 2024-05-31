@@ -124,6 +124,18 @@ process.on('unhandledRejection', error => {
     console.error('Unhandled promise rejection:', error);
 });
 
+process.on('unhandRejection', (reason, promise) => {
+    console.log(`🚫 Erro Detectado:\n\n` + reason, promise)
+});
+
+process.on('uncaughtException', (error, origin) => {
+    console.log(`🚫 Erro Detectado:\n\n` + error, origin)
+});
+
+process.on('uncaughtExceptionMonitor', (error, origin) => {
+    console.log(`🚫 Erro Detectado:\n\n` + error, origin)
+});
+
 
 
 
@@ -148,6 +160,7 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
+const { doc } = require("firebase/firestore");
 
 app.use('/', produtoRoutes);
 
@@ -543,7 +556,26 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
 
     const textChannels = channels.filter(channel => channel.type === 0);
 
-    res.render('ticket', { host: `${webConfig.host}`, user: user, server: server, channels: textChannels,})
+    let roles = guild.roles.cache
+    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false)
+
+    let ticketOptions = {
+        motivos:[],
+        permissions:[],
+        channel:'',
+        atend:{
+            start:'',
+            end:''
+        },
+        avaliacao: '',
+        log:''
+    }
+
+    if (server && 'ticketOptions' in server && 'motivos' in server) {
+        ticketOptions = server.ticketOptions
+    }
+
+    res.render('ticket', { host: `${webConfig.host}`, ticketOptions:ticketOptions,roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels,})
 })
 
 
@@ -820,25 +852,29 @@ app.post('/perms/get', async (req, res) => {
 
 app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) => {
     try {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+        return
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         var DiscordServer = await client.guilds.cache.get(req.body.serverID);
         if (server && DiscordServer) {
-            if (!res.headersSent) {
-                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o bot!' })
-            }
-            return
             if (req.file && DiscordServer.members.me) {
                 const uploadedFile = req.file;
                 const filePath = uploadedFile.path;
-                console.log(uploadedFile);
-                fs.readFile(filePath, (err, data) => {
+                fs.readFile(filePath, async(err, data) => {
                     if (err) {
                         console.error('Erro ao ler o arquivo:', err);
-                        return res.status(500).send('Erro ao processar o arquivo');
+                        return res.status(200).json({ success: false, data: 'Erro ao tentar alterar o avatar!' })
                     }
-                    console.log(data);
-                    const base64String = `data:image/jpeg;base64,${data.toString('base64')}`;
-                    DiscordServer.members.me.displayAvatarURL(base64String)
+                    try {
+                        await client.user.setAvatar(data)
+                    } catch (error) {
+                        console.log(error);
+                        if (!res.headersSent) {
+                            res.status(200).json({ success: false, data: 'Erro ao tentar alterar o avatar!' })
+                        }
+                    }
                     fs.unlink(filePath, (err) => {
                         if (err) {
                             console.error('Erro ao apagar o arquivo original:', err);
@@ -847,9 +883,13 @@ app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) 
                             return null
                         }
                     });
-                    res.status(200).json({ success: true });
+                    if (!res.headersSent) {
+                        res.status(200).json({ success: true, data: 'Avatar Alterado!' })
+                    }
                 });
-
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, data: 'Avatar Alterado!' })
+                }
             } else {
                 if (!res.headersSent) {
                     res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o bot!' })
@@ -874,6 +914,7 @@ app.post('/personalize/change', async (req, res) => {
             if (req.body.botName) {
                 var DiscordServer = await client.guilds.cache.get(req.body.serverID)
                 DiscordServer.members.me.setNickname(req.body.botName)
+                
                 if (!res.headersSent) {
                     res.status(200).json({ success: true, })
                 }
@@ -913,6 +954,97 @@ app.post('/personalize/change', async (req, res) => {
     }
 })
 
+
+app.post('/ticket/create', async(req,res)=>{
+    try {
+        let body = await req.body
+        const user = await client.users.fetch(body.userID);
+        require('./Discord/newTicketFunction')(client,{
+            guildId:body.guildId,
+            user:user
+        },body.ticketOptions)
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Ticket Criado aguarde ate que algum adiministrador entre em contato!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar criar o ticket!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/ticket/saveSend',async(req,res)=>{
+    try {
+        let body = await req.body
+        require('./Discord/createTicketMensage.js')(client,body.channelID,body.serverID)
+        let server = await db.findOne({colecao:'servers',doc: body.serverID})
+        let ticketOptions = {
+            motivos:[],
+            permissions:[],
+            channel:'',
+            atend:{
+                start:'',
+                end:''
+            },
+            avaliacao: '',
+            log:''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        ticketOptions.channel = body.channelID
+        db.update('servers',body.serverID,{
+            ticketOptions: ticketOptions
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Mensagem do ticket enviada!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar criar a mensagem do ticket!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/ticket/motivoADD',async(req,res)=>{
+    try {
+        let body = await req.body
+        let server = await db.findOne({colecao:'servers',doc: body.serverID})
+        let ticketOptions = {
+            motivos:[],
+            permissions:[],
+            channel:'',
+            atend:{
+                start:'',
+                end:''
+            },
+            avaliacao: '',
+            log:''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        let id = require('crypto').randomBytes(22).toString('base64').slice(0, 22).replace(/\+/g, '0').replace(/\//g, '0');
+        let premotivo = body.motivo
+        premotivo.id = id
+        premotivo.cargos = []
+        
+        ticketOptions.motivos.push(premotivo)
+        db.update('servers',body.serverID,{
+            ticketOptions: ticketOptions
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Motivo adicionado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar adicionar o motivo!' })
+        }
+        console.log(error);
+    }
+})
 
 app.post('/send/discordMensage', async (req, res) => {
     try {

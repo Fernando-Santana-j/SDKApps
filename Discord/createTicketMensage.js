@@ -24,11 +24,13 @@ module.exports = async (client, channelID, serverID) => {
                     .setPlaceholder('Selecione o seu idioma!')
                     .setMinValues(1)
                     .setMaxValues(1)
+                    .setDisabled(true)
                     .addOptions(
                         await new Discord.StringSelectMenuOptionBuilder()
                             .setLabel('Português ')
                             .setDescription('Idioma original')
-                            .setValue('pt'),
+                            .setValue('pt')
+                            .setDefault(true),
                         await new Discord.StringSelectMenuOptionBuilder()
                             .setLabel('Inglês')
                             .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
