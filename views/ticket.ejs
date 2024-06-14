@@ -155,6 +155,10 @@
     <script defer>
         let serverDays = JSON.parse(new DOMParser().parseFromString(document.getElementById('getTicketOptions').getAttribute('data-ticketOptions'), 'text/html').body.textContent);
         serverDays = serverDays.atend
+        let daysS = []
+        if ('days' in serverDays) {
+            daysS = serverDays.days
+        }
         let horarioTicketPreData = {
             days:[...serverDays.days],
             init:serverDays.start,
