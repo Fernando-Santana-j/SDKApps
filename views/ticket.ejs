@@ -151,21 +151,21 @@
     </div>
     <div>
         <div id="getTicketOptions" data-ticketOptions="<%= JSON.stringify(ticketOptions) %>"></div>
-        <script>
-            let serverDays = JSON.parse(new DOMParser().parseFromString(document.getElementById('getTicketOptions').getAttribute('data-ticketOptions'), 'text/html').body.textContent);
-            serverDays = serverDays.atend
-            let horarioTicketPreData = {
-                days:[...serverDays.days],
-                init:serverDays.start,
-                end:serverDays.end 
-            }
-            let buttonsSemana = document.querySelectorAll('.semana-buttons-col').forEach(async element=>{
-                if (await serverDays.days.includes(element.getAttribute('data-name'))) {
-                    element.classList.add('semana-select')
-                }
-            })
-        </script>
     </div>
+    <script defer>
+        let serverDays = JSON.parse(new DOMParser().parseFromString(document.getElementById('getTicketOptions').getAttribute('data-ticketOptions'), 'text/html').body.textContent);
+        serverDays = serverDays.atend
+        let horarioTicketPreData = {
+            days:[...serverDays.days],
+            init:serverDays.start,
+            end:serverDays.end 
+        }
+        let buttonsSemana = document.querySelectorAll('.semana-buttons-col').forEach(async element=>{
+            if (await serverDays.days.includes(element.getAttribute('data-name'))) {
+                element.classList.add('semana-select')
+            }
+        })
+    </script>
     <%- include('./reusable/script.ejs') %>
     <script src="<%= host %>/public/js/ticket.js"></script>
 </body>
