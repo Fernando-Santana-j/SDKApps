@@ -207,6 +207,15 @@ a {
     color: var(--color-text-primary);
     font-family: 'poppins';
 }
+.mini-title-col {
+    margin-bottom: 0.5em;
+    width: 100%;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+}
 
 .desc-col {
     width: 100%;

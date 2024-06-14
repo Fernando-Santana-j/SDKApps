@@ -1,7 +1,6 @@
 let functions = require('../../../functions')
 const Discord = require("discord.js");
 let db = require('../../../Firebase/models');
-const { doc } = require('firebase/firestore');
 
 module.exports = {
     name: 'enviar',

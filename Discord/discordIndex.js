@@ -22,7 +22,7 @@ var preCarrinhos = {}
 let ticketOptions = {}
 let cupomOptions = {}
 
-module.exports = (Discord, client) => {
+module.exports = (Discord2, client) => {
 
     try {
         async function calcTaxa(price) {
@@ -75,24 +75,33 @@ module.exports = (Discord, client) => {
                     }
                 }
             } catch (error) {
-                console.log(error);
+                // console.log(error);
             }
         });
 
         client.on('interactionCreate', async (interaction) => {
             try {
-
-                var DiscordServer = await client.guilds.cache.get(interaction.guildId);
-                var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
-                let verifyPerms = await functions.verifyPermissions(interaction.user.id, interaction.guildId, Discord, client)
-                if (verifyPerms.error == true) {
-                    return
+                var DiscordServer = null
+                var DiscordChannel = null
+                if (interaction.guildId != 'null') {
+                    DiscordServer = await client.guilds.cache.get(interaction.guildId);
                 }
-                if (verifyPerms.perms.owner == false && verifyPerms.perms.command == false) {
-                    interaction.reply({ content: 'Você não tem permissão para executar comandos', ephemeral: true })
-                    return
+                if (interaction.channelId != 'null' && DiscordServer) {
+                    DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
                 }
 
+                if (interaction.guildId && DiscordServer) {
+                    let verifyPerms = await functions.verifyPermissions(interaction.user.id, interaction.guildId, Discord, client)
+                    if (verifyPerms.error == true) {
+                        return
+                    }
+                    if (verifyPerms.perms.owner == false && verifyPerms.perms.command == false) {
+                        interaction.reply({ content: 'Você não tem permissão para executar comandos', ephemeral: true })
+                        return
+                    }
+
+
+                }
 
                 async function createRemoveEmbend() {
                     try {
@@ -707,14 +716,14 @@ module.exports = (Discord, client) => {
                 }
 
 
-                if (interaction.customId == 'idiomaTicket') {
-                    if (!ticketOptions[interaction.user.id]) {
-                        ticketOptions[interaction.user.id] = {}
-                    }
-                    ticketOptions[interaction.user.id].idioma = interaction.values[0]
-                    interaction.deferReply();
-                    interaction.deleteReply()
-                }
+                // if (interaction.customId == 'idiomaTicket') {
+                //     if (!ticketOptions[interaction.user.id]) {
+                //         ticketOptions[interaction.user.id] = {}
+                //     }
+                //     ticketOptions[interaction.user.id].idioma = interaction.values[0]
+                //     interaction.deferReply();
+                //     interaction.deleteReply()
+                // }
                 if (interaction.customId == 'motivoTicket') {
                     if (!ticketOptions[interaction.user.id]) {
                         ticketOptions[interaction.user.id] = {}
@@ -724,13 +733,97 @@ module.exports = (Discord, client) => {
                     interaction.deleteReply()
                 }
 
+                if (interaction.customId && interaction.customId.includes('ticketAvalStart')) {
+                    try {
+                        let embed = interaction.message.embeds[0].data
+                        let serverData = await db.findOne({ colecao: "servers", doc: embed.fields[3].value })
+                        let DiscordServer2 = await client.guilds.cache.get(embed.fields[3].value)
+                        var logChannel = await DiscordServer2.channels.cache.get(serverData.ticketOptions.log)
+                        let userRespo = await client.users.fetch(embed.fields[1].value)
+                        let starCount = interaction.customId.replace('ticketAvalStart-', '')
+                        logChannel.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setColor('#6E58C7')
+                                    .setTitle(`🌟・Nova avaliação!`)
+                                    .setDescription(`O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
+                                    .setFields({ name: "Responsavel pelo ticket", value: userRespo.username, inline: true }, { name: "ID do Responsavel", value: userRespo.id, inline: true })
+                            ],
+                        })
+                        interaction.reply({ content: "Obrigado por sua avaliação!", ephemeral: true, })
+
+
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+
                 if (interaction.customId && interaction.customId.includes('closeTicket')) {
-                    let protocolo = interaction.customId.replace('closeTicket-', "")
-                    let findChannel = DiscordServer.channels.cache.find(c => c.topic == protocolo)
-                    if (findChannel) {
+                    let protocolo = DiscordChannel.topic
+                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+                    const user = await client.users.fetch(userTicketID)
+                    if (DiscordChannel) {
                         try {
-                            findChannel.delete()
-                            dataBase.collection('tickets').doc(protocolo).delete()
+                            let embed = interaction.message.embeds[0].data
+                            if (embed.fields[3]) {
+                                try {
+                                    const userResp = await client.users.fetch(embed.fields[3].value.replace(/`/g, ""))
+                                    user.send({
+                                        embeds: [
+                                            new Discord.EmbedBuilder()
+                                                .setColor('#6E58C7')
+                                                .setTitle(`⚠・Seu ticket foi fechado!`)
+                                                .setDescription(`Agora que seu ticket foi fechado nos ajude avaliando o responsavel pelo seu ticket abaixo tera 5 estrelas caso você marque a primeira estara avaliando com 1 estrela e a ultima seram 5!`)
+                                                .setFields({ name: "Responsavel pelo ticket", value: userResp.username, inline: true }, { name: "ID do Responsavel", value: userResp.id, inline: true }, { name: "Servidor", value: DiscordServer.name, inline: false }, { name: "Servidor ID", value: interaction.guildId, inline: true })
+                                        ],
+                                        components: [
+                                            new Discord.ActionRowBuilder()
+                                                .addComponents(
+                                                    new Discord.ButtonBuilder()
+                                                        .setStyle(Discord.ButtonStyle.Danger)
+                                                        .setLabel('⭐ - 1')
+                                                        .setCustomId('ticketAvalStart-1')
+                                                )
+                                                .addComponents(
+                                                    new Discord.ButtonBuilder()
+                                                        .setStyle(Discord.ButtonStyle.Secondary)
+                                                        .setLabel('⭐ - 2')
+                                                        .setCustomId('ticketAvalStart-2')
+                                                )
+                                                .addComponents(
+                                                    new Discord.ButtonBuilder()
+                                                        .setStyle(Discord.ButtonStyle.Primary)
+                                                        .setLabel('⭐ - 3')
+                                                        .setCustomId('ticketAvalStart-3')
+                                                )
+                                                .addComponents(
+                                                    new Discord.ButtonBuilder()
+                                                        .setStyle(Discord.ButtonStyle.Secondary)
+                                                        .setLabel('⭐ - 4')
+                                                        .setCustomId('ticketAvalStart-4')
+                                                )
+                                                .addComponents(
+                                                    new Discord.ButtonBuilder()
+                                                        .setStyle(Discord.ButtonStyle.Success)
+                                                        .setLabel('⭐ - 5')
+                                                        .setCustomId('ticketAvalStart-5')
+                                                )
+                                        ]
+                                    })
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+
+                            DiscordChannel.delete()
+                            db.delete('tickets',protocolo)
+                            const voiceChannel = DiscordServer.channels.cache.find(channel =>
+                                channel.type === 2 && channel.name == DiscordChannel.name
+                            );
+
+                            if (voiceChannel) {
+                                voiceChannel.delete()
+                            }
                         } catch (error) { }
 
                     } else {
@@ -739,35 +832,286 @@ module.exports = (Discord, client) => {
                 }
 
                 if (interaction.customId == 'createTicket') {
-                    if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].idioma || !ticketOptions[interaction.user.id].motivo) {
-                        interaction.reply({ content: "Adicione o idioma e o motivo primeiro!", ephemeral: true })
-                    } else {
-                        let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
-                        if (findChannel) {
-                            interaction.reply({
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor("#C21010")
-                                        .setTitle(`⚠️| Você já possui um ticket aberto!`)
-                                        .setDescription(`Clique no botão abaixo para ir ate ele!`)
-                                ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('🎫・Ir para o Ticket')
-                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                                        )
-                                ],
-                                ephemeral: true
-                            })
-                        } else {
-                            require('./newTicketFunction')(client, interaction, ticketOptions[interaction.user.id])
-                        }
+                    let serverData = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+                    if (!serverData) {
+                        return interaction.reply({ content: "Não foi possivel localizar os dados do ticket!", ephemeral: true })
+                    }
+                    let semanaDays = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
+                    let semanaDaysServer = serverData.ticketOptions.atend.days
+                    let atend = serverData.ticketOptions.atend
+                    const today = new Date();
+                    const dayIndex = today.getDay();
+                    let todayInArray = semanaDaysServer.includes(semanaDays[dayIndex])
+                    const hora = `${today.getHours()}:${today.getMinutes()}`
 
+
+                    function isTimeAfter(referenceTime, checkTime) {
+                        // Divide as horas e minutos
+                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+
+                        // Compara as horas e minutos
+                        if (checkHours >= refHours) {
+                            return true;
+                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                            return true;
+                        }
+                        return false;
                     }
 
+                    function isTimeBefore(referenceTime, checkTime) {
+                        // Divide as horas e minutos
+                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+
+                        // Compara as horas e minutos
+                        if (checkHours <= refHours) {
+                            return true;
+                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    let checkTimeBefore = isTimeBefore(atend.end, hora)
+                    let checkTimeAfter = isTimeAfter(atend.start, hora)
+                    if (checkTimeAfter == true && checkTimeBefore == true && todayInArray) {
+                        if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].motivo) {
+                            interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
+                            return
+                        } else {
+                            let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
+                            if (findChannel) {
+                                interaction.reply({
+                                    embeds: [
+                                        new Discord.EmbedBuilder()
+                                            .setColor("#C21010")
+                                            .setTitle(`⚠️| Você já possui um ticket aberto!`)
+                                            .setDescription(`Clique no botão abaixo para ir ate ele!`)
+                                    ],
+                                    components: [
+                                        new Discord.ActionRowBuilder()
+                                            .addComponents(
+                                                new Discord.ButtonBuilder()
+                                                    .setStyle(5)
+                                                    .setLabel('🎫・Ir para o Ticket')
+                                                    .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                                            )
+                                    ],
+                                    ephemeral: true
+                                })
+                            } else {
+                                require('./newTicketFunction')(client, interaction, ticketOptions[interaction.user.id])
+                            }
+
+                        }
+                    } else {
+                        return interaction.reply({ content: `O sistema de ticket não esta funcionando nesse periodo apenas nos dias de ${semanaDaysServer.join(', ')} e no horario de ${atend.start} ate ${atend.end} !`, ephemeral: true })
+                    }
+
+
+
+                }
+
+
+
+                if (interaction.customId && interaction.customId.includes('assumirTicket')) {
+                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+
+                    if (interaction.user.id == userTicketID) {
+                        interaction.reply({ content: 'Você não pode assumir o seu proprio ticket!', ephemeral: true })
+                        return
+                    }
+                    const user = await client.users.fetch(userTicketID)
+
+                    user.send({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor('#6E58C7')
+                                .setTitle(`⚠・Nova notificação!`)
+                                .setDescription(`O usuario ${interaction.user.username} assumiu o seu ticket no servidor ${DiscordServer.name} e logo ira lhe responder, clique no botão abaixo para ser redirecionado! \n\n Protocolo do ticket: ${DiscordChannel.topic}`)
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('🎟・Ir para o Ticket')
+                                        .setURL(`https://discord.com/channels/${interaction.guild.id}/${interaction.channelId}`)
+                                )
+                        ]
+                    })
+                    let embed = interaction.message.embeds[0].data
+                    let generateProtocol = interaction.customId.replace('assumirTicket-', '')
+                    interaction.message.edit({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor(embed.color)
+                                .setTitle(embed.title)
+                                .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
+                                .setDescription(embed.description)
+                                .setFields(...embed.fields, { name: `**Assumido**`, value: "`" + interaction.user.id + "`", inline: true })
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(Discord.ButtonStyle.Primary)
+                                        .setLabel('⏰・Notificar usuario')
+                                        .setCustomId(`notifyTicket-${generateProtocol}`)
+                                )
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(Discord.ButtonStyle.Primary)
+                                        .setLabel('📞・Criar canal de voz')
+                                        .setCustomId(`voiceTicket-${generateProtocol}`)
+                                )
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(Discord.ButtonStyle.Danger)
+                                        .setLabel('❌・Fechar Ticket')
+                                        .setCustomId(`closeTicket-${generateProtocol}`)
+                                )
+
+                        ],
+                    })
+                    interaction.reply(`Ticket assumido por: ${interaction.user.username}`)
+                }
+
+
+                if (interaction.customId && interaction.customId.includes('voiceTicket')) {
+                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+
+                    if (interaction.user.id == userTicketID) {
+                        interaction.reply({ content: 'Você não pode executar essa função!', ephemeral: true })
+                        return
+                    }
+                    let embed = interaction.message.embeds[0].data
+                    let generateProtocol = interaction.customId.replace('voiceTicket-', '')
+                    let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets')
+                    if (!categoria) {
+                        categoria = await DiscordServer.channels.create({
+                            name: 'Tickets',
+                            type: Discord.ChannelType.GuildCategory,
+                            permissionOverwrites: [{
+                                id: DiscordServer.roles.everyone,
+                                deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+                            }]
+                        });
+                    }
+
+                    const voiceChannel = await DiscordServer.channels.create({
+                        name: DiscordChannel.name,
+                        type: 2,
+                        permissionOverwrites: [{
+                            id: interaction.user.id,
+                            allow: [Discord.PermissionsBitField.Flags.UseVAD, Discord.PermissionsBitField.Flags.Stream, Discord.PermissionsBitField.Flags.Speak, Discord.PermissionsBitField.Flags.ViewChannel, Discord.PermissionsBitField.Flags.Connect, Discord.PermissionsBitField.Flags.PrioritySpeaker]
+                        }, {
+                            id: userTicketID,
+                            allow: [Discord.PermissionsBitField.Flags.UseVAD, Discord.PermissionsBitField.Flags.Stream, Discord.PermissionsBitField.Flags.Speak, Discord.PermissionsBitField.Flags.ViewChannel, Discord.PermissionsBitField.Flags.Connect]
+                        }, {
+                            id: DiscordServer.roles.everyone,
+                            deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+                        }],
+                        parent: categoria
+                    });
+                    const user = await client.users.fetch(userTicketID)
+
+                    user.send({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor('#6E58C7')
+                                .setTitle(`⚠・Nova notificação!`)
+                                .setDescription(`O usuario ${interaction.user.username} criou um canal de voz para o seu ticket no servidor ${DiscordServer.name} entre no canal de voz e aguarde o responsavel, clique no botão abaixo para ser redirecionado! \n\n Protocolo do ticket: ${DiscordChannel.topic}`)
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('🎟・Ir para o canal de voz')
+                                        .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
+                                )
+                        ]
+                    })
+                    DiscordChannel.send({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor('#6E58C7')
+                                .setTitle(`⚠・Nova notificação!`)
+                                .setDescription(`O usuario ${interaction.user.username} criou um canal de voz para o ticket!`)
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('🎟・Ir para o canal de voz')
+                                        .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
+                                )
+                        ]
+                    })
+
+                    interaction.message.edit({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor(embed.color)
+                                .setTitle(embed.title)
+                                .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
+                                .setDescription(embed.description)
+                                .setFields(...embed.fields)
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(Discord.ButtonStyle.Primary)
+                                        .setLabel('⏰・Notificar usuario')
+                                        .setCustomId(`notifyTicket-${generateProtocol}`)
+                                )
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(Discord.ButtonStyle.Danger)
+                                        .setLabel('❌・Fechar Ticket')
+                                        .setCustomId(`closeTicket-${generateProtocol}`)
+                                )
+
+                        ],
+                    })
+                }
+
+
+                if (interaction.customId && interaction.customId.includes('notifyTicket')) {
+                    let serverData = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+                    if (interaction && serverData) {
+                        let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+
+                        if (interaction.user.id == userTicketID) {
+                            interaction.reply({ content: 'Você não pode usar essa função!', ephemeral: true })
+                            return
+                        }
+                        const user = await client.users.fetch(userTicketID)
+                        user.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setColor('#6E58C7')
+                                    .setTitle(`⚠・Nova notificação!`)
+                                    .setDescription(`O moderador ${interaction.user.username} está pedindo sua atenção no ticket que você criou no servidor ${DiscordServer.name}, clique no botão abaixo para ser redirecionado! \n\n Protocolo do ticket: ${DiscordChannel.topic}`)
+                            ],
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(5)
+                                            .setLabel('🎟・Ir para o Ticket')
+                                            .setURL(`https://discord.com/channels/${interaction.guild.id}/${interaction.channelId}`)
+                                    )
+                            ]
+                        })
+                        interaction.reply({ content: `O usuario ${user.username} foi notificado na dm!`, ephemeral: true })
+                    } else {
+                        interaction.reply({ content: "Erro ao executar o comando!", ephemeral: true })
+                    }
                 }
 
                 if (interaction.customId == 'cupomADD') {
@@ -1045,7 +1389,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
-                const concatenatedString = await fields.map(obj =>  `${obj.name} - ${obj.value.replace(/``/g, '')}`).join('\n');
+                const concatenatedString = await fields.map(obj => `${obj.value.replace(/``/g, '')}`).join('\n');
                 const buffer = Buffer.from(concatenatedString, 'utf-8');
                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                 function sendTxtMensage(target) {
@@ -1058,19 +1402,17 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                 .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                         ],
-                    }).catch(() => {
-                        sendTxtMensage(user)
                     })
-                    target.send({ files: [attachment] }).catch(()=>{});
+                    target.send({ files: [attachment] }).catch(() => { });
                 }
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
                 findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
-                if (fields.length > 25) {
+              
+                if (fields.length >= 25) {
                     sendTxtMensage(findChannel)
                     sendTxtMensage(user)
                     sendTxtMensage(dono)
-                    
                 } else {
                     try {
                         await dono.send({
@@ -1108,8 +1450,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         }).catch(() => {
                             sendTxtMensage(user)
                         })
-                        // user.send({ files: [attachment] }).catch(() => { });
-                        
                         findChannel.send({
                             embeds: [
                                 new Discord.EmbedBuilder()
@@ -1120,7 +1460,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                     .addFields(...fields)
                                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                             ],
-    
                             components: [
                                 new Discord.ActionRowBuilder()
                                     .addComponents(

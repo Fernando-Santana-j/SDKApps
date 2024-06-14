@@ -295,7 +295,6 @@ module.exports = {
         const mes = String(data.getMonth() + 1).padStart(2, '0');
         const ano = data.getFullYear();
         return dia + '/' + mes + '/' + ano;
-    }
-
+    },
 
 }

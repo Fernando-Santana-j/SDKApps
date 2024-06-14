@@ -33,7 +33,7 @@
             </main>
         </div>
     </div>
-    <%- include('./reusable/chatLive.ejs',{user:user}) %>
+    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
     <script>
         let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))

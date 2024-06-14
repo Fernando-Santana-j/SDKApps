@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title></title>
+    <link rel="stylesheet" href="<%= host %>/public/css/ticket.css">
+</head>
+<body>
+    <div id="body-containner">
+        <div id="config-motivo-popup-cotainner" style="display: none;" data-motivoID="">
+            <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.301);" class="close-config-motivo-popup"></div>
+            <div id="config-motivo-popup-content">
+                <div id="config-motivo-popup-top">
+                    <div class="space"></div>
+                    <div class="title-col">Edite o motivo do seu bot!</div>
+                    <div id="buttonClose" class="close-config-motivo-popup"><svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg></div>
+                </div>
+                <div id="config-motivo-popup-edit">
+                    <div style="width: 100%;">
+                        <label class="lable-padrao" for="config-motivo-popup-edit-name">Nome do motivo</label>
+                    <input required type="text" class="input-padrao" placeholder="EX: Duvida, Suporte..." id="config-motivo-popup-edit-name">
+                    </div>
+                    <div style="width: 100%;">
+                        <label class="lable-padrao" for="config-motivo-popup-edit-desc">Descrição do motivo</label>
+                    <textarea class="input-padrao" style="height: 6em !important;" placeholder="EX: Problema com uma compra!..." required id="config-motivo-popup-edit-desc"></textarea>
+                    </div>
+                    <div style="width: 100%;">
+                        <label class="lable-padrao" for="config-motivo-popup-edit-desc">Responsavel pelo motivo</label>
+                        <input required type="text" class="input-padrao" list="motivo-responsavel-ticket-edit-list" placeholder="selecione o canal..." id="motivo-responsavel-ticket-edit">
+                        <datalist id="motivo-responsavel-ticket-edit-list">
+                            <% JSON.parse(roles).forEach(element => { %>
+                                <option data-roleID="<%= element.id %>" value="<%= element.name %>"></option>
+                            <% }) %>
+                        </datalist>
+                    </div>
+                    <div id="config-motivo-popup-buttons">
+                        <button class="button-padrao" id="save-motivo-edit">Salvar</button>
+                        <button class="button-padrao redColor" id="exclud-motivo-edit">Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="containner">
+            <%- include('./reusable/header.ejs',{index:6}) %>
+            <main id="main-containner">
+                <h1 class="title-col">Seu bot de tickets pessoal!</h1>
+                <p class="desc-col">Um bot de tickets completo e integrado com o sistema de vendas!</p>
+                <div id="main-content-row">
+                    <div class="itens-col">
+                        <h1 class="title-col">Canal do ticket!</h1>
+                        <p class="desc-col">Selecione qual canal ira aparecer a mensagem do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="bot-ticket-channel-list" placeholder="selecione o canal..." id="bot-ticket-channel">
+                            <datalist id="bot-ticket-channel-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button class="button-padrao" id="save-channel-ticket">Salvar</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Log publico!</h1>
+                        <p class="desc-col">Selecione abaixo um canal que você deseja que apareca publicamente as avalições que os usuarios enviam para um ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="bot-ticket-publiclog-list" placeholder="selecione o canal..." id="bot-ticket-publiclog">
+                            <datalist id="bot-ticket-publiclog-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button class="button-padrao" id="save-publicLog-ticket">Salvar</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Horario de atendimento!</h1>
+                        <p class="desc-col">Adicione abaixo que horas inicia e termina e os dias de atendimento do suporte!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <div id="semana-containnenr">
+                                <h4 class="mini-title-col">Selecione abaixo os dias que o suporte ira funcionar</h4>
+                                <div id="semana-buttons-row">
+                                    <button data-name="segunda" class="semana-buttons-col">Segunda-Feira</button>
+                                    <button data-name="terca" class="semana-buttons-col">Terça-Feira</button>
+                                    <button data-name="quarta" class="semana-buttons-col">Quarta-Feira</button>
+                                    <button data-name="quinta" class="semana-buttons-col">Quinta-Feira</button>
+                                    <button data-name="sexta" class="semana-buttons-col">Sexta-Feira</button>
+                                    <button data-name="sabado" class="semana-buttons-col">Sabado</button>
+                                    <button data-name="domingo" class="semana-buttons-col">Domingo</button>
+                                </div>
+                            </div>
+                            <h4 class="mini-title-col">Adicione abaixo o horario de atendimento</h4>
+                            <div id="horas-containner">
+                                <div class="horas-col">
+                                    <label for="init-sup-horas" class="lable-padrao">Hora de inicio</label>
+                                    <input type="time" value="<%= ticketOptions.atend.start ? ticketOptions.atend.start : "" %>" class="input-padrao" id="init-sup-horas">
+                                </div>
+                                <div class="horas-col">
+                                    <label for="end-sup-horas" class="lable-padrao">Hora de encerramento</label>
+                                    <input type="time" value="<%= ticketOptions.atend.end ? ticketOptions.atend.end : "" %>" class="input-padrao" id="end-sup-horas">
+                                </div>
+                            </div>
+                            <button class="button-padrao" id="save-horario-date-ticket">Salvar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="itens-col">
+                        <h1 class="title-col">Motivo!</h1>
+                        <p class="desc-col">Adicione os motivos do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <div style="width: 100%;">
+                                <label class="lable-padrao" for="motivo-name-ticket">Nome do motivo</label>
+                                <input required type="text" class="input-padrao" placeholder="EX: Duvida, Suporte..." id="motivo-name-ticket">
+                            </div>
+                            <div style="width: 100%;">
+                                <label class="lable-padrao" for="motivo-desc-ticket">Descrição do motivo</label>
+                                <textarea class="input-padrao" style="height: 6em !important;" placeholder="EX: Problema com uma compra!..." required id="motivo-desc-ticket"></textarea>
+                            </div>
+                            <div style="width: 100%;">
+                                <label class="lable-padrao" for="motivo-responsavel-ticket">Cargo responsavel pelo motivo</label>
+                                <input required type="text" class="input-padrao" list="motivo-responsavel-ticket-list" placeholder="selecione o canal..." id="motivo-responsavel-ticket">
+                                <datalist id="motivo-responsavel-ticket-list">
+                                    <% JSON.parse(roles).forEach(element => { %>
+                                        <option data-roleID="<%= element.id %>" value="<%= element.name %>"></option>
+                                    <% }) %>
+                                </datalist>
+                            </div>
+                            <button class="button-padrao" id="add-ticket-motivo">Adicionar motivo</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Configurar motivos!</h1>
+                        <p class="desc-col">Configure os motivos do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div id="motivos-config-row">
+                            <% ticketOptions.motivos.forEach(element => { %>
+                                <div data-motivoID="<%= element.id %>" class="motivos-index-col">
+                                    <p title="<%= element.name %>" class="motivo-index-col-title"><%= element.name %></p>
+                                    <button class="button-padrao motivo-index-config-button">Configurar</button>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                    
+                </div>          
+            </main>
+        </div>
+    </div>
+    <div>
+        <div id="getTicketOptions" data-ticketOptions="<%= JSON.stringify(ticketOptions) %>"></div>
+        <script>
+            let serverDays = JSON.parse(new DOMParser().parseFromString(document.getElementById('getTicketOptions').getAttribute('data-ticketOptions'), 'text/html').body.textContent);
+            serverDays = serverDays.atend
+            let horarioTicketPreData = {
+                days:[...serverDays.days],
+                init:serverDays.start,
+                end:serverDays.end 
+            }
+            let buttonsSemana = document.querySelectorAll('.semana-buttons-col').forEach(async element=>{
+                if (await serverDays.days.includes(element.getAttribute('data-name'))) {
+                    element.classList.add('semana-select')
+                }
+            })
+        </script>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="<%= host %>/public/js/ticket.js"></script>
+</body>
+</html>
