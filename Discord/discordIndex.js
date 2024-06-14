@@ -1389,7 +1389,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
-
                 const concatenatedString = await fields.map(obj => `${obj.value.replace(/``/g, '')}`).join('\n');
                 const buffer = Buffer.from(concatenatedString, 'utf-8');
                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
@@ -1409,11 +1408,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
                 findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
+              
                 if (fields.length >= 25) {
                     sendTxtMensage(findChannel)
                     sendTxtMensage(user)
                     sendTxtMensage(dono)
-
                 } else {
                     try {
                         await dono.send({
@@ -1451,8 +1450,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         }).catch(() => {
                             sendTxtMensage(user)
                         })
-                        // user.send({ files: [attachment] }).catch(() => { });
-
                         findChannel.send({
                             embeds: [
                                 new Discord.EmbedBuilder()
@@ -1463,7 +1460,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                     .addFields(...fields)
                                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                             ],
-
                             components: [
                                 new Discord.ActionRowBuilder()
                                     .addComponents(
