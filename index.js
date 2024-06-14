@@ -138,6 +138,10 @@ process.on('uncaughtExceptionMonitor', (error, origin) => {
 
 
 
+client.on('guildCreate', guild => {
+    console.log(guild);
+
+})
 
 
 
@@ -160,7 +164,6 @@ app.use('/', stripeRoutes);
 //TODO PRODUTOS ROUTES
 
 const produtoRoutes = require('./stripe/productsRoutes.js');
-const { doc } = require("firebase/firestore");
 
 app.use('/', produtoRoutes);
 
@@ -171,7 +174,7 @@ app.use('/', produtoRoutes);
 
 
 app.get('/', async (req, res) => {
-    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user:{id:req.session.uid ? req.session.uid : null}, error: req.query.error ? req.query.error : '' })
+    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
 })
 
 
@@ -210,7 +213,12 @@ app.get('/dashboard', async (req, res) => {
                 lastServers: lastServers
             })
         }
-        res.render('dashboard', { host: `${webConfig.host}`, user: user, servers: servidoresEnd })
+        let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+        let chatItens = []
+        if ('ticketOptions' in adminServer) {
+            chatItens = adminServer.ticketOptions.motivos
+        }
+        res.render('dashboard', { host: `${webConfig.host}`, chatItens: chatItens, user: user, servers: servidoresEnd })
 
 
     } else {
@@ -369,7 +377,12 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
     let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
 
-    res.render('painel', { host: `${webConfig.host}`, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('painel', { host: `${webConfig.host}`, chatItens:chatItens, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
@@ -406,8 +419,12 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     const channels = guild.channels.cache;
 
     const textChannels = channels.filter(channel => channel.type === 0);
-
-    res.render('sales', { perms: verifyPerms.perms, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
+    let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('sales', { perms: verifyPerms.perms,chatItens:chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
 })
 
 
@@ -456,8 +473,12 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
             id: role.id
         };
     });
-
-    res.render('personalize', { host: `${webConfig.host}`, cargos: roleObjects, user: user, server: server })
+    let adminServer = await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('personalize', { host: `${webConfig.host}`,chatItens:chatItens, cargos: roleObjects, user: user, server: server })
 })
 
 app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
@@ -486,7 +507,12 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
         }
     }
     paymentMetod = JSON.stringify(paymentMetod)
-    res.render('analytics', { host: `${webConfig.host}`, user: user, server: server, paymentMetod: paymentMetod, canceladosEstoque: canceladosEstoque, reebolsos: reebolsos, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    let adminServer =  await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+        let chatItens = []
+        if (adminServer && 'ticketOptions' in adminServer) {
+            chatItens = adminServer.ticketOptions.motivos
+        }
+    res.render('analytics', { host: `${webConfig.host}`,chatItens:chatItens, user: user, server: server, paymentMetod: paymentMetod, canceladosEstoque: canceladosEstoque, reebolsos: reebolsos, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
@@ -519,8 +545,13 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
     }
     let guild = guilds.get(serverID)
     let roles = guild.roles.cache
-    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false)
-    res.render('perms', { host: `${webConfig.host}`, user: user, server: server, roles: JSON.stringify(rolesFilter) })
+    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
+    let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+        let chatItens = []
+        if (adminServer && 'ticketOptions' in adminServer) {
+            chatItens = adminServer.ticketOptions.motivos
+        }
+    res.render('perms', { host: `${webConfig.host}`,chatItens:chatItens, user: user, server: server, roles: JSON.stringify(rolesFilter) })
 })
 
 
@@ -557,25 +588,31 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
     const textChannels = channels.filter(channel => channel.type === 0);
 
     let roles = guild.roles.cache
-    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false)
+    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
 
     let ticketOptions = {
-        motivos:[],
-        permissions:[],
-        channel:'',
-        atend:{
-            start:'',
-            end:''
+        motivos: [],
+        permissions: [],
+        channel: '',
+        atend: {
+            start: '',
+            end: '',
+            days: []
         },
         avaliacao: '',
-        log:''
+        log: ''
     }
 
-    if (server && 'ticketOptions' in server && 'motivos' in server) {
+    if ('ticketOptions' in server) {
         ticketOptions = server.ticketOptions
     }
 
-    res.render('ticket', { host: `${webConfig.host}`, ticketOptions:ticketOptions,roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels,})
+    let adminServer =  await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+        let chatItens = []
+        if (adminServer && 'ticketOptions' in adminServer) {
+            chatItens = adminServer.ticketOptions.motivos
+        }
+    res.render('ticket', { host: `${webConfig.host}`,chatItens:chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
 
@@ -598,7 +635,13 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
         const channels = guild.channels.cache;
 
         const textChannels = channels.filter(channel => channel.type === 0);
-        res.render('config', { host: `${webConfig.host}`, user: user, channels: textChannels, server: server })
+        let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+        let chatItens = []
+        if (adminServer && 'ticketOptions' in adminServer) {
+            chatItens = adminServer.ticketOptions.motivos
+        }
+        
+        res.render('config', { host: `${webConfig.host}`,chatItens:chatItens, user: user, channels: textChannels, server: server })
     } catch (error) {
 
     }
@@ -607,7 +650,7 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
 
 
 app.get('/help', (req, res) => {
-    res.redirect('https://discord.com/channels/1234582432196333729/1234582432708169814')
+    res.redirect('https://discord.com/channels/1246186853241978911/1246186854349537295')
 })
 
 
@@ -622,7 +665,7 @@ app.get('/redirect/cancel', (req, res) => {
 })
 
 
-app.get('/redirect/discord',(req,res)=>{
+app.get('/redirect/discord', (req, res) => {
     res.redirect(webConfig.loginURL)
 })
 
@@ -861,7 +904,7 @@ app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) 
             if (req.file && DiscordServer.members.me) {
                 const uploadedFile = req.file;
                 const filePath = uploadedFile.path;
-                fs.readFile(filePath, async(err, data) => {
+                fs.readFile(filePath, async (err, data) => {
                     if (err) {
                         console.error('Erro ao ler o arquivo:', err);
                         return res.status(200).json({ success: false, data: 'Erro ao tentar alterar o avatar!' })
@@ -913,7 +956,7 @@ app.post('/personalize/change', async (req, res) => {
             if (req.body.botName) {
                 var DiscordServer = await client.guilds.cache.get(req.body.serverID)
                 DiscordServer.members.me.setNickname(req.body.botName)
-                
+
                 if (!res.headersSent) {
                     res.status(200).json({ success: true, })
                 }
@@ -954,14 +997,14 @@ app.post('/personalize/change', async (req, res) => {
 })
 
 
-app.post('/ticket/create', async(req,res)=>{
+app.post('/ticket/create', async (req, res) => {
     try {
         let body = await req.body
         const user = await client.users.fetch(body.userID);
-        require('./Discord/newTicketFunction')(client,{
-            guildId:body.guildId,
-            user:user
-        },body.ticketOptions)
+        require('./Discord/newTicketFunction')(client, {
+            guildId: body.guildId,
+            user: user
+        }, body.ticketOptions)
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Ticket Criado aguarde ate que algum adiministrador entre em contato!' })
         }
@@ -973,27 +1016,26 @@ app.post('/ticket/create', async(req,res)=>{
     }
 })
 
-app.post('/ticket/saveSend',async(req,res)=>{
+app.post('/ticket/saveSend', async (req, res) => {
     try {
         let body = await req.body
-        require('./Discord/createTicketMensage.js')(client,body.channelID,body.serverID)
-        let server = await db.findOne({colecao:'servers',doc: body.serverID})
+        require('./Discord/createTicketMensage.js')(client, body.channelID, body.serverID)
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
         let ticketOptions = {
-            motivos:[],
-            permissions:[],
-            channel:'',
-            atend:{
-                start:'',
-                end:''
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: ''
             },
             avaliacao: '',
-            log:''
+            log: ''
         }
         if ('ticketOptions' in server) {
             ticketOptions = server.ticketOptions
         }
         ticketOptions.channel = body.channelID
-        db.update('servers',body.serverID,{
+        db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
         if (!res.headersSent) {
@@ -1006,21 +1048,78 @@ app.post('/ticket/saveSend',async(req,res)=>{
         console.log(error);
     }
 })
-
-app.post('/ticket/motivoADD',async(req,res)=>{
+app.post('/ticket/motivoDEL', async (req, res) => {
     try {
         let body = await req.body
-        let server = await db.findOne({colecao:'servers',doc: body.serverID})
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        if (server && body.motivoID && 'ticketOptions' in server && server.ticketOptions.motivos.length > 0) {
+            let ticketOptions = server.ticketOptions
+            let findIndex = await ticketOptions.motivos.findIndex(element => element.id == body.motivoID)
+            if (findIndex >= 0) {
+                ticketOptions.motivos.splice(findIndex, 1)
+                db.update('servers', body.serverID, {
+                    ticketOptions: ticketOptions
+                })
+                if (ticketOptions.channel) {
+                    require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+                }
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, data: 'Motivo deletado!' })
+                }
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao deletar o motivo!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/ticket/motivoUPD', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        if (server && body.motivoID && 'ticketOptions' in server && server.ticketOptions.motivos.length > 0) {
+            let ticketOptions = server.ticketOptions
+            let findIndex = await ticketOptions.motivos.findIndex(element => element.id == body.motivoID)
+            let find = await ticketOptions.motivos.find(element => element.id == body.motivoID)
+            if (findIndex >= 0 && find) {
+                find.name = body.name
+                find.desc = body.desc
+                find.responsavel = body.responsavel
+                ticketOptions.motivos[findIndex] = find
+                db.update('servers', body.serverID, {
+                    ticketOptions: ticketOptions
+                })
+                console.log(ticketOptions.channel, ticketOptions);
+                require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, data: 'Motivo deletado!' })
+                }
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao editar o motivo!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/ticket/motivoADD', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
         let ticketOptions = {
-            motivos:[],
-            permissions:[],
-            channel:'',
-            atend:{
-                start:'',
-                end:''
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: ''
             },
             avaliacao: '',
-            log:''
+            log: ''
         }
         if ('ticketOptions' in server) {
             ticketOptions = server.ticketOptions
@@ -1029,17 +1128,89 @@ app.post('/ticket/motivoADD',async(req,res)=>{
         let premotivo = body.motivo
         premotivo.id = id
         premotivo.cargos = []
-        
+
         ticketOptions.motivos.push(premotivo)
-        db.update('servers',body.serverID,{
+        db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
+        if (ticketOptions.channel) {
+            require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+        }
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Motivo adicionado!' })
         }
     } catch (error) {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar adicionar o motivo!' })
+        }
+        console.log(error);
+    }
+})
+
+
+app.post('/ticket/horario', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        let ticketOptions = {
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: '',
+                days: []
+            },
+            avaliacao: '',
+            log: ''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        ticketOptions.atend.days = body.options.days,
+            ticketOptions.atend.start = body.options.init,
+            ticketOptions.atend.end = body.options.end
+        db.update('servers', body.serverID, {
+            ticketOptions: ticketOptions
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Horario de funcionamento modificado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar modificar o horario de funcionamento!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/ticket/publiclog', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        let ticketOptions = {
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: '',
+                days: []
+            },
+            avaliacao: '',
+            log: ''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        ticketOptions.log = body.log
+        db.update('servers', body.serverID, {
+            ticketOptions: ticketOptions
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Log publico modificado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar modificar o Log publico!' })
         }
         console.log(error);
     }
@@ -1066,30 +1237,30 @@ app.post('/send/discordMensage', async (req, res) => {
                             'Content-Type': 'application/json'
                         }
                     });
-    
+
                     return response.data.translatedText;
                 } catch (error) {
                     return null;
                 }
             };
-    
-            let resposta = await translateText(req.body.content, ticket.idioma).then(translatedText => {return translatedText});
+
+            let resposta = await translateText(req.body.content, ticket.idioma).then(translatedText => { return translatedText });
             if (resposta && resposta != null) {
                 textTranslate = resposta
             }
         }
-        
+
 
         DiscordChannel.send({
             embeds: [
                 new Discord.EmbedBuilder()
                     .setTitle('Nova mensagem!')
                     .setDescription(`\n${textTranslate}\n`)
-                    .addFields({ name: '\u200B', value: '\u200B' },{ name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`,inline:true },{name:"Nome do usuario", value:user.username,inline:true},{name:"ID do usuario", value:user.id,inline:true})
+                    .addFields({ name: '\u200B', value: '\u200B' }, { name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`, inline: true }, { name: "Nome do usuario", value: user.username, inline: true }, { name: "ID do usuario", value: user.id, inline: true })
                     .setColor('#6E58C7')
                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                     .setTimestamp()
-                    
+
             ]
         })
 
@@ -1105,14 +1276,34 @@ app.post('/send/discordMensage', async (req, res) => {
 })
 
 
-app.post('/verify/adm',(req,res)=>{
+app.post('/verify/adm', (req, res) => {
     if (req.body.pass == process.env.ADMINPASS && req.body.userID == process.env.ADMINLOGIN) {
         if (!res.headersSent) {
-            res.status(200).json({ success: true, data: req.body.userID})
+            res.status(200).json({ success: true, data: req.body.userID })
         }
-    }else{
+    } else {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar enviar a mensagem!' })
+        }
+    }
+})
+
+
+app.post('/get/server', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+        if (server) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: server })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false })
         }
     }
 })

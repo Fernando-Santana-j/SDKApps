@@ -104,6 +104,14 @@
     gap: 1em;
     padding: 0.6em 0em 0.6em 0em;
 }
+#chat-mensages-content-mens{
+    width: 100%;
+    gap: 1em;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
 
 #chat-input-content {
     display: flex;

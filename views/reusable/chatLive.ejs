@@ -16,7 +16,28 @@
             </div>
             <div class="linha"></div>
             <div id="chat-mensages-content">
+                <div style="display: none;" id="create-ticket-content">
+                    <div id="create-ticket-motivo">
+                        <label for="ticket-motivo-input" class="lable-padrao">Selecione com oque você precisa de ajuda!</label>
+                        <input required type="text" class="input-padrao" list="ticket-motivo-input-list" placeholder="Pesquise o motivo..." id="ticket-motivo-input">
+                        <datalist id="ticket-motivo-input-list">
+                            <% chatItens.forEach(element => { %>
+                                <option data-code="<%= element.id %>" selected value="<%= element.name %>"><%= element.desc %></option>
+                            <% }) %>
+                        </datalist>
+                    </div>
+                    <div id="create-ticket-idioma">
+                        <label for="ticket-idioma-input" class="lable-padrao">Selecione o seu idioma!</label>
+                        <input required type="text" style="opacity: 0.8;" value="Português" disabled class="input-padrao" list="ticket-idioma-input-list" placeholder="Pesquise o seu idioma..." id="ticket-idioma-input">
+                        <datalist id="ticket-idioma-input-list">
+                            <option data-code="pt" selected value="Português"></option>
+                        </datalist>
+                    </div>
+                    <button id="create-ticket-button" class="button-padrao">🎫 Criar Ticket</button>
+                </div>
+                <div id="chat-mensages-content-mens">
 
+                </div>
             </div>
             <div id="chat-input-content">
                 <input type="text" class="input-padrao" placeholder="Digite a sua mensagem..." id="chat-input-mensage">

@@ -26,7 +26,7 @@ async function init(params) {
         await dbFirebase.collection("tickets").onSnapshot({ includeMetadataChanges: true }, async (doc) => {
             doc.docChanges().forEach((change, index) => {
                 let data = change.doc.data()
-                if (change.type === "removed") {
+                if (change.type === "removed" && data.serverID == '1246186853241978911') {
                     let row = document.querySelector(`#ticket-open-row`)
                     let element = document.querySelector(`#ticket-open-row .ticket-open-col[data-protocolo='${change.doc.id}']`)
                     if (element.getAttribute('data-index') == ticketIndex.index) {
@@ -35,7 +35,7 @@ async function init(params) {
                     row.removeChild(element)
                     
                 }
-                if (change.type == 'modified' && change.doc.id && change.doc.id == ticketIndex.id) {
+                if (change.type == 'modified' && change.doc.id && change.doc.id == ticketIndex.id && data.serverID == '1246186853241978911') {
                     let newMensage = data.mensages[(parseInt(data.mensages.length) - 1)]
                     const date = new Date(Number(newMensage.timestamp));
                     let dateForm = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()} - ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
@@ -58,7 +58,7 @@ async function init(params) {
                     conte.scrollTop = conte.scrollHeight;
 
                 }
-                if (change.type == "added") {
+                if (change.type == "added" && data.serverID == '1246186853241978911') {
                     const date = new Date(Number(data.created));
                     let dateForm = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
                     document.getElementById('ticket-open-row').innerHTML += `

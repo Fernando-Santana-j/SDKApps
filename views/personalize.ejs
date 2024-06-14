@@ -67,7 +67,7 @@
             let server = JSON.parse(document.getElementById('serverData').getAttribute('data-server'))
         </script>
     </div>
-    <%- include('./reusable/chatLive.ejs',{user:user}) %>
+    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
     <script src="<%= host %>/public/js/personalize.js"></script>
 </body>

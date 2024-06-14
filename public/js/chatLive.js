@@ -3,6 +3,7 @@ let countMensages = 0
 let app = null
 let db = null
 let ticketProt = null
+let guildId = '1210907838558240829' //"1246186853241978911"
 
 
 document.addEventListener('click', async (event) => {
@@ -15,7 +16,12 @@ document.addEventListener('click', async (event) => {
         }
 
         if (document.getElementById('ticket-motivo-input').value.length > 0) {
-            ticketOptions.motivo = document.getElementById('ticket-motivo-input').value
+            const opcoes = document.getElementById('ticket-motivo-input-list').querySelectorAll('option');
+            opcoes.forEach(option => {
+                if (option.value === document.getElementById('ticket-motivo-input').value) {
+                    ticketOptions.motivo = option.getAttribute('data-code');
+                }
+            });
         } else {
             errorNotify('Por favor, selecione um motivo válido da lista.');
             return
@@ -28,15 +34,15 @@ document.addEventListener('click', async (event) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    guildId: '1234582432196333729',
-                    // guildId: '1210907838558240829',
+                    guildId: guildId,
                     userID: userID,
                     ticketOptions: ticketOptions
                 }),
             }).then(response => { return response.json() })
             if (session.success == true) {
                 successNotify(session.data)
-                document.getElementById("chat-mensages-content").innerHTML = ''
+                document.getElementById("chat-mensages-content-mens").style.display = 'flex'
+                document.getElementById("create-ticket-content").style.display = 'none'
             } else {
                 errorNotify(session.data)
             }
@@ -47,29 +53,8 @@ document.addEventListener('click', async (event) => {
 })
 
 async function createTicketUI() {
-    var chatContent = document.getElementById("chat-mensages-content");
-    chatContent.innerHTML = `
-        <div id="create-ticket-content">
-            <div id="create-ticket-motivo">
-                <label for="ticket-motivo-input" class="lable-padrao">Selecione com oque você precisa de ajuda!</label>
-                <input required type="text" class="input-padrao" list="ticket-motivo-input-list" placeholder="Pesquise o motivo..." id="ticket-motivo-input">
-                <datalist id="ticket-motivo-input-list">
-                    <option data-code="bot" selected value="BOT">Problemas com o funcionamento do BOT SDK!</option>
-                    <option data-code="plat" selected value="Plataforma">Problemas no funcionamento ou funcionalidades do site SDK!</option>
-                    <option data-code="duv" selected value="Duvidas">Duvidas sobre a plataforma ou bot SDK!</option>
-                    <option data-code="sup" selected value="Suporte">Suporte Geral para qualquer outro problema com a SDK!</option>
-                </datalist>
-            </div>
-            <div id="create-ticket-idioma">
-                <label for="ticket-idioma-input" class="lable-padrao">Selecione o seu idioma!</label>
-                <input required type="text" style="opacity: 0.8;" value="Português" disabled class="input-padrao" list="ticket-idioma-input-list" placeholder="Pesquise o seu idioma..." id="ticket-idioma-input">
-                <datalist id="ticket-idioma-input-list">
-                    <option data-code="pt" selected value="Português"></option>
-                </datalist>
-            </div>
-            <button id="create-ticket-button" class="button-padrao">🎫 Criar Ticket</button>
-        </div>
-    `
+    document.getElementById("chat-mensages-content-mens").style.display = 'none'
+    document.getElementById("create-ticket-content").style.display = 'flex'
     document.getElementById('ticket-motivo-input').addEventListener('blur', function () {
         const inputValue = this.value.toLowerCase();
         const datalistOptions = Array.from(document.getElementById('ticket-motivo-input-list').getElementsByTagName('option'));
@@ -106,7 +91,7 @@ async function init() {
                 const change = docChange[index];
                 let data = change.doc.data()
                 if (change.type === "removed" && change.doc.id && change.doc.id.includes(userID)) {
-                    var parentElement = document.getElementById("chat-mensages-content");
+                    var parentElement = document.getElementById("chat-mensages-content-mens");
                     while (parentElement.firstChild) {
                         parentElement.removeChild(parentElement.firstChild);
                     }
@@ -124,7 +109,7 @@ async function init() {
                             chatIcon.setAttribute('data-mensages', countMensages)
                         }
                     }
-                    document.getElementById('chat-mensages-content').innerHTML += ` 
+                    document.getElementById('chat-mensages-content-mens').innerHTML += ` 
                         <div class="mensage-ticket-containner ${newMensage.userID == userID ? "myMensage" : ""}">
                             <div class="mensage-ticket">
                                 <div class="mensage-ticket-image">
@@ -139,7 +124,7 @@ async function init() {
                             </div>
                         </div>
                     `
-                    let conte = document.getElementById('chat-mensages-content')
+                    let conte = document.getElementById('chat-mensages-content-mens')
                     conte.scrollTop = conte.scrollHeight;
 
                 }
@@ -158,7 +143,7 @@ async function init() {
                                     chatIcon.setAttribute('data-mensages', countMensages)
                                 }
                             }
-                            document.getElementById('chat-mensages-content').innerHTML += ` 
+                            document.getElementById('chat-mensages-content-mens').innerHTML += ` 
                                 <div class="mensage-ticket-containner ${element.userID == userID ? "myMensage" : ""}">
                                     <div class="mensage-ticket">
                                         <div class="mensage-ticket-image">
@@ -174,13 +159,12 @@ async function init() {
                                 </div>
                             `
                         })
-                        let conte = document.getElementById('chat-mensages-content')
+                        let conte = document.getElementById('chat-mensages-content-mens')
                         conte.scrollTop = conte.scrollHeight;
                     }
                 }
 
             }
-            console.log(ticketProt);
             if (!ticketProt) {
                 createTicketUI()
             }
@@ -253,7 +237,7 @@ document.getElementById('chat-icon-containner').addEventListener('click', () => 
         chatContainner.style.display = "flex"
         chatIsOpen = true
         countMensages = 0
-        let conte = document.getElementById('chat-mensages-content')
+        let conte = document.getElementById('chat-mensages-content-mens')
         conte.scrollTop = conte.scrollHeight;
         document.getElementById('chat-icon-containner').classList.remove('newMensage')
     } else {
