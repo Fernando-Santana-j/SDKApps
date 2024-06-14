@@ -1019,8 +1019,14 @@ app.post('/ticket/create', async (req, res) => {
 app.post('/ticket/saveSend', async (req, res) => {
     try {
         let body = await req.body
-        require('./Discord/createTicketMensage.js')(client, body.channelID, body.serverID)
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        if ( 'ticketOptions' in server && server.ticketOptions.motivos.length <= 0) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Cadastre os motivos do ticket primeiro!' })
+            }
+            return
+        }
+        require('./Discord/createTicketMensage.js')(client, body.channelID, body.serverID)
         let ticketOptions = {
             motivos: [],
             channel: '',
@@ -1038,6 +1044,7 @@ app.post('/ticket/saveSend', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
+        
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Mensagem do ticket enviada!' })
         }
