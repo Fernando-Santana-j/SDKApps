@@ -89,6 +89,45 @@ document.getElementById('save-channel-ticket').addEventListener('click',async()=
     }
 })
 
+document.getElementById('bot-ticket-privatelog').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('bot-ticket-privatelog-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+document.getElementById('save-privateLog-ticket').addEventListener('click',async()=>{
+    if (document.getElementById('bot-ticket-privatelog').value <= 0) {
+        errorNotify('Selecione um canal primeiro!')
+        return
+    }
+    const opcoes = document.getElementById('bot-ticket-privatelog-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('bot-ticket-privatelog').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+    let session = await fetch('/ticket/privatelog', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            log: channelID,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
+    }else{
+        errorNotify(session.data)
+    }
+})
 
 document.getElementById('bot-ticket-publiclog').addEventListener('blur', function () {
     const inputValue = this.value.toLowerCase();
@@ -320,4 +359,51 @@ document.getElementById('save-motivo-edit').addEventListener('click',async()=>{
     }else{
         errorNotify(session.data)
     } 
+})
+
+
+
+document.getElementById('BannerTicketPerso').addEventListener('change',()=>{
+    const fileInput = document.getElementById('BannerTicketPerso');
+    const previewImage = document.getElementById('BannerTicketPreview');
+    const file = fileInput.files[0];
+
+    if (file) {
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (allowedTypes.includes(file.type)) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            var formData = new FormData();
+            formData.append('BannerTicket',file)
+            formData.append('serverID',serverID)
+
+            $.ajax({
+                traditional: true,
+                url: '/ticket/banner',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        successNotify('Imagem Alterada')
+                    } else {
+                        errorNotify(response.data)
+                    }
+    
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            })
+        } else {
+            errorNotify('Por favor, selecione um arquivo JPEG, PNG ou JPEG válido.');
+        }
+    } else {
+        errorNotify('Por favor, selecione um arquivo para enviar.');
+    }
 })

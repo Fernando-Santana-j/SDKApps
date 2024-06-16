@@ -53,8 +53,6 @@ client.slashCommands = new Discord.Collection();
 client.login(botConfig.discordToken)
 
 
-
-
 app.use(session(webConfig.session));
 app.use(cookieParser());
 
@@ -1155,6 +1153,55 @@ app.post('/ticket/motivoADD', async (req, res) => {
 })
 
 
+app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        var DiscordServer = await client.guilds.cache.get(req.body.serverID);
+        if (server && DiscordServer) {
+            if (req.file && DiscordServer.members.me) {
+                const uploadedFile = req.file;
+                const filePath = uploadedFile.path;
+                await functions.comprimAndRecort(filePath, path.join(__dirname, `/uploads/personalize/ticketBanner/${'ticketBanner_' + uploadedFile.filename}`))
+                let ticketOptions = {
+                    motivos: [],
+                    channel: '',
+                    atend: {
+                        start: '',
+                        end: ''
+                    },
+                    avaliacao: '',
+                    log: '',
+                    banner:''
+                }
+                if ('ticketOptions' in server) {
+                    ticketOptions = server.ticketOptions
+                }
+                ticketOptions.banner = `/uploads/personalize/ticketBanner/${'ticketBanner_' + uploadedFile.filename}`
+                db.update('servers', req.body.serverID, {
+                    ticketOptions: ticketOptions
+                })
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, data: 'Banner Alterado!' })
+                }
+            } else {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o bot!' })
+                }
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log("PersonalizeBOTBannerERROR: ", error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar o banner!' })
+        }
+    }
+})
+
+
 app.post('/ticket/horario', async (req, res) => {
     try {
         let body = await req.body
@@ -1189,7 +1236,39 @@ app.post('/ticket/horario', async (req, res) => {
         console.log(error);
     }
 })
-
+app.post('/ticket/privatelog', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        let ticketOptions = {
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: '',
+                days: []
+            },
+            avaliacao: '',
+            log: '',
+            privateLog: ''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        ticketOptions.privateLog = body.log
+        db.update('servers', body.serverID, {
+            ticketOptions: ticketOptions
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Log privado modificado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar modificar o Log privado!' })
+        }
+        console.log(error);
+    }
+})
 app.post('/ticket/publiclog', async (req, res) => {
     try {
         let body = await req.body
