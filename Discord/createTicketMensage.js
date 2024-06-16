@@ -1,15 +1,18 @@
 let Discord = require('discord.js')
 let db = require('../Firebase/models')
-
+let webConfig = require('../config/web-config')
 
 module.exports = async (client, channelID, serverID) => {
     try {
         const DiscordServer = await client.guilds.cache.get(serverID);
         const DiscordChannel = await DiscordServer.channels.cache.get(channelID)
         let serverData = await db.findOne({ colecao: 'servers', doc: serverID })
-        const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
-        DiscordChannel.bulkDelete(fetched)
+        try {
+            const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
+            DiscordChannel.bulkDelete(fetched).catch(()=>{})
+        } catch (error) {}
         let motivoFields = []
+        let ticketBanner = `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`
 
         if (serverData && 'ticketOptions' in serverData) {
             for (let index = 0; index < serverData.ticketOptions.motivos.length; index++) {
@@ -21,18 +24,20 @@ module.exports = async (client, channelID, serverID) => {
                         .setValue(element.id)
                 )
             }
+            if (serverData.ticketOptions.banner) {
+                ticketBanner = `${webConfig.host}${serverData.ticketOptions.banner}`
+            }
         }
-
 
         await DiscordChannel.send({
             embeds: [
                 new Discord.EmbedBuilder()
-                    .setTitle('Está enfrentando algum problema com a SDK?')
+                    .setTitle(`Está enfrentando algum problema com a ${DiscordServer.name}?`)
                     .setDescription(`Abaixo você pode criar um ticket para que seu problema seja solucionado basta selecionar seu idioma e oque esta acontecendo e criar seu ticket!`)
                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                     .setColor('#6E58C7')
                     .setTimestamp()
-                    .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
+                    .setImage(ticketBanner)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
             components: [
@@ -123,12 +128,12 @@ module.exports = async (client, channelID, serverID) => {
                         .setMaxValues(1)
                         .addOptions(...motivoFields)
                 ),
-                new Discord.ActionRowBuilder().addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId(`createTicket`)
-                        .setLabel('🎫 Criar Ticket')
-                        .setStyle('3'),
-                )
+                // new Discord.ActionRowBuilder().addComponents(
+                //     new Discord.ButtonBuilder()
+                //         .setCustomId(`createTicket`)
+                //         .setLabel('🎫 Criar Ticket')
+                //         .setStyle('3'),
+                // )
             ],
         })
     } catch (error) {

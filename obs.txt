@@ -39,3 +39,22 @@ fazer com que o dono do discord possa aprovar um carrinho usando um comando slas
     //         .setTimestamp()
     //         .setColor("#6E58C7")
     // ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -5,7 +5,7 @@ node_modules
 config/web-config.js
 config
 config/mercadoPagoData.json
-uploads
+
 
 cart.list
 ticket.list

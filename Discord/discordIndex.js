@@ -9,7 +9,7 @@ const botConfig = require('../config/bot-config.js');
 const functions = require('../functions.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 var ncp = require("copy-paste");
-
+const discordTranscripts = require('discord-html-transcripts');
 client.login(botConfig.discordToken)
 
 
@@ -725,12 +725,114 @@ module.exports = (Discord2, client) => {
                 //     interaction.deleteReply()
                 // }
                 if (interaction.customId == 'motivoTicket') {
-                    if (!ticketOptions[interaction.user.id]) {
-                        ticketOptions[interaction.user.id] = {}
+                    let serverData = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+                    if (!serverData) {
+                        return interaction.reply({ content: "Não foi possivel localizar os dados do ticket!", ephemeral: true })
                     }
-                    ticketOptions[interaction.user.id].motivo = interaction.values[0]
-                    interaction.deferReply();
-                    interaction.deleteReply()
+                    let semanaDays = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
+                    let semanaDaysServer = serverData.ticketOptions.atend.days
+                    let atend = serverData.ticketOptions.atend
+                    const today = new Date();
+                    const dayIndex = today.getDay();
+                    let todayInArray = semanaDaysServer.includes(semanaDays[dayIndex])
+                    const hora = `${today.getHours()}:${today.getMinutes()}`
+
+
+                    function isTimeAfter(referenceTime, checkTime) {
+                        // Divide as horas e minutos
+                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+
+                        // Compara as horas e minutos
+                        if (checkHours >= refHours) {
+                            return true;
+                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    function isTimeBefore(referenceTime, checkTime) {
+                        // Divide as horas e minutos
+                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+
+                        // Compara as horas e minutos
+                        if (checkHours <= refHours) {
+                            return true;
+                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    let checkTimeBefore = isTimeBefore(atend.end, hora)
+                    let checkTimeAfter = isTimeAfter(atend.start, hora)
+                    if (checkTimeAfter == true && checkTimeBefore == true && todayInArray) {
+                        // if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].motivo) {
+                        //     interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
+                        //     return
+                        // } else {
+                        let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
+                        if (findChannel) {
+                            interaction.reply({
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setColor("#C21010")
+                                        .setTitle(`⚠️| Você já possui um ticket aberto!`)
+                                        .setDescription(`Clique no botão abaixo para ir ate ele!`)
+                                ],
+                                components: [
+                                    new Discord.ActionRowBuilder()
+                                        .addComponents(
+                                            new Discord.ButtonBuilder()
+                                                .setStyle(5)
+                                                .setLabel('🎫・Ir para o Ticket')
+                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                                        )
+                                ],
+                                ephemeral: true
+                            })
+                        } else {
+                            require('./newTicketFunction')(client, interaction, { motivo: interaction.values[0] })
+                            if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
+                                var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
+                                let dataAtual = new Date();
+                                let meses = [
+                                    "Janeiro", "Fevereiro", "Março", "Abril",
+                                    "Maio", "Junho", "Julho", "Agosto",
+                                    "Setembro", "Outubro", "Novembro", "Dezembro"
+                                ];
+                                let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+                                let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
+                                
+                                DiscordChannelPublicLog.send({
+                                    embeds: [
+                                        new Discord.EmbedBuilder()
+                                            .setColor('#6E58C7')
+                                            .setTitle(`🎫・Novo ticket!`)
+                                            .setFields({ name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "Motivo:", value: findMotivo.name, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
+                                    ],
+                                })
+                            }
+                        }
+
+                        // }
+                    } else {
+                        return interaction.reply({ content: `O sistema de ticket não esta funcionando nesse periodo apenas nos dias de ${semanaDaysServer.join(', ')} e no horario de ${atend.start} ate ${atend.end} !`, ephemeral: true })
+                    }
+
+
+
+
+
+                    // if (!ticketOptions[interaction.user.id]) {
+                    //     ticketOptions[interaction.user.id] = {}
+                    // }
+                    // ticketOptions[interaction.user.id].motivo = interaction.values[0]
+
+                    // interaction.deferReply();
+                    // interaction.deleteReply()
                 }
 
                 if (interaction.customId && interaction.customId.includes('ticketAvalStart')) {
@@ -740,18 +842,41 @@ module.exports = (Discord2, client) => {
                         let DiscordServer2 = await client.guilds.cache.get(embed.fields[3].value)
                         var logChannel = await DiscordServer2.channels.cache.get(serverData.ticketOptions.log)
                         let userRespo = await client.users.fetch(embed.fields[1].value)
-                        let starCount = interaction.customId.replace('ticketAvalStart-', '')
+                        let starCount = parseInt(interaction.customId.replace('ticketAvalStart-', ''))
+                        let starIcons = ''
+                        for (let index = 0; index < 5; index++) {
+                            if (index < starCount) {
+                                starIcons += "⭐"
+                            } else {
+                                starIcons += "☆"
+                            }
+                        }
+                        let dataAtual = new Date();
+                        let meses = [
+                            "Janeiro", "Fevereiro", "Março", "Abril",
+                            "Maio", "Junho", "Julho", "Agosto",
+                            "Setembro", "Outubro", "Novembro", "Dezembro"
+                        ];
+                        let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+
                         logChannel.send({
                             embeds: [
                                 new Discord.EmbedBuilder()
                                     .setColor('#6E58C7')
                                     .setTitle(`🌟・Nova avaliação!`)
                                     .setDescription(`O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
-                                    .setFields({ name: "Responsavel pelo ticket", value: userRespo.username, inline: true }, { name: "ID do Responsavel", value: userRespo.id, inline: true })
+                                    .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userRespo.username + "**", inline: true }, { name: "🆔 | ID do Responsavel:", value: "``" + userRespo.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "🌟 | Avaliação:", value: `${starIcons} | (${starCount}/5)`, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
                             ],
                         })
                         interaction.reply({ content: "Obrigado por sua avaliação!", ephemeral: true, })
-
+                        try {
+                            interaction.message.edit({
+                                embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja avaliou esse ticket com ${starCount} estrelas, muito obrigado!`)],
+                                components: []
+                            })
+                        } catch (error) {
+                            interaction.mensage.delete()
+                        }
 
                     } catch (error) {
                         console.log(error);
@@ -762,6 +887,8 @@ module.exports = (Discord2, client) => {
                     let protocolo = DiscordChannel.topic
                     let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
                     const user = await client.users.fetch(userTicketID)
+                    let serverData = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+
                     if (DiscordChannel) {
                         try {
                             let embed = interaction.message.embeds[0].data
@@ -810,13 +937,43 @@ module.exports = (Discord2, client) => {
                                                 )
                                         ]
                                     })
+                                    if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
+                                        var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
+                                        const attachment = await discordTranscripts.createTranscript(DiscordChannel, {
+                                            limit: -1, // Max amount of messages to fetch. `-1` recursively fetches.
+                                            returnType: 'attachment', // Valid options: 'buffer' | 'string' | 'attachment' Default: 'attachment' OR use the enum ExportReturnType
+                                            filename: `${DiscordServer.name} | ${protocolo}.html`, // Only valid with returnType is 'attachment'. Name of attachment.
+                                            saveImages: false, // Download all images and include the image data in the HTML (allows viewing the image even after it has been deleted) (! WILL INCREASE FILE SIZE !)
+                                            footerText: "Exported {number} message{s}", // Change text at footer, don't forget to put {number} to show how much messages got exported, and {s} for plural
+                                            poweredBy: false, // Whether to include the "Powered by discord-html-transcripts" footer
+                                            ssr: true // Whether to hydrate the html server-side
+                                        });
+                                        let dataAtual = new Date();
+                                        let meses = [
+                                            "Janeiro", "Fevereiro", "Março", "Abril",
+                                            "Maio", "Junho", "Julho", "Agosto",
+                                            "Setembro", "Outubro", "Novembro", "Dezembro"
+                                        ];
+                                        let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+                
+                                        DiscordChannelPublicLog.send({
+                                            embeds: [
+                                                new Discord.EmbedBuilder()
+                                                    .setColor('#6E58C7')
+                                                    .setTitle(`🎫・Ticket Fechado!`)
+                                                    .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userResp.username + "**", inline: false }, { name: "🆔 | ID do responsavel:", value: "``" + userResp.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + user.id + "``", inline: true }, { name: "Protocolo:", value: protocolo, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
+                                            ],
+                                            files: [attachment]
+                                        })
+                                    }
                                 } catch (error) {
                                     console.log(error);
                                 }
                             }
 
+
                             DiscordChannel.delete()
-                            db.delete('tickets',protocolo)
+                            db.delete('tickets', protocolo)
                             const voiceChannel = DiscordServer.channels.cache.find(channel =>
                                 channel.type === 2 && channel.name == DiscordChannel.name
                             );
@@ -824,6 +981,7 @@ module.exports = (Discord2, client) => {
                             if (voiceChannel) {
                                 voiceChannel.delete()
                             }
+
                         } catch (error) { }
 
                     } else {
@@ -1408,7 +1566,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
                 findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
-              
+
                 if (fields.length >= 25) {
                     sendTxtMensage(findChannel)
                     sendTxtMensage(user)

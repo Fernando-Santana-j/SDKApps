@@ -194,3 +194,15 @@
     opacity: 0.7 !important;
     transition: 0.7s;
 }
+
+#lableBannerTicket{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    #BannerTicketPreview{
+        max-width: 100%;
+
+    }
+}

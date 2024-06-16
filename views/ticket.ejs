@@ -144,7 +144,32 @@
                             <% }) %>
                         </div>
                     </div>
-                    
+                    <div class="itens-col">
+                        <h1 class="title-col">Banner do ticket!</h1>
+                        <p class="desc-col">Selecione uma imagem de banner para aparecer na mensagem do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <label id="lableBannerTicket" for="BannerTicketPerso">
+                                <img src="<%= server.server_pic %>" id="BannerTicketPreview">
+                                <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="BannerTicketPerso">
+                            </label>
+                        
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Log privado!</h1>
+                        <p class="desc-col">Iremos nesse canal enviar mensagens de abertura de ticket e transcripts!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="bot-ticket-privatelog-list" placeholder="selecione o canal..." id="bot-ticket-privatelog">
+                            <datalist id="bot-ticket-privatelog-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button class="button-padrao" id="save-privateLog-ticket">Salvar</button>
+                        </div>
+                    </div>
                 </div>          
             </main>
         </div>
