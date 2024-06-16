@@ -46,7 +46,6 @@ module.exports = (Discord2, client) => {
 
         //ticket
         client.on('messageCreate', async message => {
-
             try {
                 var DiscordServer = await client.guilds.cache.get(message.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(message.channelId)
@@ -71,6 +70,48 @@ module.exports = (Discord2, client) => {
                             db.update('tickets', DiscordChannel.topic, {
                                 mensages: ticketMensages
                             })
+                        }
+                    }
+
+
+                    //sistema de castigo
+                    const SPAM_THRESHOLD = 3; // Número de menções
+                    const TIME_WINDOW = 10000; // 10 segundos em milissegundos
+                    const TIMEOUT_DURATION = 5 * 60 * 1000; // 5 minutos em milissegundos
+
+                    if (message.author.bot) return; // Ignorar mensagens de bots
+
+                    const mentionedUsers = message.mentions.users;
+                    if (mentionedUsers.size === 0) return; // Ignorar se não houver menções
+
+                    const authorId = message.author.id;
+                    const channelId = message.channel.id;
+
+                    for (const [mentionedUserId, mentionedUser] of mentionedUsers) {
+                        if (mentionedUserId === authorId) continue; // Ignorar menções a si mesmo
+
+                        try {
+                            // Buscar mensagens recentes no canal
+                            const messages = await message.channel.messages.fetch({ limit: 100 });
+                            const now = Date.now();
+
+                            // Filtrar mensagens para encontrar quantas vezes o autor mencionou o mesmo usuário
+                            const recentMentions = messages.filter(
+                                msg => msg.author.id === authorId &&
+                                    msg.mentions.users.has(mentionedUserId) &&
+                                    (now - msg.createdTimestamp < TIME_WINDOW)
+                            );
+
+                            if (recentMentions.size >= SPAM_THRESHOLD) {
+                                // Colocar o usuário em timeout
+                                const member = message.guild.members.cache.get(authorId);
+                                if (member) {
+                                    await member.timeout(TIMEOUT_DURATION, `Menções excessivas a ${mentionedUser.username}`);
+                                }
+                                break;
+                            }
+                        } catch (err) {
+                            console.error(`Erro ao processar menções:`, err);
                         }
                     }
                 }
@@ -805,7 +846,7 @@ module.exports = (Discord2, client) => {
                                 ];
                                 let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
                                 let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
-                                
+
                                 DiscordChannelPublicLog.send({
                                     embeds: [
                                         new Discord.EmbedBuilder()
@@ -955,7 +996,7 @@ module.exports = (Discord2, client) => {
                                             "Setembro", "Outubro", "Novembro", "Dezembro"
                                         ];
                                         let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
-                
+
                                         DiscordChannelPublicLog.send({
                                             embeds: [
                                                 new Discord.EmbedBuilder()
