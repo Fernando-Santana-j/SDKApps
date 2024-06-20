@@ -48,3 +48,30 @@
     margin-top: 1em;
     justify-content: space-between;
 }
+
+
+@media screen and (max-width:1040px) {
+    #main-content{
+        width: 100% !important;
+        height: auto !important;
+        gap: 2em !important;
+    }
+    #main-containner{
+        width: 100% !important;
+        height: auto !important;
+        left: 0 !important;
+    }
+
+}
+
+@media screen and (max-width:800px) {
+    .charts-content{
+        flex-direction: column;
+        gap: 1em !important;
+        width: 100% !important;
+    }
+    #vendas-completas-chart,#vendas-canceladas-chart,#reebolso-chart,#estoque-chart,#payment-chart{
+        width: 90% !important;
+    }
+}
+    

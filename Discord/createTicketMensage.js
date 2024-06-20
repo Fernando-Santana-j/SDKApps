@@ -1,6 +1,9 @@
 let Discord = require('discord.js')
 let db = require('../Firebase/models')
 let webConfig = require('../config/web-config')
+const path = require('path')
+const fs = require('fs')
+const sharp = require('sharp')
 
 module.exports = async (client, channelID, serverID) => {
     try {
@@ -9,11 +12,11 @@ module.exports = async (client, channelID, serverID) => {
         let serverData = await db.findOne({ colecao: 'servers', doc: serverID })
         try {
             const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
-            DiscordChannel.bulkDelete(fetched).catch(()=>{})
-        } catch (error) {}
+            await fetched.forEach(element => {
+                element.delete()
+            });
+        } catch (error) { console.log(error); }
         let motivoFields = []
-        let ticketBanner = `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`
-
         if (serverData && 'ticketOptions' in serverData) {
             for (let index = 0; index < serverData.ticketOptions.motivos.length; index++) {
                 const element = serverData.ticketOptions.motivos[index];
@@ -24,20 +27,33 @@ module.exports = async (client, channelID, serverID) => {
                         .setValue(element.id)
                 )
             }
-            if (serverData.ticketOptions.banner) {
-                ticketBanner = `${webConfig.host}${serverData.ticketOptions.banner}`
-            }
+        }
+        let dburl = null
+        let Newdbres = null
+        if (serverData && 'ticketOptions' in serverData && 'banner' in serverData.ticketOptions) {
+            const bannerPath = path.join(__dirname, '..', serverData.ticketOptions.banner);
+            let file = await fs.readFileSync(bannerPath);
+            let buffer = Buffer.from(file, 'binary');
+            let newBuffer = await sharp(buffer).jpeg().toBuffer()
+            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
+            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
+            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
+            let dbres = await dbBannerDiscordChannel.send({
+                files: [attachment]
+            })
+            Newdbres = dbres
+            dburl = await dbres.attachments.first().url
         }
 
+        //salvar essa url no banco de dados para nao precisar ta criando toda hora uma nova mensagem
         await DiscordChannel.send({
             embeds: [
                 new Discord.EmbedBuilder()
                     .setTitle(`Está enfrentando algum problema com a ${DiscordServer.name}?`)
-                    .setDescription(`Abaixo você pode criar um ticket para que seu problema seja solucionado basta selecionar seu idioma e oque esta acontecendo e criar seu ticket!`)
-                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
-                    .setColor('#6E58C7')
+                    .setDescription(serverData && 'ticketOptions' in serverData && 'desc' in serverData.ticketOptions ? serverData.ticketOptions.desc : 'Abaixo você pode criar um ticket para que seu problema seja solucionado basta selecionar seu idioma e oque esta acontecendo e criar seu ticket!' )
+                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                     .setTimestamp()
-                    .setImage(ticketBanner)
+                    .setImage(dburl)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
             components: [
@@ -128,14 +144,11 @@ module.exports = async (client, channelID, serverID) => {
                         .setMaxValues(1)
                         .addOptions(...motivoFields)
                 ),
-                // new Discord.ActionRowBuilder().addComponents(
-                //     new Discord.ButtonBuilder()
-                //         .setCustomId(`createTicket`)
-                //         .setLabel('🎫 Criar Ticket')
-                //         .setStyle('3'),
-                // )
             ],
         })
+        // if (Newdbres) {
+        //     Newdbres.delete()
+        // }
     } catch (error) {
         console.log(error);
     }

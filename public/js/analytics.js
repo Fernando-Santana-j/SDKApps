@@ -297,7 +297,7 @@ payment(colorsBack)
 function payment(colorsBack) {
     var options = {
         series: [{
-            name: "Cancelados",
+            name: "Metodos",
             color: '#6E58C7',
             data: paymentMetodArr
         }],

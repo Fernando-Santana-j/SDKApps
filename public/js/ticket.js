@@ -360,6 +360,23 @@ document.getElementById('save-motivo-edit').addEventListener('click',async()=>{
         errorNotify(session.data)
     } 
 })
+document.getElementById('save-desc-ticket').addEventListener('click',async()=>{
+    let session = await fetch('/ticket/desc', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID:serverID,
+            desc: document.getElementById('desc-ticket').value,
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
+    }else{
+        errorNotify(session.data)
+    } 
+})
 
 
 

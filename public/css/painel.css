@@ -262,3 +262,18 @@
         align-items: center;
     }
 }
+
+
+@media screen and (max-width:500px) {
+    #signature-situation-containner {
+        width: 20em !important;
+    }
+    #bot-situation-content{
+        flex-direction: column;
+
+    }
+    #bot-situation-containner{
+        height: auto !important;
+        width: 20em !important;
+    }
+}

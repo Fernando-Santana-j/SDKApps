@@ -165,3 +165,17 @@
     width: 15em;
     margin-top: 17px;
 }
+
+@media screen and (max-width:1040px) {
+    #main-content{
+        width: 100% !important;
+        height: auto !important;
+        gap: 2em !important;
+    }
+    #main-containner{
+        width: 100% !important;
+        height: auto !important;
+        left: 0 !important;
+    }
+
+}
