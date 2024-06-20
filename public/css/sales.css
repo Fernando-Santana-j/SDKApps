@@ -1010,5 +1010,57 @@
 
 
 @media screen and (max-width:800px) {
-    
+    #pagamentos-produtos-containner{
+        flex-direction: column;
+        gap: 1em;
+         width: 100%;
+    }
+    #pagamentos-containner,#produtos-containner{
+        width: 90% !important; 
+    }
+    #cadastro-content{
+        flex-direction: column;
+    }
+    #estoque-config-add-button{
+        width: 18em !important;
+    }
+    #estoque-config-col{
+        width: 100% !important;
+    }
+    #cadastro-rigth-content,#cadastro-left-content{
+        width: 100% !important;
+    }
+    .estoque-config-col{
+        width: 100% !important;
+    }
+}
+
+
+
+@media screen and (max-width:1040px) {
+    #main-content{
+        width: 100% !important;
+        height: auto !important;
+        gap: 2em !important;
+    }
+    #main-containner{
+        width: 100% !important;
+        height: auto !important;
+        left: 0 !important;
+    }
+    #pagamentos-produtos-containner{
+        width: 100% !important; 
+    }
+    #pagamentos-containner,#produtos-containner{
+        width: 50% ; 
+    }
+    #pagamentos-produtos-containner{
+        gap: 1em;
+    }
+    #product-cadastro-containner{
+        width: 100% !important;
+    }
+    #cadastro-content{
+        gap: 0.5em !important;
+    }
 }

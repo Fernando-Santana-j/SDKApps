@@ -1138,6 +1138,7 @@ app.post('/ticket/motivoADD', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
+        
         if (ticketOptions.channel) {
             require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
         }
@@ -1180,6 +1181,9 @@ app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
                 db.update('servers', req.body.serverID, {
                     ticketOptions: ticketOptions
                 })
+                if (ticketOptions.channel) {
+                    require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+                }
                 if (!res.headersSent) {
                     res.status(200).json({ success: true, data: 'Banner Alterado!' })
                 }
@@ -1259,12 +1263,50 @@ app.post('/ticket/privatelog', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
+        
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Log privado modificado!' })
         }
     } catch (error) {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar modificar o Log privado!' })
+        }
+        console.log(error);
+    }
+})
+app.post('/ticket/desc', async (req, res) => {
+    try {
+        let body = await req.body
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        let ticketOptions = {
+            motivos: [],
+            channel: '',
+            atend: {
+                start: '',
+                end: '',
+                days: []
+            },
+            avaliacao: '',
+            log: '',
+            privateLog: '',
+            desc:''
+        }
+        if ('ticketOptions' in server) {
+            ticketOptions = server.ticketOptions
+        }
+        ticketOptions.desc = body.desc
+        db.update('servers', body.serverID, {
+            ticketOptions: ticketOptions
+        })
+        if (ticketOptions.channel) {
+            require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+        }
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Descrição modificado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar modificar a descrição do ticket!' })
         }
         console.log(error);
     }
@@ -1344,7 +1386,7 @@ app.post('/send/discordMensage', async (req, res) => {
                     .setDescription(`\n${textTranslate}\n`)
                     .addFields({ name: '\u200B', value: '\u200B' }, { name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`, inline: true }, { name: "Nome do usuario", value: user.username, inline: true }, { name: "ID do usuario", value: user.id, inline: true })
                     .setColor('#6E58C7')
-                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
+                    // .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
                     .setTimestamp()
 
             ]

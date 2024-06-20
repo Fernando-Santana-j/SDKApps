@@ -486,3 +486,18 @@ main{
         gap: 1em;
     }
 }
+
+
+@media screen and (max-width:500px) {
+    #top-fixed-menu{
+        padding: 1em 1.5em 1em 1.5em !important;
+    }
+    #fixed-menu-logo img{
+        min-width: 4em;
+    }
+    #fixed-menu-buttons{
+        flex-wrap: wrap;
+        justify-content: end;
+        gap: 1em !important;
+    }
+}

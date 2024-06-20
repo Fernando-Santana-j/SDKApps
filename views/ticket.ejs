@@ -61,19 +61,15 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Log publico!</h1>
-                        <p class="desc-col">Selecione abaixo um canal que você deseja que apareca publicamente as avalições que os usuarios enviam para um ticket!</p>
+                        <h1 class="title-col">Descrição do ticket!</h1>
+                        <p class="desc-col">Adicione o texto que sera exibido na mensagem do ticket!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
-                            <input required type="text" class="input-padrao" list="bot-ticket-publiclog-list" placeholder="selecione o canal..." id="bot-ticket-publiclog">
-                            <datalist id="bot-ticket-publiclog-list">
-                                <% channels.forEach(element => { %>
-                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                <% }) %>
-                            </datalist>
-                            <button class="button-padrao" id="save-publicLog-ticket">Salvar</button>
+                            <textarea class="input-padrao" style="height: 8em !important;" placeholder="Descrição do ticket!" required id="desc-ticket"><%= server && 'ticketOptions' in server && 'desc' in server.ticketOptions ? server.ticketOptions.desc : 'Abaixo você pode criar um ticket para que seu problema seja solucionado basta selecionar seu idioma e oque esta acontecendo e criar seu ticket!' %></textarea>
+                            <button class="button-padrao" id="save-desc-ticket">Salvar</button>
                         </div>
                     </div>
+                    
                     <div class="itens-col">
                         <h1 class="title-col">Horario de atendimento!</h1>
                         <p class="desc-col">Adicione abaixo que horas inicia e termina e os dias de atendimento do suporte!</p>
@@ -105,7 +101,18 @@
                             <button class="button-padrao" id="save-horario-date-ticket">Salvar</button>
                         </div>
                     </div>
-                    
+                    <div class="itens-col">
+                        <h1 class="title-col">Banner do ticket!</h1>
+                        <p class="desc-col">Selecione uma imagem de banner para aparecer na mensagem do ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <label id="lableBannerTicket" for="BannerTicketPerso">
+                                <img src="<%= server && 'ticketOptions' in server && 'banner' in server.ticketOptions ? host + server.ticketOptions.banner : server.server_pic %>" id="BannerTicketPreview">
+                                <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="BannerTicketPerso">
+                            </label>
+                        
+                        </div>
+                    </div>
                     <div class="itens-col">
                         <h1 class="title-col">Motivo!</h1>
                         <p class="desc-col">Adicione os motivos do ticket!</p>
@@ -144,18 +151,7 @@
                             <% }) %>
                         </div>
                     </div>
-                    <div class="itens-col">
-                        <h1 class="title-col">Banner do ticket!</h1>
-                        <p class="desc-col">Selecione uma imagem de banner para aparecer na mensagem do ticket!</p>
-                        <div class="linha" style="margin-top: 1em;"></div>
-                        <div class="itens-content-col">
-                            <label id="lableBannerTicket" for="BannerTicketPerso">
-                                <img src="<%= server.server_pic %>" id="BannerTicketPreview">
-                                <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="BannerTicketPerso">
-                            </label>
-                        
-                        </div>
-                    </div>
+                    
                     <div class="itens-col">
                         <h1 class="title-col">Log privado!</h1>
                         <p class="desc-col">Iremos nesse canal enviar mensagens de abertura de ticket e transcripts!</p>
@@ -168,6 +164,20 @@
                                 <% }) %>
                             </datalist>
                             <button class="button-padrao" id="save-privateLog-ticket">Salvar</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Log publico!</h1>
+                        <p class="desc-col">Selecione abaixo um canal que você deseja que apareca publicamente as avalições que os usuarios enviam para um ticket!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="bot-ticket-publiclog-list" placeholder="selecione o canal..." id="bot-ticket-publiclog">
+                            <datalist id="bot-ticket-publiclog-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button class="button-padrao" id="save-publicLog-ticket">Salvar</button>
                         </div>
                     </div>
                 </div>          
