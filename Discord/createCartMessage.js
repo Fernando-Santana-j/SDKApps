@@ -93,7 +93,7 @@ module.exports = async (Discord, client, data) => {
                     .setDescription(`Clique em cancelar caso desista de fazer a compra.
 
                         Abaixo são os itens do seu carrinho.`)
-                    // .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
                     .addFields(...[...fields, { name: '\u200B', value: '\u200B' },])
                     .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                     .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)

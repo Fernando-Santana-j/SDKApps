@@ -1386,7 +1386,7 @@ app.post('/send/discordMensage', async (req, res) => {
                     .setDescription(`\n${textTranslate}\n`)
                     .addFields({ name: '\u200B', value: '\u200B' }, { name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`, inline: true }, { name: "Nome do usuario", value: user.username, inline: true }, { name: "ID do usuario", value: user.id, inline: true })
                     .setColor('#6E58C7')
-                    // .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`, url: 'https://discord.gg/jVuVx4PEju' })
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
                     .setTimestamp()
 
             ]
