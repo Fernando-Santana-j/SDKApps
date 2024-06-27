@@ -117,3 +117,21 @@ document.getElementById('color-dest-input').addEventListener('change',()=>{
 document.getElementById('color-dest-input').addEventListener('input',()=>{
     document.getElementById('color-dest-preview').style.backgroundColor = document.getElementById('color-dest-input').value
 })
+
+document.getElementById('checkbox').addEventListener('change',async()=>{
+    let session = await fetch('/personalize/productIcon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            icon:document.getElementById('checkbox').checked ,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Personalização alterada!')
+    }else{
+        errorNotify(session.data)
+    }
+})

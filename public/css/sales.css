@@ -1007,6 +1007,38 @@
     }
 }
 
+#triple-containner{
+    display: flex;
+    gap: 1em;
+}
+
+#logs-sales-containner{
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    justify-content: space-around;
+    #private-log-content,#public-log-content{
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        padding: 1em;
+        background-color: var(--secundary-color);
+        border-radius: var(--border-radius-mid);
+    }
+    .logs-channel-content{
+        display: flex;
+        flex-direction: column;
+        gap: 1.5em;
+    }
+    .title-logs{
+        display: flex;
+        text-align: center;
+        flex-direction: column;
+        gap: 0.5em;
+    }
+}
 
 
 @media screen and (max-width:800px) {

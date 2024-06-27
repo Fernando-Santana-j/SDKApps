@@ -57,6 +57,19 @@
                             </label>
                         </div>
                     </div>
+
+                    <div class="itens-col">
+                        <h1 class="title-col">Icone na mensagem do produto!</h1>
+                        <p class="desc-col">Caso essa opção esteja ativa ao criar um novo produto ou enviar uma nova mensagem não ira aparecer o icone do produto (Apenas na embend de mensagem)! </p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
+                            <label for="product-icon" class="lable-padrao">Ative ou desative a exibição do icone abaixo!</label>
+                            <label id="product-icon" for="checkbox" style="text-align: center;" class="switch">
+                                <input id="checkbox" <%= 'personalize' in server && 'iconProduct' in server.personalize ? server.personalize.iconProduct == true ? 'checked' : '' : 'checked' %> type="checkbox">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

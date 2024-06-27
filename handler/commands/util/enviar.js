@@ -6,8 +6,19 @@ module.exports = {
     name: 'enviar',
     description: 'Envie um produto para um usuario!',
     type: 1,
-    options: [],
+    options: [
+        {
+            name:'quantidade',
+            description:"Quantidade de produtos que sera enviada!",
+            type:Discord.ApplicationCommandOptionType.Number,
+        }
+    ],
     run: async (client, interaction) => {
+        let quantidade = 1
+        if (interaction.options.get('quantidade')) {
+            quantidade = interaction.options.get('quantidade').value
+        }
+        
         let verifyPermissions = await functions.verifyPermissions(interaction.user.id,interaction.guildId,Discord,client)
         if (verifyPermissions.error == false && verifyPermissions.perms.commands == true) {
             let server = await db.findOne({colecao:"servers",doc:interaction.guildId})
@@ -48,7 +59,7 @@ module.exports = {
                                 new Discord.ButtonBuilder()
                                     .setStyle(3)
                                     .setLabel('🛍️・Enviar Produto')
-                                    .setCustomId('productSendConfirm')
+                                    .setCustomId(`productSendConfirm-${quantidade}`)
                             )
                     ],
                     ephemeral: true

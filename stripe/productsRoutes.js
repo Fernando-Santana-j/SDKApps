@@ -80,7 +80,8 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             backGround: backGround,
             price: await req.body.price,
             priceID: await price.id,
-            estoqueModel: JSON.parse(req.body.estoque)[0]
+            estoqueModel: JSON.parse(req.body.estoque)[0],
+            embendType: req.body.embend
         }
         if (server.products) {
             produtos = server.products
@@ -91,11 +92,19 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             products: await produtos
         })
 
-        require('../Discord/createProductMessage.js')(Discord, client, {
-            channelID: req.body.channelID,
-            serverID: req.body.serverID,
-            productID: product.id,
-        })
+        if (req.body.embend == '0') {
+            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                channelID: req.body.channelID,
+                serverID: req.body.serverID,
+                productID: product.id,
+            })
+        }else{
+            require('../Discord/createProductMessage.js')(Discord, client, {
+                channelID: req.body.channelID,
+                serverID: req.body.serverID,
+                productID: product.id,
+            })
+        }
 
         res.status(200).json({ success: true, data: model })
     } catch (error) {
@@ -182,12 +191,21 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
         db.update('servers', req.body.serverID, {
             products: produtos
         })
-        require('../Discord/createProductMessage.js')(Discord, client, {
-            channelID: produto.channel,
-            serverID: req.body.serverID,
-            productID: productID,
-            edit: true
-        })
+        if (produto.embendType == 0) {
+            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                channelID:  produto.channel,
+                serverID: req.body.serverID,
+                productID: productID,
+                edit: true
+            })
+        }else{
+            require('../Discord/createProductMessage.js')(Discord, client, {
+                channelID: produto.channel,
+                serverID: req.body.serverID,
+                productID: productID,
+                edit: true
+            })
+        }
         res.status(200).json({ success: true, data: '' })
     } catch (error) {
         console.log(error);
@@ -350,12 +368,21 @@ router.post('/estoque/txt', async (req, res) => {
                 db.update('servers', req.body.serverID, {
                     products: produtos
                 })
-                require('../Discord/createProductMessage.js')(Discord, client, {
-                    channelID: product.channel,
-                    serverID: req.body.serverID,
-                    productID: req.body.productID,
-                    edit: true
-                })
+                if (product.embendType == 0) {
+                    require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                        channelID:  product.channel,
+                        serverID: req.body.serverID,
+                        productID: productID,
+                        edit: true
+                    })
+                }else{
+                    require('../Discord/createProductMessage.js')(Discord, client, {
+                        channelID: product.channel,
+                        serverID: req.body.serverID,
+                        productID: productID,
+                        edit: true
+                    })
+                }
             }
             if (!res.headersSent) {
                 res.status(200).json({ success: true })
@@ -396,12 +423,21 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 db.update('servers', req.body.serverID, {
                     products: produtos
                 })
-                require('../Discord/createProductMessage.js')(Discord, client, {
-                    channelID: product.channel,
-                    serverID: req.body.serverID,
-                    productID: req.body.productID,
-                    edit: true
-                })
+                if (product.embendType == 0) {
+                    require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                        channelID:  product.channel,
+                        serverID: req.body.serverID,
+                        productID: productID,
+                        edit: true
+                    })
+                }else{
+                    require('../Discord/createProductMessage.js')(Discord, client, {
+                        channelID: product.channel,
+                        serverID: req.body.serverID,
+                        productID: productID,
+                        edit: true
+                    })
+                }
                 resolve({
                     err: false,
                     error: null
@@ -433,14 +469,27 @@ router.post('/product/estoqueAdd', async (req, res) => {
 })
 
 
-router.post('/product/mensage', (req, res) => {
+router.post('/product/mensage', async(req, res) => {
     try {
-        require('../Discord/createProductMessage.js')(Discord, client, {
-            channelID: req.body.channelID,
-            serverID: req.body.serverID,
-            productID: req.body.productID,
-            edit: true
-        })
+        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+        let productID = req.body.productID
+        let produtos = server.products
+        let produto = await produtos.find(product => product.productID == productID)
+        if (produto.embendType == 0) {
+            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                channelID: req.body.channelID,
+                serverID: req.body.serverID,
+                productID: req.body.productID,
+                edit: true
+            })
+        }else{
+            require('../Discord/createProductMessage.js')(Discord, client, {
+                channelID: req.body.channelID,
+                serverID: req.body.serverID,
+                productID: req.body.productID,
+                edit: true
+            })
+        }
         res.status(200).json({ success: true, data: 'Mensagem Enviada!' })
     } catch (error) {
         console.log(error);

@@ -116,6 +116,41 @@
             <%- include('./reusable/header.ejs',{index:2}) %>
             <main id="main-containner">
                 <div id="main-content">
+                    <div id="logs-sales-containner">
+                        <div id="public-log-content">
+                            <div class="title-logs">
+                                <h1 class="title-col">Log publico</h1>
+                                <p class="desc-col">Selecione o canal que deseja que apareca um log para o publico de vendas!</p>
+                                
+                            </div>
+                            <div class="linha"></div>
+                            <div class="logs-channel-content">
+                                <input required type="text" class="input-padrao" list="public-log-list" placeholder="Pesquise o canal..." id="public-log-input">
+                                <datalist id="public-log-list">
+                                    <% channels.forEach(element => { %>
+                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                    <% }) %>
+                                </datalist>
+                                <button class="button-padrao" id="save-button-public-log">Salvar</button>
+                            </div>
+                        </div>
+                        <div id="private-log-content">
+                            <div class="title-logs">
+                                <h1 class="title-col">Log privado</h1>
+                                <p class="desc-col">Selecione o canal que deseja que apareca um log privado de vendas!</p>
+                            </div>
+                            <div class="linha"></div>
+                            <div class="logs-channel-content">
+                                <input required type="text" class="input-padrao" list="private-log-list" placeholder="Pesquise o canal..." id="private-log-input">
+                                <datalist id="private-log-list">
+                                    <% channels.forEach(element => { %>
+                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                    <% }) %>
+                                </datalist>
+                                <button class="button-padrao" id="save-button-private-log">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="pagamentos-produtos-containner">
                         <div id="pagamentos-containner">
                             <% if (perms.owner == true || perms.paymentEdit && perms.paymentEdit == true) { %>
@@ -194,6 +229,7 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div id="product-cadastro-containner">
                         <form id="product-cadastro-content" enctype="multipart/form-data" >
                             <h1 class="title-col">Cadastrar Produto</h1>
@@ -238,9 +274,19 @@
                                         </div>
                                         <div id="unic-containner">
                                             <div id="doble-containner">
-                                                <div id="price-containner">
-                                                    <label class="lable-padrao" for="product-price">Preço do produto</label>
-                                                    <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price">
+                                                <div id="triple-containner">
+                                                    <div id="price-containner">
+                                                        <label class="lable-padrao" for="product-price">Preço do produto</label>
+                                                        <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price">
+                                                    </div>
+                                                    <div id="embend-type-containner">
+                                                        <label class="lable-padrao" for="product-price">Tipo da embend</label>
+                                                        <input required type="text" class="input-padrao" value="Mensagem" list="embend-input-list" placeholder="Pesquise o canal..." id="embend-type-input">
+                                                        <datalist id="embend-input-list">
+                                                            <option data-embend="0" selected value="Mensagem">Uma mensagem padrão do discord como em todos os bots!</option>
+                                                            <option data-embend="1" value="Imagem">Uma imagem gerada com as informações trazendo uma melhor qualidade visual!</option>
+                                                        </datalist>
+                                                    </div>
                                                 </div>
                                                 <button class="main-button-product" id="product-cadastro-button">Cadastrar</button>
                                             </div>
