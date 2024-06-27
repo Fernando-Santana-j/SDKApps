@@ -688,7 +688,8 @@ module.exports = (Discord2, client) => {
                     interaction.deleteReply().then((res) => { }).catch((err) => { })
                 }
 
-                if (interaction.customId == 'productSendConfirm') {
+                if (interaction.customId && interaction.customId.includes('productSendConfirm')) {
+                    let quantidade = parseInt(interaction.customId.replace('productSendConfirm-',''))
                     if (sendProduct[interaction.guild.id] && sendProduct[interaction.guild.id].user && sendProduct[interaction.guild.id].product) {
                         let server = await db.findOne({ colecao: "servers", doc: interaction.guild.id })
                         const user = await client.users.fetch(await sendProduct[interaction.guild.id].user);
@@ -700,30 +701,41 @@ module.exports = (Discord2, client) => {
                             var productIndex = await server.products.findIndex(product => product.productID == productID)
                             let estoqueData = await server.products[productIndex].estoque
                             if (product && productIndex != -1 && estoqueData) {
-                                if (estoqueData.length > 0) {
+                                if (estoqueData.length >= quantidade) {
                                     let fields = []
-                                    for (let index = 0; index < estoqueData[0].conteudo.length; index++) {
-                                        const element = estoqueData[0].conteudo[index];
-                                        fields.push({ name: element.title, value: "`" + element.content + "`" })
+                                    for (let index = 0; index < quantidade; index++) {
+                                        const element2 = estoqueData[0].conteudo;
+
+                                        await element2.forEach(element=>{
+                                            fields.push({ name: element.title, value: "`" + element.content + "`" })
+                                        })
+                                        await estoqueData.splice(0, 1);
+                                        product.estoque = estoqueData
+                                        server.products[productIndex] = product
+                                        db.update('servers',interaction.guild.id,{
+                                            products: server.products
+                                        })
                                     }
+                                    const concatenatedString = await fields.map(obj => `${obj.value.replace(/`/g, '')}`).join('\n');
+                                    const buffer = Buffer.from(concatenatedString, 'utf-8');
+                                    const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                                     user.send({
                                         embeds: [
                                             new Discord.EmbedBuilder()
                                                 .setTitle(`🛍️ | Você recebeu um produto!`)
                                                 .setDescription(`Você recebeu um novo produto de ${SendUser.globalName}`)
-                                                .addFields(...fields)
                                                 .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
                                                 .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
                                                 .setTimestamp()
                                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
                                         ],
+                                        files:[attachment]
                                     }).then((res) => {
                                         interaction.reply({
                                             embeds: [
                                                 new Discord.EmbedBuilder()
                                                     .setTitle(`✅ | Produto enviado!`)
                                                     .setDescription(`Você enviou um produto para ${user.globalName} Abaixo esta uma copia do que foi enviado:`)
-                                                    .addFields(...fields)
                                                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
                                                     .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
                                                     .setTimestamp()
@@ -734,9 +746,7 @@ module.exports = (Discord2, client) => {
                                     }).catch(err => {
                                         console.log("err", err);
                                     })
-                                    await estoqueData.splice(0, 1);
-                                    product.estoque = estoqueData
-                                    server.products[productIndex] = product
+                                    
 
                                     db.update('servers', interaction.guild.id, {
                                         products: server.products
@@ -1537,15 +1547,51 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                                 )
                                             ]
                                         }).catch((err) => {
+                                            if (product.embendType == 0) {
+                                                require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                                                    channelID: product.channel,
+                                                    serverID: params.serverID,
+                                                    productID: element.product,
+                                                    edit: true
+                                                })
+                                            }else{
+                                                require('../Discord/createProductMessage.js')(Discord, client, {
+                                                    channelID: product.channel,
+                                                    serverID: params.serverID,
+                                                    productID: element.product,
+                                                    edit: true
+                                                })
+                                            }
+
+                                        })
+                                    } else {
+                                        if (product.embendType == 0) {
+                                            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                                                channelID: product.channel,
+                                                serverID: params.serverID,
+                                                productID: element.product,
+                                                edit: true
+                                            })
+                                        }else{
                                             require('../Discord/createProductMessage.js')(Discord, client, {
                                                 channelID: product.channel,
                                                 serverID: params.serverID,
                                                 productID: element.product,
                                                 edit: true
                                             })
+                                        }
+                                    }
 
+                                } catch (error) {
+
+                                    if (product.embendType == 0) {
+                                        require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                                            channelID: product.channel,
+                                            serverID: params.serverID,
+                                            productID: element.product,
+                                            edit: true
                                         })
-                                    } else {
+                                    }else{
                                         require('../Discord/createProductMessage.js')(Discord, client, {
                                             channelID: product.channel,
                                             serverID: params.serverID,
@@ -1553,15 +1599,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                             edit: true
                                         })
                                     }
-
-                                } catch (error) {
-
-                                    require('../Discord/createProductMessage.js')(Discord, client, {
-                                        channelID: product.channel,
-                                        serverID: params.serverID,
-                                        productID: element.product,
-                                        edit: true
-                                    })
                                 }
                             }
                         }
@@ -1614,27 +1651,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     sendTxtMensage(dono)
                 } else {
                     try {
-                        await dono.send({
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setTitle(`Nova compra no servidor: ${DiscordServer.name}`)
-                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
-                                    .addFields(
-                                        { name: '\u200B', value: '\u200B' },
-                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
-                                        { name: 'ID do usuario', value: user.id, inline: true },
-                                        { name: 'ID da compra', value: findChannel.id },
-                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
-                                        { name: '\u200B', value: '\u200B' },
-                                        ...fields
-                                    )
-                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
-                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                            ],
-                        }).catch(() => {
-                            sendTxtMensage(dono)
-                        })
                         // dono.send({ files: [attachment] }).catch(()=>{});
                         await user.send({
                             embeds: [
@@ -1672,6 +1688,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             sendTxtMensage(findChannel)
                         })
                         // findChannel.send({ files: [attachment] }).catch(()=>{});
+
+                        
                     } catch (error) {
                         sendTxtMensage(findChannel)
                         sendTxtMensage(user)
@@ -1679,10 +1697,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     }
                 }
 
-
-                if ('configs' in serverData && 'publicBuyChannel' in serverData.configs && serverData.configs.publicBuyChannel) {
+                if ('saleLogs' in serverData && serverData.saleLogs.publicLog) {
                     try {
-                        let findChannelPublic = DiscordServer.channels.cache.find(c => c.id === serverData.configs.publicBuyChannel)
+                        let findChannelPublic = DiscordServer.channels.cache.find(c => c.id === serverData.saleLogs.publicLog)
                         let fieldsPublic = { name: `Carrinho:`, value: '' }
                         let valorTotal = 0
                         await carrinho.forEach(async (element, index) => {
@@ -1724,6 +1741,99 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         console.log("LogPublicError", error);
                     }
                 }
+                if ('saleLogs' in serverData && serverData.saleLogs.privateLog) {
+                    let findChannelPrivate = DiscordServer.channels.cache.find(c => c.id === serverData.saleLogs.privateLog)
+                    try {
+                        
+                        findChannelPrivate.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle(`Nova compra no servidor!`)
+                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
+                                    .addFields(
+                                        { name: '\u200B', value: '\u200B' },
+                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
+                                        { name: 'ID do usuario', value: user.id, inline: true },
+                                        { name: 'ID da compra', value: findChannel.id },
+                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
+                                        { name: '\u200B', value: '\u200B' },
+                                        ...fields
+                                    )
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                            ],
+                        }).catch(() => {
+                            
+                            sendTxtMensage(dono)
+                        })
+                    } catch (error) {
+                        findChannelPrivate.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle(`Nova compra no servidor!`)
+                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
+                                    .addFields(
+                                        { name: '\u200B', value: '\u200B' },
+                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
+                                        { name: 'ID do usuario', value: user.id, inline: true },
+                                        { name: 'ID da compra', value: findChannel.id },
+                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
+                                        { name: '\u200B', value: '\u200B' },
+                                    )
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                            ],
+                        })
+                        sendTxtMensage(dono)
+                    }
+                }else{
+                    try {
+                        await dono.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle(`Nova compra no servidor: ${DiscordServer.name}`)
+                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
+                                    .addFields(
+                                        { name: '\u200B', value: '\u200B' },
+                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
+                                        { name: 'ID do usuario', value: user.id, inline: true },
+                                        { name: 'ID da compra', value: findChannel.id },
+                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
+                                        { name: '\u200B', value: '\u200B' },
+                                        ...fields
+                                    )
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                            ],
+                        }).catch(() => {
+                            sendTxtMensage(dono)
+                        })
+                    } catch (error) {
+                        await dono.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle(`Nova compra no servidor: ${DiscordServer.name}`)
+                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
+                                    .addFields(
+                                        { name: '\u200B', value: '\u200B' },
+                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
+                                        { name: 'ID do usuario', value: user.id, inline: true },
+                                        { name: 'ID da compra', value: findChannel.id },
+                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
+                                        { name: '\u200B', value: '\u200B' },
+                                    )
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                            ],
+                        })
+                        sendTxtMensage(dono)
+                    }
+                }
+                
 
                 if ('personalize' in serverData && 'cargoPay' in serverData.personalize) {
                     try {

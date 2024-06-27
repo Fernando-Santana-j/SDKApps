@@ -758,7 +758,16 @@ document.getElementById('button-backGround-input-edit').addEventListener('click'
     }
 })
 
+document.getElementById('embend-type-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('embend-input-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
 
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione uma embend válida da lista.');
+        this.value = '';
+    }
+});
 
 function previewImage(input, preview) {
     if (input.files && input.files[0]) {
@@ -868,6 +877,16 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
         }
     });
 
+
+    const opcoesEmbend = document.getElementById('embend-input-list').querySelectorAll('option');
+    let EmbendID = null;
+
+    opcoesEmbend.forEach(option => {
+        if (option.value === document.getElementById('embend-type-input').value) {
+            EmbendID = option.getAttribute('data-embend');
+        }
+    });
+
     var formData = new FormData();
     formData.append('estoque', JSON.stringify(EstoqueData));
     formData.append('productLogo', document.getElementById('logo-input').files[0]);
@@ -875,6 +894,7 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
     formData.append('productName', document.getElementById('product-name').value.trim());
     formData.append('producDesc', document.getElementById('product-desc').value.trim());
     formData.append('serverID', serverID);
+    formData.append('embend', EmbendID)
     formData.append('price', parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')));
     // if (parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')) < 100) {
     //     errorNotify('O valor do produto não pode ser menor que R$ 1,00')
@@ -911,4 +931,87 @@ document.getElementById("product-cadastro-content").addEventListener("submit", f
 
 
 
+
+document.getElementById('private-log-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('private-log-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+
+document.getElementById('save-button-private-log').addEventListener('click',async()=>{
+    if (document.getElementById('private-log-input').value <= 0) {
+        errorNotify('Selecione um canal primeiro!')
+        return
+    }
+    const opcoes = document.getElementById('private-log-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('private-log-input').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+    let session = await fetch('/sales/privateLog', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            channelID: channelID,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
+    }else{
+        errorNotify(session.data)
+    }
+})
+
+
+document.getElementById('public-log-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('public-log-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+
+document.getElementById('save-button-public-log').addEventListener('click',async()=>{
+    if (document.getElementById('public-log-input').value <= 0) {
+        errorNotify('Selecione um canal primeiro!')
+        return
+    }
+    const opcoes = document.getElementById('public-log-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('public-log-input').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+    let session = await fetch('/sales/publicLog', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            channelID: channelID,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
+    }else{
+        errorNotify(session.data)
+    }
+})
 

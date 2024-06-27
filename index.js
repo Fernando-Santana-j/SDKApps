@@ -380,7 +380,7 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('painel', { host: `${webConfig.host}`, chatItens:chatItens, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    res.render('painel', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
@@ -417,12 +417,12 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     const channels = guild.channels.cache;
 
     const textChannels = channels.filter(channel => channel.type === 0);
-    let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+    let adminServer = db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
     let chatItens = []
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('sales', { perms: verifyPerms.perms,chatItens:chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
+    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
 })
 
 
@@ -471,12 +471,12 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
             id: role.id
         };
     });
-    let adminServer = await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
     let chatItens = []
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('personalize', { host: `${webConfig.host}`,chatItens:chatItens, cargos: roleObjects, user: user, server: server })
+    res.render('personalize', { host: `${webConfig.host}`, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
 
 app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
@@ -505,12 +505,12 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
         }
     }
     paymentMetod = JSON.stringify(paymentMetod)
-    let adminServer =  await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
-        let chatItens = []
-        if (adminServer && 'ticketOptions' in adminServer) {
-            chatItens = adminServer.ticketOptions.motivos
-        }
-    res.render('analytics', { host: `${webConfig.host}`,chatItens:chatItens, user: user, server: server, paymentMetod: paymentMetod, canceladosEstoque: canceladosEstoque, reebolsos: reebolsos, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('analytics', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, paymentMetod: paymentMetod, canceladosEstoque: canceladosEstoque, reebolsos: reebolsos, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
@@ -544,12 +544,12 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
     let guild = guilds.get(serverID)
     let roles = guild.roles.cache
     let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
-    let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
-        let chatItens = []
-        if (adminServer && 'ticketOptions' in adminServer) {
-            chatItens = adminServer.ticketOptions.motivos
-        }
-    res.render('perms', { host: `${webConfig.host}`,chatItens:chatItens, user: user, server: server, roles: JSON.stringify(rolesFilter) })
+    let adminServer = db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('perms', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, roles: JSON.stringify(rolesFilter) })
 })
 
 
@@ -605,12 +605,12 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
         ticketOptions = server.ticketOptions
     }
 
-    let adminServer =  await db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
-        let chatItens = []
-        if (adminServer && 'ticketOptions' in adminServer) {
-            chatItens = adminServer.ticketOptions.motivos
-        }
-    res.render('ticket', { host: `${webConfig.host}`,chatItens:chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('ticket', { host: `${webConfig.host}`, chatItens: chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
 
@@ -633,13 +633,13 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
         const channels = guild.channels.cache;
 
         const textChannels = channels.filter(channel => channel.type === 0);
-        let adminServer = db.findOne({colecao:'servers',doc:process.env.ADMINSERVER})
+        let adminServer = db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
         let chatItens = []
         if (adminServer && 'ticketOptions' in adminServer) {
             chatItens = adminServer.ticketOptions.motivos
         }
-        
-        res.render('config', { host: `${webConfig.host}`,chatItens:chatItens, user: user, channels: textChannels, server: server })
+
+        res.render('config', { host: `${webConfig.host}`, chatItens: chatItens, user: user, channels: textChannels, server: server })
     } catch (error) {
 
     }
@@ -993,7 +993,88 @@ app.post('/personalize/change', async (req, res) => {
         }
     }
 })
+app.post('/personalize/productIcon', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.iconProduct = req.body.icon
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
 
+app.post('/sales/privateLog', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let logs = {
+                publicLog: '',
+                privateLog: ''
+            }
+            if ('saleLogs' in server) {
+                logs = server.saleLogs
+            }
+            logs.privateLog = req.body.channelID
+            db.update('servers', req.body.serverID, {
+                saleLogs: logs
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Log alterada' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a log!' })
+        }
+    }
+})
+app.post('/sales/publicLog', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let logs = {
+                publicLog: '',
+                privateLog: ''
+            }
+            if ('saleLogs' in server) {
+                logs = server.saleLogs
+            }
+            logs.publicLog = req.body.channelID
+            db.update('servers', req.body.serverID, {
+                saleLogs: logs
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Log alterada' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a log!' })
+        }
+    }
+})
 
 app.post('/ticket/create', async (req, res) => {
     try {
@@ -1018,7 +1099,7 @@ app.post('/ticket/saveSend', async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
-        if ( 'ticketOptions' in server && server.ticketOptions.motivos.length <= 0) {
+        if ('ticketOptions' in server && server.ticketOptions.motivos.length <= 0) {
             if (!res.headersSent) {
                 res.status(200).json({ success: false, data: 'Cadastre os motivos do ticket primeiro!' })
             }
@@ -1042,7 +1123,7 @@ app.post('/ticket/saveSend', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
-        
+
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Mensagem do ticket enviada!' })
         }
@@ -1138,7 +1219,7 @@ app.post('/ticket/motivoADD', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
-        
+
         if (ticketOptions.channel) {
             require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
         }
@@ -1172,7 +1253,7 @@ app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
                     },
                     avaliacao: '',
                     log: '',
-                    banner:''
+                    banner: ''
                 }
                 if ('ticketOptions' in server) {
                     ticketOptions = server.ticketOptions
@@ -1263,7 +1344,7 @@ app.post('/ticket/privatelog', async (req, res) => {
         db.update('servers', body.serverID, {
             ticketOptions: ticketOptions
         })
-        
+
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Log privado modificado!' })
         }
@@ -1289,7 +1370,7 @@ app.post('/ticket/desc', async (req, res) => {
             avaliacao: '',
             log: '',
             privateLog: '',
-            desc:''
+            desc: ''
         }
         if ('ticketOptions' in server) {
             ticketOptions = server.ticketOptions
@@ -1386,7 +1467,7 @@ app.post('/send/discordMensage', async (req, res) => {
                     .setDescription(`\n${textTranslate}\n`)
                     .addFields({ name: '\u200B', value: '\u200B' }, { name: 'Tipo', value: `${req.body.admin == true ? "administrador" : "usuario"}`, inline: true }, { name: "Nome do usuario", value: user.username, inline: true }, { name: "ID do usuario", value: user.id, inline: true })
                     .setColor('#6E58C7')
-                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
                     .setTimestamp()
 
             ]
