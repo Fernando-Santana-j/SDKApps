@@ -3,8 +3,8 @@ let serverID = location.pathname.replace('/server/sales/', "")
 
 
 
-document.getElementById('add-pix-popup-tutorial').addEventListener('click',()=>{
-    window.open('https://www.youtube.com/watch?v=jK4JmvWDvAc',"_blank")
+document.getElementById('add-pix-popup-tutorial').addEventListener('click', () => {
+    window.open('https://www.youtube.com/watch?v=jK4JmvWDvAc', "_blank")
 })
 
 if (document.getElementById('bank-input-list')) {
@@ -494,13 +494,13 @@ document.addEventListener('click', async (event) => {
                         body: JSON.stringify({
                             productID: productID,
                             serverID: serverID,
-                            txt:linhas,
-                            title:document.getElementById('input-title-txt').value
+                            txt: linhas,
+                            title: document.getElementById('input-title-txt').value
                         }),
                     }).then(response => { return response.json() })
                     if (productData.success == true) {
                         successNotify('Estoque adicionado!')
-                    }else{
+                    } else {
                         errorNotify('Erro ao adicionar estoque!')
                     }
                 };
@@ -805,6 +805,14 @@ document.getElementById('backGround-input-edit').addEventListener('change', func
 });
 
 
+document.getElementById('image-input-multi').addEventListener('change', function () {
+    previewImage(this, document.getElementById('image-preview-multi'));
+});
+document.getElementById('logo-input-multi').addEventListener('change', function () {
+    previewImage(this, document.getElementById('logo-preview-multi'));
+});
+
+
 
 
 
@@ -818,7 +826,7 @@ function clearCadastroProduct() {
     document.getElementById('logo-preview').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
     document.getElementById('image-preview').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
 
-    document.querySelector('#product-cadastro-containner #estoque-config-row').innerHTML = `
+    document.querySelector('.product-cadastro-containner #estoque-config-row').innerHTML = `
         <div class="estoque-config-col" data-index="1"> 
             <h1 class="title-col">Estoque 1</h1>
             <div class="estoque-config-inputs-containner">
@@ -844,14 +852,14 @@ function clearCadastroProduct() {
 }
 
 
-document.getElementById("product-cadastro-content").addEventListener("submit", function (event) {
+document.getElementById("form-prodc").addEventListener("submit", function (event) {
     event.preventDefault();
     if (!document.getElementById('logo-input').files[0]) {
         return errorNotify('Nenhuma logo foi inserida!')
     }
 
     // coletar os dados do estoque
-    let row = document.querySelector('#product-cadastro-containner #estoque-config-row')
+    let row = document.querySelector('.product-cadastro-containner #estoque-config-row')
     var EstoqueData = [];
 
     Array.from(row.children).forEach((element, index) => {
@@ -943,7 +951,7 @@ document.getElementById('private-log-input').addEventListener('blur', function (
     }
 });
 
-document.getElementById('save-button-private-log').addEventListener('click',async()=>{
+document.getElementById('save-button-private-log').addEventListener('click', async () => {
     if (document.getElementById('private-log-input').value <= 0) {
         errorNotify('Selecione um canal primeiro!')
         return
@@ -963,12 +971,12 @@ document.getElementById('save-button-private-log').addEventListener('click',asyn
         },
         body: JSON.stringify({
             channelID: channelID,
-            serverID:serverID
+            serverID: serverID
         }),
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify(session.data)
-    }else{
+    } else {
         errorNotify(session.data)
     }
 })
@@ -985,7 +993,7 @@ document.getElementById('public-log-input').addEventListener('blur', function ()
     }
 });
 
-document.getElementById('save-button-public-log').addEventListener('click',async()=>{
+document.getElementById('save-button-public-log').addEventListener('click', async () => {
     if (document.getElementById('public-log-input').value <= 0) {
         errorNotify('Selecione um canal primeiro!')
         return
@@ -1005,13 +1013,195 @@ document.getElementById('save-button-public-log').addEventListener('click',async
         },
         body: JSON.stringify({
             channelID: channelID,
-            serverID:serverID
+            serverID: serverID
         }),
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify(session.data)
-    }else{
+    } else {
         errorNotify(session.data)
     }
 })
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let selectProdsList = []
+
+let optionsIsOpen = false
+function exibOptionsSelect() {
+    optionsIsOpen = true
+    let selectProdOptions = document.getElementById('select-product-options-containner')
+    let selectProdContent = document.getElementById('select-product-content')
+    document.getElementById('select-product-options-containner').style.display = 'flex'
+    selectProdOptions.style.width = (selectProdContent.offsetWidth + 3) + 'px'
+    selectProdOptions.style.left = (selectProdContent.offsetLeft - 2) + 'px'
+    selectProdOptions.style.top = selectProdContent.offsetTop + selectProdContent.offsetHeight + 5 + 'px'
+}
+document.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (target.closest('.select-product-col-exclud-button')) {
+        let deleteTarget = target.closest('.select-product-col-exclud-button')
+        let id = deleteTarget.getAttribute('data-id')
+
+        selectProdsList.splice(selectProdsList.indexOf(id), 1);
+        document.getElementById('select-product-row').removeChild(deleteTarget.parentNode.parentNode)
+    }
+    if (target.closest('.select-product-options-col')) {
+        let targetSelect = target.closest('.select-product-options-col')
+        let prodID = targetSelect.getAttribute('data-id')
+        selectProdsList.push(prodID)
+
+        document.getElementById('select-product-row').innerHTML += `
+            <div class="select-product-col">
+                <div class="select-product-col-text">
+                    <h1 class="select-product-col-title">${targetSelect.querySelector('.select-product-options-col-title').textContent}</h1>
+                    <p class="select-product-col-desc">${targetSelect.querySelector('.select-product-options-col-desc').textContent}</p>
+                </div>
+                <div class="select-product-col-exclud">
+                    <button type="button" data-id='${targetSelect.getAttribute('data-id')}' class="select-product-col-exclud-button">X</button>
+                </div>
+            </div>
+        `
+        exibOptionsSelect()
+        document.getElementById('select-product-options-row').removeChild(targetSelect)
+    }
+    if (optionsIsOpen == true && !target.closest('.select-product-options-col') && !target.closest('#select-product-focus-button')) {
+        document.getElementById('select-product-options-containner').style.display = 'none'
+        optionsIsOpen = false
+    }
+})
+
+
+document.getElementById('select-product-focus-button').addEventListener('click', async () => {
+    exibOptionsSelect()
+
+    let productData = await fetch('/product/get', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID: serverID
+        }),
+    }).then(response => { return response.json() })
+    if (productData.success == true) {
+        function formatarMoeda(numeroCentavos) {
+            const valorReal = numeroCentavos / 100;
+            return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        document.getElementById('select-product-options-row').innerHTML = ''
+        productData.data.forEach((element) => {
+            if (!selectProdsList.includes(element.productID)) {
+                document.getElementById('select-product-options-row').innerHTML += `
+                    <div class="select-product-options-col" data-id='${element.productID}'>
+                        <img class="select-product-options-col-image" src="${location.origin + element.productLogo}" alt="">
+
+                        <h1 class="select-product-options-col-title" title="${element.productName}">${element.productName}</h1> 
+                        <div style="color: var(--color-text-primary);">•</div>
+                        <p class="select-product-options-col-desc" title='${formatarMoeda(element.price)}'>${formatarMoeda(element.price)}</p>
+                    </div>
+                `
+            }
+        })
+    }
+})
+document.getElementById('channel-multi-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('channel-multi-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+document.getElementById("form-prodc-mult").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (selectProdsList.length <= 0) {
+        errorNotify('Selecione um ou mais produtos para continuar!')
+        return
+    }
+    if (document.getElementById('channel-multi-input').value.trim().length <= 0) {
+        errorNotify('Selecione um canal para ser enviado o produto!')
+        return
+    }
+    if (document.getElementById('product-name-mult').value.trim().length <= 0) {
+        errorNotify('Adicione um nome primeiro!')
+        return
+    }
+    if (document.getElementById('product-desc-multi').value.trim().length <= 0) {
+        errorNotify('Adicione uma descrição primeiro!')
+        return
+    }
+    // coletar o id do canal
+    const opcoes = document.getElementById('channel-multi-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('channel-multi-input').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+
+
+
+
+    var formData = new FormData();
+
+
+    formData.append('channelID', channelID);
+    formData.append('productName', document.getElementById('product-name-mult').value.trim());
+    formData.append('producDesc', document.getElementById('product-desc-multi').value.trim());
+    formData.append('serverID', serverID);
+    formData.append('productsList',selectProdsList)
+    if (document.getElementById('logo-input-multi').files[0]) {
+        formData.append('productLogo', document.getElementById('logo-input-multi').files[0]);
+    }
+    if (document.getElementById('image-input-multi').files[0]) {
+        formData.append('backGround', document.getElementById('image-input-multi').files[0]);
+    }
+
+    document.getElementById('select-product-row').innerHTML = ''
+    selectProdsList = []
+    document.getElementById('logo-input-multi').value = ''
+    document.getElementById('product-name-mult').value = ''
+    document.getElementById('channel-multi-input').value = ''
+    document.getElementById('product-desc-multi').value = ''
+    document.getElementById('image-preview-multi').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
+    document.getElementById('logo-preview-multi').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
+    $.ajax({
+        traditional: true,
+        url: '/product/mult',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.success) {
+                successNotify('Multiproduto criado!')
+            } else {
+                errorNotify(response.data)
+            }
+
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    })
+})
