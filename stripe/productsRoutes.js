@@ -29,11 +29,107 @@ const upload = multer({ storage });
 
 let Discord = require('discord.js')
 const botConfig = require('../config/bot-config.js');
-const { error } = require('console');
+const { error, log } = require('console');
 const { rejects } = require('assert');
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
+
+router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+    try {
+        var DiscordServer = await client.guilds.cache.get(req.body.serverID);
+        var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelID)
+        let serverDb = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+
+        let dburl = null
+        let Newdbres = null
+        if (req.files.backGround) {
+            const bannerPath = req.files.backGround[0].path;
+            let file = await fs.readFileSync(bannerPath);
+            let buffer = Buffer.from(file, 'binary');
+            let newBuffer = await sharp(buffer).jpeg().toBuffer()
+            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
+            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
+            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
+            let dbres = await dbBannerDiscordChannel.send({
+                files: [attachment]
+            })
+            Newdbres = dbres
+            dburl = await dbres.attachments.first().url
+            fs.unlink(req.files.backGround[0].path, (err) => {
+                if (err) {
+                    console.error('Erro ao apagar o arquivo original:', err);
+                    
+                } 
+            });
+        }
+        let dburl2 = null
+        let Newdbres2 = null
+        if (req.files.productLogo) {
+            const bannerPath = req.files.productLogo[0].path
+            let file = await fs.readFileSync(bannerPath);
+            let buffer = Buffer.from(file, 'binary');
+            let newBuffer = await sharp(buffer).jpeg().toBuffer()
+            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
+            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
+            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
+            let dbres = await dbBannerDiscordChannel.send({
+                files: [attachment]
+            })
+            Newdbres2 = dbres
+            dburl2 = await dbres.attachments.first().url
+            fs.unlink(req.files.productLogo[0].path, (err) => {
+                if (err) {
+                    console.error('Erro ao apagar o arquivo original:', err);
+                    return { error: true, err: err }
+                } else {
+                    return null
+                }
+            });
+        }
+
+        let productsArrayOptions = []
+        let productList = await req.body.productsList.split(',')
+        for (let index = 0; index < productList.length; index++) {
+            const element = await productList[index];
+            let produto = await serverDb.products.find(product => product.productID == element)
+            await productsArrayOptions.push(
+                await new Discord.StringSelectMenuOptionBuilder().setLabel(produto.productName).setDescription(functions.formatarMoeda(produto.price)).setValue(produto.productID)
+            )
+        }
+
+        DiscordChannel.send({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle(req.body.productName)
+                    .setDescription(req.body.producDesc)
+                    .setColor('personalize' in serverDb && 'colorDest' in serverDb.personalize ? serverDb.personalize.colorDest : '#6E58C7')
+                    .setTimestamp()
+                    .setThumbnail(dburl2)
+                    .setImage(dburl)
+                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+            ],
+            components: [
+                new Discord.ActionRowBuilder().addComponents(
+                    new Discord.StringSelectMenuBuilder()
+                        .setCustomId('multSelectProduct')
+                        .setPlaceholder('Selecione um produto!')
+                        .setMinValues(1)
+                        .setMaxValues(1)
+                        .addOptions(...productsArrayOptions)
+                )
+            ]
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Mensagem enviada!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar enviar a mensagem!' })
+        }
+        console.log(error);
+    }
+})
 
 router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
@@ -98,7 +194,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
                 serverID: req.body.serverID,
                 productID: product.id,
             })
-        }else{
+        } else {
             require('../Discord/createProductMessage.js')(Discord, client, {
                 channelID: req.body.channelID,
                 serverID: req.body.serverID,
@@ -175,9 +271,9 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
         let produtos = server.products
 
         produto.productName = req.body.productName,
-        produto.producDesc = req.body.producDesc,
-        produto.price = req.body.price,
-        produto.priceID = price.id
+            produto.producDesc = req.body.producDesc,
+            produto.price = req.body.price,
+            produto.priceID = price.id
         if (logo != null) {
             produto.productLogo = logo
         }
@@ -193,12 +289,12 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
         })
         if (produto.embendType == 0) {
             require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                channelID:  produto.channel,
+                channelID: produto.channel,
                 serverID: req.body.serverID,
                 productID: productID,
                 edit: true
             })
-        }else{
+        } else {
             require('../Discord/createProductMessage.js')(Discord, client, {
                 channelID: produto.channel,
                 serverID: req.body.serverID,
@@ -370,12 +466,12 @@ router.post('/estoque/txt', async (req, res) => {
                 })
                 if (product.embendType == 0) {
                     require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                        channelID:  product.channel,
+                        channelID: product.channel,
                         serverID: req.body.serverID,
                         productID: productID,
                         edit: true
                     })
-                }else{
+                } else {
                     require('../Discord/createProductMessage.js')(Discord, client, {
                         channelID: product.channel,
                         serverID: req.body.serverID,
@@ -425,12 +521,12 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 })
                 if (product.embendType == 0) {
                     require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                        channelID:  product.channel,
+                        channelID: product.channel,
                         serverID: req.body.serverID,
                         productID: productID,
                         edit: true
                     })
-                }else{
+                } else {
                     require('../Discord/createProductMessage.js')(Discord, client, {
                         channelID: product.channel,
                         serverID: req.body.serverID,
@@ -469,7 +565,7 @@ router.post('/product/estoqueAdd', async (req, res) => {
 })
 
 
-router.post('/product/mensage', async(req, res) => {
+router.post('/product/mensage', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         let productID = req.body.productID
@@ -482,7 +578,7 @@ router.post('/product/mensage', async(req, res) => {
                 productID: req.body.productID,
                 edit: true
             })
-        }else{
+        } else {
             require('../Discord/createProductMessage.js')(Discord, client, {
                 channelID: req.body.channelID,
                 serverID: req.body.serverID,

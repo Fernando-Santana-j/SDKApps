@@ -47,7 +47,7 @@
                 <div id="produtos-config-row">
                     <div id="cadastro-left-content">
                         <div id="product-logo-content">
-                            <h1 id="logo-title">Mudar logo:</h1>
+                            <h1 class="logo-title">Mudar logo:</h1>
                             <label for="logo-input-edit">
                                 <img id="logo-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                             </label>
@@ -230,15 +230,15 @@
                         </div>
                     </div>
                     
-                    <div id="product-cadastro-containner">
-                        <form id="product-cadastro-content" enctype="multipart/form-data" >
+                    <div class="product-cadastro-containner">
+                        <form class="product-cadastro-content" id="form-prodc" enctype="multipart/form-data" >
                             <h1 class="title-col">Cadastrar Produto</h1>
                             <div class="linha"></div>
-                            <div id="cadastro-content">
-                                <div id="cadastro-left-content">
-                                    <div id="channels-containner">
-                                        <h1 id="cannels-title">Selecione o canal de anuncio do produto:</h1>
-                                        <div id="channels-content">
+                            <div class="cadastro-content">
+                                <div class="cadastro-left-content">
+                                    <div class="channels-containner">
+                                        <h1 class="cannels-title">Selecione o canal de anuncio do produto:</h1>
+                                        <div class="channels-content">
                                             <input required type="text" class="input-padrao" list="channels-input-list" placeholder="Pesquise o canal..." id="channel-name-input">
                                             <datalist id="channels-input-list">
                                                 <% channels.forEach(element => { %>
@@ -247,23 +247,23 @@
                                             </datalist>
                                         </div>
                                     </div>
-                                    <div id="backGround-containner">
-                                        <h1 id="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
-                                        <div id="backGround-content">
-                                            <div id="backGround-image-preview">
+                                    <div class="backGround-containner">
+                                        <h1 class="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
+                                        <div class="backGround-content">
+                                            <div class="backGround-image-preview">
                                                 <label for="image-preview">Preview da imagem</label>
                                                 <img id="image-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                             </div>
-                                            <div id="backGround-image-input-content">
-                                                <label id="button-image-input" data-plan="<%= server.plan %>" for="image-input">Anexar Imagem</label>
+                                            <div class="backGround-image-input-content">
+                                                <label id="button-image-input" class="image-lable" data-plan="<%= server.plan %>" for="image-input">Anexar Imagem</label>
                                                 <input name="backGround" accept="image/*" hidden type="file" <%= server.plan == 1 ? 'disabled' : '' %> name="" id="image-input">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div id="cadastro-rigth-content">
-                                    <h1 id="rigth-content-title">Dados do produto:</h1>
-                                    <div id="rigth-content">
+                                <div class="cadastro-rigth-content">
+                                    <h1 class="rigth-content-title">Dados do produto:</h1>
+                                    <div class="rigth-content">
                                         <div class="inputs-containner" id="product-name-content">
                                             <label class="lable-padrao" for="product-name">Nome do produto</label>
                                             <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name">
@@ -272,9 +272,9 @@
                                             <label class="lable-padrao" for="product-desc">Descrição do produto</label>
                                             <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc"></textarea>
                                         </div>
-                                        <div id="unic-containner">
-                                            <div id="doble-containner">
-                                                <div id="triple-containner">
+                                        <div class="unic-containner">
+                                            <div class="doble-containner">
+                                                <div class="triple-containner">
                                                     <div id="price-containner">
                                                         <label class="lable-padrao" for="product-price">Preço do produto</label>
                                                         <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price">
@@ -290,8 +290,8 @@
                                                 </div>
                                                 <button class="main-button-product" id="product-cadastro-button">Cadastrar</button>
                                             </div>
-                                            <div id="product-logo-content">
-                                                <h1 id="logo-title">Adicionar logo:</h1>
+                                            <div class="product-logo-content">
+                                                <h1 class="logo-title">Adicionar logo:</h1>
                                                 <label for="logo-input">
                                                     <img id="logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                                 </label>
@@ -345,6 +345,103 @@
                                             <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50px" height="50px" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.6907,0 -23,10.3093 -23,23c0,12.69071 10.3093,23 23,23c12.69071,0 23,-10.30929 23,-23c0,-12.6907 -10.30929,-23 -23,-23zM25,4c11.60982,0 21,9.39018 21,21c0,11.60982 -9.39018,21 -21,21c-11.60982,0 -21,-9.39018 -21,-21c0,-11.60982 9.39018,-21 21,-21zM24.98438,16.98633c-0.55152,0.00862 -0.99193,0.46214 -0.98437,1.01367v6h-6c-0.36064,-0.0051 -0.69608,0.18438 -0.87789,0.49587c-0.18181,0.3115 -0.18181,0.69676 0,1.00825c0.18181,0.3115 0.51725,0.50097 0.87789,0.49587h6v6c-0.0051,0.36064 0.18438,0.69608 0.49587,0.87789c0.3115,0.18181 0.69676,0.18181 1.00825,0c0.3115,-0.18181 0.50097,-0.51725 0.49587,-0.87789v-6h6c0.36064,0.0051 0.69608,-0.18438 0.87789,-0.49587c0.18181,-0.3115 0.18181,-0.69676 0,-1.00825c-0.18181,-0.3115 -0.51725,-0.50097 -0.87789,-0.49587h-6v-6c0.0037,-0.2703 -0.10218,-0.53059 -0.29351,-0.72155c-0.19133,-0.19097 -0.45182,-0.29634 -0.72212,-0.29212z"></path></g></g></svg>
                                             Adicionar item ao estoque
                                         </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="product-cadastro-containner">
+                        <form class="product-cadastro-content" id="form-prodc-mult" enctype="multipart/form-data" >
+                            <h1 class="title-col">Cadastrar de multi Produtos</h1>
+                            <div class="linha"></div>
+                            <div class="cadastro-content">
+                                <div class="cadastro-left-content">
+                                    <div class="channels-containner">
+                                        <h1 class="cannels-title">Selecione o canal de anuncio do produto:</h1>
+                                        <div class="channels-content">
+                                            <input required type="text" class="input-padrao" list="channels-input-list" placeholder="Pesquise o canal..." id="channel-multi-input">
+                                            <datalist id="channel-multi-list">
+                                                <% channels.forEach(element => { %>
+                                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                                <% }) %>
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                    <div class="backGround-containner">
+                                        <h1 class="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
+                                        <div class="backGround-content">
+                                            <div class="backGround-image-preview">
+                                                <label for="image-preview-multi">Preview da imagem</label>
+                                                <img id="image-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                            </div>
+                                            <div class="backGround-image-input-content">
+                                                <label id="button-image-input-multi" class="image-lable" data-plan="<%= server.plan %>" for="image-input-multi">Anexar Imagem</label>
+                                                <input name="backGround" accept="image/*" hidden type="file" <%= server.plan == 1 ? 'disabled' : '' %> name="" id="image-input-multi">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cadastro-rigth-content">
+                                    <h1 class="rigth-content-title">Dados do multi produto:</h1>
+                                    <div class="rigth-content">
+                                        <div class="inputs-containner" id="product-name-content">
+                                            <label class="lable-padrao" for="product-name-mult">Nome do multi produto</label>
+                                            <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name-mult">
+                                        </div>
+                                        <div class="inputs-containner" id="product-desc-content">
+                                            <label class="lable-padrao" for="product-desc-multi">Descrição do multi produto</label>
+                                            <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc-multi"></textarea>
+                                        </div>
+                                        <div class="unic-containner">
+                                            <div class="doble-containner">
+                                                <div class="triple-containner">
+                                                    <div id="select-product-containner">
+                                                        <div id="select-product-content">
+                                                            <div id="select-product-focus">
+                                                                <button class="button-padrao" id="select-product-focus-button" type="button">Selecionar produtos</button>
+                                                                
+                                                            </div>
+                                                            <div id="select-product-row">
+                                                                
+                                                            </div>
+                                                        </div>
+                                                        <div id="select-product-options-containner" style="display: none;">
+                                                            <div id="select-product-options-row">
+                                                                
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="main-button-product" id="product-cadastro-multi-button">Cadastrar</button>
+                                            </div>
+                                            <div class="product-logo-content">
+                                                <h1 class="logo-title">Adicionar logo:</h1>
+                                                <label for="logo-input-multi">
+                                                    <img id="logo-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                                </label>
+                                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="logo-input-multi">
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
