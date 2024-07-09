@@ -12,17 +12,14 @@
   "author": "Fernando Santana",
   "license": "ISC",
   "dependencies": {
-    "apexcharts": "^3.46.0",
     "axios": "^1.6.7",
     "body-parser": "^1.20.2",
     "canvas": "^2.11.2",
-    "clipboardy": "^4.0.0",
     "cookie-parser": "^1.4.6",
     "copy-paste": "^1.5.3",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "discord-html-transcripts": "^3.2.0",
-    "discord-rpc": "^4.0.1",
     "discord.js": "^14.12.1",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
@@ -34,13 +31,11 @@
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^2.0.8",
     "multer": "^1.4.5-lts.1",
-    "ngrok": "^5.0.0-beta.2",
     "node-fetch": "^3.3.2",
     "pagseguro-nodejs": "^0.1.2",
     "path": "^0.12.7",
     "qrcode": "^1.5.3",
     "sharp": "^0.33.2",
-    "stripe": "^14.19.0",
-    "wio.db": "^4.0.22"
+    "stripe": "^14.19.0"
   }
 }
