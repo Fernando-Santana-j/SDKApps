@@ -128,7 +128,6 @@ module.exports = {
                         return
                     }
                 }
-                
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
                     const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
@@ -163,7 +162,6 @@ module.exports = {
                 }
 
             } catch (error) {
-                console.log(error);
                 res.redirect('/')
             }
         } else {
@@ -183,7 +181,6 @@ module.exports = {
                 ...headers
             }
         }).then((res) => { return res.data }).catch((err) => {
-            console.error(err)
             return { error: true, err: err }
         })
         if (serverResponse.error) return serverResponse;

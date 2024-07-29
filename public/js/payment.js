@@ -1,6 +1,27 @@
 
 let serverID = location.pathname.replace('/payment/', "")
 
+$.ajax({
+    traditional: true,
+    url: '/subscription/exist',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify( {
+        serverID:serverID,
+    } ),
+    dataType: 'json',
+    success: function(response) {
+        console.log(response);
+        if (response.success == true) {
+            window.location.href = location.origin + '/dashboard';
+        }   
+    },
+    error: function(xhr, status, error) {
+        console.error(error);
+    }
+})
+
+
 async function initCheckout(plan,price) {
     await $.ajax({
         traditional: true,

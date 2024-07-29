@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const stripe = require('stripe')(require('../config/web-config').stripe);
-
+const Discord = require("discord.js");
 const db = require('../Firebase/models')
 const fs = require('fs');
 const functions = require('../functions');
 const webConfig = require('../config/web-config');
 const sharp = require('sharp');
-
+const botConfig = require('../config/bot-config.js');
 const { default: axios } = require("axios");
+const client = new Discord.Client({ intents: botConfig.intents })
+client.login(botConfig.discordToken)
 
 router.get('/auth/verify/:acesstoken', async (req, res) => {
     let param = req.params.acesstoken

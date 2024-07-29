@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title>SDK - Cupom</title>
+        <link rel="stylesheet" href="<%= host %>/public/css/cupom.css">
+</head>
+
+<body>
+    <div id="body-containner">
+
+        <div id="containner">
+            <%- include('./reusable/header.ejs',{index:7}) %>
+                <main id="main-containner">
+                    <div id="main-content">
+                        <h1 class="title-col">Crie e modifique cupons para seus produtos!</h1>
+                        <div id="main-content-row">
+                            <div class="itens-col">
+                                <h1 class="title-col">Criar cupom!</h1>
+                                <p class="desc-col">Crie cupons para produtos especificos!</p>
+                                <div class="linha" style="margin-top: 1em;"></div>
+                                <div class="itens-content-col">
+                                    <div class="inputs-col-content">
+                                        <label for="cupom-number-value" class="lable-padrao">Adicione abaixo o codigo/nome do cupom: </label>
+                                        <input type="text" class="input-padrao" id="cupom-code-value">
+                                    </div>
+                                    <div class="inputs-col-content">
+                                        <label for="type-cupom-value" class="lable-padrao">Selecione o tipo de desconto abaixo:</label>
+                                        <input required type="text" class="input-padrao" list="type-cupom-value-list" placeholder="Tipo de desconto..." id="type-cupom-value">
+                                        <datalist id="type-cupom-value-list">
+                                            <option data-channel="procent" value="Porcentagem">Selecione essa opção para dar um desconto em porcentagem!</option>
+                                            <option data-channel="int" value="Valor">Selecione essa opção para dar o desconto em um valor especifico!</option>
+                                        </datalist>
+                                    </div>
+                                    <div class="inputs-col-content">
+                                        <label for="cupom-number-value" class="lable-padrao">Valor do desconto seja o valor(centavos) ou a porcentagem: </label>
+                                        <input type="number" class="input-padrao" id="cupom-number-value">
+                                    </div>
+                                    <div class="inputs-col-content">
+                                        <label for="type-value" class="lable-padrao">Selecione os produtos que podem receber esse cupom: </label>
+                                        <div id="select-product-containner">
+                                            <div id="select-product-content">
+                                                <div id="select-product-focus">
+                                                    <button class="button-padrao" id="select-product-focus-button" type="button">Selecionar produtos</button>
+                                                    
+                                                </div>
+                                                <div id="select-product-row">
+                                                    
+                                                </div>
+                                            </div>
+                                            <div id="select-product-options-containner" style="display: none;">
+                                                <div id="select-product-options-row">
+                                                    
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    <button type="button" class="button-padrao" id="create-cupom-button">Criar cupom</button>
+                                </div>
+                            </div>
+                            <div class="itens-col">
+                                <h1 class="title-col">Cupons criados!</h1>
+                                <p class="desc-col">Abaixo esta os cupons ja criados!</p>
+                                <div class="linha" style="margin-top: 1em;"></div>
+                                <div class="itens-content-col">
+                                    <div id="cupons-row">
+                                        <% server.cupons.forEach(element => { %>
+                                            <div class="cupons-col">
+                                                <div class="cupons-col-wrap">
+                                                    <div class="cupons-col-code mini-title-col"><%= element.code %></div>
+                                                    <div class="cupons-col-value desc-col">
+                                                        <%= element.descontoValue %>
+                                                        <span class="cupons-col-type desc-col"><%= element.descontoType == 'int' ? 'Centavos' : '%' %></span>
+                                                    </div>
+                                                </div>
+                                                <button data-cupom="<%= element.id %>" class="active-cupom button-padrao greenColor <%= element.active == true ? '' : 'hidden' %>">Ativar Cupom</button>
+                                                <button data-cupom="<%= element.id %>" class="desactive-cupom button-padrao redColor <%= element.active == true ? 'hidden' : '' %>">Desativar Cupom</button>
+                                            </div>
+                                            <div class="linha"></div>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+        <script src="<%= host %>/public/js/cupom.js"></script>
+</body>
+
+</html>

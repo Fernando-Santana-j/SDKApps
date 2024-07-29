@@ -94,6 +94,9 @@
 .SvgFill rect {
     fill: var(--color-fill) !important;
 }
+.SvgNoFill {
+    fill: none !important;
+}
 
 body {
     background-color: var(--primary-color);
@@ -330,4 +333,34 @@ a {
     padding: 1em;
     height: 100%;
     border-radius: var(--border-radius-mid);
+}
+
+
+.itens-col{
+    padding: 1em;
+    width: 26em;
+    min-height: 20em;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: var(--border-radius-mid);
+    background-color: var(--tertiary-color);
+}
+.itens-content-col{
+    width: 100%;
+    flex: 1;
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 1em;
+}
+.inputs-col-content{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.hidden{
+    display: none;
 }

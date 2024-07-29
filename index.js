@@ -370,6 +370,8 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
     res.render('personalize', { host: `${webConfig.host}`, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
 
+
+
 app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -504,6 +506,50 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
     res.render('ticket', { host: `${webConfig.host}`, chatItens: chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
+app.get('/server/cupom/:id', functions.subscriptionStatus, async (req, res) => {
+
+    let serverID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    if (server.assinante == false || server.isPaymented == false) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
+        res.redirect(`/server/${serverID}`)
+        return
+    }
+
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
+
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+
+
+
+    res.render('cupom', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, channels: textChannels, })
+})
+
+
 
 app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
     try {
@@ -563,6 +609,8 @@ app.get('/redirect/discord', (req, res) => {
 app.get('/adm', (req, res) => {
     res.render('admin', { host: `${webConfig.host}` })
 })
+
+
 
 app.post('/firebase/configs', (req, res) => {
     res.status(200).json({ success: true, projectId: require('./config/firebase.json').project_id, data: require('./config/firebase.json') })
@@ -1311,6 +1359,48 @@ app.post('/ticket/publiclog', async (req, res) => {
     } catch (error) {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar modificar o Log publico!' })
+        }
+        console.log(error);
+    }
+})
+
+app.post('/cupom/create', async (req, res) => {
+    try {
+        let body = await req.body
+        console.log(body);
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        const cupomId = require('crypto').randomBytes(11).toString('hex')
+        let cupons = []
+        let findCupom = null
+        let code = await req.body.cupomCode
+        if (`cupons` in server) {
+            cupons = server.cupons
+            findCupom = await server.cupons.find(cupom=>cupom.code == code)
+        }
+        if (findCupom) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Ja existe um cupom com esse codigo!' })
+            }
+            return
+        }
+        
+        await cupons.push({
+            code:code,
+            products:req.body.productsList,
+            descontoType:req.body.descontoType,
+            descontoValue:req.body.descontoValue,
+            active:true,
+            id:cupomId
+        })
+        db.update('servers', body.serverID, {
+            cupons: cupons
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Cupom criado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar criar o cupom!' })
         }
         console.log(error);
     }

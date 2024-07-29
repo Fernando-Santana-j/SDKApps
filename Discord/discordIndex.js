@@ -231,7 +231,18 @@ module.exports = (Discord2, client) => {
                     let product = await server.products.find(product => product.productID == productID)
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
                     if (!product || server.error == true || product.estoque.length <= 0) {
-                        await interaction.reply({ content: `⚠️| O produto selecionado está sem estoque!`, ephemeral: true })
+                        await interaction.reply({
+                            content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
+                            components: [
+                                new Discord.ActionRowBuilder().addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`privateAviso_${productID}`)
+                                        .setLabel('Receber aviso')
+                                        .setStyle(Discord.ButtonStyle.Primary),
+                                )
+                            ],
+                            ephemeral: true
+                        })
                         let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
 
                         if (analytics.error == false) {
@@ -391,6 +402,37 @@ module.exports = (Discord2, client) => {
                     comprarFunction(interaction.values[0])
                 }
 
+                if (interaction.customId && interaction.customId.includes('privateAviso')) {
+                    let productID = await interaction.customId.replace('privateAviso_', '')
+                    let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+                    let products = await server.products
+                    let product = await products.find(product => product.productID == productID)
+                    let productIndex = await await products.findIndex(product => product.productID == productID)
+                    if (server && product) {
+                        let estoqueAviso = []
+                        if ('estoqueAviso' in product) {
+                            estoqueAviso = product.estoqueAviso
+                        }
+                        if (estoqueAviso.includes(interaction.user.id)) {
+                            await interaction.reply({
+                                content: `Ok iremos te notificar quando o estoque voltar!`,
+                                ephemeral: true
+                            })
+                            return
+                        }
+                        await estoqueAviso.push(interaction.user.id)
+                        product.estoqueAviso = estoqueAviso
+                        products[productIndex] = product
+                        db.update('servers', interaction.guildId, {
+                            products: products
+                        })
+                        await interaction.reply({
+                            content: `Ok iremos te notificar quando o estoque voltar!`,
+                            ephemeral: true
+                        })
+                    }
+                    
+                }
 
 
 
@@ -446,16 +488,6 @@ module.exports = (Discord2, client) => {
                                 const element = carrinho[index];
                                 let produto = await server.products.find(product => product.productID == element.product)
                                 let price = parseInt(produto.price)
-                                // if (cupomOptions[interaction.user.id]) {
-                                //     let findCupom = serverData.cupons.find(cupom => cupom.code == cupomOptions[interaction.user.id])
-                                //     if (findCupom && findCupom.productRef == produto.productID) {
-                                //         price = parseInt(produto.priceID) - (findCupom.type == 'porcent' ? parseInt(produto.priceID) * (parseInt(findCupom.value) / 100) : parseInt(findCupom.value))
-                                //     }else{
-                                //         price = produto.priceID
-                                //     }
-                                // }else{
-                                //     price = produto.priceID
-                                // }
 
                                 if (price < 100) {
                                     isProduct1n = true
@@ -1902,5 +1934,30 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
         }
     } catch (error) {
         console.log('sendDiscordMensageChannelERROR: ', error);
+    }
+}
+
+module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
+    try {
+        const userF = await client.users.fetch(user);
+        console.log(userF,title,mensage);
+        await userF.send({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle(title)
+                    .setDescription(mensage)
+                    .setColor('#6E58C7')
+            ],
+            components: [buttonRef ? new Discord.ActionRowBuilder().addComponents(
+                new Discord.ButtonBuilder()
+                    .setLabel(buttonLabel)
+                    .setURL(buttonRef)
+                    .setStyle(Discord.ButtonStyle.Link),
+            ) : '']
+        }).catch((err) => { 
+            console.log(err);
+        })
+    } catch (error) {
+        console.log('sendDiscordMensageUserERROR: ', error);
     }
 }
