@@ -306,7 +306,9 @@ module.exports = {
         let dbres = await dbBannerDiscordChannel.send({
             files: [attachment]
         })
-        return dbres
+        let linkImage = await dbres.attachments.first()
+
+        return linkImage.url
     }
 
 }

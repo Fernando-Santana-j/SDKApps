@@ -638,7 +638,6 @@ app.post('/accout/delete', async (req, res) => {
                                 serverID: req.body.serverID
                             }
                         })
-                        console.log(prod);
                     } catch (error) {
 
                     }
@@ -1194,7 +1193,6 @@ app.post('/ticket/motivoUPD', async (req, res) => {
                 db.update('servers', body.serverID, {
                     ticketOptions: ticketOptions
                 })
-                console.log(ticketOptions.channel, ticketOptions);
                 require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
                 if (!res.headersSent) {
                     res.status(200).json({ success: true, data: 'Motivo deletado!' })
