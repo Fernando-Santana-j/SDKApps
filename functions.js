@@ -4,6 +4,8 @@ const fs = require('fs');
 const stripe = require('stripe')(require('./config/web-config').stripe);
 const db = require('./Firebase/models');
 const webConfig = require('./config/web-config')
+let path = require(`path`);
+const botConfig = require('./config/bot-config');
 
 module.exports = {
     verifyPermissions: async (user, server, Discord, client) => {
@@ -128,7 +130,6 @@ module.exports = {
                         return
                     }
                 }
-                
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
                     const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
@@ -163,7 +164,6 @@ module.exports = {
                 }
 
             } catch (error) {
-                console.log(error);
                 res.redirect('/')
             }
         } else {
@@ -183,7 +183,6 @@ module.exports = {
                 ...headers
             }
         }).then((res) => { return res.data }).catch((err) => {
-            console.error(err)
             return { error: true, err: err }
         })
         if (serverResponse.error) return serverResponse;
@@ -296,5 +295,18 @@ module.exports = {
         const ano = data.getFullYear();
         return dia + '/' + mes + '/' + ano;
     },
+    discordDB:async (imagePath,client,Discord)=>{
+        const bannerPath = path.join(__dirname, imagePath);
+        let file = await fs.readFileSync(bannerPath);
+        let buffer = Buffer.from(file, 'binary');
+        let newBuffer = await sharp(buffer).jpeg().toBuffer()
+        const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
+        let dbBannerDiscordServer = await client.guilds.cache.get(botConfig.dbServer)
+        let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get(botConfig.dbChannel)
+        let dbres = await dbBannerDiscordChannel.send({
+            files: [attachment]
+        })
+        return dbres
+    }
 
 }

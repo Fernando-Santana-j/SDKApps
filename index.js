@@ -1,7 +1,6 @@
 //TODO-------------importes------------
 const Discord = require("discord.js");
 const { Events, GatewayIntentBits } = require('discord.js');
-const rpc = require('discord-rpc')
 const db = require('./Firebase/models.js')
 const dataBase = require('./Firebase/db.js')
 const express = require('express')
@@ -11,9 +10,6 @@ const session = require('express-session')
 const path = require('path');
 const multer = require('multer')
 const cookieParser = require("cookie-parser");
-
-var firebase = require("firebase-admin");
-
 const webConfig = require('./config/web-config.js')
 
 const botConfig = require('./config/bot-config.js');
@@ -113,7 +109,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 })
 
-
+//TODO monitoramento de erros
 client.on(Events.ShardError, error => {
     console.error('A websocket connection encountered an error:', error);
 });
@@ -136,18 +132,17 @@ process.on('uncaughtExceptionMonitor', (error, origin) => {
 
 
 
-client.on('guildCreate', guild => {
-    console.log(guild);
-
-})
-
-
-
 
 
 //TODO------------WEB PAGE--------------
 
-//TODO Mercado Pago
+
+//TODO Discord Routes
+const discordRouter = require('./Discord/discordRoutes.js')
+app.use('/', discordRouter);
+
+
+//TODO Mercado Pago Routes
 
 const mercadoPago = require('./mercadoPago.js')
 app.use('/', mercadoPago);
@@ -164,8 +159,6 @@ app.use('/', stripeRoutes);
 const produtoRoutes = require('./stripe/productsRoutes.js');
 
 app.use('/', produtoRoutes);
-
-
 
 
 
@@ -223,90 +216,6 @@ app.get('/dashboard', async (req, res) => {
         res.redirect('/')
     }
 })
-
-
-
-app.get('/auth/verify/:acesstoken', async (req, res) => {
-    let param = req.params.acesstoken
-    if (param) {
-        try {
-            const headers = {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept-Encoding': 'application/x-www-form-urlencoded'
-            };
-            let userResponse = await axios.get('https://discord.com/api/users/@me', {
-                headers: {
-                    Authorization: `Bearer ${param}`,
-                    ...headers
-                }
-            }).then((res) => { return res.data })
-            if (userResponse) {
-                req.session.uid = userResponse.id
-                res.redirect('/dashboard')
-            } else {
-                res.redirect(webConfig.loginURL)
-            }
-        } catch (error) {
-            res.redirect(webConfig.loginURL)
-        }
-    } else {
-        res.redirect(webConfig.loginURL)
-    }
-})
-
-app.get('/auth/callback', async (req, res) => {
-    try {
-        if (req.session.uid) {
-            res.redirect('/dashboard')
-        } else {
-            if (!req.query.code) {
-                res.redirect('/logout')
-            } else {
-                let param = new URLSearchParams({
-                    client_id: webConfig.clientId,
-                    client_secret: webConfig.secret,
-                    grant_type: 'authorization_code',
-                    code: req.query.code,
-                    redirect_uri: webConfig.redirect
-                })
-                const headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept-Encoding': 'application/x-www-form-urlencoded'
-                };
-                const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
-                    console.error(err)
-                })
-                if (!response) {
-                    res.redirect('/logout')
-                    return
-                }
-                let userResponse = await axios.get('https://discord.com/api/users/@me', {
-                    headers: {
-                        Authorization: `Bearer ${response.data.access_token}`,
-                        ...headers
-                    }
-                }).then((res) => { return res.data }).catch((err) => {
-                    console.error(err)
-                });
-                await db.create('users', userResponse.id, {
-                    id: userResponse.id,
-                    username: userResponse.username,
-                    profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
-                    displayName: userResponse.global_name,
-                    email: userResponse.email,
-                    access_token: response.data.access_token
-                })
-
-                req.session.uid = userResponse.id
-
-                res.redirect('/dashboard')
-            }
-        }
-    } catch (error) {
-        res.redirect('/logout')
-    }
-})
-
 
 
 app.get('/logout', async (req, res) => {
@@ -427,24 +336,6 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
 
 
 
-app.get('/addbot/:serverID', (req, res) => {
-    if (!req.params.serverID) {
-        res.redirect(`/`)
-        return
-    }
-    const guilds = client.guilds.cache;
-    const isBotInServer = guilds.has(req.params.serverID);
-    if (isBotInServer) {
-        res.redirect(`/server/${req.body.serverID}`)
-    } else {
-        res.redirect(`https://discord.com/oauth2/authorize?client_id=${webConfig.clientId}&permissions=8&response_type=code&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&redirect_uri=${process.env.DISCORDURI}&guild_id=${req.params.serverID}&disable_guild_select=true`)
-    }
-
-})
-
-
-
-
 app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -471,13 +362,18 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
             id: role.id
         };
     });
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
     let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
     let chatItens = []
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('personalize', { host: `${webConfig.host}`, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
+    res.render('personalize', { host: `${webConfig.host}`, channels: textChannels, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
+
+
 
 app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
@@ -613,6 +509,50 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
     res.render('ticket', { host: `${webConfig.host}`, chatItens: chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
+app.get('/server/cupom/:id', functions.subscriptionStatus, async (req, res) => {
+
+    let serverID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    if (server.assinante == false || server.isPaymented == false) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard')
+        return
+    }
+
+    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
+        res.redirect(`/server/${serverID}`)
+        return
+    }
+
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
+
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if (adminServer && 'ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+
+
+
+    res.render('cupom', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, channels: textChannels, })
+})
+
+
 
 app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
     try {
@@ -672,6 +612,8 @@ app.get('/redirect/discord', (req, res) => {
 app.get('/adm', (req, res) => {
     res.render('admin', { host: `${webConfig.host}` })
 })
+
+
 
 app.post('/firebase/configs', (req, res) => {
     res.status(200).json({ success: true, projectId: require('./config/firebase.json').project_id, data: require('./config/firebase.json') })
@@ -1016,7 +958,81 @@ app.post('/personalize/productIcon', async (req, res) => {
         }
     }
 })
-
+app.post('/personalize/welcome', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.welcomeMensage = {
+                active:true,
+                channel:req.body.channel,
+                mensage:req.body.mensage,
+                title:req.body.title
+            }
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/welcomeActive', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            server.personalize.welcomeMensage.active = true
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/welcomeDesactive', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            server.personalize.welcomeMensage.active = false
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
 app.post('/sales/privateLog', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
@@ -1425,6 +1441,48 @@ app.post('/ticket/publiclog', async (req, res) => {
     }
 })
 
+app.post('/cupom/create', async (req, res) => {
+    try {
+        let body = await req.body
+        console.log(body);
+        let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
+        const cupomId = require('crypto').randomBytes(11).toString('hex')
+        let cupons = []
+        let findCupom = null
+        let code = await req.body.cupomCode
+        if (`cupons` in server) {
+            cupons = server.cupons
+            findCupom = await server.cupons.find(cupom=>cupom.code == code)
+        }
+        if (findCupom) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Ja existe um cupom com esse codigo!' })
+            }
+            return
+        }
+        
+        await cupons.push({
+            code:code,
+            products:req.body.productsList,
+            descontoType:req.body.descontoType,
+            descontoValue:req.body.descontoValue,
+            active:true,
+            id:cupomId
+        })
+        db.update('servers', body.serverID, {
+            cupons: cupons
+        })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Cupom criado!' })
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar criar o cupom!' })
+        }
+        console.log(error);
+    }
+})
+
 app.post('/send/discordMensage', async (req, res) => {
     try {
         var DiscordServer = await client.guilds.cache.get(req.body.guildId);
@@ -1516,6 +1574,7 @@ app.post('/get/server', async (req, res) => {
         }
     }
 })
+
 
 
 

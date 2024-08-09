@@ -9,7 +9,55 @@ const functions = require('../functions');
 const webConfig = require('../config/web-config');
 const sharp = require('sharp');
 
-const axios = require('axios')
+const axios = require('axios');
+
+async function createAccount(data) {
+    let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
+    let servers = await functions.reqServerByTime(user, functions.findServers)
+    let filterServers = await servers.find(server => server.id == data.metadata.serverID)
+
+    var dataUnixConvert = new Date(parseInt(data.created) * 1000)
+    dataUnixConvert.setMonth(dataUnixConvert.getMonth() + 1);
+    var novaDataUnix = Math.floor(dataUnixConvert.getTime() / 1000);
+    let serverADD = {
+        assinante: true,
+        id: data.metadata.serverID,
+        subscription: data.subscription,
+        plan: data.metadata.plan,
+        tipo: filterServers.tipo,
+        server_pic: filterServers.server_pic,
+        name: filterServers.name,
+        payment_status: data.payment_status,
+        isPaymented: true,
+        subscriptionData: {
+            lastPayment: data.created,
+            created: data.created,
+            email: data.customer_details.email,
+            name: data.customer_details.name,
+            phone: data.customer_details.phone,
+            expires_at: novaDataUnix,
+            customer: data.customer
+        }
+    }
+    let newServer = []
+    if (user.server) {
+        newServer = user.server
+        newServer.push(data.metadata.serverID)
+    } else {
+        newServer.push(data.metadata.serverID)
+    }
+    db.update('users', data.metadata.uid, {
+        servers: newServer
+    })
+    db.create('servers', data.metadata.serverID, serverADD)
+    try {
+        db.delete(`preServers`,data.metadata.serverID)
+    } catch (error) {
+        
+    }
+}
+
+
 
 router.post('/subscription/create', async (req, res) => {
     try {
@@ -29,7 +77,12 @@ router.post('/subscription/create', async (req, res) => {
                 action: 'newSubscription'
             }
         });
-
+        db.create('preServers',req.body.serverID,{
+            serverID:req.body.serverID,
+            uid:req.body.uid,
+            plan:req.body.plan,
+            sessionID: session.id
+        })
         res.status(200).json({ success: true, url: session.url })
     } catch (error) {
         console.error('Erro ao iniciar o checkout:', error);
@@ -49,7 +102,7 @@ router.post('/subscription/update', async (req, res) => {
         }
     } catch (error) {
         console.error('Erro ao iniciar o checkout:', error);
-        res.status(200).json({ success: false, data:"Erro ao redirecionar para o checkout!" })
+        res.status(200).json({ success: false, data: "Erro ao redirecionar para o checkout!" })
     }
 })
 
@@ -58,55 +111,23 @@ router.post('/subscription/update', async (req, res) => {
 router.post('/webhook/stripe/payment', async (req, res) => {
     let data = req.body.data.object
     let type = req.body.type
+    
     switch (type) {
         case 'checkout.session.completed':
             if (data.status == 'complete') {
-                if (data.metadata.action == 'newSubscription') {
-                    let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
-                    let servers = await functions.reqServerByTime(user, functions.findServers)
-                    let filterServers = await servers.find(server => server.id == data.metadata.serverID)
-
-                    var dataUnixConvert = new Date(parseInt(data.created) * 1000)
-                    dataUnixConvert.setMonth(dataUnixConvert.getMonth() + 1);
-                    var novaDataUnix = Math.floor(dataUnixConvert.getTime() / 1000);
-                    let serverADD = {
-                        assinante: true,
-                        id: data.metadata.serverID,
-                        subscription: data.subscription,
-                        plan: data.metadata.plan,
-                        tipo: filterServers.tipo,
-                        server_pic: filterServers.server_pic,
-                        name: filterServers.name,
-                        payment_status: data.payment_status,
-                        isPaymented: true,
-                        subscriptionData: {
-                            lastPayment: data.created,
-                            created: data.created,
-                            email: data.customer_details.email,
-                            name: data.customer_details.name,
-                            phone: data.customer_details.phone,
-                            expires_at: novaDataUnix,
-                            customer: data.customer
-                        }
-                    }
-                    let newServer = []
-                    if (user.server) {
-                        newServer = user.server
-                        newServer.push(data.metadata.serverID)
-                    } else {
-                        newServer.push(data.metadata.serverID)
-                    }
-                    db.update('users', data.metadata.uid, {
-                        servers: newServer
-                    })
-                    db.create('servers', data.metadata.serverID, serverADD)
-                }
                 if (data.metadata.action == 'productCompra') {
                     require("../Discord/discordIndex").sendProductPayment({
-                        serverID:data.metadata.serverID,
+                        serverID: data.metadata.serverID,
                         userID: data.metadata.user,
                         carrinhos: data.metadata.products,
-                    },data.payment_intent,'stripe')
+                    },data.payment_intent, 'stripe')
+                }
+                if (data.metadata.action == 'newSubscription') {
+                    createAccount(data)
+                }
+                if (data.metadata.action == 'cobrancaPay') {
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.user,'✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null , null)
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.userCobrador, '✅ cobranca paga!', `O usuario com id ${data.metadata.user} pagou a sua ultima cobrança.`,null , null)
                 }
             }
             break;
@@ -135,13 +156,17 @@ router.post('/webhook/stripe/payment', async (req, res) => {
                         payment_status: 'pending',
                         isPaymented: false,
                     })
-                    
+
                     // integrar codigo de pendencia na fatura
                 }
-                
+
             }
             break;
         case 'invoice.payment_succeeded':
+            if (data.metadata.action == 'newSubscription') {
+                createAccount(data)
+                return
+            }
             if (data.status == 'paid') {
                 let server = await db.findOne({ colecao: 'servers', where: ['subscription', "==", data.subscription] })
                 if (server.error) {
@@ -168,9 +193,9 @@ router.post('/webhook/stripe/payment', async (req, res) => {
         default:
             break;
     }
-
-    res.status(200).end();
+    res.sendStatus(200)
 })
+
 
 router.post('/addDadosBanc', async (req, res) => {
     try {
@@ -242,7 +267,7 @@ router.post('/addDadosBanc', async (req, res) => {
                 refresh_url: `${webConfig.host}/accountLink/${account.id}/${req.body.serverID}`,
                 type: 'account_onboarding',
             });
-            let server = await db.findOne({colecao:'servers',doc:req.body.serverID})
+            let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
             db.update('servers', req.body.serverID, {
                 bankData: {
                     userRef: req.session.uid,
@@ -250,7 +275,7 @@ router.post('/addDadosBanc', async (req, res) => {
                     cpf: req.body.cpf,
                     accountID: account.id,
                     bankID: bank.id,
-                    mercadoPagoToken:server.bankData && server.bankData.mercadoPagoToken ? server.bankData.mercadoPagoToken : null
+                    mercadoPagoToken: server.bankData && server.bankData.mercadoPagoToken ? server.bankData.mercadoPagoToken : null
                 }
             })
             res.status(200).json({ success: true, data: accountLink.url })
@@ -297,20 +322,60 @@ router.get('/accountLink/:account/:serverID', async (req, res) => {
     res.redirect(accountLink.url)
 })
 
-router.get('/subscription/get/:serverID',async(req,res)=>{
+router.get('/subscription/get/:serverID', async (req, res) => {
     try {
         if (req.params.serverID) {
-            let server = await db.findOne({colecao:"servers",doc:req.params.serverID})
+            let server = await db.findOne({ colecao: "servers", doc: req.params.serverID })
             let session = await stripe.billingPortal.sessions.create({
                 customer: server.subscriptionData.customer,
                 return_url: `${webConfig.host}/dashboard`
             });
             if (session) {
-                res.render('updatePayment',{url:session.url})
+                res.render('updatePayment', { url: session.url })
             }
         }
     } catch (error) {
         console.log(error);
+    }
+})
+
+router.post('/subscription/exist',async(req,res)=>{
+    
+    try {
+        let preserver = await db.findOne({colecao:`preServers`,doc:req.body.serverID})
+        const checkout = await stripe.checkout.sessions.retrieve(preserver.sessionID);
+        if (checkout && checkout.status == 'complete' && checkout.payment_status == 'paid' ) {
+            let subscription = await stripe.subscriptions.retrieve(checkout.subscription)
+            createAccount({
+                payment_status:checkout.payment_status,
+                subscription:checkout.subscription,
+                metadata:{
+                    serverID:preserver.serverID,
+                    uid:preserver.uid,
+                    plan:preserver.plan
+                },
+                created:subscription.created,
+                customer_details:{
+                    email:null,
+                    name:null,
+                    phone:null
+                },
+                customer:subscription.customer
+
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar modificar a descrição do ticket!' })
+            }
+        }
+        
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar modificar a descrição do ticket!' })
+        }
     }
 })
 

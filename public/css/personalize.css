@@ -25,7 +25,7 @@
     margin-top: 5em;
 }
 
-.itens-col{
+/* .itens-col{
     padding: 1em;
     width: 26em;
     height: 20em;
@@ -34,7 +34,7 @@
     position: relative;
     border-radius: var(--border-radius-mid);
     background-color: var(--tertiary-color);
-}
+} */
 .itens-content-col{
     width: 100%;
     flex: 1;
@@ -46,6 +46,8 @@
 #color-dest-preview{
     display: block;
     height: 100%;
+    width: 100%;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;

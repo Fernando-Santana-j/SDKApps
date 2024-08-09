@@ -1130,8 +1130,21 @@ document.getElementById('channel-multi-input').addEventListener('blur', function
         this.value = '';
     }
 });
-document.getElementById("form-prodc-mult").addEventListener("submit", function (event) {
+document.getElementById("form-prodc-mult").addEventListener("submit", async function (event) {
     event.preventDefault();
+    let serverData = await fetch('/get/server', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID: serverID
+        }),
+    }).then(response => { return response.json() })
+    if (!serverData && serverData.plan != 2 || serverData.plan != 3) {
+        errorNotify('O seu plano não dá acesso a essa função!!')
+        return
+    }
 
     if (selectProdsList.length <= 0) {
         errorNotify('Selecione um ou mais produtos para continuar!')

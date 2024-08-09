@@ -7,5 +7,4 @@ config
 config/mercadoPagoData.json
 
 
-cart.list
-ticket.list
+/cart.list

@@ -21,38 +21,73 @@ router.post('/mercadopago/webhook', async (req, res) => {
                         'Authorization': `Bearer ${params.token}`
                     }
                 }).then(async (doc) => {
-                    let metadata = {
-                        serverID:doc.data.metadata.server_id,
-                        carrinhos:doc.data.metadata.carrinhos,
-                        token:doc.data.metadata.token,
-                        userID: doc.data.metadata.user_id
-                    }
-                    
-                    let server = await db.findOne({ colecao: 'servers', doc: metadata.serverID })
-                    if (doc.data.status === "approved") {
-                        let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
+                    if (doc.data.metadata.action == `cobrancaPay`) {
+                        let metadata = {
+                            serverID: doc.data.metadata.server_id,
+                            user: doc.data.metadata.user,
+                            token: doc.data.metadata.token,
+                            userCobrador: doc.data.metadata.userCobrador,
+                            valor: doc.data.metadata.valor
+                        }
+                        if (doc.data.status === "approved") {
+                            let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
 
-                        if ('blockBank' in server && server.blockBank.includes(bank)) {
-                            try {
-                                await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
-                                    headers: {
-                                        Authorization: `Bearer ${params.token}`
-                                    }
-                                })
-                                require("./Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID,null,'Reembolso',`Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`,params.userID,false)
-                            } catch (error) {
-                                console.log(error);
-                            }
-                        } else {
-                            try {
-                                require("./Discord/discordIndex").sendProductPayment(metadata, id, 'pix')
-                            } catch (error) {
-                                console.log(error);
+                            if ('blockBank' in server && server.blockBank.includes(bank)) {
+                                try {
+                                    await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
+                                        headers: {
+                                            Authorization: `Bearer ${params.token}`
+                                        }
+                                    })
+                                    require("./Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadata.user, false)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            } else {
+                                try {
+                                    require("./Discord/discordIndex").sendDiscordMensageUser(metadata.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null,null)
+                                    require("./Discord/discordIndex").sendDiscordMensageUser(metadata.userCobrador,'✅ cobranca paga!', `O usuario com id ${metadata.user} pagou a sua ultima cobrança.`, null,null)
+                                } catch (error) {
+                                    console.log(error);
+                                }
                             }
                         }
+                    } else {
+
+                        let metadata = {
+                            serverID: doc.data.metadata.server_id,
+                            carrinhos: doc.data.metadata.carrinhos,
+                            token: doc.data.metadata.token,
+                            userID: doc.data.metadata.user_id
+                        }
+
+                        let server = await db.findOne({ colecao: 'servers', doc: metadata.serverID })
+                        if (doc.data.status === "approved") {
+                            let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
+
+                            if ('blockBank' in server && server.blockBank.includes(bank)) {
+                                try {
+                                    await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
+                                        headers: {
+                                            Authorization: `Bearer ${params.token}`
+                                        }
+                                    })
+                                    require("./Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadata.userID, false)
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            } else {
+                                try {
+                                    require("./Discord/discordIndex").sendProductPayment(metadata, id, 'pix')
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }
+
+                        }
+
 
                     }
-
                 }).catch(err => {
                     console.log(err);
                 })

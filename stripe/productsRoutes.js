@@ -425,6 +425,7 @@ router.post('/product/get', async (req, res) => {
 
 })
 
+
 router.post('/estoque/txt', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
@@ -459,6 +460,13 @@ router.post('/estoque/txt', async (req, res) => {
                     }
                 });
                 finalEstoqueArr = await finalEstoqueArr.filter(linha => linha.conteudo[0].content.length > 0)
+                if (`estoqueAviso` in product) {
+                    for (let index = 0; index < product.estoqueAviso.length; index++) {
+                        const element = product.estoqueAviso[index];
+                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto')
+                    }
+                    product.estoqueAviso = []
+                }
                 produtos[index] = product
 
                 db.update('servers', req.body.serverID, {
@@ -513,7 +521,13 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 }
 
                 await product.estoque.push(estoqueADD)
-
+                if (`estoqueAviso` in product) {
+                    for (let index = 0; index < product.estoqueAviso.length; index++) {
+                        const element = product.estoqueAviso[index];
+                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto')
+                    }
+                    product.estoqueAviso = []
+                }
                 produtos[index] = product
 
                 db.update('servers', req.body.serverID, {

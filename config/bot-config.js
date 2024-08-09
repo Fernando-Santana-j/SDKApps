@@ -22,5 +22,7 @@ module.exports = {
         GatewayIntentBits.AutoModerationConfiguration,
         GatewayIntentBits.AutoModerationExecution
     ],
-    clientSecret: process.env.CLIENTSECRET
+    clientSecret: process.env.CLIENTSECRET,
+    dbServer:'1271518850038366412',
+    dbChannel:'1271519116196315268'
 }
