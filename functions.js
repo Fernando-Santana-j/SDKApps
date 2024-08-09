@@ -306,7 +306,18 @@ module.exports = {
         let dbres = await dbBannerDiscordChannel.send({
             files: [attachment]
         })
-        return dbres
+        let linkImage = await dbres.attachments.first()
+        try {
+            console.log(dbres.attachments);
+            console.log(dbres.attachments[0]);
+            console.log(dbres.attachment.url);
+            
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
+        return linkImage.url
     }
 
 }
