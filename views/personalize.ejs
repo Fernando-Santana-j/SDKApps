@@ -70,6 +70,38 @@
                             </label>
                         </div>
                     </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Mensagem de boas vindas!</h1>
+                        <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
+                            <% if ('personalize' in server && 'welcomeMensage' in server.personalize) { %>
+                                <div id="buttons-active-desactive-welcome">
+                                    <label for="" class="lable-padrao">Ativar ou desativar a mensagem de boas vindas!</label>
+                                    <button id="desative-welcome" class="button-padrao redColor <%= server.personalize.welcomeMensage.active == true ? '' : 'hidden' %>">Desativar mensagem</button>
+                                    <button id="active-welcome" class="button-padrao greenColor <%= server.personalize.welcomeMensage.active == true ? 'hidden' : '' %>">Ativar mensagem</button>
+                                </div>
+                            <% } %>
+                            <div class="inputs-col-content">
+                                <label for="title-welcome" class="lable-padrao">Titulo da mensagem!</label>
+                                <input required type="text" class="input-padrao" placeholder="Titulo" id="title-welcome">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="mensage-welcome" class="lable-padrao">Mensagem de boas vindas!</label>
+                                <input required type="text" class="input-padrao" placeholder="Mensagem" id="mensage-welcome">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="welcome-channel-input" class="lable-padrao">Canal de boas vindas!</label>
+                                <input required type="text" class="input-padrao" list="welcome-channel-list" placeholder="Pesquise o canal..." id="welcome-channel-input">
+                                <datalist id="welcome-channel-list">
+                                    <% channels.forEach(element => { %>
+                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                    <% }) %>
+                                </datalist>
+                            </div>
+                            <button id="save-mensage-welcome" class="button-padrao">Salvar Mensagem</button>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

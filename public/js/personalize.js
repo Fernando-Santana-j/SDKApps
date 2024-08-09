@@ -135,3 +135,79 @@ document.getElementById('checkbox').addEventListener('change',async()=>{
         errorNotify(session.data)
     }
 })
+document.getElementById('welcome-channel-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('welcome-channel-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+document.getElementById('save-mensage-welcome').addEventListener('click',async()=>{
+    const opcoes = document.getElementById('welcome-channel-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('welcome-channel-input').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+
+    let session = await fetch('/personalize/welcome', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            mensage:document.getElementById('mensage-welcome').value ,
+            title:document.getElementById('title-welcome').value ,
+            channel:channelID,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Mensagem de boas vindas salva!')
+    }else{
+        errorNotify(session.data)
+    }
+})
+
+document.getElementById('desative-welcome').addEventListener('click',async()=>{
+    let session = await fetch('/personalize/welcomeDesactive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Mensagem de boas vindas desativada!')
+        document.getElementById(`active-welcome`).classList.add(`hidden`)
+        document.getElementById(`desative-welcome`).classList.remove(`hidden`)
+    }else{
+        errorNotify(session.data)
+    }
+})
+
+document.getElementById('active-welcome').addEventListener('click',async()=>{
+    let session = await fetch('/personalize/welcomeActive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Mensagem de boas vindas ativada!')
+        document.getElementById(`active-welcome`).classList.remove(`hidden`)
+        document.getElementById(`desative-welcome`).classList.add(`hidden`)
+    }else{
+        errorNotify(session.data)
+    }
+})

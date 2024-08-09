@@ -362,12 +362,15 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
             id: role.id
         };
     });
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
     let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
     let chatItens = []
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('personalize', { host: `${webConfig.host}`, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
+    res.render('personalize', { host: `${webConfig.host}`, channels: textChannels, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
 
 
@@ -955,7 +958,81 @@ app.post('/personalize/productIcon', async (req, res) => {
         }
     }
 })
-
+app.post('/personalize/welcome', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.welcomeMensage = {
+                active:true,
+                channel:req.body.channel,
+                mensage:req.body.mensage,
+                title:req.body.title
+            }
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/welcomeActive', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            server.personalize.welcomeMensage.active = true
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/welcomeDesactive', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            server.personalize.welcomeMensage.active = false
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
 app.post('/sales/privateLog', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })

@@ -125,6 +125,10 @@ router.post('/webhook/stripe/payment', async (req, res) => {
                 if (data.metadata.action == 'newSubscription') {
                     createAccount(data)
                 }
+                if (data.metadata.action == 'cobrancaPay') {
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.user,'✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null , null)
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.userCobrador, '✅ cobranca paga!', `O usuario com id ${data.metadata.user} pagou a sua ultima cobrança.`,null , null)
+                }
             }
             break;
         case 'invoice.payment_failed':
@@ -189,8 +193,7 @@ router.post('/webhook/stripe/payment', async (req, res) => {
         default:
             break;
     }
-
-    res.status(200).end();
+    res.sendStatus(200)
 })
 
 

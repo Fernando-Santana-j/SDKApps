@@ -91,7 +91,8 @@
 .SvgFill *,
 .SvgFill path,
 .SvgFill g,
-.SvgFill rect {
+.SvgFill rect,
+.SvgFill {
     fill: var(--color-fill) !important;
 }
 .SvgNoFill {

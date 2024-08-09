@@ -4,6 +4,7 @@ const path = require('path')
 let Discord = require('discord.js')
 const fs = require('fs');
 const sharp = require('sharp');
+const functions = require('../functions');
 
 module.exports = async (Discord2, client, data) => {
     try {
@@ -46,37 +47,19 @@ module.exports = async (Discord2, client, data) => {
         if (totalEstoque.length <= 0) {
             totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel('Sem estoque').setValue('null').setDefault(true),)
         }
-        let dburl = null
-        let Newdbres = null
-        if (produto.backGround) {
-            const bannerPath = path.join(__dirname, "..",  produto.backGround);
-            let file = await fs.readFileSync(bannerPath);
-            let buffer = Buffer.from(file, 'binary');
-            let newBuffer = await sharp(buffer).jpeg().toBuffer()
-            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
-            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
-            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
-            let dbres = await dbBannerDiscordChannel.send({
-                files: [attachment]
-            })
-            Newdbres = dbres
-            dburl = await dbres.attachments.first().url
+        let backGroundLink = ''
+        let logoLink = ''
+        if (`logoLink` in produto) {
+            logoLink = produto.logoLink
+        }else{
+            logoLink = produto.productLogo ? functions.discordDB(produto.productLogo,client,Discord) : ``
+            produto.logoLink = logoLink
         }
-        let dburl2 = null
-        let Newdbres2 = null
-        if (produto.productLogo) {
-            const bannerPath = path.join(__dirname, "..",  produto.productLogo);
-            let file = await fs.readFileSync(bannerPath);
-            let buffer = Buffer.from(file, 'binary');
-            let newBuffer = await sharp(buffer).jpeg().toBuffer()
-            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
-            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
-            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
-            let dbres = await dbBannerDiscordChannel.send({
-                files: [attachment]
-            })
-            Newdbres2 = dbres
-            dburl2 = await dbres.attachments.first().url
+        if (`backGroundLink` in produto) {
+            backGroundLink = produto.backGroundLink
+        }else{
+            backGroundLink = produto.backGround ? functions.discordDB(produto.backGround,client,Discord) : ``
+            produto.backGroundLink = backGroundLink
         }
         let embed = await DiscordChannel.send({
             embeds: [
@@ -94,8 +77,8 @@ module.exports = async (Discord2, client, data) => {
                         value: produto.estoque.length.toString(),
                         inline:true
                     })
-                    .setThumbnail('personalize' in serverDb && 'iconProduct' in serverDb.personalize ? serverDb.personalize.iconProduct == true ? dburl2 : null : dburl2)
-                    .setImage(dburl)
+                    .setThumbnail('personalize' in serverDb && 'iconProduct' in serverDb.personalize ? serverDb.personalize.iconProduct == true ? logoLink : null : logoLink)
+                    .setImage(backGroundLink)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
             components: [

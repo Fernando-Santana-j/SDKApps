@@ -21,6 +21,45 @@ var sendProduct = {}
 var preCarrinhos = {}
 let ticketOptions = {}
 let cupomOptions = {}
+let paymentMCobranca = {}
+
+client.on('guildMemberAdd', async member => {
+    let server = await db.findOne({ colecao: 'servers', doc: member.guild.id })
+    if ('personalize' in server && 'welcomeMensage' in server.personalize && server.personalize.welcomeMensage.active == true) {
+        let mensage = server.personalize.welcomeMensage.mensage
+        let title = server.personalize.welcomeMensage.title
+        let channel = await member.guild.channels.cache.get(server.personalize.welcomeMensage.channel)
+        if (mensage.includes('@@server')) {
+            mensage = await mensage.replace('@@server', member.guild.name)
+        }
+        if (mensage.includes('@@username')) {
+            mensage = await mensage.replace('@@username', member.user.username)
+        }
+        if (mensage.includes('@@globalname')) {
+            mensage = await mensage.replace('@@globalname', member.user.globalName)
+        }
+        if (title.includes('@@server')) {
+            title = await title.replace('@@server', member.guild.name)
+        }
+        if (title.includes('@@username')) {
+            title = await title.replace('@@username', member.user.username)
+        }
+        if (title.includes('@@globalname')) {
+            title = await title.replace('@@globalname', member.user.globalName)
+        }
+        channel.send({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setTitle(title)
+                    .setDescription(mensage)
+                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                    .setTimestamp()
+                    .setThumbnail(member.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))
+            ]
+        })
+    }
+});
+
 
 module.exports = (Discord2, client) => {
 
@@ -431,7 +470,7 @@ module.exports = (Discord2, client) => {
                             ephemeral: true
                         })
                     }
-                    
+
                 }
 
 
@@ -1395,6 +1434,143 @@ module.exports = (Discord2, client) => {
                     await interaction.showModal(modal);
                 }
 
+
+                if (interaction.customId && interaction.customId.includes('cobrancaRecuse')) {
+                    let userID = await interaction.customId.replace(`cobrancaRecuse_`)
+                    userID = await userID.includes(`undefined`) ? userID.replace(`undefined`,``) : userID
+                    const user = await client.users.fetch(userID)
+                    interaction.reply({content:`Cobranca recusada!`,ephemeral:true})
+                    user.send(`O usuario ${interaction.user.username} recusou sua ultima cobrança!`)
+                }
+                if (interaction.customId == `paymentMCobranca`) {
+                    paymentMCobranca[interaction.user.id] = interaction.values[0]
+                    interaction.deferReply();
+                    interaction.deleteReply()
+                }
+                if (interaction.customId && interaction.customId.includes('cobrancaPayment')) {
+                    let values = await interaction.customId.replace(`cobrancaPayment_`)
+                    values = values.split(`_`)
+                    let serverID = values[0].includes('undefined') ? values[0].replace('undefined',``) : values[0]
+                    let userID = values[1]
+                    let valor = values[2]
+                    let serverData = await db.findOne({ colecao: `servers`, doc: serverID })
+                    const user = await client.users.fetch(userID)
+                    let paymentMetod = paymentMCobranca[interaction.user.id]
+                    if (paymentMetod == 'card' || paymentMetod == 'boleto') {
+                        let valueStripe = await valor < 100 ? 100 : valor
+                        let isProduct1n = await valor < 100 ? true : false
+                        const paymentLinkCard = await stripe.checkout.sessions.create({
+                            payment_method_types: [paymentMetod],
+                            line_items: [{
+                                price_data: {
+                                    currency: 'brl',
+                                    product_data: {
+                                        name: 'Cobrança Customizada',
+                                    },
+                                    unit_amount: valueStripe, // Valor em centavos, por exemplo, 2000 para $20.00
+                                },
+                                quantity: 1,
+                            }],
+                            metadata: {
+                                action: 'cobrancaPay',
+                                user: interaction.user.id,
+                                userCobrador: userID,
+                                serverID: serverID,
+                                valor:valueStripe
+                            },
+                            payment_intent_data: {
+                                transfer_data: {
+                                    amount: await calcTaxa(valueStripe),
+                                    destination: await serverData.bankData.accountID,
+                                },
+
+                            },
+                            mode: 'payment',
+                            success_url: `${process.env.HOST}/redirect/sucess`,
+                            cancel_url: `${process.env.HOST}/redirect/cancel`,
+                        });
+                        interaction.reply({
+                            content: isProduct1n == true ? '⚠️ Sua cobrança foi feita por menos de 1 real porem para cartoes o minimo permitido e de 1 real entao esse valor foi alterado!' : '',
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setTitle(`💕 | Pagamento Criado!`)
+                                    .setDescription(`<@${interaction.user.id}> **Acesse o link abaixo para fazer o pagamento da sua cobrança.**`)
+                            ],
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(5)
+                                            .setLabel('🛍️・Ir para o pagamento')
+                                            .setURL(paymentLinkCard.url)
+                                    )
+                            ],
+                            ephemeral: true
+                        })
+
+                    } else {
+                        try {
+                            const Mercadoclient = new MercadoPagoConfig({ accessToken: serverData.bankData.mercadoPagoToken, options: { timeout: 5000 } });
+                            const payment = new Payment(Mercadoclient);
+                            let numeroComPonto = valor / 100;
+                            let amount = parseFloat(numeroComPonto.toFixed(2))
+                            const body = {
+                                transaction_amount: amount,
+                                description: `cobranca do usuario - ${interaction.user.username}`,
+                                payment_method_id: 'pix',
+                                external_reference: interaction.user.id,
+                                payer: mercadoPagoData.payer,
+                                notification_url: `${mercadoPagoData.notification_url}/mercadopago/webhook?token=${serverData.bankData.mercadoPagoToken}`,
+                                metadata: {
+                                    user: interaction.user.id,
+                                    userCobrador: userID,
+                                    serverID: serverID,
+                                    valor:valor,
+                                    action: 'cobrancaPay',
+                                    token: serverData.bankData.mercadoPagoToken,
+                                }
+                            };
+
+                            payment.create({ body }).then(async (response) => {
+                                const cpc = response.point_of_interaction.transaction_data.qr_code
+                                const buffer = Buffer.from(response.point_of_interaction.transaction_data.qr_code_base64, "base64");
+                                const attachment = new Discord.AttachmentBuilder(buffer, { name: 'qrcodepix.png' })
+                                const botMessages = await DiscordChannel.messages.cache.filter(msg => msg.author.id === client.user.id);
+                                const lastBotMessage = await botMessages.first();
+                                lastBotMessage.edit({
+                                    embeds: [
+                                        new Discord.EmbedBuilder()
+                                            .setTitle('Pague o sua cobrança pelo qrcode ou pelo pix copiar e colar abaixo!')
+                                            .setDescription(`Pix Copiar e Colar:
+                                                    ${'**```' + cpc + '```**'}`)
+                                            .setImage('attachment://qrcodepix.png')
+                                    ],
+                                    components: [new Discord.ActionRowBuilder()
+                                        .addComponents(
+                                            new Discord.ButtonBuilder()
+                                                .setCustomId('pixCancel')
+                                                .setLabel('Cancelar')
+                                                .setStyle('4')
+                                        )],
+                                    files: [attachment],
+                                    components: [new Discord.ActionRowBuilder()
+                                        .addComponents(
+                                            new Discord.ButtonBuilder()
+                                                .setCustomId(`copyPix`)
+                                                .setLabel('Copiar Codigo')
+                                                .setStyle('2'),
+                                        )]
+
+                                })
+                            }).catch((error) => {
+                                console.error(error);
+                            });
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }
+                }
             } catch (error) {
                 console.log(error);
             }
@@ -1918,6 +2094,7 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
         } else {
             DiscordChannel = await DiscordServer.channels.cache.get(channel)
         }
+        console.log(DiscordChannel);
         await DiscordChannel.send({
             embeds: [
                 new Discord.EmbedBuilder()
@@ -1940,7 +2117,17 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
 module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
     try {
         const userF = await client.users.fetch(user);
-        console.log(userF,title,mensage);
+        let comp = ''
+        if (buttonRef) {
+             comp = {
+                components: [new Discord.ActionRowBuilder().addComponents(
+                    new Discord.ButtonBuilder()
+                        .setLabel(buttonLabel)
+                        .setURL(buttonRef)
+                        .setStyle(Discord.ButtonStyle.Link),
+                )]
+            }
+        }
         await userF.send({
             embeds: [
                 new Discord.EmbedBuilder()
@@ -1948,13 +2135,8 @@ module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, 
                     .setDescription(mensage)
                     .setColor('#6E58C7')
             ],
-            components: [buttonRef ? new Discord.ActionRowBuilder().addComponents(
-                new Discord.ButtonBuilder()
-                    .setLabel(buttonLabel)
-                    .setURL(buttonRef)
-                    .setStyle(Discord.ButtonStyle.Link),
-            ) : '']
-        }).catch((err) => { 
+            
+        }).catch((err) => {
             console.log(err);
         })
     } catch (error) {
