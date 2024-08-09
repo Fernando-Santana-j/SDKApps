@@ -77,7 +77,7 @@ module.exports = async (Discord2, client, data) => {
                         value: produto.estoque.length.toString(),
                         inline:true
                     })
-                    .setThumbnail('personalize' in serverDb && 'iconProduct' in serverDb.personalize ? serverDb.personalize.iconProduct == true ? logoLink : null : logoLink)
+                    .setThumbnail(logoLink)
                     .setImage(backGroundLink)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
