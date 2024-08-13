@@ -114,24 +114,6 @@ client.on(Events.ShardError, error => {
     console.error('A websocket connection encountered an error:', error);
 });
 
-process.on('unhandledRejection', error => {
-    console.error('Unhandled promise rejection:', error);
-});
-
-process.on('unhandRejection', (reason, promise) => {
-    console.log(`🚫 Erro Detectado:\n\n` + reason, promise)
-});
-
-process.on('uncaughtException', (error, origin) => {
-    console.log(`🚫 Erro Detectado:\n\n` + error, origin)
-});
-
-process.on('uncaughtExceptionMonitor', (error, origin) => {
-    console.log(`🚫 Erro Detectado:\n\n` + error, origin)
-});
-
-
-
 
 
 //TODO------------WEB PAGE--------------
@@ -991,7 +973,7 @@ app.post('/personalize/welcomeActive', async (req, res) => {
         if (server) {
             server.personalize.welcomeMensage.active = true
             db.update('servers', req.body.serverID, {
-                personalize: personalize
+                personalize: server.personalize
             })
             if (!res.headersSent) {
                 res.status(200).json({ success: true, })
@@ -1014,7 +996,7 @@ app.post('/personalize/welcomeDesactive', async (req, res) => {
         if (server) {
             server.personalize.welcomeMensage.active = false
             db.update('servers', req.body.serverID, {
-                personalize: personalize
+                personalize: server.personalize
             })
             if (!res.headersSent) {
                 res.status(200).json({ success: true, })
@@ -1277,7 +1259,7 @@ app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
                     ticketOptions: ticketOptions
                 })
                 if (ticketOptions.channel) {
-                    require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
+                    require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, req.body.serverID)
                 }
                 if (!res.headersSent) {
                     res.status(200).json({ success: true, data: 'Banner Alterado!' })

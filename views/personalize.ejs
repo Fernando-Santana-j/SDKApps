@@ -84,11 +84,11 @@
                             <% } %>
                             <div class="inputs-col-content">
                                 <label for="title-welcome" class="lable-padrao">Titulo da mensagem!</label>
-                                <input required type="text" class="input-padrao" placeholder="Titulo" id="title-welcome">
+                                <input required type="text" value="<%= 'personalize' in server && 'welcomeMensage' in server.personalize ? server.personalize.welcomeMensage.title :''%>" class="input-padrao" placeholder="Titulo" id="title-welcome">
                             </div>
                             <div class="inputs-col-content">
                                 <label for="mensage-welcome" class="lable-padrao">Mensagem de boas vindas!</label>
-                                <input required type="text" class="input-padrao" placeholder="Mensagem" id="mensage-welcome">
+                                <input required type="text" value="<%= 'personalize' in server && 'welcomeMensage' in server.personalize ? server.personalize.welcomeMensage.mensage :''%>"  class="input-padrao" placeholder="Mensagem" id="mensage-welcome">
                             </div>
                             <div class="inputs-col-content">
                                 <label for="welcome-channel-input" class="lable-padrao">Canal de boas vindas!</label>
