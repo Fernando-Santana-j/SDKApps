@@ -60,6 +60,19 @@ document.getElementById('motivo-responsavel-ticket-edit').addEventListener('blur
 });
 
 document.getElementById('save-channel-ticket').addEventListener('click',async()=>{
+    let server = await fetch('/get/server', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (server.success == true && `ticketOptions` in server.data && server.data.ticketOptions.motivos.length <= 0) {
+        errorNotify(`Cadastre um motivo primeiro!`)   
+        return 
+    }
     if (document.getElementById('bot-ticket-channel').value <= 0) {
         errorNotify('Selecione um canal primeiro!')
         return

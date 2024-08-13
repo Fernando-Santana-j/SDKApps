@@ -1,9 +1,11 @@
 let Discord = require('discord.js')
 let db = require('../Firebase/models')
 let webConfig = require('../config/web-config')
+let botConfig = require('../config/bot-config')
 const path = require('path')
 const fs = require('fs')
 const sharp = require('sharp')
+const functions = require('../functions')
 
 module.exports = async (client, channelID, serverID) => {
     try {
@@ -28,23 +30,8 @@ module.exports = async (client, channelID, serverID) => {
                 )
             }
         }
-        let dburl = null
-        let Newdbres = null
-        if (serverData && 'ticketOptions' in serverData && 'banner' in serverData.ticketOptions) {
-            const bannerPath = path.join(__dirname, '..', serverData.ticketOptions.banner);
-            let file = await fs.readFileSync(bannerPath);
-            let buffer = Buffer.from(file, 'binary');
-            let newBuffer = await sharp(buffer).jpeg().toBuffer()
-            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
-            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
-            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
-            let dbres = await dbBannerDiscordChannel.send({
-                files: [attachment]
-            })
-            Newdbres = dbres
-            dburl = await dbres.attachments.first().url
-        }
-
+        let dburl = serverData.ticketOptions.banner ? await functions.discordDB(serverData.ticketOptions.banner,client,Discord) : null
+        
         //salvar essa url no banco de dados para nao precisar ta criando toda hora uma nova mensagem
         await DiscordChannel.send({
             embeds: [

@@ -49,8 +49,8 @@ module.exports = async (Discord2, client, data) => {
         }
         let backGroundLink = ''
         let logoLink = ''
-        logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo,client,Discord) : ``
-        backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround,client,Discord) : ``
+        logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo,client,Discord) : null
+        backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround,client,Discord) : null
           
         let embed = await DiscordChannel.send({
             embeds: [

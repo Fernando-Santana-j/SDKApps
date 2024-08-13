@@ -146,6 +146,18 @@ document.getElementById('welcome-channel-input').addEventListener('blur', functi
     }
 });
 document.getElementById('save-mensage-welcome').addEventListener('click',async()=>{
+    if (document.getElementById(`title-welcome`).value.trim().length <= 0) {
+        errorNotify(`Insira um titulo primeiro!`)
+        return
+    }
+    if (document.getElementById(`mensage-welcome`).value.trim().length <= 0) {
+        errorNotify(`Insira uma mensagem primeiro!`)
+        return
+    }
+    if (document.getElementById(`welcome-channel-input`).value.trim().length <= 0) {
+        errorNotify(`Insira um canal primeiro!`)
+        return
+    }
     const opcoes = document.getElementById('welcome-channel-list').querySelectorAll('option');
     let channelID = null;
 
@@ -186,8 +198,8 @@ document.getElementById('desative-welcome').addEventListener('click',async()=>{
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify('Mensagem de boas vindas desativada!')
-        document.getElementById(`active-welcome`).classList.add(`hidden`)
-        document.getElementById(`desative-welcome`).classList.remove(`hidden`)
+        document.getElementById(`active-welcome`).classList.remove(`hidden`)
+        document.getElementById(`desative-welcome`).classList.add(`hidden`)
     }else{
         errorNotify(session.data)
     }
@@ -205,8 +217,8 @@ document.getElementById('active-welcome').addEventListener('click',async()=>{
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify('Mensagem de boas vindas ativada!')
-        document.getElementById(`active-welcome`).classList.remove(`hidden`)
-        document.getElementById(`desative-welcome`).classList.add(`hidden`)
+        document.getElementById(`active-welcome`).classList.add(`hidden`)
+        document.getElementById(`desative-welcome`).classList.remove(`hidden`)
     }else{
         errorNotify(session.data)
     }
