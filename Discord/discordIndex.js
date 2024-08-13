@@ -61,6 +61,175 @@ client.on('guildMemberAdd', async member => {
 });
 
 
+
+async function comprarFunction(productID,interaction) {
+    let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+    let product = await server.products.find(product => product.productID == productID)
+    let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
+    if (!product || server.error == true || product.estoque.length <= 0) {
+        await interaction.reply({
+            content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
+            components: [
+                new Discord.ActionRowBuilder().addComponents(
+                    new Discord.ButtonBuilder()
+                        .setCustomId(`privateAviso_${productID}`)
+                        .setLabel('Receber aviso')
+                        .setStyle(Discord.ButtonStyle.Primary),
+                )
+            ],
+            ephemeral: true
+        })
+        let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
+
+        if (analytics.error == false) {
+            let canceladosEstoque = analytics['cancelados estoque']
+            await canceladosEstoque.push(await functions.formatDate(new Date()))
+            db.update('analytics', server.id, {
+                "cancelados estoque": canceladosEstoque
+            })
+        } else {
+            db.create('analytics', server.id, {
+                "cancelados estoque": [await functions.formatDate(new Date())],
+                "pagamentos": {
+                    "PIX": 0,
+                    "card": 0,
+                    "boleto": 0,
+                },
+                "reebolsos": [],
+                "vendas canceladas": [],
+                "vendas completas": []
+            })
+        }
+
+        return
+    }
+    async function findUniCarrinhos() {
+        let prodid = productID
+        let findItem
+        if (preCarrinhos[interaction.user.id]) {
+            findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
+        } else {
+            findItem = null
+        }
+        if (!carrinhos[interaction.user.id]) {
+            carrinhos[interaction.user.id] = []
+        }
+        if (findItem) {
+            carrinhos[interaction.user.id].push(findItem)
+        } else {
+            carrinhos[interaction.user.id].push({
+                product: prodid,
+                quantidade: 1
+            })
+        }
+    }
+    if (findChannel) {
+        if (!carrinhos[interaction.user.id]) {
+            interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
+            await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
+            return
+        }
+        let prodid = await productID
+        let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
+        let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
+        if (findProductCart) {
+            carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
+        } else {
+            findUniCarrinhos()
+        }
+
+        interaction.reply({
+            embeds: [
+                new Discord.EmbedBuilder()
+                    .setColor("#C21010")
+                    .setTitle(`⚠️| Você já possui um carrinho aberto!`)
+                    .setDescription(`Adicionamos esse produto ao seu carrinho!`)
+            ],
+            components: [
+                new Discord.ActionRowBuilder()
+                    .addComponents(
+                        new Discord.ButtonBuilder()
+                            .setStyle(5)
+                            .setLabel('🛒・Ir para o Carrinho')
+                            .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                    )
+            ],
+            ephemeral: true
+        })
+
+        require('./createCartMessage')(Discord, client, {
+            serverID: interaction.guild.id,
+            user: interaction.user,
+            member: interaction.member,
+            channelID: await findChannel.id,
+            edit: true
+        })
+
+    } else {
+        let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
+        if (!categoria) {
+            categoria = await DiscordServer.channels.create({
+                name: 'carrinhos',
+                type: Discord.ChannelType.GuildCategory,
+                permissionOverwrites: [{
+                    id: DiscordServer.roles.everyone,
+                    deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+                }]
+            });
+        }
+        const newChannel = await DiscordServer.channels.create({
+            name: `🛒・Carrinho・${interaction.user.username}`,
+            type: 0,
+            parent: categoria,
+            topic: interaction.user.id,
+            permissionOverwrites: [{
+                id: interaction.user.id,
+                allow: [Discord.PermissionsBitField.Flags.ViewChannel]
+            }, {
+                id: DiscordServer.roles.everyone,
+                deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+            }]
+        })
+        if (newChannel) {
+            await interaction.reply({
+                content: `🛒 | Criando o Carrinho...`,
+                ephemeral: true
+            })
+            setTimeout(() => {
+                interaction.editReply({
+                    content: ` `,
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                            .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                            .setTitle(`😍 | Carrinho Criado!`)
+                            .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
+                    ],
+                    components: [
+                        new Discord.ActionRowBuilder()
+                            .addComponents(
+                                new Discord.ButtonBuilder()
+                                    .setStyle(5)
+                                    .setLabel('🛒・Ir para o Carrinho')
+                                    .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
+                            )
+                    ],
+                    ephemeral: true
+                });
+            }, 2500);
+        } else {
+            return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
+        }
+        findUniCarrinhos()
+        require('./createCartMessage')(Discord, client, {
+            serverID: interaction.guild.id,
+            user: interaction.user,
+            member: interaction.member,
+            channelID: await newChannel.id,
+            edit: false
+        })
+    }
+}
+
 module.exports = (Discord2, client) => {
 
     try {
@@ -263,175 +432,6 @@ module.exports = (Discord2, client) => {
                     interaction.deleteReply()
                 }
 
-
-
-                async function comprarFunction(productID) {
-                    let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
-                    let product = await server.products.find(product => product.productID == productID)
-                    let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
-                    if (!product || server.error == true || product.estoque.length <= 0) {
-                        await interaction.reply({
-                            content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
-                            components: [
-                                new Discord.ActionRowBuilder().addComponents(
-                                    new Discord.ButtonBuilder()
-                                        .setCustomId(`privateAviso_${productID}`)
-                                        .setLabel('Receber aviso')
-                                        .setStyle(Discord.ButtonStyle.Primary),
-                                )
-                            ],
-                            ephemeral: true
-                        })
-                        let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
-
-                        if (analytics.error == false) {
-                            let canceladosEstoque = analytics['cancelados estoque']
-                            await canceladosEstoque.push(await functions.formatDate(new Date()))
-                            db.update('analytics', server.id, {
-                                "cancelados estoque": canceladosEstoque
-                            })
-                        } else {
-                            db.create('analytics', server.id, {
-                                "cancelados estoque": [await functions.formatDate(new Date())],
-                                "pagamentos": {
-                                    "PIX": 0,
-                                    "card": 0,
-                                    "boleto": 0,
-                                },
-                                "reebolsos": [],
-                                "vendas canceladas": [],
-                                "vendas completas": []
-                            })
-                        }
-
-                        return
-                    }
-                    async function findUniCarrinhos() {
-                        let prodid = productID
-                        let findItem
-                        if (preCarrinhos[interaction.user.id]) {
-                            findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
-                        } else {
-                            findItem = null
-                        }
-                        if (!carrinhos[interaction.user.id]) {
-                            carrinhos[interaction.user.id] = []
-                        }
-                        if (findItem) {
-                            carrinhos[interaction.user.id].push(findItem)
-                        } else {
-                            carrinhos[interaction.user.id].push({
-                                product: prodid,
-                                quantidade: 1
-                            })
-                        }
-                    }
-                    if (findChannel) {
-                        if (!carrinhos[interaction.user.id]) {
-                            interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
-                            await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
-                            return
-                        }
-                        let prodid = await productID
-                        let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
-                        let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
-                        if (findProductCart) {
-                            carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
-                        } else {
-                            findUniCarrinhos()
-                        }
-
-                        interaction.reply({
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setColor("#C21010")
-                                    .setTitle(`⚠️| Você já possui um carrinho aberto!`)
-                                    .setDescription(`Adicionamos esse produto ao seu carrinho!`)
-                            ],
-                            components: [
-                                new Discord.ActionRowBuilder()
-                                    .addComponents(
-                                        new Discord.ButtonBuilder()
-                                            .setStyle(5)
-                                            .setLabel('🛒・Ir para o Carrinho')
-                                            .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                                    )
-                            ],
-                            ephemeral: true
-                        })
-
-                        require('./createCartMessage')(Discord, client, {
-                            serverID: interaction.guild.id,
-                            user: interaction.user,
-                            member: interaction.member,
-                            channelID: await findChannel.id,
-                            edit: true
-                        })
-
-                    } else {
-                        let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
-                        if (!categoria) {
-                            categoria = await DiscordServer.channels.create({
-                                name: 'carrinhos',
-                                type: Discord.ChannelType.GuildCategory,
-                                permissionOverwrites: [{
-                                    id: DiscordServer.roles.everyone,
-                                    deny: [Discord.PermissionsBitField.Flags.ViewChannel]
-                                }]
-                            });
-                        }
-                        const newChannel = await DiscordServer.channels.create({
-                            name: `🛒・Carrinho・${interaction.user.username}`,
-                            type: 0,
-                            parent: categoria,
-                            topic: interaction.user.id,
-                            permissionOverwrites: [{
-                                id: interaction.user.id,
-                                allow: [Discord.PermissionsBitField.Flags.ViewChannel]
-                            }, {
-                                id: DiscordServer.roles.everyone,
-                                deny: [Discord.PermissionsBitField.Flags.ViewChannel]
-                            }]
-                        })
-                        if (newChannel) {
-                            await interaction.reply({
-                                content: `🛒 | Criando o Carrinho...`,
-                                ephemeral: true
-                            })
-                            setTimeout(() => {
-                                interaction.editReply({
-                                    content: ` `,
-                                    embeds: [
-                                        new Discord.EmbedBuilder()
-                                            .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
-                                            .setTitle(`😍 | Carrinho Criado!`)
-                                            .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
-                                    ],
-                                    components: [
-                                        new Discord.ActionRowBuilder()
-                                            .addComponents(
-                                                new Discord.ButtonBuilder()
-                                                    .setStyle(5)
-                                                    .setLabel('🛒・Ir para o Carrinho')
-                                                    .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
-                                            )
-                                    ],
-                                    ephemeral: true
-                                });
-                            }, 2500);
-                        } else {
-                            return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
-                        }
-                        findUniCarrinhos()
-                        require('./createCartMessage')(Discord, client, {
-                            serverID: interaction.guild.id,
-                            user: interaction.user,
-                            member: interaction.member,
-                            channelID: await newChannel.id,
-                            edit: false
-                        })
-                    }
-                }
                 // interacao do botao de compra de um produto
                 if (interaction.customId && interaction.customId.includes('comprar')) {
                     comprarFunction(interaction.customId.replace('comprar_', ''))
@@ -1853,58 +1853,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
                 findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
 
-
-
-                // if (fields.length >= 25) {
                 sendTxtMensage(findChannel)
                 sendTxtMensage(user)
-                // } else {
-                //     try {
-                //         // dono.send({ files: [attachment] }).catch(()=>{});
-                //         await user.send({
-                //             embeds: [
-                //                 new Discord.EmbedBuilder()
-                //                     .setTitle('📦 | Sua entrega chegou!')
-                //                     .setDescription(`Abaixo estão os dados da sua entrega:`)
-                //                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`,})
-                //                     .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                //                     .addFields(...fields)
-                //                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                //             ],
-                //         }).catch(() => {
-                //             sendTxtMensage(user)
-                //         })
-                //         findChannel.send({
-                //             embeds: [
-                //                 new Discord.EmbedBuilder()
-                //                     .setTitle('📦 | Sua entrega chegou!')
-                //                     .setDescription(`Enviamos a entrega no seu privado caso não tenha recebido o seu privado pode esta bloqueado então tenha certeza de baixar os arquivos antes que o carrinho seja fechado`)
-                //                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
-                //                     .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                //                     .addFields(...fields)
-                //                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                //             ],
-                //             components: [
-                //                 new Discord.ActionRowBuilder()
-                //                     .addComponents(
-                //                         new Discord.ButtonBuilder()
-                //                             .setStyle(4)
-                //                             .setLabel('Fechar carrinho')
-                //                             .setCustomId('cancel')
-                //                     )
-                //             ],
-                //         }).catch(() => {
-                //             sendTxtMensage(findChannel)
-                //         })
-                //         // findChannel.send({ files: [attachment] }).catch(()=>{});
-
-
-                //     } catch (error) {
-                //         sendTxtMensage(findChannel)
-                //         sendTxtMensage(user)
-                //         sendTxtMensage(dono)
-                //     }
-                // }
 
                 if ('saleLogs' in serverData && serverData.saleLogs.publicLog) {
                     try {
@@ -2060,7 +2010,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         "vendas completas": [await functions.formatDate(new Date())]
                     })
                 }
-                carrinhos[params.userID] = null
+                carrinhos[params.userID] = []
             } catch (error) {
                 console.log(error);
                 console.log(fields);
