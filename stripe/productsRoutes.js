@@ -41,8 +41,8 @@ router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }
         var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelID)
         let serverDb = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
 
-        let dburl = req.files.backGround ? await functions.discordDB(req.files.backGround[0].path,client,Discord) : null
-        let dburl2 = req.files.productLogo ? await functions.discordDB(req.files.productLogo[0].path,client,Discord) : null
+        let dburl = req.files.backGround ? await functions.discordDB(req.files.backGround[0].path,client,Discord,true) : null
+        let dburl2 = req.files.productLogo ? await functions.discordDB(req.files.productLogo[0].path,client,Discord,true) : null
         if (req.files.productLogo) {
             try {
                 fs.unlink(req.files.productLogo[0].path, (err) => {
