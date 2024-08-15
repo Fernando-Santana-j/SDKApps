@@ -295,8 +295,13 @@ module.exports = {
         const ano = data.getFullYear();
         return dia + '/' + mes + '/' + ano;
     },
-    discordDB:async (imagePath,client,Discord)=>{
-        const bannerPath = path.join(__dirname, imagePath);
+    discordDB:async (imagePath,client,Discord, isFullPath = false)=>{
+        let bannerPath = null
+        if (isFullPath == true) {
+            bannerPath =  path.join(imagePath)
+        }else{
+            bannerPath =  path.join(__dirname, imagePath);
+        }
         let file = await fs.readFileSync(bannerPath);
         let buffer = Buffer.from(file, 'binary');
         let newBuffer = await sharp(buffer).jpeg().toBuffer()
