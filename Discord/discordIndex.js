@@ -618,6 +618,7 @@ module.exports = (Discord2, client) => {
                                         userID: interaction.user.id,
                                         serverID: interaction.guildId,
                                         carrinhos: JSON.stringify(carrinho),
+                                        action: 'produtoPay',
                                         token: serverData.bankData.mercadoPagoToken,
                                     }
                                 };

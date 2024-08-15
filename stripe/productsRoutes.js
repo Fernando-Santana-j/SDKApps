@@ -41,28 +41,7 @@ router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }
         var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelID)
         let serverDb = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
 
-        let dburl = null
-        let Newdbres = null
-        if (req.files.backGround) {
-            const bannerPath = req.files.backGround[0].path;
-            let file = await fs.readFileSync(bannerPath);
-            let buffer = Buffer.from(file, 'binary');
-            let newBuffer = await sharp(buffer).jpeg().toBuffer()
-            const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
-            let dbBannerDiscordServer = await client.guilds.cache.get('1246186853241978911')
-            let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get('1253279027662426142')
-            let dbres = await dbBannerDiscordChannel.send({
-                files: [attachment]
-            })
-            Newdbres = dbres
-            dburl = await dbres.attachments.first().url
-            fs.unlink(req.files.backGround[0].path, (err) => {
-                if (err) {
-                    console.error('Erro ao apagar o arquivo original:', err);
-                    
-                } 
-            });
-        }
+        let dburl = req.files.backGround ? await functions.discordDB(req.files.backGround[0].path,client,Discord) :null
         let dburl2 = null
         let Newdbres2 = null
         if (req.files.productLogo) {

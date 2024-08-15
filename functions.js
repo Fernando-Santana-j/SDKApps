@@ -119,7 +119,7 @@ module.exports = {
             try {
                 if ('bankData' in server && server.bankData.bankID) {
                     let account = await stripe.accounts.retrieve(server.bankData.accountID);
-                    if (account.payouts_enabled == false || account.requirements.disabled_reason != null ) {
+                    if (account.payouts_enabled == false || account.requirements.disabled_reason != null) {
                         let accountLink = await stripe.accountLinks.create({
                             account: account.id,
                             return_url: `${webConfig.host}/server/sales/${server.id}`,
@@ -295,7 +295,7 @@ module.exports = {
         const ano = data.getFullYear();
         return dia + '/' + mes + '/' + ano;
     },
-    discordDB:async (imagePath,client,Discord)=>{
+    discordDB: async (imagePath, client, Discord) => {
         const bannerPath = path.join(__dirname, imagePath);
         let file = await fs.readFileSync(bannerPath);
         let buffer = Buffer.from(file, 'binary');
@@ -307,8 +307,22 @@ module.exports = {
             files: [attachment]
         })
         let linkImage = await dbres.attachments.first()
-        
+
         return linkImage.url
+    },
+    addFreeMonthSubscription: async (subscriptionID,) => {
+        try {
+            const { current_period_end } = await stripe.subscriptions.retrieve(subscriptionID);
+            const newEndDate = current_period_end + 30 * 24 * 60 * 60;
+            await stripe.subscriptions.update(subscriptionID, {
+                cancel_at: newEndDate, 
+                proration_behavior: 'none',
+            });
+
+            console.log('Assinatura atualizada com sucesso.');
+        } catch (error) {
+            console.error('Erro ao atualizar a assinatura:', error.message);
+        }
     }
 
 }
