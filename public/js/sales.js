@@ -1141,11 +1141,6 @@ document.getElementById("form-prodc-mult").addEventListener("submit", async func
             serverID: serverID
         }),
     }).then(response => { return response.json() })
-    if (!serverData && serverData.plan != 2 || serverData.plan != 3) {
-        errorNotify('O seu plano não dá acesso a essa função!!')
-        return
-    }
-
     if (selectProdsList.length <= 0) {
         errorNotify('Selecione um ou mais produtos para continuar!')
         return
