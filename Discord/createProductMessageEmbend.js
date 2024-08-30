@@ -47,10 +47,20 @@ module.exports = async (Discord2, client, data) => {
         if (totalEstoque.length <= 0) {
             totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel('Sem estoque').setValue('null').setDefault(true),)
         }
-        let backGroundLink = ''
-        let logoLink = ''
-        logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo,client,Discord) : null
+        let backGroundLink = null 
+        let logoLink =  null
         backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround,client,Discord) : null
+        logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo,client,Discord) : null
+        
+        // if ('backGroundLink' in produto) {
+            //PENSAR MELHOR POIS TEM QUE ADICIONAR ALGUMA VERIFICACAO PARA SABER SE O USUARIO ALTEROU A LOGO OU O BACKGROUND DO PRODUTO
+        // }
+        // if ('logoLink' in produto) {
+        //     logoLink = produto.logoLink
+        // }else{
+        //     logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo,client,Discord) : null
+        //     produto.logoLink = logoLink
+        // }
           
         let embed = await DiscordChannel.send({
             embeds: [

@@ -97,13 +97,14 @@ client.on("interactionCreate", async (interaction) => {
 
         if (!cmd)
             return;
-
         cmd.run(client, interaction);
+        
     }
 
     if (interaction.isContextMenuCommand()) {
         await interaction.deferReply({ ephemeral: false });
         const command = client.slashCommands.get(interaction.commandName);
+        
         if (command) command.run(client, interaction);
 
     }
@@ -144,7 +145,26 @@ app.use('/', produtoRoutes);
 
 
 
-
+async function test(params) {
+    const sub = await stripe.subscriptions.retrieve('sub_1PhvpsEVoMwYkZ6cSHJvoKjX')
+    stripeRoutes.createAccount({
+        customer_details: {
+            email: 'test@gmail.com',
+            name: 'test',
+            phone: null
+        },
+        metadata: {
+            serverID: '1272612677318869093',
+            plan: '2'
+        }
+    }, 'pix')
+    // const subscription = await stripe.subscriptions.update(
+    //     'sub_1PhvpsEVoMwYkZ6cSHJvoKjX',
+    //     {
+    //       trial_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // Um mês de teste gratuito
+    //     }
+    //   );
+}
 
 app.get('/', async (req, res) => {
     res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
@@ -166,7 +186,7 @@ app.get('/dashboard', async (req, res) => {
                     }
                 }
             } else {
-                res.redirect('/')
+                res.redirect('/redirect/discord')
             }
         } else {
             let lastServers = []
@@ -195,7 +215,7 @@ app.get('/dashboard', async (req, res) => {
 
 
     } else {
-        res.redirect('/')
+        res.redirect('/?error=Logue novamente!')
     }
 })
 
@@ -221,13 +241,23 @@ app.get('/logout', async (req, res) => {
 
 app.get('/payment/:id', async (req, res) => {
     if (!req.params.id || !req.session.uid) {
-        res.redirect('/')
+        res.redirect('/?error=Parametros invalidos!')
         return
     }
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    res.render('payment', { host: `${webConfig.host}`, user: user })
+    let server = await db.findOne({ colecao: 'servers', doc: req.params.id })
+    let exist = false
+    let type = null
+    if (server.error == false) {
+        exist = true
+        type = server.type
+        if (server.isPaymented == true) {
+            res.redirect('/dashboard')
+        return
+        }
+    }
+    res.render('payment', { host: `${webConfig.host}`, user: user,server:server, exist: exist, type: type })
 })
-
 
 app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
@@ -240,7 +270,7 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (!server || !user) {
-        res.redirect('/')
+        res.redirect('/?error=Erro ao recuperar o servidor ou o seu usuario!')
         return
     }
     if (server.hasOwnProperty('bankData')) {
@@ -596,6 +626,14 @@ app.get('/adm', (req, res) => {
 })
 
 
+app.get('/copyText/:copy', async (req, res) => {
+    res.render('copyText', { host: `${webConfig.host}`, copyText: req.params.copy })
+})
+
+
+
+
+//-----POST-------
 
 app.post('/firebase/configs', (req, res) => {
     res.status(200).json({ success: true, projectId: require('./config/firebase.json').project_id, data: require('./config/firebase.json') })
@@ -939,16 +977,39 @@ app.post('/personalize/productIcon', async (req, res) => {
         }
     }
 })
+app.post('/personalize/feedback', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.feedbackChannel = req.body.channelID
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
 app.post('/personalize/welcome', async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
             let personalize = 'personalize' in server ? server.personalize : {}
             personalize.welcomeMensage = {
-                active:true,
-                channel:req.body.channel,
-                mensage:req.body.mensage,
-                title:req.body.title
+                active: true,
+                channel: req.body.channel,
+                mensage: req.body.mensage,
+                title: req.body.title
             }
             db.update('servers', req.body.serverID, {
                 personalize: personalize
@@ -1007,7 +1068,7 @@ app.post('/personalize/welcomeDesactive', async (req, res) => {
             }
         }
     } catch (error) {
-        
+
         console.log(error);
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
@@ -1432,7 +1493,7 @@ app.post('/cupom/create', async (req, res) => {
         let code = await req.body.cupomCode
         if (`cupons` in server) {
             cupons = server.cupons
-            findCupom = await server.cupons.find(cupom=>cupom.code == code)
+            findCupom = await server.cupons.find(cupom => cupom.code == code)
         }
         if (findCupom) {
             if (!res.headersSent) {
@@ -1440,14 +1501,14 @@ app.post('/cupom/create', async (req, res) => {
             }
             return
         }
-        
+
         await cupons.push({
-            code:code,
-            products:req.body.productsList,
-            descontoType:req.body.descontoType,
-            descontoValue:req.body.descontoValue,
-            active:true,
-            id:cupomId
+            code: code,
+            products: req.body.productsList,
+            descontoType: req.body.descontoType,
+            descontoValue: req.body.descontoValue,
+            active: true,
+            id: cupomId
         })
         db.update('servers', body.serverID, {
             cupons: cupons

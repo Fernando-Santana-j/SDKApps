@@ -186,39 +186,86 @@ document.getElementById('save-mensage-welcome').addEventListener('click',async()
     }
 })
 
-document.getElementById('desative-welcome').addEventListener('click',async()=>{
-    let session = await fetch('/personalize/welcomeDesactive', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            serverID:serverID
-        }),
-    }).then(response => { return response.json() })
-    if (session.success == true) {
-        successNotify('Mensagem de boas vindas desativada!')
-        document.getElementById(`active-welcome`).classList.remove(`hidden`)
-        document.getElementById(`desative-welcome`).classList.add(`hidden`)
-    }else{
-        errorNotify(session.data)
-    }
-})
+if (document.getElementById('desative-welcome')) {
+    document.getElementById('desative-welcome').addEventListener('click',async()=>{
+        let session = await fetch('/personalize/welcomeDesactive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                serverID:serverID
+            }),
+        }).then(response => { return response.json() })
+        if (session.success == true) {
+            successNotify('Mensagem de boas vindas desativada!')
+            document.getElementById(`active-welcome`).classList.remove(`hidden`)
+            document.getElementById(`desative-welcome`).classList.add(`hidden`)
+        }else{
+            errorNotify(session.data)
+        }
+    })
+}
 
-document.getElementById('active-welcome').addEventListener('click',async()=>{
-    let session = await fetch('/personalize/welcomeActive', {
+if (document.getElementById('active-welcome')) {
+    document.getElementById('active-welcome').addEventListener('click',async()=>{
+        let session = await fetch('/personalize/welcomeActive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                serverID:serverID
+            }),
+        }).then(response => { return response.json() })
+        if (session.success == true) {
+            successNotify('Mensagem de boas vindas ativada!')
+            document.getElementById(`active-welcome`).classList.add(`hidden`)
+            document.getElementById(`desative-welcome`).classList.remove(`hidden`)
+        }else{
+            errorNotify(session.data)
+        }
+    })
+}
+
+
+
+document.getElementById('feedback-channel-input').addEventListener('blur', function () {
+    const inputValue = this.value.toLowerCase();
+    const datalistOptions = Array.from(document.getElementById('feedback-channel-list').getElementsByTagName('option'));
+    const validOptions = datalistOptions.map(option => option.value.toLowerCase());
+
+    if (!validOptions.includes(inputValue)) {
+        errorNotify('Por favor, selecione um canal válido da lista.');
+        this.value = '';
+    }
+});
+document.getElementById('saveChannelFeedback').addEventListener('click',async()=>{
+
+    if (document.getElementById(`feedback-channel-input`).value.trim().length <= 0) {
+        errorNotify(`Insira um canal primeiro!`)
+        return
+    }
+    const opcoes = document.getElementById('feedback-channel-list').querySelectorAll('option');
+    let channelID = null;
+
+    opcoes.forEach(option => {
+        if (option.value === document.getElementById('feedback-channel-input').value) {
+            channelID = option.getAttribute('data-channel');
+        }
+    });
+    let session = await fetch('/personalize/feedback', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            serverID:serverID
+            serverID:serverID,
+            channelID:channelID
         }),
     }).then(response => { return response.json() })
     if (session.success == true) {
-        successNotify('Mensagem de boas vindas ativada!')
-        document.getElementById(`active-welcome`).classList.add(`hidden`)
-        document.getElementById(`desative-welcome`).classList.remove(`hidden`)
+        successNotify('Canal salvo!')
     }else{
         errorNotify(session.data)
     }

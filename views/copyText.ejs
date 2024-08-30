@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK</title>
+    <style>
+        *{
+            
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <input style=" opacity: 0;" id="copy-text" value="<%= copyText %>" >
+    <button style="width: 100vw; height: 100vh; z-index: 999; font-size: xx-large;" onclick="copy()">Copiar texto</button>
+    <script>
+        function copy() {
+            var copyText = document.getElementById("copy-text");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            setTimeout(()=>{
+                window.close()
+            },500)
+        }
+    </script>
+</body>
+</html>
