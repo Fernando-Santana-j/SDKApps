@@ -77,15 +77,27 @@ router.get('/auth/callback', async (req, res) => {
                 }).then((res) => { return res.data }).catch((err) => {
                     console.error(err)
                 });
-                await db.create('users', userResponse.id, {
-                    id: userResponse.id,
-                    username: userResponse.username,
-                    profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
-                    displayName: userResponse.global_name,
-                    email: userResponse.email,
-                    access_token: response.data.access_token
-                })
 
+                let user = await db.findOne({colecao:'users',doc:userResponse.id})
+                if (user && user.error == false) {
+                    await db.update('users', userResponse.id,{
+                        username: userResponse.username,
+                        profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
+                        displayName: userResponse.global_name,
+                        access_token: response.data.access_token
+                    })
+                }else{
+                    let customer = await functions.createCustomer(userResponse.username,userResponse.email)
+                    await db.create('users', userResponse.id, {
+                        id: userResponse.id,
+                        customer:customer,
+                        username: userResponse.username,
+                        profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
+                        displayName: userResponse.global_name,
+                        email: userResponse.email,
+                        access_token: response.data.access_token
+                    })
+                }
                 req.session.uid = userResponse.id
 
                 res.redirect('/dashboard')
@@ -93,6 +105,8 @@ router.get('/auth/callback', async (req, res) => {
         }
     } catch (error) {
         res.redirect('/logout')
+        console.log(error);
+        
     }
 })
 

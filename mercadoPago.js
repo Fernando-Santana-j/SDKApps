@@ -6,15 +6,19 @@ const axios = require('axios')
 
 
 const { Payment, MercadoPagoConfig } = require('mercadopago');
-const mercadoPagoData = require('./config/mercadoPagoData.json')
+const mercadoPagoData = require('./config/mercadoPagoData.json');
+const webConfig = require('./config/web-config');
 
 
 router.post('/mercadopago/webhook', async (req, res) => {
     let resposta = req.body
     let params = req.query
+    res.sendStatus(200)
     try {
         if (resposta.action == 'payment.updated') {
             let id = await resposta.data.id
+            console.log(params,id);
+            
             if (params) {
                 axios.get(`https://api.mercadopago.com/v1/payments/${id}`, {
                     headers: {
@@ -32,7 +36,7 @@ router.post('/mercadopago/webhook', async (req, res) => {
                             }
                             if (doc.data.status === "approved") {
                                 let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
-    
+
                                 if ('blockBank' in server && server.blockBank.includes(bank)) {
                                     try {
                                         await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
@@ -46,8 +50,8 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                     }
                                 } else {
                                     try {
-                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null,null)
-                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador,'✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null,null)
+                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
+                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador, '✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null, null)
                                     } catch (error) {
                                         console.log(error);
                                     }
@@ -61,11 +65,11 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                 token: doc.data.metadata.token,
                                 userID: doc.data.metadata.user_id
                             }
-    
+
                             let server = await db.findOne({ colecao: 'servers', doc: metadata.serverID })
                             if (doc.data.status === "approved") {
                                 let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
-    
+
                                 if ('blockBank' in server && server.blockBank.includes(bank)) {
                                     try {
                                         await axios.post(`https://api.mercadopago.com/v1/payments/${id}/refunds`, {}, {
@@ -84,13 +88,30 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                         console.log(error);
                                     }
                                 }
-    
+
                             }
                             break;
                         case 'planPay':
-                            
-                            break;
-                        default:
+                            let metadataP = {
+                                serverID: doc.data.metadata.server_id,
+                                token: doc.data.metadata.token,
+                                userID: doc.data.metadata.user_id,
+                                price:doc.data.metadata.price,
+                                plan : doc.data.metadata.plan,
+                                time: doc.data.metadata.time
+                            }
+                            let serverP = await db.findOne({colecao:'servers',doc: metadataP.serverID})
+                            if (serverP.error == false) {
+                                await functions.renovarPix(serverP.subscription,metadataP.time)
+                            }else{
+                                await functions.createAccount({
+                                    metadata:{
+                                        uid: metadataP.userID,
+                                        plan:metadataP.plan,
+                                        serverID:metadataP.serverID
+                                    }
+                                }, 'pix', metadataP.price,functions)
+                            }
                             break;
                     }
                 }).catch(err => {
@@ -98,7 +119,7 @@ router.post('/mercadopago/webhook', async (req, res) => {
                 })
             }
         }
-        res.sendStatus(200)
+        
     } catch (error) {
         console.log(error);
     }
@@ -153,6 +174,55 @@ router.post('/mercadopago/desative', async (req, res) => {
         res.status(200).json({ success: true, data: 'Pix desativado!' })
     } catch (error) {
         res.status(200).json({ success: false, data: 'Erro ao desativar o pix' })
+    }
+})
+
+router.post('/pix/create', async (req, res) => {
+    try {
+        let timeMultiply = req.body.timeMultiply
+        let time = req.body.time
+        let plan = req.body.plan
+        let indexPrice = timeMultiply == 1 ? 0 : timeMultiply == 3 ? 1 : 2
+        
+        let itemPlan = webConfig.planos[plan][indexPrice]
+       
+        
+
+        const Mercadoclient = new MercadoPagoConfig({ accessToken: webConfig.mercadoPagoToken, options: { timeout: 5000 } });
+        const payment = new Payment(Mercadoclient);
+
+        let amount = itemPlan.price
+
+        const body = {
+            transaction_amount: amount,
+            description: `Cobranca do plano ${plan} na plataforma SDKApps`,
+            payment_method_id: 'pix',
+            external_reference: req.body.uid,
+            payer: require(`./config/mercadoPagoData.json`).payer,
+            notification_url: `${require(`./config/mercadoPagoData.json`).notification_url}/mercadopago/webhook?token=${webConfig.mercadoPagoToken}`,
+            metadata: {
+                userID: req.body.uid,
+                serverID: req.body.serverID,
+                action: 'planPay',
+                plan:req.body.plan,
+                price: itemPlan,
+                token: webConfig.mercadoPagoToken,
+                time:time
+            }
+        };
+
+        let dataPix = await payment.create({ body })
+        const cpc = dataPix.point_of_interaction.transaction_data.qr_code
+        const base64 = dataPix.point_of_interaction.transaction_data.qr_code_base64
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, cpc: cpc, qrcode: base64 })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao criar o pix' })
+        }
     }
 })
 

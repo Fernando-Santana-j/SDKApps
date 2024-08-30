@@ -30,7 +30,7 @@ module.exports = async (client, channelID, serverID) => {
                 )
             }
         }
-        let dburl = serverData.ticketOptions.banner ? await functions.discordDB(serverData.ticketOptions.banner,client,Discord) : null
+        let dburl = 'ticketOptions' in serverData && 'banner' in serverData.ticketOptions ? await functions.discordDB(serverData.ticketOptions.banner,client,Discord) : null
         
         //salvar essa url no banco de dados para nao precisar ta criando toda hora uma nova mensagem
         await DiscordChannel.send({

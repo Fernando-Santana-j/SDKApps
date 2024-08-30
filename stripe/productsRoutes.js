@@ -37,58 +37,15 @@ client.login(botConfig.discordToken)
 
 router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
-        var DiscordServer = await client.guilds.cache.get(req.body.serverID);
-        var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelID)
-        let serverDb = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-
-        let dburl = req.files.backGround ? await functions.discordDB(req.files.backGround[0].path,client,Discord,true) : null
-        let dburl2 = req.files.productLogo ? await functions.discordDB(req.files.productLogo[0].path,client,Discord,true) : null
-        if (req.files.productLogo) {
-            try {
-                fs.unlink(req.files.productLogo[0].path, (err) => {
-                    if (err) {
-                        console.error('Erro ao apagar o arquivo original:', err);
-                        return { error: true, err: err }
-                    } else {
-                        return null
-                    }
-                });
-            } catch (error) {
-                
-            }
-        }
-
-        let productsArrayOptions = []
-        let productList = await req.body.productsList.split(',')
-        for (let index = 0; index < productList.length; index++) {
-            const element = await productList[index];
-            let produto = await serverDb.products.find(product => product.productID == element)
-            await productsArrayOptions.push(
-                await new Discord.StringSelectMenuOptionBuilder().setLabel(produto.productName).setDescription(functions.formatarMoeda(produto.price)).setValue(produto.productID)
-            )
-        }
-
-        DiscordChannel.send({
-            embeds: [
-                new Discord.EmbedBuilder()
-                    .setTitle(req.body.productName)
-                    .setDescription(req.body.producDesc)
-                    .setColor('personalize' in serverDb && 'colorDest' in serverDb.personalize ? serverDb.personalize.colorDest : '#6E58C7')
-                    .setTimestamp()
-                    .setThumbnail(dburl2)
-                    .setImage(dburl)
-                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-            ],
-            components: [
-                new Discord.ActionRowBuilder().addComponents(
-                    new Discord.StringSelectMenuBuilder()
-                        .setCustomId('multSelectProduct')
-                        .setPlaceholder('Selecione um produto!')
-                        .setMinValues(1)
-                        .setMaxValues(1)
-                        .addOptions(...productsArrayOptions)
-                )
-            ]
+        await require('../Discord/createMultiProductMensage.js')(Discord,client,{
+            serverID: req.body.serverID,
+            channelID: req.body.channelID,
+            backGround:req.files.backGround[0].path,
+            logo:req.files.productLogo[0].path,
+            productsList: req.body.productsList,
+            productName: req.body.productName,
+            producDesc: req.body.producDesc,
+            edit:false
         })
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Mensagem enviada!' })
@@ -494,7 +451,7 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 if (`estoqueAviso` in product) {
                     for (let index = 0; index < product.estoqueAviso.length; index++) {
                         const element = product.estoqueAviso[index];
-                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto')
+                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto',)
                     }
                     product.estoqueAviso = []
                 }

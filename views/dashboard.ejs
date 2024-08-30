@@ -38,7 +38,7 @@
                 <div id="servers-containner">
                     <div id="servers-row">
                         <% servers.forEach(element => { %>
-                            <a href="/<%= element.isPaymented == true ? 'server' : element.assinante == true ? "subscription/get" : "payment"%>/<%= element.id %>" class="server-col">
+                            <a href="/<%= element.isPaymented == true ? 'server' : "payment"%>/<%= element.id %>" class="server-col">
                                 <div class="server-col-status <%= element.isPaymented == true ? 'greenColor' : element.assinante == true ? 'attentionColor' :"redColor"%>"></div>
                                 <div class="server-col-content">
                                     <img class="server-col-pic" src="<%= element.server_pic %>">

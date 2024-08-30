@@ -4,3 +4,11 @@
 <script src="<%= host %>/public/src/app.js"></script>
 <script src="<%= host %>/public/js/notify.js"></script>
 <script src="<%= host %>/public/js/theme.js"></script>
+<script>
+    const urlObj = new URL(window.location.href);
+    const queryParams = new URLSearchParams(urlObj.search);
+    const queryObject = {};
+    queryParams.forEach((value, key) => {
+        queryObject[key] = value;
+    });
+</script>

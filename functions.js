@@ -107,7 +107,7 @@ module.exports = {
     },
     subscriptionStatus: async (req, res, next) => {
         if (!req.params.id || !req.session.uid) {
-            res.redirect('/')
+            res.redirect('/?error=Faca login novamente!')
             return
         }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
@@ -132,42 +132,61 @@ module.exports = {
                 }
                 const assinatura = await stripe.subscriptions.retrieve(server.subscription);
                 if (assinatura) {
-                    const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
-                    const hoje = new Date();
-                    const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-                    const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
-                    if (server.payment_status == "paused") {
-                        res.redirect('/dashboard')
-                        return
-                    }
-                    switch (assinatura.status) {
-                        case 'active':
-                            if (diasRestantes <= 3) {
-                                req.query.lastdays = diasRestantes
-                            }
-                            next()
-                            break;
-                        case 'canceled':
+                    if ('type' in server && server.type == 'pix') {
+                        if (assinatura.status == 'past_due' || assinatura.status == 'canceled') {
                             await db.update('servers', req.params.id, {
                                 assinante: false,
                                 payment_status: "cancel",
                                 isPaymented: false
                             })
-                            res.redirect('/dashboard')
-                            break;
-                        default:
+                            res.redirect('/dashboard?error=Assinatura vencida!')
+                        } else {
                             next()
-                            break;
+                        }
+                    } else {
+
+                        const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
+                        const hoje = new Date();
+                        const diferencaEmMilissegundos = tempoUnixConvert - hoje;
+                        const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
+                        if (server.payment_status == "paused") {
+                            res.redirect('/dashboard?error=Sua assinatura esta pausada!')
+                            return
+                        }
+                        switch (assinatura.status) {
+                            case 'active':
+                                if (diasRestantes <= 3) {
+                                    req.query.lastdays = diasRestantes
+                                }
+                                next()
+                                break;
+                            case 'canceled':
+                                await db.update('servers', req.params.id, {
+                                    assinante: false,
+                                    payment_status: "cancel",
+                                    isPaymented: false
+                                })
+                                res.redirect('/dashboard?error=Sua assinatura foi cancelada!')
+                                break;
+                            default:
+                                next()
+                                break;
+                        }
+
                     }
                 } else {
-                    res.redirect('/')
+                    res.redirect('/?error=nao foi possivel localizar a assinatura')
                 }
 
+
+
             } catch (error) {
-                res.redirect('/')
+                console.log(error);
+
+                res.redirect('/?error=Erro ao verificar os dados da assinatura!')
             }
         } else {
-            res.redirect('/')
+            res.redirect('/?error=Erro ao recuperar o servidor')
             return
         }
 
@@ -298,9 +317,9 @@ module.exports = {
     discordDB: async (imagePath, client, Discord, isFullPath = false) => {
         let bannerPath = null
         if (isFullPath == true) {
-            bannerPath =  path.join(imagePath)
-        }else{
-            bannerPath =  path.join(__dirname, imagePath);
+            bannerPath = path.join(imagePath)
+        } else {
+            bannerPath = path.join(__dirname, imagePath);
         }
         let file = await fs.readFileSync(bannerPath);
         let buffer = Buffer.from(file, 'binary');
@@ -320,7 +339,7 @@ module.exports = {
             const { current_period_end } = await stripe.subscriptions.retrieve(subscriptionID);
             const newEndDate = current_period_end + 30 * 24 * 60 * 60;
             await stripe.subscriptions.update(subscriptionID, {
-                cancel_at: newEndDate, 
+                cancel_at: newEndDate,
                 proration_behavior: 'none',
             });
 
@@ -328,6 +347,94 @@ module.exports = {
         } catch (error) {
             console.error('Erro ao atualizar a assinatura:', error.message);
         }
-    }
+    },
+    createCustomer: async (name, email) => {
+        const customer = await stripe.customers.create({
+            name: name,
+            email: email,
+        });
+        return customer.id
+    },
+    createAccount: async (data, type, price, functions) => {
+        let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
+        if (type == 'pix') {
+            const subscription = await stripe.subscriptions.create({
+                // customer: user.customer,
+                customer: await functions.createCustomer('test', 'test@gmail.com'),
+                items: [{
+                    price: price.id,
+                }],
+                collection_method: 'send_invoice',
+                days_until_due: 5,
+            });
+            data.subscription = await subscription.id
+            data.created = subscription.created,
+                data.payment_status = await subscription.status
+            data.customer = user.customer
+            data.customer_details = {
+                email: null,
+                name: null,
+                phone: null
+            }
+        }
+        let servers = await functions.reqServerByTime(user, functions.findServers)
+        let filterServers = await servers.find(server => server.id == data.metadata.serverID)
 
+        var dataUnixConvert = new Date(parseInt(data.created) * 1000)
+        dataUnixConvert.setMonth(dataUnixConvert.getMonth() + 1);
+        var novaDataUnix = Math.floor(dataUnixConvert.getTime() / 1000);
+        let serverADD = {
+            assinante: true,
+            type: type,
+            id: data.metadata.serverID,
+            subscription: data.subscription,
+            plan: data.metadata.plan,
+            tipo: filterServers.tipo,
+            server_pic: filterServers.server_pic,
+            name: filterServers.name,
+            payment_status: data.payment_status,
+            isPaymented: true,
+            subscriptionData: {
+                lastPayment: data.created,
+                created: data.created,
+                email: data.customer_details.email,
+                name: data.customer_details.name,
+                phone: data.customer_details.phone,
+                expires_at: novaDataUnix,
+                customer: data.customer
+            }
+        }
+        db.create('servers', data.metadata.serverID, serverADD)
+
+
+        try {
+            db.delete(`preServers`, data.metadata.serverID)
+        } catch (error) { }
+    },
+    renovarPix: async (subscriptionID, time) => {
+        try {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionID);
+            const currentPeriodEnd = Math.floor(Date.now() / 1000);
+            const billingInterval = time ? time : subscription.items.data[0].price.recurring.interval;
+            let additionalTime;
+
+            if (billingInterval === 'month' || billingInterval == 'mensal') {
+                additionalTime = 30 * 24 * 60 * 60;
+            } else if (billingInterval === 'year' || billingInterval == 'anual') {
+                additionalTime = 365 * 24 * 60 * 60;
+            } else if (billingInterval === 'quarter' || billingInterval === 'trimestral') {
+                additionalTime = 3 * 30 * 24 * 60 * 60;
+            }
+
+            const newTrialEnd = currentPeriodEnd + additionalTime;
+
+            await stripe.subscriptions.update(subscriptionID, {
+                trial_end: newTrialEnd,
+                proration_behavior: 'none',
+            });
+        } catch (error) {
+            console.log(error);
+            
+        }
+    }
 }

@@ -16,8 +16,7 @@ module.exports = {
     iban: process.env.IBAN,
     stripeAccount: process.env.STRIPEACCOUNT,
     host: process.env.HOST,
-    product1: require('./product.json').product1,
-    product2: require('./product.json').product2,
-    product3: require('./product.json').product3,
-    loginURL: process.env.DISCORDLOGIN
+    planos: require('./product.json'),
+    loginURL: `https://discord.com/oauth2/authorize?client_id=${process.env.CLIENTID}&response_type=code&redirect_uri=${process.env.REDIRECTURI}&scope=identify+email+guilds+guilds.join`,
+    mercadoPagoToken:process.env.MERCADOPAGOTOKEN
 }

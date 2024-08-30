@@ -1,304 +1,179 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <%- include('./reusable/head.ejs') %>
-    <title>SDK - Planos</title>
-    
+        <title>SDK - Planos</title>
+        <link rel="stylesheet" href="<%= host %>/public/css/payment.css">
 </head>
+
 <body>
     <div id="body-containner">
-        <style>
-            #plans-section{
-        position: relative;
-        width: 100%;
-        height: calc(100vh + 8em);
-        background-color: var(--primary-color);
-        -webkit-box-shadow: 0px 10px 36px 7px var(--primary-color);
-        -moz-box-shadow: 0px 10px 36px 7px var(--primary-color);
-        box-shadow: 0px 10px 36px 7px var(--primary-color);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-around;
-        z-index: 9;
-        padding: 5em;
-        #plans-title-containner{
-            width: 70%;
-            #plans-title{
-                font-family: 'poppins',sans-serif;
-                color: var(--color-text-primary);
-                font-weight: 500;
-                font-size: 2.6em;
-                text-align: center;
-            }
-        }
-        #plans-row-containner{
-            width: 100%;
-            height: 100%;
-            padding: 1em;
-            #plans-row{
-                width: 100%;
-                display: flex;
-                justify-content: space-evenly;
-                height: 100%;
-                align-items: end;
-                gap: 2em;
-                
-                .plans-col{
-                    border-radius: var(--border-radius-min);
-                    width: 20em;
-                    height: 30em;
-                    min-width: 20em;
-                    min-height: 30em;
-                    background-color: var(--tertiary-color);
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    .plans-col-top-fit{
-                        width: calc(100%);
-                        position: relative;
-                        height: 1em;
-                        border-radius: var(--border-radius-min) var(--border-radius-min) 0 0;
-                        background-color: var(--secundary-color-purple);
-                    }
-                    .plans-col-wrap{
-                        width: 100%;
-                        height: 100%;
-                        padding: 1em;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-around;
-                    }
-                    .plans-col-mini-title{
-                        width: 100%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        .mini-title{
-                            width: auto;
-                            font-size: 1.1em;
-                            color: var(--white-color);
-                            font-family: 'ubuntu',sans-serif;
-                            padding-bottom: 0.5em; 
-                            border-bottom: 1px solid var(--secundary-color-purple);
-                            display: inline-block;
-                        }
-                    }
-                    .plans-col-precos-containner{
-                        display: flex;
-                        justify-content: center;
-                        align-items: end;
-                        gap: 0.5em;
-                        margin: 1em;
-                        .precos-moeda,.precos-valor{
-                            font-size: 2.2em;
-                            font-weight: 600;
-                            color: var(--white-color);
-                            font-family: 'ubuntu',sans-serif;
-                        }
-                        .precos-tempo{
-                            font-size: 1.1em;
-                            font-weight: 300;
-                            color: var(--white-color);
-                            font-family: 'ubuntu',sans-serif;
-                        }
-                    }
-                    .plans-col-beneficios{
-                        display: flex;
-                        flex-direction: column;
-                        gap: 1.5em;
-                        align-items: center;
-                        justify-content: center;
-                        .beneficios-title{
-                            font-size: 1.2em;
-                            font-weight: 500;
-                            color: var(--white-color);
-                            font-family: 'ubuntu',sans-serif;
-                        }
-                        .beneficios-list{
-                            text-align: center;
-                            list-style-type: disc;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            flex-direction: column;
-                            gap: 0.5em;
-                            .beneficios-list-item{
-                                width: fit-content;
-                                text-align: center;
-                                font-size: 0.9em;
-                                font-weight: 300;
-                                color: var(--white-color);
-                                font-family: 'ubuntu',sans-serif;
-                            }
-                        }
-                    }
-                    .plans-col-button{
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        .button-assinar{
-                            width: 10em;
-                            height: 4em;
-                            transition: 0.7s;
-                            font-family: 'poppins',sans-serif;
-                            color: var(--white-color);
-                            font-weight: 400;
-                            font-size: 1.1em;
-                            text-align: center;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            border-radius: var(--border-radius-min);
-                            background-color: var(--secundary-color-purple);
-                            -webkit-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
-                            -moz-box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
-                            box-shadow: 0px 0px 30px 0px var(--secundary-color-purple);
-                            &:hover{
-                                transition: 0.7s;
-                                opacity: 0.8;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-            #mid-col{
-                margin-bottom: 10em;
-                
-            }
-            #mid-col::before{
-                content: "Popular";
-                position: absolute;
-                z-index: 99;
-                margin-left: 13em;
-                margin-top: -3em;
-                border-radius: var(--border-radius-max);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 6em;
-                height: 6em;
-                font-family: 'ubuntu',sans-serif;
-                color: var(--white-color);
-                font-weight: 500;
-                font-size: 1.2em;
-                background-color: var(--main-color-purple);
-            }
-            @media screen and (max-width:1080px) {
-                #plans-section{
-                    height: fit-content !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    gap: 1.5em !important;
-
-                }
-                #plans-row{
-                    flex-direction: column !important;
-                    gap: 5em !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    #mid-col{
-                        margin-bottom: 0em !important;
-                    }
-                }
-                #plans-title-containner{
-                    width: 100% !important; 
-                
-                }
-            }
-
-        </style>
         <div id="containner">
-            <section id="plans-section">
-                <div id="plans-title-containner">
-                    <h1 id="plans-title">Seu servidor esta inativo escolha um dos nossos planos!</h1>
-                </div>
-                <div id="plans-row-containner">
-                    <div id="plans-row">
-                        <div class="plans-col">
-                            <div class="plans-col-top-fit"></div>
-                            <div class="plans-col-wrap">
-                                <div class="plans-col-mini-title">
-                                    <p class="mini-title">
-                                        Capacite as Ideias!
-                                    </p>
-                                </div>
-                                <div class="plans-col-precos-containner">
-                                    <div class="precos-moeda">R$</div>
-                                    <div class="precos-valor">9,99</div>
-                                    <div class="precos-tempo">/ Mês</div>
-                                </div>
-                                <div class="plans-col-beneficios">
-                                    <p class="beneficios-title">Benefícios:</p>
-                                    <ul class="beneficios-list">
-                                        <li class="beneficios-list-item">Bot de vendas</li>
-                                        <li class="beneficios-list-item">Suporte</li>
-                                    </ul>
-                                </div>
-                                <div class="plans-col-button">
-                                    <a class="button-assinar" href="#" id="plan-1" >Assinar</a>
-                                </div>
-                            </div>
+            <div id="popup-pix-pay-containner" style="display: none;">
+                <div id="popup-pix-pay-content">
+                    <div id="title-popup">
+                        <h1 class="title-col">Pague o pix abaixo para liberar o acesso ao seu bot!</h1>
+                    </div>
+                    <div id="pix-data">
+                        <div id="pix-cpc">
+                            <p id="cpc-pix" class="mini-title-col"></p>
                         </div>
-                        <div class="plans-col" id="mid-col" >
-                            <div class="plans-col-top-fit"></div>
-                            <div class="plans-col-wrap">
-                                <div class="plans-col-mini-title">
-                                    <p class="mini-title">
-                                        Abrace o crescimento!
-                                    </p>
-                                </div>
-                                <div class="plans-col-precos-containner">
-                                    <div class="precos-moeda">R$</div>
-                                    <div class="precos-valor">14,99</div>
-                                    <div class="precos-tempo">/ Mês</div>
-                                </div>
-                                <div class="plans-col-beneficios">
-                                    <p class="beneficios-title">Benefícios:</p>
-                                    <ul class="beneficios-list">
-                                        <li class="beneficios-list-item">Bot de vendas</li>
-                                        <li class="beneficios-list-item">Suporte</li>
-                                        <li class="beneficios-list-item">Configurações premium</li>
-                                    </ul>
-                                </div>
-                                <div class="plans-col-button">
-                                    <a class="button-assinar" id="plan-2" href="#" >Assinar</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="plans-col">
-                            <div class="plans-col-top-fit"></div>
-                            <div class="plans-col-wrap">
-                                <div class="plans-col-mini-title">
-                                    <p class="mini-title">
-                                        Explore as oportunidades!
-                                    </p>
-                                    
-                                </div>
-                                <div class="plans-col-precos-containner">
-                                    <div class="precos-moeda">R$</div>
-                                    <div class="precos-valor">19,99</div>
-                                    <div class="precos-tempo">/ Mês</div>
-                                </div>
-                                <div class="plans-col-beneficios">
-                                    <p class="beneficios-title">Benefícios:</p>
-                                    <ul class="beneficios-list">
-                                        <li class="beneficios-list-item">Bot de vendas</li>
-                                        <li class="beneficios-list-item">Suporte</li>
-                                        <li class="beneficios-list-item">Configurações premium</li>
-                                        <li class="beneficios-list-item">Bot personalizavel</li>
-                                    </ul>
-                                </div>
-                                <div class="plans-col-button">
-                                    <a class="button-assinar" id="plan-3" href="#" >Assinar</a>
-                                </div>
-                            </div>
+                        <div id="pix-qrcode">
+                            <img id="qrcode-image" src="">
                         </div>
                     </div>
+                    <p class="desc-col">Após o pagamento ele será processado automaticamente, Clique abaixo para ir ao dashboard apos o pagamento!</p>
+                    <a href="/dashboard" class="button-padrao" >Ir para o dashboard</a>
                 </div>
-            </section>
+            </div>
+            <div id="change-containner">
+                <input hidden type="text" id="plan-server" value="<%= server.plan %>">
+                <% if (exist == true) { %>
+                    <% if (type == 'stripe') { %>
+                       <div class="mensage-containner">
+                            <div class="mensage-content">
+                                <h1 class="title-col">Sua assinatura esta vencida clique no botao abaixo para ser redirecionado para a pagina do stripe para renovar sua assinatura!</h1>
+                                <button class="button-padrao" id="signature-situation-button">Renovar</button>
+                            </div>
+                       </div>
+                    <% } else  { %>
+                        <div class="mensage-containner">
+                            <div class="mensage-content">
+                                <h1 class="title-col">Sua assinatura esta vencida clique no botao abaixo para pagar realizar o pagamento via pix para renovar sua assinatura!</h1>
+                                <label class="lable-padrao" for="time-input">Escolha o tempo de assinatura</label>
+                                <input required type="text" class="input-padrao" list="time-input-list-renovar" placeholder="Pesquise o tempo..."  id="time-input-renovar">
+                                <datalist id="time-input-list-renovar">
+                                    <option value="mensal">Mensal</option>
+                                    <option value="trimestral">Trimestral</option>
+                                    <option value="anual">Anual</option>
+                                </datalist>
+                                <button class="button-padrao" id="signature-pix-button">Renovar</button>
+                            </div>
+                       </div>
+                    <% } %>
+                <% } else { %>
+                    <section id="plans-section">
+                        <div id="plans-title-containner">
+                            <h1 id="plans-title">Seu servidor esta inativo escolha um dos nossos planos!</h1>
+                        </div>
+                        <div id="plans-row-containner">
+                            <div id="plans-row">
+                                <div class="plans-col">
+                                    <div class="plans-col-top-fit"></div>
+                                    <div class="plans-col-wrap">
+                                        <div class="plans-col-mini-title">
+                                            <p class="mini-title">
+                                                Plano inicial
+                                            </p>
+                                        </div>
+                                        <div class="plans-col-precos-containner">
+                                            <div class="precos-moeda">R$</div>
+                                            <div class="precos-valor">12,99</div>
+                                            <div class="precos-tempo">/ Mês</div>
+                                        </div>
+                                        <div class="plans-col-beneficios">
+                                            <p class="beneficios-title">Benefícios:</p>
+                                            <ul class="beneficios-list">
+                                                <li class="beneficios-list-item">Bot de vendas</li>
+                                                <li class="beneficios-list-item">Suporte</li>
+                                            </ul>
+                                        </div>
+                                        <div class="plans-col-button">
+                                            <a class="button-assinar" href="#" id="plan-init">Assinar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="plans-col" id="details">
+                                    <div class="plans-col-top-fit"></div>
+                                    <div class="plans-col-wrap">
+                                        <div class="plans-col-mini-title">
+                                            <p class="mini-title">
+                                                Dados do seu plano!
+                                            </p>
+                                        </div>
+                                        <div id="data-subscription">
+                                            <div id="data-subscription-plan">
+                                                <label class="lable-padrao" for="plan-input">Escolha seu
+                                                    plano</label>
+                                                <input required type="text" class="input-padrao"
+                                                    list="plan-input-list" placeholder="Pesquise o seu plano..."
+                                                    id="plan-input">
+                                                <datalist id="plan-input-list">
+                                                    <option value="inicial">Plano inicial</option>
+                                                    <option value="premium">Plano premium</option>
+                                                </datalist>
+                                            </div>
+                                            <div id="data-subscription-time">
+                                                <label class="lable-padrao" for="time-input">Escolha o tempo de
+                                                    assinatura</label>
+                                                <input required type="text" class="input-padrao"
+                                                    list="time-input-list" placeholder="Pesquise o tempo..."
+                                                    id="time-input">
+                                                <datalist id="time-input-list">
+                                                    <option value="mensal">Mensal</option>
+                                                    <option value="trimestral">Trimestral</option>
+                                                    <option value="anual">Anual</option>
+                                                </datalist>
+                                            </div>
+                                            <div id="data-subscription-method">
+                                                <label class="lable-padrao" for="method-input">Escolha o metodo de
+                                                    pagamento</label>
+                                                <input required type="text" class="input-padrao"
+                                                    list="method-input-list" placeholder="Pesquise o metodo..."
+                                                    id="method-input">
+                                                <datalist id="method-input-list">
+                                                    <option value="pix">PIX</option>
+                                                    <option value="stripe">Cartão ou Boleto</option>
+                                                </datalist>
+                                            </div>
+                                        </div>
+                                        <div id="final-price">
+                                            <p class="desc-col" id="total-price"
+                                                style="text-decoration: line-through !important;">R$ 0,00</p>
+                                            <h1 class="title-col" id="desconto-price">R$ 0,00</h1>
+                                        </div>
+                                        <div class="plans-col-button">
+                                            <a class="button-assinar" id="confirm-subscription"
+                                                href="#">Confirmar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="plans-col" id="mid-col">
+                                    <div class="plans-col-top-fit"></div>
+                                    <div class="plans-col-wrap">
+                                        <div class="plans-col-mini-title">
+                                            <p class="mini-title">
+                                                Plano premium
+                                            </p>
+
+                                        </div>
+                                        <div class="plans-col-precos-containner">
+                                            <div class="precos-moeda">R$</div>
+                                            <div class="precos-valor">26,99</div>
+                                            <div class="precos-tempo">/ Mês</div>
+                                        </div>
+                                        <div class="plans-col-beneficios">
+                                            <p class="beneficios-title">Benefícios:</p>
+                                            <ul class="beneficios-list">
+                                                <li class="beneficios-list-item">Tudo do primeiro plano e +</li>
+                                                <li class="beneficios-list-item">Configurações premium</li>
+                                                <li class="beneficios-list-item">Bot personalizavel</li>
+                                                <li class="beneficios-list-item">Bot de tickets</li>
+                                                <li class="beneficios-list-item">Sistema de cupons</li>
+                                            </ul>
+                                        </div>
+                                        <div class="plans-col-button">
+                                            <a class="button-assinar" id="plan-premium" href="#">Assinar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                <% } %>
+            </div>
+
         </div>
     </div>
 
@@ -306,6 +181,7 @@
         <script>let uid = '<%= user.id %>'</script>
     </div>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/payment.js"></script>
+        <script src="<%= host %>/public/js/payment.js"></script>
 </body>
+
 </html>

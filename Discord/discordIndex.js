@@ -10,6 +10,7 @@ const functions = require('../functions.js');
 const client = new Discord.Client({ intents: botConfig.intents })
 var ncp = require("copy-paste");
 const discordTranscripts = require('discord-html-transcripts');
+const webConfig = require('../config/web-config');
 client.login(botConfig.discordToken)
 
 
@@ -81,176 +82,186 @@ module.exports = (Discord2, client) => {
                 console.log(error);
             }
         }
-        
-        
-        async function comprarFunction(productID,interaction) {
-            var DiscordServer = await client.guilds.cache.get(interaction.guildId);
-            var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId)
-        
-            let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
-            let product = await server.products.find(product => product.productID == productID)
-            let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
-            if (!product || server.error == true || product.estoque.length <= 0) {
-                await interaction.reply({
-                    content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
-                    components: [
-                        new Discord.ActionRowBuilder().addComponents(
-                            new Discord.ButtonBuilder()
-                                .setCustomId(`privateAviso_${productID}`)
-                                .setLabel('Receber aviso')
-                                .setStyle(Discord.ButtonStyle.Primary),
-                        )
-                    ],
-                    ephemeral: true
-                })
-                let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
-        
-                if (analytics.error == false) {
-                    let canceladosEstoque = analytics['cancelados estoque']
-                    await canceladosEstoque.push(await functions.formatDate(new Date()))
-                    db.update('analytics', server.id, {
-                        "cancelados estoque": canceladosEstoque
+
+
+        async function comprarFunction(productID, interaction) {
+            try {
+                var DiscordServer = await client.guilds.cache.get(interaction.guildId);
+                var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId);
+
+                let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
+                let product = await server.products.find(product => product.productID == productID)
+                let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
+                if (!product || server.error == true || product.estoque.length <= 0) {
+                    await interaction.reply({
+                        content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
+                        components: [
+                            new Discord.ActionRowBuilder().addComponents(
+                                new Discord.ButtonBuilder()
+                                    .setCustomId(`solicitarStok_${productID}`)
+                                    .setLabel('Solicitar estoque')
+                                    .setStyle(Discord.ButtonStyle.Success),
+                            ).addComponents(
+                                new Discord.ButtonBuilder()
+                                    .setCustomId(`privateAviso_${productID}`)
+                                    .setLabel('Receber aviso')
+                                    .setStyle(Discord.ButtonStyle.Primary),
+                            )
+                        ],
+                        ephemeral: true
                     })
-                } else {
-                    db.create('analytics', server.id, {
-                        "cancelados estoque": [await functions.formatDate(new Date())],
-                        "pagamentos": {
-                            "PIX": 0,
-                            "card": 0,
-                            "boleto": 0,
-                        },
-                        "reebolsos": [],
-                        "vendas canceladas": [],
-                        "vendas completas": []
-                    })
-                }
-        
-                return
-            }
-            async function findUniCarrinhos() {
-                let prodid = productID
-                let findItem
-                if (preCarrinhos[interaction.user.id]) {
-                    findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
-                } else {
-                    findItem = null
-                }
-                if (!carrinhos[interaction.user.id]) {
-                    carrinhos[interaction.user.id] = []
-                }
-                if (findItem) {
-                    carrinhos[interaction.user.id].push(findItem)
-                } else {
-                    carrinhos[interaction.user.id].push({
-                        product: prodid,
-                        quantidade: 1
-                    })
-                }
-            }
-            if (findChannel) {
-                if (!carrinhos[interaction.user.id]) {
-                    interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
-                    await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
+                    let analytics = await db.findOne({ colecao: "analytics", doc: server.id })
+
+                    if (analytics.error == false) {
+                        let canceladosEstoque = analytics['cancelados estoque']
+                        await canceladosEstoque.push(await functions.formatDate(new Date()))
+                        db.update('analytics', server.id, {
+                            "cancelados estoque": canceladosEstoque
+                        })
+                    } else {
+                        db.create('analytics', server.id, {
+                            "cancelados estoque": [await functions.formatDate(new Date())],
+                            "pagamentos": {
+                                "PIX": 0,
+                                "card": 0,
+                                "boleto": 0,
+                            },
+                            "reebolsos": [],
+                            "vendas canceladas": [],
+                            "vendas completas": []
+                        })
+                    }
+
                     return
                 }
-                let prodid = await productID
-                let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
-                let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
-                if (findProductCart) {
-                    carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
-                } else {
-                    findUniCarrinhos()
+                async function findUniCarrinhos() {
+                    let prodid = productID
+                    let findItem
+                    if (preCarrinhos[interaction.user.id]) {
+                        findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
+                    } else {
+                        findItem = null
+                    }
+                    if (!carrinhos[interaction.user.id]) {
+                        carrinhos[interaction.user.id] = []
+                    }
+                    if (findItem) {
+                        carrinhos[interaction.user.id].push(findItem)
+                    } else {
+                        carrinhos[interaction.user.id].push({
+                            product: prodid,
+                            quantidade: 1
+                        })
+                    }
                 }
-        
-                interaction.reply({
-                    embeds: [
-                        new Discord.EmbedBuilder()
-                            .setColor("#C21010")
-                            .setTitle(`⚠️| Você já possui um carrinho aberto!`)
-                            .setDescription(`Adicionamos esse produto ao seu carrinho!`)
-                    ],
-                    components: [
-                        new Discord.ActionRowBuilder()
-                            .addComponents(
-                                new Discord.ButtonBuilder()
-                                    .setStyle(5)
-                                    .setLabel('🛒・Ir para o Carrinho')
-                                    .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                            )
-                    ],
-                    ephemeral: true
-                })
-        
-                require('./createCartMessage')(Discord, client, {
-                    serverID: interaction.guild.id,
-                    user: interaction.user,
-                    member: interaction.member,
-                    channelID: await findChannel.id,
-                    edit: true
-                })
-        
-            } else {
-                let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
-                if (!categoria) {
-                    categoria = await DiscordServer.channels.create({
-                        name: 'carrinhos',
-                        type: Discord.ChannelType.GuildCategory,
+                if (findChannel) {
+                    if (!carrinhos[interaction.user.id]) {
+                        interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
+                        await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
+                        return
+                    }
+                    let prodid = await productID
+                    let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
+                    let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
+                    if (findProductCart) {
+                        carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
+                    } else {
+                        findUniCarrinhos()
+                    }
+
+                    interaction.reply({
+                        embeds: [
+                            new Discord.EmbedBuilder()
+                                .setColor("#C21010")
+                                .setTitle(`⚠️| Você já possui um carrinho aberto!`)
+                                .setDescription(`Adicionamos esse produto ao seu carrinho!`)
+                        ],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('🛒・Ir para o Carrinho')
+                                        .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                                )
+                        ],
+                        ephemeral: true
+                    })
+
+                    require('./createCartMessage')(Discord, client, {
+                        serverID: interaction.guild.id,
+                        user: interaction.user,
+                        member: interaction.member,
+                        channelID: await findChannel.id,
+                        edit: true
+                    })
+
+                } else {
+                    let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
+                    if (!categoria) {
+                        categoria = await DiscordServer.channels.create({
+                            name: 'carrinhos',
+                            type: Discord.ChannelType.GuildCategory,
+                            permissionOverwrites: [{
+                                id: DiscordServer.roles.everyone,
+                                deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+                            }]
+                        });
+                    }
+                    const newChannel = await DiscordServer.channels.create({
+                        name: `🛒・Carrinho・${interaction.user.username}`,
+                        type: 0,
+                        parent: categoria,
+                        topic: interaction.user.id,
                         permissionOverwrites: [{
+                            id: interaction.user.id,
+                            allow: [Discord.PermissionsBitField.Flags.ViewChannel]
+                        }, {
                             id: DiscordServer.roles.everyone,
                             deny: [Discord.PermissionsBitField.Flags.ViewChannel]
                         }]
-                    });
-                }
-                const newChannel = await DiscordServer.channels.create({
-                    name: `🛒・Carrinho・${interaction.user.username}`,
-                    type: 0,
-                    parent: categoria,
-                    topic: interaction.user.id,
-                    permissionOverwrites: [{
-                        id: interaction.user.id,
-                        allow: [Discord.PermissionsBitField.Flags.ViewChannel]
-                    }, {
-                        id: DiscordServer.roles.everyone,
-                        deny: [Discord.PermissionsBitField.Flags.ViewChannel]
-                    }]
-                })
-                if (newChannel) {
-                    await interaction.reply({
-                        content: `🛒 | Criando o Carrinho...`,
-                        ephemeral: true
                     })
-                    setTimeout(() => {
-                        interaction.editReply({
-                            content: ` `,
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
-                                    .setTitle(`😍 | Carrinho Criado!`)
-                                    .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
-                            ],
-                            components: [
-                                new Discord.ActionRowBuilder()
-                                    .addComponents(
-                                        new Discord.ButtonBuilder()
-                                            .setStyle(5)
-                                            .setLabel('🛒・Ir para o Carrinho')
-                                            .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
-                                    )
-                            ],
+                    if (newChannel) {
+                        await interaction.reply({
+                            content: `🛒 | Criando o Carrinho...`,
                             ephemeral: true
-                        });
-                    }, 2500);
-                } else {
-                    return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
+                        })
+                        setTimeout(() => {
+                            interaction.editReply({
+                                content: ` `,
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                        .setTitle(`😍 | Carrinho Criado!`)
+                                        .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
+                                ],
+                                components: [
+                                    new Discord.ActionRowBuilder()
+                                        .addComponents(
+                                            new Discord.ButtonBuilder()
+                                                .setStyle(5)
+                                                .setLabel('🛒・Ir para o Carrinho')
+                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
+                                        )
+                                ],
+                                ephemeral: true
+                            });
+                        }, 2500);
+                    } else {
+                        return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
+                    }
+                    findUniCarrinhos()
+                    require('./createCartMessage')(Discord, client, {
+                        serverID: interaction.guild.id,
+                        user: interaction.user,
+                        member: interaction.member,
+                        channelID: await newChannel.id,
+                        edit: false
+                    })
                 }
-                findUniCarrinhos()
-                require('./createCartMessage')(Discord, client, {
-                    serverID: interaction.guild.id,
-                    user: interaction.user,
-                    member: interaction.member,
-                    channelID: await newChannel.id,
-                    edit: false
-                })
+            } catch (error) {
+                console.log('ComprarFunctionError: ', error);
+
             }
         }
 
@@ -439,11 +450,11 @@ module.exports = (Discord2, client) => {
 
                 // interacao do botao de compra de um produto
                 if (interaction.customId && interaction.customId.includes('comprar')) {
-                    comprarFunction(interaction.customId.replace('comprar_', ''),interaction)
+                    comprarFunction(interaction.customId.replace('comprar_', ''), interaction)
                 }
 
                 if (interaction.customId == 'multSelectProduct') {
-                    comprarFunction(interaction.values[0],interaction)
+                    comprarFunction(interaction.values[0], interaction)
                 }
 
                 if (interaction.customId && interaction.customId.includes('privateAviso')) {
@@ -490,7 +501,16 @@ module.exports = (Discord2, client) => {
                 }
 
 
+                if (interaction.customId && interaction.customId.includes('solicitarStok')) {
 
+                    let productId = await interaction.customId.replace('solicitarStok_', '')
+                    var DiscordServer = await client.guilds.cache.get(interaction.guildId);
+                    let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
+                    let server = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+                    var product = await server.products.find(product => product.productID == productId)
+                    dono.send(`O usuario ${interaction.user.globalName} solicitou o estoque para o produto ${product.productName}`)
+                    interaction.reply({ content: 'A solicitação foi enviada para o vendedor!', ephemeral: true })
+                }
 
 
 
@@ -650,9 +670,9 @@ module.exports = (Discord2, client) => {
                                         components: [new Discord.ActionRowBuilder()
                                             .addComponents(
                                                 new Discord.ButtonBuilder()
-                                                    .setCustomId(`copyPix`)
+                                                    .setURL(`${webConfig.host}/copyText/${cpc}`)
                                                     .setLabel('Copiar Codigo')
-                                                    .setStyle('2'),
+                                                    .setStyle(Discord.ButtonStyle.Link),
                                             )]
 
                                     })
@@ -859,44 +879,50 @@ module.exports = (Discord2, client) => {
                     }
                     let semanaDays = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
                     let semanaDaysServer = serverData.ticketOptions.atend.days
+                    if (!semanaDaysServer) {
+                        semanaDaysServer = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
+                    }
                     let atend = serverData.ticketOptions.atend
                     const today = new Date();
                     const dayIndex = today.getDay();
+
                     let todayInArray = semanaDaysServer.includes(semanaDays[dayIndex])
                     const hora = `${today.getHours()}:${today.getMinutes()}`
 
 
                     function isTimeAfter(referenceTime, checkTime) {
-                        // Divide as horas e minutos
-                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
-                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+                        try {
+                            const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                            const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
 
-                        // Compara as horas e minutos
-                        if (checkHours >= refHours) {
-                            return true;
-                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
-                            return true;
-                        }
-                        return false;
+                            if (checkHours >= refHours) {
+                                return true;
+                            } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                                return true;
+                            }
+                            return false;
+                        } catch (error) {}
                     }
 
                     function isTimeBefore(referenceTime, checkTime) {
-                        // Divide as horas e minutos
-                        const [refHours, refMinutes] = referenceTime.split(":").map(Number);
-                        const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
+                        try {
+                            const [refHours, refMinutes] = referenceTime.split(":").map(Number);
+                            const [checkHours, checkMinutes] = checkTime.split(":").map(Number);
 
-                        // Compara as horas e minutos
-                        if (checkHours <= refHours) {
-                            return true;
-                        } else if (checkHours === refHours && checkMinutes > refMinutes) {
-                            return true;
+                            if (checkHours <= refHours) {
+                                return true;
+                            } else if (checkHours === refHours && checkMinutes > refMinutes) {
+                                return true;
+                            }
+                            return false;
+                        } catch (error) {
+
                         }
-                        return false;
                     }
 
                     let checkTimeBefore = isTimeBefore(atend.end, hora)
                     let checkTimeAfter = isTimeAfter(atend.start, hora)
-                    if (checkTimeAfter == true && checkTimeBefore == true && todayInArray) {
+                    if (checkTimeAfter == true && checkTimeBefore == true && todayInArray || !atend.start || !atend.end) {
                         // if (!ticketOptions[interaction.user.id] || !ticketOptions[interaction.user.id].motivo) {
                         //     interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
                         //     return
@@ -951,9 +977,6 @@ module.exports = (Discord2, client) => {
                     }
 
 
-
-
-
                     // if (!ticketOptions[interaction.user.id]) {
                     //     ticketOptions[interaction.user.id] = {}
                     // }
@@ -963,14 +986,71 @@ module.exports = (Discord2, client) => {
                     // interaction.deleteReply()
                 }
 
-                if (interaction.customId && interaction.customId.includes('ticketAvalStart')) {
+                if (interaction.customId && interaction.customId == 'openModalAva') {
+                    const modal = new Discord.ModalBuilder()
+                        .setCustomId('modalAval')
+                        .setTitle('Avaliar atendimento');
+
+                    modal.addComponents(
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('avalNota')
+                                .setLabel("Insira um valor de 1 a 5 para avaliar!")
+                                .setPlaceholder('Somente números')
+                                .setStyle(Discord.TextInputStyle.Short)
+                                .setMaxLength(1)
+                                .setRequired(true)
+
+                        ),
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('avalMensage')
+                                .setLabel("Insira uma mensagem sobre o seu atendimento!")
+                                .setStyle(Discord.TextInputStyle.Paragraph)
+                                .setRequired(false)
+                        )
+                    );
+                    await interaction.showModal(modal);
+                }
+                if (interaction.customId == 'modalAval') {
+                    let userInput = interaction.fields.getTextInputValue('avalNota');
+                    const avalMensage = interaction.fields.getTextInputValue('avalMensage');
+                    if (!/^\d+$/.test(userInput)) {
+                        return interaction.reply({ content: 'Por favor, insira apenas números.', ephemeral: true });
+                    }
+                    if (userInput > 5) {
+                        userInput = 5
+                    }
+                    try {
+                        const channel = await client.channels.fetch(interaction.channelId);
+                        const message = await channel.messages.fetch(interaction.message.id);
+                        await message.edit({
+                            components: []
+                        });
+                        try {
+                            await message.edit({
+                                embeds:[Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja avaliou esse ticket com ${starCount} estrelas, muito obrigado!`)],
+                            });
+                        } catch (error) {
+                            
+                        }
+                    } catch (error) {
+                        
+                    }
+                    if (userInput <= 2) {
+                        interaction.reply(`😢 | Sinto muito que sua experiência com o suporte não tenha sido boa, iremos trabalhar para melhorar cada vez mais 💖!`)
+                    }else if (userInput == 3) {
+                        interaction.reply(`💔 | Posso ver que o seu atendimento não foi perfeito, com sua avaliação e sua mensagem iremos ver oque precisamos melhorar 💫!`)
+                    }else if (userInput >= 4) {
+                        interaction.reply(`🥰 | Fico feliz que tenha tido uma boa experiência com o suporte, se lembre, caso tenha algum problema, não tenha medo de falar 🤗!`)
+                    }
                     try {
                         let embed = interaction.message.embeds[0].data
                         let serverData = await db.findOne({ colecao: "servers", doc: embed.fields[3].value })
                         let DiscordServer2 = await client.guilds.cache.get(embed.fields[3].value)
                         var logChannel = await DiscordServer2.channels.cache.get(serverData.ticketOptions.log)
                         let userRespo = await client.users.fetch(embed.fields[1].value)
-                        let starCount = parseInt(interaction.customId.replace('ticketAvalStart-', ''))
+                        let starCount = userInput
                         let starIcons = ''
                         for (let index = 0; index < 5; index++) {
                             if (index < starCount) {
@@ -992,19 +1072,10 @@ module.exports = (Discord2, client) => {
                                 new Discord.EmbedBuilder()
                                     .setColor('#6E58C7')
                                     .setTitle(`🌟・Nova avaliação!`)
-                                    .setDescription(`O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
+                                    .setDescription(avalMensage && avalMensage.length > 1 ? 'Mensagem do usuario: ' + avalMensage :`O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
                                     .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userRespo.username + "**", inline: true }, { name: "🆔 | ID do Responsavel:", value: "``" + userRespo.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "🌟 | Avaliação:", value: `${starIcons} | (${starCount}/5)`, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
                             ],
                         })
-                        interaction.reply({ content: "Obrigado por sua avaliação!", ephemeral: true, })
-                        try {
-                            interaction.message.edit({
-                                embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja avaliou esse ticket com ${starCount} estrelas, muito obrigado!`)],
-                                components: []
-                            })
-                        } catch (error) {
-                            interaction.mensage.delete()
-                        }
 
                     } catch (error) {
                         console.log(error);
@@ -1035,33 +1106,9 @@ module.exports = (Discord2, client) => {
                                             new Discord.ActionRowBuilder()
                                                 .addComponents(
                                                     new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Danger)
-                                                        .setLabel('⭐ - 1')
-                                                        .setCustomId('ticketAvalStart-1')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Secondary)
-                                                        .setLabel('⭐ - 2')
-                                                        .setCustomId('ticketAvalStart-2')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Primary)
-                                                        .setLabel('⭐ - 3')
-                                                        .setCustomId('ticketAvalStart-3')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Secondary)
-                                                        .setLabel('⭐ - 4')
-                                                        .setCustomId('ticketAvalStart-4')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
                                                         .setStyle(Discord.ButtonStyle.Success)
-                                                        .setLabel('⭐ - 5')
-                                                        .setCustomId('ticketAvalStart-5')
+                                                        .setLabel('⭐ | Avaliar')
+                                                        .setCustomId('openModalAva')
                                                 )
                                         ]
                                     })
@@ -1443,9 +1490,9 @@ module.exports = (Discord2, client) => {
 
                 if (interaction.customId && interaction.customId.includes('cobrancaRecuse')) {
                     let userID = await interaction.customId.replace(`cobrancaRecuse_`)
-                    userID = await userID.includes(`undefined`) ? userID.replace(`undefined`,``) : userID
+                    userID = await userID.includes(`undefined`) ? userID.replace(`undefined`, ``) : userID
                     const user = await client.users.fetch(userID)
-                    interaction.reply({content:`Cobranca recusada!`,ephemeral:true})
+                    interaction.reply({ content: `Cobranca recusada!`, ephemeral: true })
                     user.send(`O usuario ${interaction.user.username} recusou sua ultima cobrança!`)
                 }
                 if (interaction.customId == `paymentMCobranca`) {
@@ -1456,7 +1503,7 @@ module.exports = (Discord2, client) => {
                 if (interaction.customId && interaction.customId.includes('cobrancaPayment')) {
                     let values = await interaction.customId.replace(`cobrancaPayment_`)
                     values = values.split(`_`)
-                    let serverID = values[0].includes('undefined') ? values[0].replace('undefined',``) : values[0]
+                    let serverID = values[0].includes('undefined') ? values[0].replace('undefined', ``) : values[0]
                     let userID = values[1]
                     let valor = values[2]
                     let serverData = await db.findOne({ colecao: `servers`, doc: serverID })
@@ -1482,7 +1529,7 @@ module.exports = (Discord2, client) => {
                                 user: interaction.user.id,
                                 userCobrador: userID,
                                 serverID: serverID,
-                                valor:valueStripe
+                                valor: valueStripe
                             },
                             payment_intent_data: {
                                 transfer_data: {
@@ -1532,7 +1579,7 @@ module.exports = (Discord2, client) => {
                                     user: interaction.user.id,
                                     userCobrador: userID,
                                     serverID: serverID,
-                                    valor:valor,
+                                    valor: valor,
                                     action: 'cobrancaPay',
                                     token: serverData.bankData.mercadoPagoToken,
                                 }
@@ -1708,6 +1755,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             const user = await client.users.fetch(params.userID);
             let fields = []
+            let products = []
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
                 try {
@@ -1715,11 +1763,29 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
                     let estoqueData = await serverData.products[productIndex].estoque
                     let arrayCarrinhoProd = []
+                    products.push(product.productName)
                     if (parseInt(element.quantidade) <= estoqueData.length) {
                         for (let index = 0; index < parseInt(element.quantidade); index++) {
                             arrayCarrinhoProd.push(estoqueData[0].conteudo)
                             await estoqueData.splice(0, 1);
                             if (index == parseInt(element.quantidade) - 1) {
+                                function reSendMensage(productEmbendType, channelID, serverID, productID) {
+                                    if (productEmbendType == 0) {
+                                        require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                                            channelID: channelID,
+                                            serverID: serverID,
+                                            productID: productID,
+                                            edit: true
+                                        })
+                                    } else {
+                                        require('../Discord/createProductMessage.js')(Discord, client, {
+                                            channelID: channelID,
+                                            serverID: serverID,
+                                            productID: productID,
+                                            edit: true
+                                        })
+                                    }
+                                }
                                 try {
                                     let DiscordServer = await client.guilds.cache.get(serverData.id);
                                     let findProductChannel = DiscordServer.channels.cache.find(c => c.id === product.channel)
@@ -1761,58 +1827,14 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                                 )
                                             ]
                                         }).catch((err) => {
-                                            if (product.embendType == 0) {
-                                                require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                                                    channelID: product.channel,
-                                                    serverID: params.serverID,
-                                                    productID: element.product,
-                                                    edit: true
-                                                })
-                                            } else {
-                                                require('../Discord/createProductMessage.js')(Discord, client, {
-                                                    channelID: product.channel,
-                                                    serverID: params.serverID,
-                                                    productID: element.product,
-                                                    edit: true
-                                                })
-                                            }
-
+                                            reSendMensage(product.embendType, product.channel, params.serverID, element.product)
                                         })
                                     } else {
-                                        if (product.embendType == 0) {
-                                            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                                                channelID: product.channel,
-                                                serverID: params.serverID,
-                                                productID: element.product,
-                                                edit: true
-                                            })
-                                        } else {
-                                            require('../Discord/createProductMessage.js')(Discord, client, {
-                                                channelID: product.channel,
-                                                serverID: params.serverID,
-                                                productID: element.product,
-                                                edit: true
-                                            })
-                                        }
+                                        reSendMensage(product.embendType, product.channel, params.serverID, element.product)
                                     }
 
                                 } catch (error) {
-
-                                    if (product.embendType == 0) {
-                                        require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                                            channelID: product.channel,
-                                            serverID: params.serverID,
-                                            productID: element.product,
-                                            edit: true
-                                        })
-                                    } else {
-                                        require('../Discord/createProductMessage.js')(Discord, client, {
-                                            channelID: product.channel,
-                                            serverID: params.serverID,
-                                            productID: element.product,
-                                            edit: true
-                                        })
-                                    }
+                                    reSendMensage(product.embendType, product.channel, params.serverID, element.product)
                                 }
                             }
                         }
@@ -1839,6 +1861,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
+                let productText = await products.join('\n');
+
                 const concatenatedString = await fields.map(obj => `${obj.value.replace(/``/g, '')}`).join('\n');
                 const buffer = Buffer.from(concatenatedString, 'utf-8');
                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
@@ -1846,8 +1870,16 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     target.send({
                         embeds: [
                             new Discord.EmbedBuilder()
-                                .setTitle('📦 | Sua entrega chegou!')
+                                .setTitle('💫 | Sua entrega chegou!')
                                 .setDescription(`Abaixo estão os dados da sua entrega:`)
+                                .setFields(
+                                    {
+                                        name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
+                                    },
+                                    {
+                                        name: "💖 | Muito obrigado por comprar conosco!", value: `${DiscordServer.name} agradece o seu carinho!`
+                                    },
+                                )
                                 .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
                                 .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
@@ -2021,7 +2053,23 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 console.log(error);
                 console.log(fields);
             }
-
+            try {
+                if ('personalize' in serverData && 'feedbackChannel' in serverData.personalize) {
+                    setTimeout(async()=>{
+                        user.send({
+                            content:`Ola, <@${user.id}>, Vimos que comprou um produto recentemente no servidor ${DiscordServer.name}, pedimos para deixar um comentário no nosso canal de feedback!`,
+                            components:[new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setStyle(5)
+                                        .setLabel('💫 ・ Deixe o seu feedback')
+                                        .setURL(`https://discord.com/channels/${DiscordServer.id}/${serverData.personalize.feedbackChannel}`)
+                                )]
+                        })
+                    },400000)
+                    
+                }
+            } catch (error) {}
         } else {
             refound()
         }
@@ -2034,7 +2082,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             }, 20000)
         } catch (error) { }
-
+        
     }
 }
 
@@ -2073,15 +2121,17 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
 module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
     try {
         const userF = await client.users.fetch(user);
-        let comp = ''
+        let comp = null
         if (buttonRef) {
-             comp = {
-                components: [new Discord.ActionRowBuilder().addComponents(
-                    new Discord.ButtonBuilder()
-                        .setLabel(buttonLabel)
-                        .setURL(buttonRef)
-                        .setStyle(Discord.ButtonStyle.Link),
-                )]
+            comp = {
+                components: [
+                    new Discord.ActionRowBuilder().addComponents(
+                        new Discord.ButtonBuilder()
+                            .setLabel(buttonLabel)
+                            .setURL(buttonRef)
+                            .setStyle(Discord.ButtonStyle.Link),
+                    )
+                ]
             }
         }
         await userF.send({
@@ -2091,7 +2141,7 @@ module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, 
                     .setDescription(mensage)
                     .setColor('#6E58C7')
             ],
-            
+            ...comp
         }).catch((err) => {
             console.log(err);
         })

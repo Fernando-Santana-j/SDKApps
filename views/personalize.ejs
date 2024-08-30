@@ -71,6 +71,20 @@
                         </div>
                     </div>
                     <div class="itens-col">
+                        <h1 class="title-col">Canal do feedback!</h1>
+                        <p class="desc-col">Canal aonde o usuario ira escrever o feedback sobre um produto!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <input required type="text" class="input-padrao" list="feedback-channel-list" placeholder="Pesquise o cargo..." id="feedback-channel-input">
+                            <datalist id="feedback-channel-list">
+                                <% channels.forEach(element => { %>
+                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                <% }) %>
+                            </datalist>
+                            <button id="saveChannelFeedback" class="button-padrao">Salvar canal</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
                         <h1 class="title-col">Mensagem de boas vindas!</h1>
                         <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
                         <div class="linha" style="margin-top: 1em;"></div>

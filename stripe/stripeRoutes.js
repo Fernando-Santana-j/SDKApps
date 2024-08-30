@@ -11,60 +11,20 @@ const sharp = require('sharp');
 
 const axios = require('axios');
 
-async function createAccount(data) {
-    let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
-    let servers = await functions.reqServerByTime(user, functions.findServers)
-    let filterServers = await servers.find(server => server.id == data.metadata.serverID)
-
-    var dataUnixConvert = new Date(parseInt(data.created) * 1000)
-    dataUnixConvert.setMonth(dataUnixConvert.getMonth() + 1);
-    var novaDataUnix = Math.floor(dataUnixConvert.getTime() / 1000);
-    let serverADD = {
-        assinante: true,
-        id: data.metadata.serverID,
-        subscription: data.subscription,
-        plan: data.metadata.plan,
-        tipo: filterServers.tipo,
-        server_pic: filterServers.server_pic,
-        name: filterServers.name,
-        payment_status: data.payment_status,
-        isPaymented: true,
-        subscriptionData: {
-            lastPayment: data.created,
-            created: data.created,
-            email: data.customer_details.email,
-            name: data.customer_details.name,
-            phone: data.customer_details.phone,
-            expires_at: novaDataUnix,
-            customer: data.customer
-        }
-    }
-    let newServer = []
-    if (user.server) {
-        newServer = user.server
-        newServer.push(data.metadata.serverID)
-    } else {
-        newServer.push(data.metadata.serverID)
-    }
-    db.update('users', data.metadata.uid, {
-        servers: newServer
-    })
-    db.create('servers', data.metadata.serverID, serverADD)
-    try {
-        db.delete(`preServers`,data.metadata.serverID)
-    } catch (error) {
-        
-    }
-}
-
-
-
 router.post('/subscription/create', async (req, res) => {
     try {
+        let user = await db.findOne({ colecao: 'users', doc: req.body.uid })
+
+        let time = req.body.time
+        let plan = req.body.plan
+        let indexPrice = time == 1 ? 0 : time == 3 ? 1 : 2
+
+        let itemPlan = webConfig.planos[plan][indexPrice]
+
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
+            payment_method_types: ['card', 'boleto'],
             line_items: [{
-                price: req.body.plan == 1 ? webConfig.product1 : req.body.plan == 2 ? webConfig.product2 : webConfig.product3,
+                price: itemPlan.id,
                 quantity: 1,
             }],
             mode: 'subscription',
@@ -74,13 +34,16 @@ router.post('/subscription/create', async (req, res) => {
                 plan: req.body.plan,
                 serverID: req.body.serverID,
                 uid: req.body.uid,
+                time: req.body.time,
                 action: 'newSubscription'
-            }
+            },
+            customer: user.customer
         });
-        db.create('preServers',req.body.serverID,{
-            serverID:req.body.serverID,
-            uid:req.body.uid,
-            plan:req.body.plan,
+        db.create('preServers', req.body.serverID, {
+            serverID: req.body.serverID,
+            uid: req.body.uid,
+            plan: req.body.plan,
+            time: req.body.time,
             sessionID: session.id
         })
         res.status(200).json({ success: true, url: session.url })
@@ -111,7 +74,7 @@ router.post('/subscription/update', async (req, res) => {
 router.post('/webhook/stripe/payment', async (req, res) => {
     let data = req.body.data.object
     let type = req.body.type
-    
+
     switch (type) {
         case 'checkout.session.completed':
             if (data.status == 'complete') {
@@ -120,14 +83,19 @@ router.post('/webhook/stripe/payment', async (req, res) => {
                         serverID: data.metadata.serverID,
                         userID: data.metadata.user,
                         carrinhos: data.metadata.products,
-                    },data.payment_intent, 'stripe')
+                    }, data.payment_intent, 'stripe')
                 }
                 if (data.metadata.action == 'newSubscription') {
-                    createAccount(data)
+                    let time = data.metadata.time
+                    let plan = data.metadata.plan
+                    let indexPrice = time == 1 ? 0 : time == 3 ? 1 : 2
+
+                    let itemPlan = webConfig.planos[plan][indexPrice]
+                    functions.createAccount(data, 'stripe', itemPlan.id,functions)
                 }
                 if (data.metadata.action == 'cobrancaPay') {
-                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.user,'✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null , null)
-                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.userCobrador, '✅ cobranca paga!', `O usuario com id ${data.metadata.user} pagou a sua ultima cobrança.`,null , null)
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
+                    require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.userCobrador, '✅ cobranca paga!', `O usuario com id ${data.metadata.user} pagou a sua ultima cobrança.`, null, null)
                 }
             }
             break;
@@ -164,7 +132,12 @@ router.post('/webhook/stripe/payment', async (req, res) => {
             break;
         case 'invoice.payment_succeeded':
             if (data.metadata.action == 'newSubscription') {
-                createAccount(data)
+                let time = data.metadata.time
+                let plan = data.metadata.plan
+                let indexPrice = time == 1 ? 0 : time == 3 ? 1 : 2
+
+                let itemPlan = webConfig.planos[plan][indexPrice]
+                functions.createAccount(data, 'stripe', itemPlan.id,functions)
                 return
             }
             if (data.status == 'paid') {
@@ -310,7 +283,7 @@ router.post('/account/modify', async (req, res) => {
 
 router.get('/accountLink/:account/:serverID', async (req, res) => {
     if (!req.session.uid || !req.params.account) {
-        return res.redirect('/')
+        return res.redirect('/?error=Erri ao recuperar a sessao!')
     }
     const accountLink = await stripe.accountLinks.create({
         account: req.params.account,
@@ -322,64 +295,55 @@ router.get('/accountLink/:account/:serverID', async (req, res) => {
     res.redirect(accountLink.url)
 })
 
-router.get('/subscription/get/:serverID', async (req, res) => {
-    try {
-        if (req.params.serverID) {
-            let server = await db.findOne({ colecao: "servers", doc: req.params.serverID })
-            let session = await stripe.billingPortal.sessions.create({
-                customer: server.subscriptionData.customer,
-                return_url: `${webConfig.host}/dashboard`
-            });
-            if (session) {
-                res.render('updatePayment', { url: session.url })
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
-})
 
-router.post('/subscription/exist',async(req,res)=>{
-    
+
+router.post('/subscription/exist', async (req, res) => {
+
     try {
-        let preserver = await db.findOne({colecao:`preServers`,doc:req.body.serverID})
+        let preserver = await db.findOne({ colecao: `preServers`, doc: req.body.serverID })
         const checkout = await stripe.checkout.sessions.retrieve(preserver.sessionID);
-        if (checkout && checkout.status == 'complete' && checkout.payment_status == 'paid' ) {
+        if (checkout && checkout.status == 'complete' && checkout.payment_status == 'paid') {
             let subscription = await stripe.subscriptions.retrieve(checkout.subscription)
-            createAccount({
-                payment_status:checkout.payment_status,
-                subscription:checkout.subscription,
-                metadata:{
-                    serverID:preserver.serverID,
-                    uid:preserver.uid,
-                    plan:preserver.plan
-                },
-                created:subscription.created,
-                customer_details:{
-                    email:null,
-                    name:null,
-                    phone:null
-                },
-                customer:subscription.customer
+            let time = data.metadata.time
+            let plan = data.metadata.plan
+            let indexPrice = time == 1 ? 0 : time == 3 ? 1 : 2
 
-            })
+            let itemPlan = webConfig.planos[plan][indexPrice]
+            functions.createAccount({
+                payment_status: checkout.payment_status,
+                subscription: checkout.subscription,
+                metadata: {
+                    serverID: preserver.serverID,
+                    uid: preserver.uid,
+                    plan: preserver.plan
+                },
+                created: subscription.created,
+                customer_details: {
+                    email: null,
+                    name: null,
+                    phone: null
+                },
+                customer: subscription.customer
+
+            }, 'stripe',itemPlan.id,functions)
             if (!res.headersSent) {
                 res.status(200).json({ success: true })
             }
         } else {
             if (!res.headersSent) {
-                res.status(200).json({ success: false, data: 'Erro ao tentar modificar a descrição do ticket!' })
+                res.status(200).json({ success: false, data: 'Erro!' })
             }
         }
-        
+
     } catch (error) {
         if (!res.headersSent) {
-            res.status(200).json({ success: false, data: 'Erro ao tentar modificar a descrição do ticket!' })
+            res.status(200).json({ success: false, data: 'Erro!' })
         }
     }
 })
-
 module.exports = router;
+
+
 
 // stripe.accounts.del('acct_1OsBocIOPwdTmaXd');
 
