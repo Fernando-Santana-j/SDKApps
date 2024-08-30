@@ -97,7 +97,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             productID: await product.id,
             productName: await req.body.productName,
             producDesc: await req.body.producDesc,
-            estoque: await JSON.parse(req.body.estoque),
+            estoque: await JSON.parse(req.body.estoque)[0].conteudo[0].content.length > 0 ?await JSON.parse(req.body.estoque) : [],
             channel: await req.body.channelID,
             productLogo: `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`,
             backGround: backGround,
