@@ -394,6 +394,8 @@ module.exports = {
             name: filterServers.name,
             payment_status: data.payment_status,
             isPaymented: true,
+            vendasActive: true,
+            botActive: true,
             subscriptionData: {
                 lastPayment: data.created,
                 created: data.created,

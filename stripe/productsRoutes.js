@@ -37,6 +37,13 @@ client.login(botConfig.discordToken)
 
 router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
+        let server = await db.findOne({colecao:'servers', doc:req.body.serverID})
+        if (server.plan != 'inicial') {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Seu plano não dá acesso a essa funcionalidade!' })
+            }
+            return
+        }
         await require('../Discord/createMultiProductMensage.js')(Discord,client,{
             serverID: req.body.serverID,
             channelID: req.body.channelID,
@@ -65,10 +72,6 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
             return
         }
-        // if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
-        //     res.status(200).json({ success: false, data: 'Preço invalido!' })
-        //     return
-        // }
         const product = await stripe.products.create({
             name: req.body.productName,
             description: req.body.producDesc,
@@ -82,7 +85,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 
         await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
         let backGround = null
-        if (req.files.backGround) {
+        if (req.files.backGround && server.plan != 'inicial') {
             backGround = `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`
             await functions.comprimAndRecort(req.files.backGround[0].path, path.join(__dirname, '..', `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`))
         }
@@ -93,17 +96,26 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 
         let produtos = []
 
+        let estoque = JSON.parse(req.body.estoque)
+
         let model = {
             productID: await product.id,
             productName: await req.body.productName,
             producDesc: await req.body.producDesc,
-            estoque: await JSON.parse(req.body.estoque)[0].conteudo[0].content.length > 0 ?await JSON.parse(req.body.estoque) : [],
+            estoque: estoque,
             channel: await req.body.channelID,
             productLogo: `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`,
             backGround: backGround,
             price: await req.body.price,
             priceID: await price.id,
-            estoqueModel: JSON.parse(req.body.estoque)[0],
+            estoqueModel: estoque.length > 0 ? estoque[0] : {
+                conteudo:[
+                    {
+                        title:'',
+                        content:''
+                    }
+                ]
+            },
             embendType: req.body.embend
         }
         if (server.products) {
@@ -115,18 +127,20 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             products: await produtos
         })
 
-        if (req.body.embend == '0') {
-            require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                channelID: req.body.channelID,
-                serverID: req.body.serverID,
-                productID: product.id,
-            })
-        } else {
-            require('../Discord/createProductMessage.js')(Discord, client, {
-                channelID: req.body.channelID,
-                serverID: req.body.serverID,
-                productID: product.id,
-            })
+        if (estoque.length > 0) {
+            if (req.body.embend == '0') {
+                require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                    channelID: req.body.channelID,
+                    serverID: req.body.serverID,
+                    productID: product.id,
+                })
+            } else {
+                require('../Discord/createProductMessage.js')(Discord, client, {
+                    channelID: req.body.channelID,
+                    serverID: req.body.serverID,
+                    productID: product.id,
+                })
+            }
         }
 
         res.status(200).json({ success: true, data: model })
@@ -136,7 +150,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 
 })
 
-router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'bacKGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (!server.bankData) {
@@ -168,7 +182,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
             });
         }
         let backGround = null
-        if (req.files.backGround) {
+        if (req.files.backGround && server.plan != 'inicial') {
             backGround = `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`
             await functions.comprimAndRecort(req.files.backGround[0].path, path.join(__dirname, '..', `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`))
             if (produto.backGround != null) {
@@ -285,7 +299,9 @@ router.post('/product/delete', async (req, res) => {
             const DiscordChannel = DiscordServer.channels.cache.get(produto.channel);
 
             DiscordChannel.messages.fetch(produto.mensageID).then((res) => {
-                res.delete().then((res) => { }).catch((err) => { })
+                try {
+                    res.delete()
+                } catch (error) {}
             })
         } catch (error) {
             console.log(error);
@@ -455,6 +471,7 @@ router.post('/product/estoqueAdd', async (req, res) => {
                     }
                     product.estoqueAviso = []
                 }
+                product.estoqueModel = estoqueADD
                 produtos[index] = product
 
                 db.update('servers', req.body.serverID, {

@@ -151,7 +151,7 @@ document.getElementById('top-header-theme').addEventListener('click', async () =
     cancelChart(getLast7Days(), colorsBack)
 })
 
-document.getElementById("notify-signature").addEventListener("click",async()=>{
+document.getElementById("notify-signature").addEventListener("click", async () => {
     fetch('/config/notify', {
         method: 'POST',
         headers: {
@@ -162,11 +162,11 @@ document.getElementById("notify-signature").addEventListener("click",async()=>{
         }),
     })
     successNotify('Você sera notificado 3 dias antes no seu privado do discord!')
-    
+
 })
 
 
-document.getElementById('signature-situation-button').addEventListener('click', async() => {
+document.getElementById('signature-situation-button').addEventListener('click', async () => {
 
     let session = await fetch('/subscription/update', {
         method: 'POST',
@@ -188,3 +188,57 @@ document.getElementById('signature-situation-button').addEventListener('click', 
         errorNotify(session.data)
     }
 })
+
+
+async function modifyStatus(type, active) {
+    let session = await fetch('/statusBotVendas', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID: serverID,
+            type: type,
+            active: active
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
+    } else {
+        errorNotify(session.data)
+    }
+}
+
+document.addEventListener('click', async (event) => {
+    const target = event.target;
+
+    if (target.closest('#vendas-active-button')) {
+        await modifyStatus('vendas', true)
+        document.getElementById('vendas-situation-content').innerHTML = `
+            <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Vendas ativada</p>
+            <button class="bot-contents-button" id="vendas-desactive-button" style="background-color: var(--red-color);" >Desativar Vendas</button>
+        `
+    }
+    if (target.closest('#vendas-desactive-button')) {
+        await modifyStatus('vendas', false)
+        document.getElementById('vendas-situation-content').innerHTML = `
+            <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Vendas desativadas</p>
+            <button class="bot-contents-button" id="vendas-active-button" style="background-color: var(--green-color);" >Ativar Vendas</button>
+        `
+    }
+    if (target.closest('#bot-desactive-button')) {
+        await modifyStatus('bot', false)
+        document.getElementById('bot-act-content').innerHTML = `
+            <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Bot desativado</p>
+            <button class="bot-contents-button" id="bot-active-button" style="background-color: var(--green-color);" >Ativar Bot</button>
+        `
+    }
+    if (target.closest('#bot-active-button')) {
+        await modifyStatus('bot', true)
+        document.getElementById('bot-act-content').innerHTML = `
+            <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Bot ativado</p>
+            <button class="bot-contents-button" id="bot-desactive-button" style="background-color: var(--red-color);" >Desativar Bot</button>
+        `
+    }
+})
+

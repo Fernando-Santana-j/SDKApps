@@ -92,6 +92,20 @@ module.exports = (Discord2, client) => {
                 let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
                 let product = await server.products.find(product => product.productID == productID)
                 let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
+                if (server.vendasActive == false) {
+                    await interaction.reply({
+                        content: `⚠️| O vendedor desativou as vendas desse servidor!`,
+                        ephemeral: true
+                    })
+                    return
+                }
+                if (server.botActive == false) {
+                    await interaction.reply({
+                        content: `⚠️| O vendedor desativou o bot desse servidor!`,
+                        ephemeral: true
+                    })
+                    return
+                }
                 if (!product || server.error == true || product.estoque.length <= 0) {
                     await interaction.reply({
                         content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
@@ -367,7 +381,16 @@ module.exports = (Discord2, client) => {
 
 
                 }
-
+                if (interaction.guildId) {
+                    let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
+                    if (serverData.botActive == false) {
+                        await interaction.reply({
+                            content: `⚠️| O vendedor desativou o bot desse servidor!`,
+                            ephemeral: true
+                        })
+                        return
+                    }
+                }
                 async function createRemoveEmbend() {
                     try {
                         var fields = []
@@ -816,34 +839,57 @@ module.exports = (Discord2, client) => {
                                     const concatenatedString = await fields.map(obj => `${obj.value.replace(/`/g, '')}`).join('\n');
                                     const buffer = Buffer.from(concatenatedString, 'utf-8');
                                     const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
-                                    user.send({
+                                    await user.send({
                                         embeds: [
                                             new Discord.EmbedBuilder()
                                                 .setTitle(`🛍️ | Você recebeu um produto!`)
                                                 .setDescription(`Você recebeu um novo produto de ${SendUser.globalName}`)
                                                 .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
                                                 .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                                .setFields({
+                                                    name:'Nome do produto',
+                                                    value:product.productName
+                                                },{
+                                                    name:'Nome do servidor',
+                                                    value:DiscordServer.name
+                                                })
                                                 .setTimestamp()
                                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
                                         ],
-                                        files: [attachment]
-                                    }).then((res) => {
-                                        interaction.reply({
-                                            embeds: [
-                                                new Discord.EmbedBuilder()
-                                                    .setTitle(`✅ | Produto enviado!`)
-                                                    .setDescription(`Você enviou um produto para ${user.globalName} Abaixo esta uma copia do que foi enviado:`)
-                                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
-                                                    .setTimestamp()
-                                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
-                                            ],
-                                            ephemeral: true
-                                        })
-                                    }).catch(err => {
-                                        console.log("err", err);
                                     })
-
+                                    user.send({files:[attachment]})
+                                    interaction.reply({
+                                        embeds: [
+                                            new Discord.EmbedBuilder()
+                                                .setTitle(`✅ | Produto enviado!`)
+                                                .setDescription(`Você enviou um produto para ${user.globalName}, foi enviado em seu privado uma copia do arquivo que o usuario recebeu!`)
+                                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
+                                                .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                                .setTimestamp()
+                                                .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
+                                        ],
+                                        ephemeral: true
+                                    })
+                                    const userSend = await client.users.fetch(interaction.user.id);
+                                    userSend.send({
+                                        content:`Copia do ultimo produto (${product.productName}) enviado:`,
+                                        files:[attachment]
+                                    })
+                                    if (product.embendType == 0) {
+                                        require('../Discord/createProductMessageEmbend.js')(Discord, client, {
+                                            channelID: product.channel,
+                                            serverID: interaction.guildId,
+                                            productID: product.productID,
+                                            edit: true
+                                        })
+                                    } else {
+                                        require('../Discord/createProductMessage.js')(Discord, client, {
+                                            channelID: channelID,
+                                            serverID: serverID,
+                                            productID: productID,
+                                            edit: true
+                                        })
+                                    }
 
                                     db.update('servers', interaction.guild.id, {
                                         products: server.products
@@ -901,7 +947,7 @@ module.exports = (Discord2, client) => {
                                 return true;
                             }
                             return false;
-                        } catch (error) {}
+                        } catch (error) { }
                     }
 
                     function isTimeBefore(referenceTime, checkTime) {
@@ -1029,19 +1075,19 @@ module.exports = (Discord2, client) => {
                         });
                         try {
                             await message.edit({
-                                embeds:[Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja avaliou esse ticket com ${starCount} estrelas, muito obrigado!`)],
+                                embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja avaliou esse ticket com ${starCount} estrelas, muito obrigado!`)],
                             });
                         } catch (error) {
-                            
+
                         }
                     } catch (error) {
-                        
+
                     }
                     if (userInput <= 2) {
                         interaction.reply(`😢 | Sinto muito que sua experiência com o suporte não tenha sido boa, iremos trabalhar para melhorar cada vez mais 💖!`)
-                    }else if (userInput == 3) {
+                    } else if (userInput == 3) {
                         interaction.reply(`💔 | Posso ver que o seu atendimento não foi perfeito, com sua avaliação e sua mensagem iremos ver oque precisamos melhorar 💫!`)
-                    }else if (userInput >= 4) {
+                    } else if (userInput >= 4) {
                         interaction.reply(`🥰 | Fico feliz que tenha tido uma boa experiência com o suporte, se lembre, caso tenha algum problema, não tenha medo de falar 🤗!`)
                     }
                     try {
@@ -1072,7 +1118,7 @@ module.exports = (Discord2, client) => {
                                 new Discord.EmbedBuilder()
                                     .setColor('#6E58C7')
                                     .setTitle(`🌟・Nova avaliação!`)
-                                    .setDescription(avalMensage && avalMensage.length > 1 ? 'Mensagem do usuario: ' + avalMensage :`O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
+                                    .setDescription(avalMensage && avalMensage.length > 1 ? 'Mensagem do usuario: ' + avalMensage : `O responsavel pelo ticket **${userRespo.globalName}** foi avaliado com ${starCount} estrelas no seu ultimo ticket!`)
                                     .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userRespo.username + "**", inline: true }, { name: "🆔 | ID do Responsavel:", value: "``" + userRespo.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "🌟 | Avaliação:", value: `${starIcons} | (${starCount}/5)`, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
                             ],
                         })
@@ -2055,10 +2101,10 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
             try {
                 if ('personalize' in serverData && 'feedbackChannel' in serverData.personalize) {
-                    setTimeout(async()=>{
+                    setTimeout(async () => {
                         user.send({
-                            content:`Ola, <@${user.id}>, Vimos que comprou um produto recentemente no servidor ${DiscordServer.name}, pedimos para deixar um comentário no nosso canal de feedback!`,
-                            components:[new Discord.ActionRowBuilder()
+                            content: `Ola, <@${user.id}>, Vimos que comprou um produto recentemente no servidor ${DiscordServer.name}, pedimos para deixar um comentário no nosso canal de feedback!`,
+                            components: [new Discord.ActionRowBuilder()
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
@@ -2066,10 +2112,10 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                         .setURL(`https://discord.com/channels/${DiscordServer.id}/${serverData.personalize.feedbackChannel}`)
                                 )]
                         })
-                    },400000)
-                    
+                    }, 400000)
+
                 }
-            } catch (error) {}
+            } catch (error) { }
         } else {
             refound()
         }
@@ -2082,13 +2128,13 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             }, 20000)
         } catch (error) { }
-        
+
     }
 }
 
 
 
-module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false) => {
+module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true) => {
     try {
         let serverData = await db.findOne({ colecao: 'servers', doc: server })
         var DiscordServer = await client.guilds.cache.get(server);
@@ -2098,14 +2144,18 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
         } else {
             DiscordChannel = await DiscordServer.channels.cache.get(channel)
         }
-        console.log(DiscordChannel);
+        let embend = new Discord.EmbedBuilder()
+            .setTitle(serverName == true ? `${DiscordServer.name} | ${title}` : title)
+            .setDescription(mensage)
+            .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+        if (tumbnail) {
+            embend.setThumbnail(tumbnail)
+        }
+        if (banner) {
+            embend.setImage(banner)
+        }
         await DiscordChannel.send({
-            embeds: [
-                new Discord.EmbedBuilder()
-                    .setTitle(`${DiscordServer.name} | ${title}`)
-                    .setDescription(mensage)
-                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-            ]
+            embeds: [embend]
         }).catch(() => { })
 
         if (deleteChannel == true) {

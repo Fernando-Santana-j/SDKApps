@@ -31,6 +31,13 @@ module.exports = {
         let userSend = await interaction.options.getUser(`usuario`)
         let valor = await interaction.options.getNumber(`preco`)
         let paymentFields = []
+        if (serverData.botActive == false) {
+            await interaction.reply({
+                content: `⚠️| O vendedor desativou o bot desse servidor!`,
+                ephemeral: true
+            })
+            return
+        }
         if (serverData.bankData && serverData.bankData.mercadoPagoToken && serverData.bankData.mercadoPagoToken != '') {
             paymentFields.unshift(
                 await new Discord.StringSelectMenuOptionBuilder()

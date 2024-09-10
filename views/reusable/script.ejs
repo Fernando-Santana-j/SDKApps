@@ -11,4 +11,7 @@
     queryParams.forEach((value, key) => {
         queryObject[key] = value;
     });
+    if ('error' in queryObject) {
+        errorNotify(queryObject.error)
+    }
 </script>

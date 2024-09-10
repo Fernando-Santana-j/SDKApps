@@ -270,3 +270,77 @@ document.getElementById('saveChannelFeedback').addEventListener('click',async()=
         errorNotify(session.data)
     }
 })
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById('save-mensage-lembrete').addEventListener('click',async()=>{
+    if (document.getElementById(`title-lembrete`).value.trim().length <= 0) {
+        errorNotify(`Insira um titulo primeiro!`)
+        return
+    }
+    if (document.getElementById(`mensage-lembrete`).value.trim().length <= 0) {
+        errorNotify(`Insira uma mensagem primeiro!`)
+        return
+    }
+    let session = await fetch('/personalize/lembrete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            mensage:document.getElementById('mensage-lembrete').value ,
+            title:document.getElementById('title-lembrete').value ,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Mensagem de lembrete salva!')
+        
+    }else{
+        errorNotify(session.data)
+    }
+})
+async function toogleLembrete(active) {
+    let session = await fetch('/personalize/lembreteToogle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            serverID:serverID,
+            active: active
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        if (active == true) {
+            successNotify('Mensagem de lembrete ativada!')
+            document.getElementById(`active-lembrete`).classList.add(`hidden`)
+            document.getElementById(`desative-lembrete`).classList.remove(`hidden`)
+        }else{
+            successNotify('Mensagem de lembrete desativada!')
+            document.getElementById(`active-lembrete`).classList.remove(`hidden`)
+            document.getElementById(`desative-lembrete`).classList.add(`hidden`)
+        }
+    }else{
+        errorNotify(session.data)
+    }
+}
+if (document.getElementById('desative-lembrete')) {
+    document.getElementById('desative-lembrete').addEventListener('click',async()=>{
+        toogleLembrete(false)
+    })
+}
+
+if (document.getElementById('active-lembrete')) {
+    document.getElementById('active-lembrete').addEventListener('click',async()=>{
+        toogleLembrete(true)
+    })
+}

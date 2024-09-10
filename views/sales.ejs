@@ -61,8 +61,8 @@
                                     <img id="backGround-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                 </div>
                                 <div id="backGround-image-input-content">
-                                    <label id="button-backGround-input-edit" data-plan="<%= server.plan %>" for="backGround-input-edit">Anexar Imagem</label>
-                                    <input accept="image/*" hidden type="file" <%= server.plan == 1 ? 'disabled' : '' %> name="" id="backGround-input-edit">
+                                    <label id="button-backGround-input-edit" class="buttons-background-select" data-plan="<%= server.plan %>" for="backGround-input-edit">Anexar Imagem</label>
+                                    <input accept="image/*" hidden type="file" <%= server.plan == 'inicial' ? 'disabled' : '' %> id="backGround-input-edit">
                                 </div>
                             </div>
                         </div>
@@ -255,8 +255,8 @@
                                                 <img id="image-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                             </div>
                                             <div class="backGround-image-input-content">
-                                                <label id="button-image-input" class="image-lable" data-plan="<%= server.plan %>" for="image-input">Anexar Imagem</label>
-                                                <input name="backGround" accept="image/*" hidden type="file" <%= server.plan == 1 ? 'disabled' : '' %> name="" id="image-input">
+                                                <label id="button-image-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="image-input">Anexar Imagem</label>
+                                                <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input">
                                             </div>
                                         </div>
                                     </div>
@@ -280,7 +280,7 @@
                                                         <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price">
                                                     </div>
                                                     <div id="embend-type-containner">
-                                                        <label class="lable-padrao" for="product-price">Tipo da embend</label>
+                                                        <label class="lable-padrao" for="product-price">Tipo da embend <br>(Apague o texto abaixo para ver os outros modelos)</label>
                                                         <input required type="text" class="input-padrao" value="Mensagem" list="embend-input-list" placeholder="Pesquise o canal..." id="embend-type-input">
                                                         <datalist id="embend-input-list">
                                                             <option data-embend="0" selected value="Mensagem">Uma mensagem padrão do discord como em todos os bots!</option>
@@ -320,11 +320,11 @@
                                                 <div data-estoque="1" data-input="1" class="estoque-config-inputs">
                                                     <div class="estoque-config-input-content-title">
                                                         <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                                                        <input name="estoque-title-input"  placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                                                        <input name="estoque-title-input" placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                                                     </div>
                                                     <div class="estoque-config-input-content-conteudo">
                                                         <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                                                        <input name="estoque-content-input"  placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                                                        <input name="estoque-content-input" placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                                                     </div>
                                                     <div class="estoque-config-exclud-input">
                                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(2,2)"><path d="M49,1c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3h30c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3zM24,15c-7.17,0 -13,5.83 -13,13c0,7.17 5.83,13 13,13h77v63c0,9.37 -7.63,17 -17,17h-40c-9.37,0 -17,-7.63 -17,-17v-52c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3v52c0,12.68 10.32,23 23,23h40c12.68,0 23,-10.32 23,-23v-63.35937c5.72,-1.36 10,-6.50062 10,-12.64062c0,-7.17 -5.83,-13 -13,-13zM24,21h80c3.86,0 7,3.14 7,7c0,3.86 -3.14,7 -7,7h-80c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7zM50,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3zM78,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3z"></path></g></g></svg>
@@ -371,7 +371,7 @@
                     <div class="product-cadastro-containner">
                         <form class="product-cadastro-content" id="form-prodc-mult" enctype="multipart/form-data" >
                             <h1 class="title-col">Cadastrar de multi Produtos </h1>
-                            <div style="width: 100%; display: flex; justify-content: center; align-items: center;"><svg style="width: 3em;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
+                            <div style="width: 100%; display: flex; justify-content: center; align-items: center;"><svg style="width: 3em;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg> (Premium)</div>
                             <div class="linha"></div>
                             <div class="cadastro-content">
                                 <div class="cadastro-left-content">
@@ -387,7 +387,7 @@
                                         </div>
                                     </div>
                                     <div class="backGround-containner">
-                                        <h1 class="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
+                                        <h1 class="backGround-title">Imagem de fundo do produto: </h1>
                                         <div class="backGround-content">
                                             <div class="backGround-image-preview">
                                                 <label for="image-preview-multi">Preview da imagem</label>
@@ -395,7 +395,7 @@
                                             </div>
                                             <div class="backGround-image-input-content">
                                                 <label id="button-image-input-multi" class="image-lable" data-plan="<%= server.plan %>" for="image-input-multi">Anexar Imagem</label>
-                                                <input name="backGround" accept="image/*" hidden type="file" <%= server.plan == 1 ? 'disabled' : '' %> name="" id="image-input-multi">
+                                                <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input-multi">
                                             </div>
                                         </div>
                                     </div>

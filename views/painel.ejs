@@ -24,12 +24,22 @@
                             <h1 class="title-col">Situação atual do bot:</h1>
                             <div id="bot-situation-content">
                                 <div class="bot-contents" id="vendas-situation-content">
-                                    <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Vendas Ativa</p>
-                                    <button class="bot-contents-button" id="vendas-modify" style="background-color: var(--red-color);">Desativar Vendas</button>
+                                    <% if (server.vendasActive == true) { %>
+                                        <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Vendas ativada</p>
+                                        <button class="bot-contents-button" id="vendas-desactive-button" style="background-color: var(--red-color);" >Desativar Vendas</button>
+                                    <% } else { %>
+                                        <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Vendas desativadas</p>
+                                        <button class="bot-contents-button" id="vendas-active-button" style="background-color: var(--green-color);" >Ativar Vendas</button>
+                                    <% } %>
                                 </div>
                                 <div class="bot-contents" id="bot-act-content">
-                                    <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Bot Ativo</p>
-                                    <button class="bot-contents-button" id="bot-modify" style="background-color: var(--red-color);">Desativar Bot</button>
+                                    <% if (server.botActive == true) { %>
+                                        <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Bot ativado</p>
+                                        <button class="bot-contents-button" id="bot-desactive-button" style="background-color: var(--red-color);" >Desativar Bot</button>
+                                    <% } else { %>
+                                        <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Bot desativado</p>
+                                        <button class="bot-contents-button" id="bot-active-button" style="background-color: var(--green-color);" >Ativar Bot</button>
+                                    <% } %>
                                 </div>
                                 
                             </div>
@@ -57,25 +67,35 @@
             </main>
         </div>
     </div>
-    <script>
-        converterExpiracao(parseInt('<%= server.subscriptionData.expires_at %>'))
-                
-        function converterExpiracao(tempoUnix) {
-            const tempoUnixConvert = new Date(tempoUnix * 1000);
-            let dataExp = tempoUnixConvert.toLocaleDateString(); 
-            const hoje = new Date();
-            const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-            const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24)); // Convertendo milissegundos para dias
-            document.getElementById('signature-situation-days').innerText = diasRestantes + ' Dias restantes'
-            document.getElementById('signature-situation-date').innerText = dataExp
-        }
-    </script>
+    
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
-    <script>
-        let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))
-        let comprasCanceladas = JSON.parse(("<%= comprasCanceladas %>").replace(/&#34;/g, '"'))
-    </script>
+    <div>
+        <script>
+            converterExpiracao(parseInt('<%= server.subscriptionData.expires_at %>'))
+                    
+            function converterExpiracao(tempoUnix) {
+                const tempoUnixConvert = new Date(tempoUnix * 1000);
+                let dataExp = tempoUnixConvert.toLocaleDateString(); 
+                const hoje = new Date();
+                const diferencaEmMilissegundos = tempoUnixConvert - hoje;
+                const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24)); // Convertendo milissegundos para dias
+                document.getElementById('signature-situation-days').innerText = diasRestantes + ' Dias restantes'
+                document.getElementById('signature-situation-date').innerText = dataExp
+            }
+        </script>
+        <script>
+            let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))
+            let comprasCanceladas = JSON.parse(("<%= comprasCanceladas %>").replace(/&#34;/g, '"'))
+        </script>
+        <div>
+            <script>
+                try {
+                    localStorage.setItem(`BackUpServer-${'<%= server.id %>'}`, JSON.parse(JSON.stringify('<%= serverString %>')).replace(/&#34;/g, '"'))
+                } catch (error) {}
+            </script>
+        </div>
+    </div>
     <script src="<%= host %>/public/js/painel.js"></script>
 </body>
 </html>

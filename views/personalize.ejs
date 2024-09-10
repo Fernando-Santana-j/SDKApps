@@ -85,6 +85,29 @@
                         </div>
                     </div>
                     <div class="itens-col">
+                        <h1 class="title-col">Mensagem de lembrete!</h1>
+                        <p class="desc-col">Configure uma mensagem para ser enviada no privado do usuario quando ele não concluir uma compra!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
+                            <% if ('personalize' in server && 'lembreteMensage' in server.personalize) { %>
+                                <div id="buttons-active-desactive-lembrete">
+                                    <label for="" class="lable-padrao">Ativar ou desativar a mensagem de boas vindas!</label>
+                                    <button id="desative-lembrete" class="button-padrao redColor <%= server.personalize.lembreteMensage.active == true ? '' : 'hidden' %>">Desativar lembrete</button>
+                                    <button id="active-lembrete" class="button-padrao greenColor <%= server.personalize.lembreteMensage.active == true ? 'hidden' : '' %>">Ativar lembrete</button>
+                                </div>
+                            <% } %>
+                            <div class="inputs-col-content">
+                                <label for="title-lembrete" class="lable-padrao">Titulo da mensagem!</label>
+                                <input required type="text" value="<%= 'personalize' in server && 'lembreteMensage' in server.personalize ? server.personalize.lembreteMensage.title :''%>" class="input-padrao" placeholder="Titulo" id="title-lembrete">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="mensage-lembrete" class="lable-padrao">Mensagem de boas vindas!</label>
+                                <input required type="text" value="<%= 'personalize' in server && 'lembreteMensage' in server.personalize ? server.personalize.lembreteMensage.mensage :''%>"  class="input-padrao" placeholder="Mensagem" id="mensage-lembrete">
+                            </div>
+                            <button id="save-mensage-lembrete" class="button-padrao">Salvar Mensagem</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
                         <h1 class="title-col">Mensagem de boas vindas!</h1>
                         <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
                         <div class="linha" style="margin-top: 1em;"></div>

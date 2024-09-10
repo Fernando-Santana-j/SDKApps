@@ -144,28 +144,6 @@ const produtoRoutes = require('./stripe/productsRoutes.js');
 app.use('/', produtoRoutes);
 
 
-
-async function test(params) {
-    const sub = await stripe.subscriptions.retrieve('sub_1PhvpsEVoMwYkZ6cSHJvoKjX')
-    stripeRoutes.createAccount({
-        customer_details: {
-            email: 'test@gmail.com',
-            name: 'test',
-            phone: null
-        },
-        metadata: {
-            serverID: '1272612677318869093',
-            plan: '2'
-        }
-    }, 'pix')
-    // const subscription = await stripe.subscriptions.update(
-    //     'sub_1PhvpsEVoMwYkZ6cSHJvoKjX',
-    //     {
-    //       trial_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // Um mês de teste gratuito
-    //     }
-    //   );
-}
-
 app.get('/', async (req, res) => {
     res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
 })
@@ -276,18 +254,14 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     if (server.hasOwnProperty('bankData')) {
         delete server.bankData
     }
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
-        return
-    }
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
     if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botEdit == false) {
-        res.redirect('/dashboard?botedit=false')
+        res.redirect('/dashboard?error=Você não tem permissão para editar esse bot')
         return
     }
 
@@ -301,7 +275,7 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('painel', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    res.render('painel', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, serverString: JSON.stringify(server), comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
 })
 
 
@@ -312,18 +286,14 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     if (!server) {
         return
     }
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
-        return
-    }
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
 
     if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botConfig == false) {
-        res.redirect(`/dashboard`)
+        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
         return
     }
     let bankData = server.bankData ? server.bankData : null
@@ -352,11 +322,20 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
+    if (server.plan == 'inicial') {
+        res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
+        return
+    }
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
 
+    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
+        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
+        return
+    }
     const guilds = client.guilds.cache;
     const isBotInServer = guilds.has(serverID);
     if (!isBotInServer) {
@@ -391,11 +370,10 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
+    if (server.plan == 'inicial') {
+        res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
         return
     }
-
     let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
 
     let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
@@ -427,19 +405,15 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
-        return
-    }
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
 
     if (verifyPerms.error == false && verifyPerms.perms.owner == false) {
-        res.redirect(`/server/${serverID}`)
+        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
         return
     }
 
@@ -466,19 +440,18 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
+    if (server.plan == 'inicial') {
+        res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
         return
     }
-
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
 
     if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
-        res.redirect(`/server/${serverID}`)
+        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
         return
     }
 
@@ -526,19 +499,15 @@ app.get('/server/cupom/:id', functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.assinante == false || server.isPaymented == false) {
-        res.redirect('/dashboard')
-        return
-    }
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
-        res.redirect('/dashboard')
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
 
     if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
-        res.redirect(`/server/${serverID}`)
+        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
         return
     }
 
@@ -571,10 +540,6 @@ app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => 
         let serverID = req.params.id
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
         let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-        if (!server || server.assinante == false || server.isPaymented == false) {
-            res.redirect('/dashboard')
-            return
-        }
         const guilds = client.guilds.cache;
         const isBotInServer = guilds.has(serverID);
         if (!isBotInServer) {
@@ -1070,6 +1035,65 @@ app.post('/personalize/welcomeDesactive', async (req, res) => {
     } catch (error) {
 
         console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/lembrete', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.lembreteMensage = {
+                active: true,
+                mensage: req.body.mensage,
+                title: req.body.title
+            }
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+app.post('/personalize/lembreteToogle', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            try {
+                let personalize = 'personalize' in server ? server.personalize : {}
+                personalize.welcomeMensage.active = req.body.active
+                db.update('servers', req.body.serverID, {
+                    personalize: personalize
+                })
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, })
+                }
+            } catch (error) {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro tentar mudar a visibilidade do lembrete o servidor!' })
+                }
+            }
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
         }
@@ -1617,7 +1641,33 @@ app.post('/get/server', async (req, res) => {
 })
 
 
-
+app.post('/statusBotVendas', async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            if (req.body.type == 'bot') {
+                db.update('servers', req.body.serverID, {
+                    botActive: req.body.active
+                })
+            }else{
+                db.update('servers', req.body.serverID, {
+                    vendasActive: req.body.active
+                })
+            }
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: `${req.body.type} ${req.body.active == true ? 'ativado' : 'desativado'} com sucesso!` })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a log!' })
+        }
+    }
+})
 
 
 
