@@ -121,7 +121,7 @@ module.exports = async (Discord, client, data) => {
                         require('../Discord/discordIndex').sendDiscordMensageUser(userD,serverData.personalize.lembreteMensage.title,serverData.personalize.lembreteMensage.mensage,`https://discord.com/channels/${DiscordServer.id}/${data.channelID}`,'🛒・Ir para o carrinho')
                         carrinhosMensage.push(data.channelID)
                     } catch (error) {}
-                },500)
+                },600000)
                 // 600000
             }
             
