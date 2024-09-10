@@ -417,6 +417,14 @@ main{
     background-color: var(--main-color-purple);
 }
 
+#dual-group{
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 1em;
+    justify-content: space-around;
+}
+
 @media screen and (max-width:1080px) {
     #plans-section{
         height: fit-content !important;
@@ -457,7 +465,18 @@ main{
     #introduce-section{
         gap: 4em !important;
         height: max-content !important;
-        padding: 4em;
+        
+        padding: 4em 1em 4em 1em;
+    }
+    #dual-group{
+        flex-direction: column;
+        gap: 1em;
+    }
+    #plans-section{
+        padding: 5em 1em 5em 1em !important;
+    }
+    #comunity-section {
+        padding: 5em 1em 5em 1em !important;
     }
     #introduce-section, #introduce-resume-containner{
         width: 100% !important;

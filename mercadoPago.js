@@ -17,8 +17,6 @@ router.post('/mercadopago/webhook', async (req, res) => {
     try {
         if (resposta.action == 'payment.updated') {
             let id = await resposta.data.id
-            console.log(params,id);
-            
             if (params) {
                 axios.get(`https://api.mercadopago.com/v1/payments/${id}`, {
                     headers: {
@@ -96,21 +94,21 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                 serverID: doc.data.metadata.server_id,
                                 token: doc.data.metadata.token,
                                 userID: doc.data.metadata.user_id,
-                                price:doc.data.metadata.price,
-                                plan : doc.data.metadata.plan,
+                                price: doc.data.metadata.price,
+                                plan: doc.data.metadata.plan,
                                 time: doc.data.metadata.time
                             }
-                            let serverP = await db.findOne({colecao:'servers',doc: metadataP.serverID})
+                            let serverP = await db.findOne({ colecao: 'servers', doc: metadataP.serverID })
                             if (serverP.error == false) {
-                                await functions.renovarPix(serverP.subscription,metadataP.time)
-                            }else{
+                                await functions.renovarPix(serverP.subscription, metadataP.time)
+                            } else {
                                 await functions.createAccount({
-                                    metadata:{
+                                    metadata: {
                                         uid: metadataP.userID,
-                                        plan:metadataP.plan,
-                                        serverID:metadataP.serverID
+                                        plan: metadataP.plan,
+                                        serverID: metadataP.serverID
                                     }
-                                }, 'pix', metadataP.price,functions)
+                                }, 'pix', metadataP.price, functions)
                             }
                             break;
                     }
@@ -119,7 +117,7 @@ router.post('/mercadopago/webhook', async (req, res) => {
                 })
             }
         }
-        
+
     } catch (error) {
         console.log(error);
     }
@@ -183,10 +181,10 @@ router.post('/pix/create', async (req, res) => {
         let time = req.body.time
         let plan = req.body.plan
         let indexPrice = timeMultiply == 1 ? 0 : timeMultiply == 3 ? 1 : 2
-        
+
         let itemPlan = webConfig.planos[plan][indexPrice]
-       
-        
+
+
 
         const Mercadoclient = new MercadoPagoConfig({ accessToken: webConfig.mercadoPagoToken, options: { timeout: 5000 } });
         const payment = new Payment(Mercadoclient);
@@ -204,10 +202,10 @@ router.post('/pix/create', async (req, res) => {
                 userID: req.body.uid,
                 serverID: req.body.serverID,
                 action: 'planPay',
-                plan:req.body.plan,
+                plan: req.body.plan,
                 price: itemPlan,
                 token: webConfig.mercadoPagoToken,
-                time:time
+                time: time
             }
         };
 
@@ -219,7 +217,7 @@ router.post('/pix/create', async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        
+
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao criar o pix' })
         }

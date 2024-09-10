@@ -112,14 +112,21 @@ module.exports = async (Discord, client, data) => {
         } else {
             let embed = await DiscordChannel.send(contentEmbend);
         }
-
+        if ('personalize' in serverData && 'lembreteMensage' in serverData.personalize && serverData.personalize.lembreteMensage.active == true) {
+            setTimeout(async()=>{
+                try {
+                    const userD = await client.users.fetch(user)
+                    require('../Discord/discordIndex').sendDiscordMensageUser(userD,serverData.personalize.lembreteMensage.title,serverData.personalize.lembreteMensage.mensage,`https://discord.com/channels/${DiscordServer.id}/${DiscordChannel.id}`,'🛒・Ir para o carrinho')
+                } catch (error) {}
+            },600000)
+        }
         setTimeout(async()=>{
             try {
                 await DiscordServer.channels.cache.get(data.channelID).delete()
                 const userD = await client.users.fetch(user)
                 userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
             } catch (error) {}
-        },900000)
+        },1000000)
     } catch (error) {
         console.log("MainCartERROR: ",error);
     }

@@ -1189,6 +1189,11 @@
     height: 2em;
     border-radius: var(--border-radius-max);
 }
+
+#product-desc-multi{
+    resize: none;
+    height: 6em;
+}
 @media screen and (max-width:800px) {
     #pagamentos-produtos-containner{
         flex-direction: column;

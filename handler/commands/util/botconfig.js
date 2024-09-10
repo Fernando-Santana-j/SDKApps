@@ -1,6 +1,6 @@
 let functions = require('../../../functions')
 const Discord = require("discord.js");
-
+let db = require('../../../Firebase/models');
 module.exports = {
     name: 'botconfig',
     description: 'Configurar o bot de vendas!',
@@ -9,6 +9,14 @@ module.exports = {
     run: async (client, interaction) => {
         let verifyPermissions = await functions.verifyPermissions(interaction.user.id,interaction.guildId,null,client)
         if (verifyPermissions.error == false && verifyPermissions.perms.commands == true) {
+            let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
+            if (serverData.botActive == false) {
+                await interaction.reply({
+                    content: `⚠️| O vendedor desativou o bot desse servidor!`,
+                    ephemeral: true
+                })
+                return
+            }
             interaction.reply({
                 embeds: [
                     new Discord.EmbedBuilder()

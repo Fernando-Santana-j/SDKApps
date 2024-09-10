@@ -5,7 +5,5 @@ if (botedit == 'false') {
     window.history.pushState({ path: novaURL }, '', novaURL);
 }
 
-if ('error' in queryObject) {
-    errorNotify(queryObject.error)
-}
+
 

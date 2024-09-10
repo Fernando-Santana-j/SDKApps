@@ -280,11 +280,11 @@ document.getElementById('estoque-config-add-button').addEventListener('click', (
                 <div class="estoque-config-inputs">
                     <div class="estoque-config-input-content-title">
                         <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                        <input name="estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                        <input name="estoque-title-input" placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                     </div>
                     <div class="estoque-config-input-content-conteudo">
                         <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                        <input name="estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                        <input name="estoque-content-input" placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                     </div>
                     <div class="estoque-config-exclud-input">
                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(2,2)"><path d="M49,1c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3h30c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3zM24,15c-7.17,0 -13,5.83 -13,13c0,7.17 5.83,13 13,13h77v63c0,9.37 -7.63,17 -17,17h-40c-9.37,0 -17,-7.63 -17,-17v-52c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3v52c0,12.68 10.32,23 23,23h40c12.68,0 23,-10.32 23,-23v-63.35937c5.72,-1.36 10,-6.50062 10,-12.64062c0,-7.17 -5.83,-13 -13,-13zM24,21h80c3.86,0 7,3.14 7,7c0,3.86 -3.14,7 -7,7h-80c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7zM50,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3zM78,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3z"></path></g></g></svg>
@@ -319,11 +319,11 @@ function addNewData() {
             novoDiv.innerHTML = `
                 <div class="estoque-config-input-content-title">
                     <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                    <input name="estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                    <input name="estoque-title-input" placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                 </div>
                 <div class="estoque-config-input-content-conteudo">
                     <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                    <input name="estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                    <input name="estoque-content-input" placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                 </div>
                 <div class="estoque-config-exclud-input">
                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(2,2)"><path d="M49,1c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3h30c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3zM24,15c-7.17,0 -13,5.83 -13,13c0,7.17 5.83,13 13,13h77v63c0,9.37 -7.63,17 -17,17h-40c-9.37,0 -17,-7.63 -17,-17v-52c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3v52c0,12.68 10.32,23 23,23h40c12.68,0 23,-10.32 23,-23v-63.35937c5.72,-1.36 10,-6.50062 10,-12.64062c0,-7.17 -5.83,-13 -13,-13zM24,21h80c3.86,0 7,3.14 7,7c0,3.86 -3.14,7 -7,7h-80c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7zM50,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3zM78,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3z"></path></g></g></svg>
@@ -341,6 +341,15 @@ function addNewData() {
 
 document.addEventListener('click', async (event) => {
     const target = event.target;
+
+    if (target.closest('.buttons-background-select')) {
+        let plan = target.closest('.buttons-background-select').getAttribute('data-plan')
+        if (plan == 'inicial') {
+            mensageNotify('O plano 1 não atende a essa função, assine outro plano para obter essa personalização!')
+        }
+    }
+
+
     if (target.closest('.estoque-config-exclud-input')) {
         const parentDiv = target.closest('.estoque-config-inputs');
         let containnerArr = parentDiv.parentElement.children
@@ -438,11 +447,11 @@ document.addEventListener('click', async (event) => {
                     <div class="estoque-config-inputs">
                         <div class="estoque-config-input-content-title">
                             <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                            <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                            <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input"  placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                         </div>
                         <div class="estoque-config-input-content-conteudo">
                             <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                            <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                            <input name="edit-estoque-content-input"  placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                         </div>
                     </div>
                 `
@@ -456,7 +465,7 @@ document.addEventListener('click', async (event) => {
                         <div id="add-estoque-txt-content">
                             <div style="display: flex; flex-direction: column; width: 100%;">
                                 <label for="input-title-txt" class="lable-padrao">Titulo dos itens do txt</label>
-                                <input type="text" required id="input-title-txt" class="input-padrao" value='${data.estoqueModel.conteudo[0].title}'>
+                                <input type="text"  id="input-title-txt" class="input-padrao" value='${data.estoqueModel.conteudo[0].title}'>
                             </div>
 
                             <label type="button" class="main-button-product" for="add-txt-input-file" id="add-estoque-text-file">Adiconar arquivo txt!</label>
@@ -620,8 +629,14 @@ document.addEventListener('click', async (event) => {
             Array.from(row.children).forEach((element, index) => {
                 var title = element.querySelector('input[name="edit-estoque-title-input"]').value;
                 var content = element.querySelector('input[name="edit-estoque-content-input"]').value;
-                EstoqueData.conteudo.push({ index: index + 1, title: title, content: content })
+                if (title.trim().length > 0 && content.trim().length > 0) {
+                    EstoqueData.conteudo.push({ index: index + 1, title: title, content: content })
+                }
             })
+            if (EstoqueData.conteudo.length <= 0) {
+                errorNotify('Digite um titulo e um conteudo primeiro!')
+                return
+            }
 
             await fetch('/product/estoqueAdd', {
                 method: 'POST',
@@ -640,11 +655,11 @@ document.addEventListener('click', async (event) => {
                             <div class="estoque-config-inputs">
                                 <div class="estoque-config-input-content-title">
                                     <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                                    <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                                    <input value="${data.estoqueModel.conteudo[index].title}" name="edit-estoque-title-input"  placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                                 </div>
                                 <div class="estoque-config-input-content-conteudo">
                                     <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                                    <input name="edit-estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                                    <input name="edit-estoque-content-input"  placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                                 </div>
                             </div>
                         `
@@ -657,8 +672,9 @@ document.addEventListener('click', async (event) => {
             })
         }
 
-
-
+        
+        
+       
     }
 });
 
@@ -745,18 +761,7 @@ document.getElementById('channel-name-input').addEventListener('blur', function 
         this.value = '';
     }
 });
-document.getElementById('button-image-input').addEventListener('click', () => {
-    let plan = document.getElementById('button-image-input').getAttribute('data-plan')
-    if (plan == 1) {
-        mensageNotify('O plano 1 não atende a essa função, assine outro plano para obter essa personalização!')
-    }
-})
-document.getElementById('button-backGround-input-edit').addEventListener('click', () => {
-    let plan = document.getElementById('button-backGround-input-edit').getAttribute('data-plan')
-    if (plan == 1) {
-        mensageNotify('O plano 1 não atende a essa função, assine outro plano para obter essa personalização!')
-    }
-})
+
 
 document.getElementById('embend-type-input').addEventListener('blur', function () {
     const inputValue = this.value.toLowerCase();
@@ -794,20 +799,29 @@ function previewImage(input, preview) {
 document.getElementById('logo-input').addEventListener('change', function () {
     previewImage(this, document.getElementById('logo-preview'));
 });
-document.getElementById('image-input').addEventListener('change', function () {
-    previewImage(this, document.getElementById('image-preview'));
-});
+
 document.getElementById('logo-input-edit').addEventListener('change', function () {
     previewImage(this, document.getElementById('logo-preview-edit'));
 });
-document.getElementById('backGround-input-edit').addEventListener('change', function () {
-    previewImage(this, document.getElementById('backGround-preview-edit'));
-});
 
+if (document.getElementById('image-input')) {
+    document.getElementById('image-input').addEventListener('change', function () {
+        previewImage(this, document.getElementById('image-preview'));
+    });
+}
+if (document.getElementById('backGround-input-edit')) {
+    document.getElementById('backGround-input-edit').addEventListener('change', function () {
+        previewImage(this, document.getElementById('backGround-preview-edit'));
+    });
+    
+}
 
-document.getElementById('image-input-multi').addEventListener('change', function () {
-    previewImage(this, document.getElementById('image-preview-multi'));
-});
+if (document.getElementById('image-input-multi')) {
+    document.getElementById('image-input-multi').addEventListener('change', function () {
+        previewImage(this, document.getElementById('image-preview-multi'));
+    });
+}
+
 document.getElementById('logo-input-multi').addEventListener('change', function () {
     previewImage(this, document.getElementById('logo-preview-multi'));
 });
@@ -833,11 +847,11 @@ function clearCadastroProduct() {
                 <div class="estoque-config-inputs">
                     <div class="estoque-config-input-content-title">
                         <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                        <input name="estoque-title-input" required placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
+                        <input name="estoque-title-input"  placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
                     </div>
                     <div class="estoque-config-input-content-conteudo">
                         <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                        <input name="estoque-content-input" required placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
+                        <input name="estoque-content-input"  placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
                     </div>
                 </div>
             </div>
@@ -868,12 +882,17 @@ document.getElementById("form-prodc").addEventListener("submit", function (event
             estoque: index + 1,
             conteudo: []
         }
+        let push = true
         Array.from(inputsContainner.children).forEach((inputs, indexinput) => {
             var title = inputs.querySelector('input[name="estoque-title-input"]').value;
             var content = inputs.querySelector('input[name="estoque-content-input"]').value;
-            model.conteudo.push({ index: indexinput + 1, title: title, content: content })
+            if (title.trim().length > 0 && content.trim().length > 0 ) {
+                model.conteudo.push({ index: indexinput + 1, title: title, content: content })
+            }
         })
-        EstoqueData.push(model)
+        if (model.conteudo.length > 0) {
+            EstoqueData.push(model)
+        }
     })
     // coletar o id do canal
     const opcoes = document.getElementById('channels-input-list').querySelectorAll('option');
@@ -896,7 +915,7 @@ document.getElementById("form-prodc").addEventListener("submit", function (event
     });
 
     var formData = new FormData();
-    formData.append('estoque', JSON.stringify(EstoqueData));
+    formData.append('estoque', EstoqueData.length >= 0 ? JSON.stringify(EstoqueData) : JSON.stringify([]));
     formData.append('productLogo', document.getElementById('logo-input').files[0]);
     formData.append('channelID', channelID);
     formData.append('productName', document.getElementById('product-name').value.trim());
@@ -1141,6 +1160,10 @@ document.getElementById("form-prodc-mult").addEventListener("submit", async func
             serverID: serverID
         }),
     }).then(response => { return response.json() })
+    if (serverData.plan == 'inicial') {
+        errorNotify('Seu plano não dá acesso a essa funcionalidade!')
+        return
+    }
     if (selectProdsList.length <= 0) {
         errorNotify('Selecione um ou mais produtos para continuar!')
         return
@@ -1213,3 +1236,4 @@ document.getElementById("form-prodc-mult").addEventListener("submit", async func
         }
     })
 })
+

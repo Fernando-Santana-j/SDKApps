@@ -21,6 +21,14 @@ module.exports = {
         
         let verifyPermissions = await functions.verifyPermissions(interaction.user.id,interaction.guildId,Discord,client)
         if (verifyPermissions.error == false && verifyPermissions.perms.commands == true) {
+            let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
+            if (serverData.botActive == false) {
+                await interaction.reply({
+                    content: `⚠️| O vendedor desativou o bot desse servidor!`,
+                    ephemeral: true
+                })
+                return
+            }
             let server = await db.findOne({colecao:"servers",doc:interaction.guildId})
             if (server) {
                 let products = server.products
