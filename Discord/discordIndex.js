@@ -394,9 +394,9 @@ module.exports = (Discord2, client) => {
                 async function createRemoveEmbend() {
                     try {
                         var fields = []
+                        let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
                         for (let index = 0; index < carrinhos[interaction.user.id].length; index++) {
                             const element = carrinhos[interaction.user.id][index].product;
-                            let serverData = await db.findOne({ colecao: "servers", doc: await interaction.guildId })
                             let produto = await serverData.products.find(product => product.productID == element)
                             const valorReal = produto.price / 100;
                             let valorFormatado = valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -431,7 +431,7 @@ module.exports = (Discord2, client) => {
                                     .setTitle('Selecione abaixo o item que deseja excluir!')
                                     .setDescription(`Clique em cancelar caso desista de excluir um item!`)
                                     .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                                     .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
                                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                             ],
@@ -2111,7 +2111,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                         .setLabel('💫 ・ Deixe o seu feedback')
                                         .setURL(`https://discord.com/channels/${DiscordServer.id}/${serverData.personalize.feedbackChannel}`)
                                 )]
-                        })
+                        }).then(()=>{}).catch(()=>{})
                     }, 400000)
 
                 }
