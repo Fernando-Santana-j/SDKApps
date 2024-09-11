@@ -211,6 +211,10 @@ module.exports = (Discord2, client) => {
                     })
 
                 } else {
+                    await interaction.reply({
+                        content: `🛒 | Criando o Carrinho...`,
+                        ephemeral: true
+                    })
                     let categoria = DiscordServer.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'carrinhos')
                     if (!categoria) {
                         categoria = await DiscordServer.channels.create({
@@ -236,33 +240,42 @@ module.exports = (Discord2, client) => {
                         }]
                     })
                     if (newChannel) {
-                        await interaction.reply({
-                            content: `🛒 | Criando o Carrinho...`,
+                        await interaction.editReply({
+                            content: ` `,
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
+                                    .setTitle(`😍 | Carrinho Criado!`)
+                                    .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
+                            ],
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(5)
+                                            .setLabel('🛒・Ir para o Carrinho')
+                                            .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
+                                    )
+                            ],
                             ephemeral: true
-                        })
-                        setTimeout(() => {
-                            interaction.editReply({
-                                content: ` `,
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
-                                        .setTitle(`😍 | Carrinho Criado!`)
-                                        .setDescription(`<@${interaction.user.id}> **Seu carrinho foi criado com sucesso, fique avontade para adicionar mais produtos.**`)
-                                ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('🛒・Ir para o Carrinho')
-                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
-                                        )
-                                ],
-                                ephemeral: true
-                            });
-                        }, 2500);
+                        });
+                        if ('personalize' in server && 'lembreteMensage' in server.personalize && server.personalize.lembreteMensage.active == true) {
+                            let channelID = newChannel.id
+                            let userID = interaction.user.id
+                            setTimeout(async()=>{
+                                try {
+                                    let discordChannelVerify = await DiscordServer.channels.cache.get(channelID)
+                                    if (discordChannelVerify) {
+                                        const userD = await client.users.fetch(userID)
+                                        if (userD) {
+                                            require('../Discord/discordIndex').sendDiscordMensageUser(userD,server.personalize.lembreteMensage.title,server.personalize.lembreteMensage.mensage,`https://discord.com/channels/${interaction.guild.id}/${discordChannelVerify.id}`,'🛒・Ir para o carrinho')
+                                        }
+                                    }
+                                } catch (error) {}
+                            },600000)
+                        }
                     } else {
-                        return interaction.reply({ content: 'Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
+                        return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                     }
                     findUniCarrinhos()
                     require('./createCartMessage')(Discord, client, {

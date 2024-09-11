@@ -1,6 +1,5 @@
 const db = require('../Firebase/models')
 require('dotenv').config()
-let carrinhosMensage = []
 module.exports = async (Discord, client, data) => {
     try {
         const DiscordServer = await client.guilds.cache.get(data.serverID);
@@ -110,22 +109,9 @@ module.exports = async (Discord, client, data) => {
             const lastBotMessage = await botMessages.first();
             lastBotMessage.edit(contentEmbend)
         } else {
-            let embed = await DiscordChannel.send(contentEmbend);
+            await DiscordChannel.send(contentEmbend);
         }
-        if ('personalize' in serverData && 'lembreteMensage' in serverData.personalize && serverData.personalize.lembreteMensage.active == true) {
-            let discordChannel = await DiscordServer.channels.cache.get(data.channelID)
-            if (discordChannel && !carrinhosMensage.includes(data.channelID)) {
-                setTimeout(async()=>{
-                    try {
-                        const userD = await client.users.fetch(user)
-                        require('../Discord/discordIndex').sendDiscordMensageUser(userD,serverData.personalize.lembreteMensage.title,serverData.personalize.lembreteMensage.mensage,`https://discord.com/channels/${DiscordServer.id}/${data.channelID}`,'🛒・Ir para o carrinho')
-                        carrinhosMensage.push(data.channelID)
-                    } catch (error) {}
-                },500)
-                // 600000
-            }
-            
-        }
+        
         setTimeout(async()=>{
             try {
                 await DiscordServer.channels.cache.get(data.channelID).delete()
