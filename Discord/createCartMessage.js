@@ -112,13 +112,7 @@ module.exports = async (Discord, client, data) => {
             await DiscordChannel.send(contentEmbend);
         }
         
-        setTimeout(async()=>{
-            try {
-                await DiscordServer.channels.cache.get(data.channelID).delete()
-                const userD = await client.users.fetch(user)
-                userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-            } catch (error) {}
-        },1000000)
+        
     } catch (error) {
         console.log("MainCartERROR: ",error);
     }

@@ -4,7 +4,7 @@ const functions = require('./functions')
 const db = require('./Firebase/models')
 const axios = require('axios')
 
-
+let client = require('./Discord/discordIndex').client
 const { Payment, MercadoPagoConfig } = require('mercadopago');
 const mercadoPagoData = require('./config/mercadoPagoData.json');
 const webConfig = require('./config/web-config');
@@ -30,7 +30,9 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                 user: doc.data.metadata.user,
                                 token: doc.data.metadata.token,
                                 userCobrador: doc.data.metadata.userCobrador,
-                                valor: doc.data.metadata.valor
+                                valor: doc.data.metadata.valor,
+                                mensageID: doc.data.metadata.mensageID,
+                                channelID: doc.data.metadata.channelID
                             }
                             if (doc.data.status === "approved") {
                                 let bank = doc.data.point_of_interaction.transaction_data.bank_info.payer.long_name
@@ -50,6 +52,18 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                     try {
                                         require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
                                         require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador, '✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null, null)
+                                        try {
+                                            const channel = await client.channels.fetch(metadataC.channelID);
+                                            const message = await channel.messages.fetch(metadataC.mensageID);
+                                            await message.edit({
+                                                components: []
+                                            });
+                                            try {
+                                                await message.edit({
+                                                    embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja pagou essa cobrança!`)],
+                                                });
+                                            } catch (error) {}
+                                        } catch (error) {}
                                     } catch (error) {
                                         console.log(error);
                                     }

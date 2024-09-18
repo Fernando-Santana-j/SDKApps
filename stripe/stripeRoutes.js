@@ -10,6 +10,7 @@ const webConfig = require('../config/web-config');
 const sharp = require('sharp');
 
 const axios = require('axios');
+let client = require('../Discord/discordIndex').client
 
 router.post('/subscription/create', async (req, res) => {
     try {
@@ -96,6 +97,18 @@ router.post('/webhook/stripe/payment', async (req, res) => {
                 if (data.metadata.action == 'cobrancaPay') {
                     require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
                     require("../Discord/discordIndex").sendDiscordMensageUser(data.metadata.userCobrador, '✅ cobranca paga!', `O usuario com id ${data.metadata.user} pagou a sua ultima cobrança.`, null, null)
+                    try {
+                        const channel = await client.channels.fetch(data.metadata.channelID);
+                        const message = await channel.messages.fetch(data.metadata.mensageID);
+                        await message.edit({
+                            components: []
+                        });
+                        try {
+                            await message.edit({
+                                embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja pagou essa cobrança!`)],
+                            });
+                        } catch (error) {}
+                    } catch (error) {}
                 }
             }
             break;

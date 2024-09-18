@@ -27,6 +27,7 @@ const stripe = require('stripe')(require('./config/web-config').stripe);
 const app = express();
 
 
+
 const corsOptions = {
     origin: 'https://api.mercadopago.com'
 };
@@ -37,14 +38,8 @@ require('dotenv').config()
 
 const client = new Discord.Client({ intents: botConfig.intents })
 
-require('./handler/index.js')(client)
-
 require('./Discord/discordIndex.js')(Discord, client)
 
-
-
-client.commands = new Discord.Collection();
-client.slashCommands = new Discord.Collection();
 
 client.login(botConfig.discordToken)
 
@@ -84,37 +79,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-
-
-//TODO------------Clients discord--------------
-
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.guild) return;
-
-    if (interaction.isCommand()) {
-
-        const cmd = client.slashCommands.get(interaction.commandName);
-
-        if (!cmd)
-            return;
-        cmd.run(client, interaction);
-        
-    }
-
-    if (interaction.isContextMenuCommand()) {
-        await interaction.deferReply({ ephemeral: false });
-        const command = client.slashCommands.get(interaction.commandName);
-        
-        if (command) command.run(client, interaction);
-
-    }
-})
-
-//TODO monitoramento de erros
-client.on(Events.ShardError, error => {
-    console.error('A websocket connection encountered an error:', error);
-});
-
 
 
 //TODO------------WEB PAGE--------------
@@ -231,10 +195,10 @@ app.get('/payment/:id', async (req, res) => {
         type = server.type
         if (server.isPaymented == true) {
             res.redirect('/dashboard')
-        return
+            return
         }
     }
-    res.render('payment', { host: `${webConfig.host}`, user: user,server:server, exist: exist, type: type })
+    res.render('payment', { host: `${webConfig.host}`, user: user, server: server, exist: exist, type: type })
 })
 
 app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
@@ -1649,7 +1613,7 @@ app.post('/statusBotVendas', async (req, res) => {
                 db.update('servers', req.body.serverID, {
                     botActive: req.body.active
                 })
-            }else{
+            } else {
                 db.update('servers', req.body.serverID, {
                     vendasActive: req.body.active
                 })
