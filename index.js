@@ -108,6 +108,29 @@ const produtoRoutes = require('./stripe/productsRoutes.js');
 app.use('/', produtoRoutes);
 
 
+
+
+app.get('/pass', async (req, res) => {
+    res.render('tempPassPage.ejs', { host: `${webConfig.host}`, })
+})
+
+app.post('/verify/pass', (req, res) => {
+    let pass = req.body.pass
+
+    if (pass && pass.trim() == process.env.PASS) {
+        req.session.pass = true
+        if (!res.headersSent) {
+            res.status(200).json({ success: true})
+        }
+    } else {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Senha incorreta!' })
+        }
+    }
+})
+
+
+
 app.get('/', async (req, res) => {
     res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
 })

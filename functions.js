@@ -110,6 +110,9 @@ module.exports = {
             res.redirect('/?error=Faca login novamente!')
             return
         }
+        if (!req.session.pass || req.session.pass == false) {
+            res.redirect('/pass')
+        }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
         if ("vitalicio" in server && server.vitalicio == true) {
             next()
