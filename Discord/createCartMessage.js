@@ -1,6 +1,5 @@
 const db = require('../Firebase/models')
 require('dotenv').config()
-let carrinhosMensage = []
 module.exports = async (Discord, client, data) => {
     try {
         const DiscordServer = await client.guilds.cache.get(data.serverID);
@@ -110,7 +109,7 @@ module.exports = async (Discord, client, data) => {
             const lastBotMessage = await botMessages.first();
             lastBotMessage.edit(contentEmbend)
         } else {
-            let embed = await DiscordChannel.send(contentEmbend);
+            await DiscordChannel.send(contentEmbend);
         }
         if ('personalize' in serverData && 'lembreteMensage' in serverData.personalize && serverData.personalize.lembreteMensage.active == true) {
             let discordChannel = await DiscordServer.channels.cache.get(data.channelID)
@@ -122,7 +121,6 @@ module.exports = async (Discord, client, data) => {
                         carrinhosMensage.push(data.channelID)
                     } catch (error) {}
                 },600000)
-                // 600000
             }
             
         }
