@@ -154,6 +154,7 @@ document.getElementById('top-header-theme').addEventListener('click', async () =
 document.getElementById("notify-signature").addEventListener("click", async () => {
     fetch('/config/notify', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -170,6 +171,7 @@ document.getElementById('signature-situation-button').addEventListener('click', 
 
     let session = await fetch('/subscription/update', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -193,6 +195,7 @@ document.getElementById('signature-situation-button').addEventListener('click', 
 async function modifyStatus(type, active) {
     let session = await fetch('/statusBotVendas', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -241,4 +244,5 @@ document.addEventListener('click', async (event) => {
         `
     }
 })
+
 

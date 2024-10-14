@@ -1,6 +1,6 @@
-<div id="chat-up-containner">
-    <% if (user.id != null) { %>
-        <link rel="stylesheet" href="<%= host %>/public/css/chatLive.css">
+<!-- <div id="chat-up-containner">
+    <%# if (user.id != null) { %>
+        <link rel="stylesheet" href="<%#= host %>/public/css/chatLive.css">
         <div id="chat-icon-containner">
             <div id="chat-icon-content">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg>
@@ -21,9 +21,9 @@
                         <label for="ticket-motivo-input" class="lable-padrao">Selecione com oque você precisa de ajuda!</label>
                         <input required type="text" class="input-padrao" list="ticket-motivo-input-list" placeholder="Pesquise o motivo..." id="ticket-motivo-input">
                         <datalist id="ticket-motivo-input-list">
-                            <% chatItens.forEach(element => { %>
-                                <option data-code="<%= element.id %>" selected value="<%= element.name %>"><%= element.desc %></option>
-                            <% }) %>
+                            <%# chatItens.forEach(element => { %>
+                                <option data-code="<%#= element.id %>" selected value="<%#= element.name %>"><%#= element.desc %></option>
+                            <%# }) %>
                         </datalist>
                     </div>
                     <div id="create-ticket-idioma">
@@ -47,11 +47,11 @@
             </div>
         </div>
         <script>
-            let userID = '<%= user.id %>'
+            let userID = '<%#= user.id %>'
         </script>
         <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-        <script src="<%= host %>/public/js/chatLive.js"></script>
-    <% } %>
+        <script src="<%#= host %>/public/js/chatLive.js"></script>
+    <%# } %>
     
-</div>
+</div> -->

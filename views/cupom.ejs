@@ -4,14 +4,14 @@
 <head>
     <%- include('./reusable/head.ejs') %>
         <title>SDK - Cupom</title>
-        <link rel="stylesheet" href="<%= host %>/public/css/cupom.css">
+        <link rel="stylesheet" href="/public/css/cupom.css">
 </head>
 
 <body>
     <div id="body-containner">
 
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:7}) %>
+            <%- include('./reusable/body.ejs',{index:7}) %>
                 <main id="main-containner">
                     <div id="main-content">
                         <h1 class="title-col">Crie e modifique cupons para seus produtos!</h1>
@@ -89,7 +89,7 @@
         </div>
     </div>
     <%- include('./reusable/script.ejs') %>
-        <script src="<%= host %>/public/js/cupom.js"></script>
+        <script src="/public/js/cupom.js"></script>
 </body>
 
 </html>

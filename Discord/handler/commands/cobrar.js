@@ -57,28 +57,6 @@ module.exports = {
                         .setValue('boleto')
                 )
             }
-            const row = new Discord.ActionRowBuilder().addComponents(
-                new Discord.StringSelectMenuBuilder()
-                    .setCustomId(`paymentMCobranca`)
-                    .setPlaceholder('Selecione o método de pagamento desejado!')
-                    .setMinValues(1)
-                    .setMaxValues(1)
-                    .addOptions(...paymentFields)
-            )
-            const row2 = new Discord.ActionRowBuilder()
-                .addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId(`cobrancaPayment_${serverID}_${interaction.user.id}_${valor}`)
-                        .setLabel('Confirmar')
-                        .setStyle('3'),
-                )
-                .addComponents(
-
-                    new Discord.ButtonBuilder()
-                        .setCustomId(`cobrancaRecuse_${interaction.user.id}`)
-                        .setLabel('Cancelar')
-                        .setStyle('4')
-                )
             userSend.send({
                 embeds: [
                     new Discord.EmbedBuilder()
@@ -95,12 +73,29 @@ module.exports = {
                         .setTimestamp()
                         .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                 ],
-                components: [row, row2],
+                components: [
+                    new Discord.ActionRowBuilder()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`paymentCobranca_${serverID}_${interaction.user.id}_${valor}`)
+                                .setLabel('Pagar')
+                                .setEmoji(await require('../../emojisGet').comprar)
+                                .setStyle('3'),
+                        )
+                        .addComponents(
+
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`cobrancaRecuse_${interaction.user.id}`)
+                                .setLabel('Cancelar')
+                                .setEmoji(await require('../../emojisGet').cancelar)
+                                .setStyle('4')
+                        )
+                ],
             })
             interaction.reply({ content: `Cobranca enviada!`, ephemeral: true })
         } catch (error) {
             console.log(error);
-            
+
             interaction.reply({ content: `Erro ao enviar a cobranca!`, ephemeral: true })
         }
     },

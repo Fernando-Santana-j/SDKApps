@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
+    "dev": "nodemon --trace-warnings  index.js",
     "start": "npm i && node index.js",
     "build": "npm install"
   },
@@ -13,11 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.6.7",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "canvas": "^2.11.2",
     "cookie-parser": "^1.4.6",
     "copy-paste": "^1.5.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
     "discord-html-transcripts": "^3.2.0",
     "dotenv": "^16.4.5",
@@ -31,10 +33,12 @@
     "mercadopago": "^2.0.8",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.15",
     "pagseguro-nodejs": "^0.1.2",
     "path": "^0.12.7",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "sharp": "^0.33.2",
+    "speakeasy": "^2.0.0",
     "stripe": "^14.19.0"
   }
 }

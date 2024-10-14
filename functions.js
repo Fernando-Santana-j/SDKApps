@@ -4,10 +4,69 @@ const fs = require('fs');
 const stripe = require('stripe')(require('./config/web-config').stripe);
 const db = require('./Firebase/models');
 const webConfig = require('./config/web-config')
-let path = require(`path`);
+const path = require(`path`);
 const botConfig = require('./config/bot-config');
+const nodemailer = require('nodemailer');
+require('dotenv').config()
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const ejs = require('ejs')
+const crypto = require('crypto');
+
+async function gerarToken(res, req, session, email, code, tokenName) {
+    try {
+        const payload = {
+            id: session,
+            email: email
+        };
+        let jwtConfig = {
+            expiresIn: '6M'
+        }
+        let configsCookie = { ...webConfig.cookieConfig }
+        if (tokenName == 'token') {
+            configsCookie.maxAge = 3600000
+            jwtConfig.expiresIn = '1h'
+        }
+        const token = await jwt.sign(payload, process.env.TOKENCODE, jwtConfig);
+        await res.cookie(tokenName, token, configsCookie)
+        return token;
+    } catch (error) {
+        return null
+    }
+}
+
+
+async function verificarToken(req, res, token, code) {
+    // const token = req.header('Authorization').replace('Bearer ', '');
+    if (!token) return 'invalid'
+    try {
+        const verified = await jwt.verify(token, process.env.TOKENCODE, (err, decoded) => {
+            if (err) {
+                return 'invalid'
+            }
+            return decoded
+        });
+
+        return verified
+    } catch (err) {
+        return 'invalid'
+    }
+}
+
+function renovarToken(req, res, token, code, tokenName) {
+    try {
+        const decoded = jwt.verify(token, code, { ignoreExpiration: true });
+        const novoToken = gerarToken(res, req, decoded.id, null, process.env.TOKENCODE, tokenName);
+        return novoToken;
+    } catch (err) {
+        return 'invalid'
+    }
+}
+
+
 
 module.exports = {
+    gerarToken: gerarToken,
     verifyPermissions: async (user, server, Discord, client) => {
         try {
             let serverDB = await db.findOne({ colecao: "servers", doc: server })
@@ -105,14 +164,116 @@ module.exports = {
             return { error: true, err: error }
         }
     },
+    authGetState: async (req, res, next) => {
+        try {
+            if (!req.session.uid) return res.redirect('/?error=Faca login novamente!');
+
+            let user = await db.findOne({colecao:'users',doc:req.session.uid})
+
+
+    
+            if (req.cookies && 'token' in req.cookies) {
+                let verify = await verificarToken(req, res, await req.cookies.token, process.env.TOKENCODE)
+                if (verify == 'invalid') {
+                    await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token')
+                }
+            } else {
+                await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token')
+            }
+            if (req.url.includes('/security/pass')) {
+                next()
+                return
+            }
+            if (!req.session.pass && !req.url.includes('/security/pass')) {
+                return res.redirect(`/security/pass`);
+            }
+    
+            
+            
+            if (!req.url.includes('/security/code')) {
+                let securityExist = 'security' in user
+                let emailVerifyExist = securityExist ? 'emailVerify' in user.security : false
+
+                if ((emailVerifyExist == true && user.security.emailVerify == false) || emailVerifyExist == false) {
+                    return res.redirect('/security/code/email')
+                }
+
+                let securityExist2FA = securityExist ? 'data2fa' in user.security : false
+
+                if (securityExist2FA == false || (securityExist2FA == true && user.security.data2fa.active == false)) {
+                    if (req.url.includes('/security/code/2fa')) {
+                        return res.redirect('/dashboard')
+                    }else{
+                        return next()
+                    }
+                }else {
+                    if (securityExist == true && (req.cookies && req.cookies.verify2fa)) {
+                        let verify = await verificarToken(req, res, await req.cookies.verify2fa, process.env.TOKENCODE2FA)
+                        if (verify == 'invalid') {
+                            if (!req.url.includes('/security/code/2fa')) {
+                                await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
+                                return res.redirect('/security/code/2fa')
+                            }else{
+                                return next()
+                            }
+                        }
+                    }else{
+                        await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
+                        return res.redirect('/security/code/2fa')
+                    }
+                }
+            }
+
+            
+            next()
+        } catch (error) {
+            console.log(error);
+            
+        }
+    },
+    authPostState: async (req, res, next) => {
+        try {
+            if (!req.session.uid) {
+                res.redirect('/logout?error=Faca login!')
+                return
+            }
+    
+            let verifyToken = await verificarToken(req, res, req.cookies.token)
+            if (verifyToken == 'invalid' || !req.cookies.token) {
+                try {
+                    let newToken = await renovarToken(req, res, req.cookies.token, process.env.TOKENCODE, 'token')
+                    if (newToken == 'invalid') {
+                        res.redirect('/logout?error=Logue novamente, seu token e invalido!')
+                        if (!res.headersSent) {
+                            res.status(200).json({ success: false, data: 'Logue novamente, seu token e invalido' })
+                        }
+                    } else {
+                        next()
+                    }
+                } catch (error) {
+                    if (!res.headersSent) {
+                        res.status(200).json({ success: false, data: 'Não foi possível concluir sua solicitação' })
+                    }
+                    res.redirect('/logout?error=Não foi possível concluir sua solicitação!')
+                }
+            } else {
+                next()
+            }
+        } catch (error) {
+            console.log(error);
+            
+        }
+
+    },
+    generateSession: async (req, res, email, uid) => {
+        try {
+            let token = await gerarToken(res, req, uid, email, process.env.TOKENCODE, 'token')
+            return token
+        } catch (error) {
+            return null
+        }
+    },
     subscriptionStatus: async (req, res, next) => {
-        if (!req.params.id || !req.session.uid) {
-            res.redirect('/?error=Faca login novamente!')
-            return
-        }
-        if (!req.session.pass || req.session.pass == false) {
-            res.redirect('/pass')
-        }
         let server = await db.findOne({ colecao: "servers", doc: req.params.id })
         if ("vitalicio" in server && server.vitalicio == true) {
             next()
@@ -439,7 +600,50 @@ module.exports = {
             });
         } catch (error) {
             console.log(error);
-            
+
         }
+    },
+    sendEmail: async (email, subject, html) => {
+        try {
+            const transporter = await nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'sdkapps2023@gmail.com',
+                    pass: 'rbio wgsd reox fsap'
+                }
+            });
+            await transporter.sendMail({
+                from: 'SDKApps <sdkapps2023@gmail.com>',
+                to: email,
+                subject: subject,
+                html: html,
+                headers: {
+                    'X-Mailer': 'Nodemailer',
+                    'List-Unsubscribe': '<mailto:unsubscribe@skapps.com.br>',
+                },
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    criptografar: async (text, key) => {
+        const iv = crypto.randomBytes(16)
+        const cipher = crypto.createCipheriv(process.env.ALGORITHM, Buffer.from(key, 'hex'), iv);
+        let encrypted = cipher.update(text, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        return `${iv.toString('hex')}:${encrypted}`;
+    },
+
+    descriptografar:async (encrypted, key) => {
+        const [iv, data]= await encrypted.split(':')
+        const decipher = crypto.createDecipheriv(process.env.ALGORITHM, Buffer.from(key, 'hex'), Buffer.from(iv, 'hex'));
+        let decrypted = decipher.update(data, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    },
+    readTemplate: async (relativePath, data)=>{
+        let caminho = await path.join(__dirname, '/templates',relativePath)
+        return await ejs.renderFile(caminho, data);
     }
 }

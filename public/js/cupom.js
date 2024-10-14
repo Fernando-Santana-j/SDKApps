@@ -56,6 +56,7 @@ document.getElementById('select-product-focus-button').addEventListener('click',
 
     let productData = await fetch('/product/get', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

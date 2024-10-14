@@ -22,6 +22,7 @@ if ('personalize' in server) {
 async function sendPersonalize(type,data) {
     let session = await fetch('/personalize/change', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -121,6 +122,7 @@ document.getElementById('color-dest-input').addEventListener('input',()=>{
 document.getElementById('checkbox').addEventListener('change',async()=>{
     let session = await fetch('/personalize/productIcon', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -169,6 +171,7 @@ document.getElementById('save-mensage-welcome').addEventListener('click',async()
 
     let session = await fetch('/personalize/welcome', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -190,6 +193,7 @@ if (document.getElementById('desative-welcome')) {
     document.getElementById('desative-welcome').addEventListener('click',async()=>{
         let session = await fetch('/personalize/welcomeDesactive', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -211,6 +215,7 @@ if (document.getElementById('active-welcome')) {
     document.getElementById('active-welcome').addEventListener('click',async()=>{
         let session = await fetch('/personalize/welcomeActive', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -256,6 +261,7 @@ document.getElementById('saveChannelFeedback').addEventListener('click',async()=
     });
     let session = await fetch('/personalize/feedback', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -292,6 +298,7 @@ document.getElementById('save-mensage-lembrete').addEventListener('click',async(
     }
     let session = await fetch('/personalize/lembrete', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -311,6 +318,7 @@ document.getElementById('save-mensage-lembrete').addEventListener('click',async(
 async function toogleLembrete(active) {
     let session = await fetch('/personalize/lembreteToogle', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title>User - SDK</title>
+        <link rel="stylesheet" href="/public/css/userConfig.css">
+</head>
+
+<body>
+    <div id="body-containner">
+        <div id="containner">
+
+            <div id="full-containner-2fa" style="display: none;">
+                <div id="containner-2fa">
+                    <div id="content-2fa">
+                        <div>
+                            <h1 class="title-col">Autenticação de 2 fatores.</h1>
+                            <p class="desc-col">Escanei o código que segue abaixo ou digite manualmente para ativar a autenticação de 2 fatores na SDK!</p>
+                        </div>
+                        <div class="linha"></div>
+                        <div id="codes-2fa-content">
+                            <p id="code-2fa-text"></p>
+                            <img id="code-2fa-image" src="" alt="">
+                        </div>
+                        <div class="linha"></div>
+                        <div id="code-2fa-token">
+                            <div>
+                                <label class="lable-padrao" for="token-input-2fa">Insira o token de 6 digitos do aplicativo: </label>
+                                <input maxlength="6" type="text" class="input-padrao" id="token-input-2fa" placeholder="Token de 6 digitos">
+                            </div>
+                            <button class="button-padrao" id="send-code-2fa">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <main id="main-containner">
+                <h1 class="title-col">Configurações de usuário!</h1>
+                <div id="main-content-row">
+                    <div class="itens-col">
+                        <h1 class="title-col">Verificação de 2 fatores.</h1>
+                        <p class="desc-col">Use aplicativos como Microsoft Authenticator ou Google Authenticator para
+                            dar mais segurança para sua conta!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <% if ('security' in user && 'data2fa' in user.security) { %>
+                                <div id="buttons-active-desactive-2fa">
+                                    <label for="" class="lable-padrao">Ativar ou desativar a verificação de 2 fatores!</label>
+                                    <button id="desative-2fa" class="button-padrao redColor <%= user.security.data2fa.active == true ? '' : 'hidden' %>">Desativar verificação</button>
+                                    <button id="active-2fa" class="button-padrao greenColor <%= user.security.data2fa.active == true ? 'hidden' : '' %>">Ativar verificação</button>
+                                </div>
+                            <% }else{ %>
+                                <h1 class="mini-title-col">Você ainda não tem o cadastro da verificação de 2 fatores, clique no botão abaixo para cadastrar.</h1>
+                            <% } %>
+                            <div class="linha"></div>
+                            <button id="cadastro-2fa-button" class="button-padrao">Cadastrar 2Fa</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <div id="go-dashboard-containner">
+                <a class="button-padrao" style="max-width: 30em; min-width: 15em;" href="/dashboard">Ir para o
+                    dashboard</a>
+            </div>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/userConfig.js"></script>
+</body>
+
+</html>

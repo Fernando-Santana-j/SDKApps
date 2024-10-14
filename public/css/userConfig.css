@@ -1,0 +1,122 @@
+#main-containner {
+    width: 100%;
+    position: relative;
+
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+}
+
+#main-content-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: calc(100vh - 12em);
+    gap: 2em;
+    padding: 1em;
+    padding-right: 3em;
+    padding-left: 3em;
+    margin-top: 5em;
+}
+
+
+#go-dashboard-containner{
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+    margin-bottom: 0.5em;
+}
+#buttons-active-desactive-2fa{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+#cadastro-2fa-button{
+    margin-top: 1em;
+}
+
+
+#containner-2fa {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-color-opacity);
+    z-index: 9999999999999999;
+}
+
+#content-2fa {
+    overflow: auto;
+    min-width: 15em;
+    width: 100%;
+    max-width: 35em;
+    min-height: 30em;
+    margin: 1em;
+    padding: 1em;
+
+    z-index: 99999999999999999;
+    background-color: var(--tertiary-color);
+    border-radius: var(--border-radius-mid);
+    display: flex;
+    gap: 1em;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+} 
+#codes-2fa-content{
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+#code-2fa-text{
+    width: 100%;
+    padding: 1em;
+    text-align: center;
+    word-wrap: break-word;
+    text-wrap: wrap;
+    margin-bottom: 0.5em;
+    width: 100%;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+    border-radius: var(--border-radius-mid);
+    border: 1px solid var(--text-gray-color-primary);
+    
+}
+#code-2fa-image{
+    width: 100%;
+    min-width: 10em;
+    min-height: 10em;
+    border-radius: var(--border-radius-min);
+    max-width: 18em;
+    max-height: max-content;
+}
+
+#code-2fa-token{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+}
+@media screen and (max-width:500px) {
+    #code-2fa-text{
+        font-size: 0.8em;
+    }
+
+}

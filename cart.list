@@ -6,36 +6,26 @@ sistema de editar quantidade de produtos no carrinho
 
 
 
-
-                                            new Discord.ActionRowBuilder()
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Danger)
-                                                        .setLabel('⭐ - 1')
-                                                        .setCustomId('ticketAvalStart-1')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Secondary)
-                                                        .setLabel('⭐ - 2')
-                                                        .setCustomId('ticketAvalStart-2')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Primary)
-                                                        .setLabel('⭐ - 3')
-                                                        .setCustomId('ticketAvalStart-3')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Secondary)
-                                                        .setLabel('⭐ - 4')
-                                                        .setCustomId('ticketAvalStart-4')
-                                                )
-                                                .addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setStyle(Discord.ButtonStyle.Success)
-                                                        .setLabel('⭐ - 5')
-                                                        .setCustomId('ticketAvalStart-5')
-                                                )
-                                        
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrossel de Colaboradores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .carousel-container {
+            overflow: hidden;
+        }
+        .carousel-inner {
+            white-space: nowrap;
+            transition: transform 0.1s linear;
+        }
+        .carousel-item {
+            display: inline-block;
+            width: 256px;
+            padding: 1rem;
+            margin: 0 0.5rem;
+        }
+    </style>
+</head>

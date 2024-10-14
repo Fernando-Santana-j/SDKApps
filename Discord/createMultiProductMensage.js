@@ -56,7 +56,7 @@ module.exports = async (Discord2, client, data) => {
             components: [
                 new Discord.ActionRowBuilder().addComponents(
                     new Discord.StringSelectMenuBuilder()
-                        .setCustomId('multSelectProduct')
+                        .setCustomId(`quantidadeEdit`)
                         .setPlaceholder('Selecione um produto!')
                         .setMinValues(1)
                         .setMaxValues(1)

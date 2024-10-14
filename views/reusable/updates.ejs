@@ -1,7 +1,7 @@
-<link rel="stylesheet" href="<%= host %>/public/css/updates.css">
+<link rel="stylesheet" href="/public/css/updates.css">
 <div id="updates-containner">
     <div id="updates-row">
-        <div class="update-col"></div>
+        <div class="update-col">
             <div class="update-col-version-date">
                 <div class="update-col-version">
                     Versão 1.8
@@ -14,10 +14,10 @@
             <div class="update-col-content">
                 <div class="update-col-content-title">Lista de atualizações: </div>
                 <ul class="update-col-content-list">
-                    <li><b>Repaginação no comando de /enviar:</b> <br> Agora o comando de enviar este mais intuitivo, simples e com novas funcionalidades incríveis como a opção de enviar uma mensagem personalizada podendo selecionar um título, mensagem e banner, e na mensagem e no título é possível usar comandos para ter dados personalizados como: @@server (substitui pelo nome do servidor), @@user = (substitui pelo nome do usuário que ira receber o produto), @@usersend = (substitui pelo nome do usuário que esta enviando o produto).</li>
-                    <li><b>Repaginação no camando de /aprovar:</b> <br> Correção de bugs do comando de /aprovar além da opção de aprovar um carrinho sem precisar ir até o canal do mesmo.</li>
-                    <li><b>Novo comando de /produto:</b> <br> Agora é possível usar o comando de /produto em um canal para enviar a mensagem do produto selecionado, visando facilitar a organização do servidor e a praticidade.</li>
-                    <li><b>Correção de bugs gerais:</b> <br> Correção de bugs como a mensagem de cobrança não excluir os botões após o pagamento ou cancelamento da cobrança,</li>
+                    <li><b>Repaginação no comando de /enviar:</b> <br> Agora o comando de enviar está mais intuitivo, simples e com novas funcionalidades incríveis, como a opção de enviar uma mensagem personalizada podendo selecionar um título, mensagem e banner. Na mensagem e no título, é possível usar comandos para dados personalizados como: @@server (substitui pelo nome do servidor), @@user (substitui pelo nome do usuário que irá receber o produto), @@usersend (substitui pelo nome do usuário que está enviando o produto).</li>
+                    <li><b>Repaginação no comando de /aprovar:</b> <br> Correção de bugs no comando /aprovar, além da opção de aprovar um carrinho sem precisar ir até o canal do mesmo.</li>
+                    <li><b>Novo comando de /produto:</b> <br> Agora é possível usar o comando de /produto em um canal para enviar a mensagem do produto selecionado, facilitando a organização do servidor e a praticidade.</li>
+                    <li><b>Correção de bugs gerais:</b> <br> Correção de bugs como a mensagem de cobrança não excluir os botões após o pagamento ou cancelamento da cobrança.</li>
                 </ul>
             </div>
         </div>
@@ -35,10 +35,10 @@
             <div class="update-col-content">
                 <div class="update-col-content-title">Lista de atualizações: </div>
                 <ul class="update-col-content-list">
-                    <li><b>Comando de anúncio:</b> <br> Agora é possível criar um anúncio em qualquer canal do seu servidor apenas digitando /anuncio e preenchendo os campos para que sua mensagem seja enviada!</li>
-                    <li><b>Sistema de lembrete:</b> <br> Agora é possível configurar um lembrete para quando um usuário abrir um carrinho e esquecer de concluir sua compra, após 10 minutos será enviado esse lembrete, e possível configurar a mensagem na aba de personalização!</li>
-                    <li><b>Correção de bugs e mudanças diversas:</b> <br> Atualização no comando de enviar para modificar o estoque da mensagem do produto, correção de bugs na validação do plano, correção de bugs ao cadastrar estoque de produtos!</li>
-                    <li><b>Status do bot e das vendas:</b> <br> Agora é possível alterar se o bot ou as vendas ficaram ativas, ou desativadas no painel do seu servidor!</li>
+                    <li><b>Comando de anúncio:</b> <br> Agora é possível criar um anúncio em qualquer canal do servidor apenas digitando /anuncio e preenchendo os campos para que sua mensagem seja enviada!</li>
+                    <li><b>Sistema de lembrete:</b> <br> Agora é possível configurar um lembrete para quando um usuário abrir um carrinho e esquecer de concluir sua compra. Após 10 minutos será enviado esse lembrete, e é possível configurar a mensagem na aba de personalização.</li>
+                    <li><b>Correção de bugs e mudanças diversas:</b> <br> Atualização no comando de enviar para modificar o estoque da mensagem do produto. Correção de bugs na validação do plano e ao cadastrar estoque de produtos.</li>
+                    <li><b>Status do bot e das vendas:</b> <br> Agora é possível alterar se o bot ou as vendas estarão ativas ou desativadas no painel do servidor!</li>
                 </ul>
             </div>
         </div>
@@ -56,10 +56,10 @@
             <div class="update-col-content">
                 <div class="update-col-content-title">Lista de atualizações: </div>
                 <ul class="update-col-content-list">
-                    <li><b>Meio de pagamento via pix para a assinatura:</b> <br> Agora é possível ter uma assinatura sem o cartão apenas com o pix, visando facilitar a vida das pessoas que não usam ou tem medo de usar o cartão!</li>
-                    <li><b>Solicitação de estoque:</b> <br> Com essa funcionalidade os compradores poderão solicitar o estoque de um produto quando ele tiver acabado, enviando uma solicitação imediata para o vendedor!</li>
+                    <li><b>Meio de pagamento via PIX para a assinatura:</b> <br> Agora é possível ter uma assinatura sem o cartão, apenas com o PIX, visando facilitar a vida das pessoas que não usam ou têm medo de usar o cartão!</li>
+                    <li><b>Solicitação de estoque:</b> <br> Com essa funcionalidade, os compradores poderão solicitar o estoque de um produto quando ele acabar, enviando uma solicitação imediata para o vendedor!</li>
                     <li><b>Carrinhos expirados:</b> <br> Agora os carrinhos abandonados serão apagados automaticamente após 15 minutos!</li>
-                    <li><b>Feedback de compra:</b> <br> Agora após um usuário comprar um produto da sua loja ele tera a opção de dar um feedback!</li>
+                    <li><b>Feedback de compra:</b> <br> Agora, após um usuário comprar um produto da sua loja, ele terá a opção de dar um feedback!</li>
                 </ul>
             </div>
         </div>
@@ -77,11 +77,10 @@
             <div class="update-col-content">
                 <div class="update-col-content-title">Lista de atualizações: </div>
                 <ul class="update-col-content-list">
-                    <li><b>Novo comando de cobrança:</b> <br> Ao usar o comando /cobrar em qualquer servidor sera possivel enviar uma cobrança para um membro especifico do servido!</li>
-                    <li><b>Mensagem de boas vindas:</b> <br> Agora e possivel dar boas vindas aos usuarios novos atraves do nosso bot!</li>
+                    <li><b>Novo comando de cobrança:</b> <br> Ao usar o comando /cobrar em qualquer servidor, será possível enviar uma cobrança para um membro específico do servidor!</li>
+                    <li><b>Mensagem de boas-vindas:</b> <br> Agora é possível dar boas-vindas aos novos usuários através do nosso bot!</li>
                 </ul>
             </div>
         </div>
-    
     </div>
 </div>

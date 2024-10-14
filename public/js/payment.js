@@ -24,6 +24,7 @@ if (document.getElementById('signature-situation-button')) {
 
         let session = await fetch('/subscription/update', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },

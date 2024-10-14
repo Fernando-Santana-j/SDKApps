@@ -35,10 +35,10 @@ const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
 
-router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/mult',functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
         let server = await db.findOne({colecao:'servers', doc:req.body.serverID})
-        if (server.plan != 'inicial') {
+        if (server.plan == 'inicial') {
             if (!res.headersSent) {
                 res.status(200).json({ success: false, data: 'Seu plano não dá acesso a essa funcionalidade!' })
             }
@@ -47,7 +47,7 @@ router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }
         await require('../Discord/createMultiProductMensage.js')(Discord,client,{
             serverID: req.body.serverID,
             channelID: req.body.channelID,
-            backGround:req.files.backGround[0].path,
+            backGround:req.files.backGround ? req.files.backGround[0].path : null,
             logo:req.files.productLogo[0].path,
             productsList: req.body.productsList,
             productName: req.body.productName,
@@ -65,49 +65,57 @@ router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }
     }
 })
 
-router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/create',functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
-        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+    
+        let {price, productName, producDesc, channelID, serverID, typeProduct} = req.body
+
+        let server = await db.findOne({ colecao: 'servers', doc: serverID })
+        
         if (!server.bankData) {
             res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
             return
         }
-        const product = await stripe.products.create({
-            name: req.body.productName,
-            description: req.body.producDesc,
-        });
 
-        const price = await stripe.prices.create({
-            unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
-            currency: 'brl',
-            product: product.id,
-        });
+        if (isNaN(parseInt(price)) || !price) return res.status(200).json({ success: false, data: 'Adicione o preço do produto!' });
+        if (!productName) return res.status(200).json({ success: false, data: 'Adicione o nome do produto!' });
+        if (!producDesc) return res.status(200).json({ success: false, data: 'Adicione a descricão do produto!' });  
+        if (!channelID) return res.status(200).json({ success: false, data: 'Selecione um canal valido!' });
+        if (!req.files.productLogo) return res.status(200).json({ success: false, data: 'Adicione o logo do seu produto!' });
 
-        await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
         let backGround = null
         if (req.files.backGround && server.plan != 'inicial') {
             backGround = `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`
             await functions.comprimAndRecort(req.files.backGround[0].path, path.join(__dirname, '..', `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`))
         }
 
+        await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
 
 
 
+        const productStripe = await stripe.products.create({
+            name: req.body.productName,
+            description: req.body.producDesc,
+        })
 
-        let produtos = []
-
-        let estoque = JSON.parse(req.body.estoque)
-
+        const priceStripe = await stripe.prices.create({
+            unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
+            currency: 'brl',
+            product: productStripe.id,
+        });
+       
+        
+        
         let model = {
-            productID: await product.id,
-            productName: await req.body.productName,
-            producDesc: await req.body.producDesc,
+            productID: await productStripe.id,
+            productName: productName,
+            producDesc: producDesc,
             estoque: estoque,
-            channel: await req.body.channelID,
+            channel: channelID,
             productLogo: `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`,
             backGround: backGround,
-            price: await req.body.price,
-            priceID: await price.id,
+            price: price,
+            priceID: await priceStripe.id,
             estoqueModel: estoque.length > 0 ? estoque[0] : {
                 conteudo:[
                     {
@@ -118,6 +126,18 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             },
             embendType: req.body.embend
         }
+        
+        
+
+
+
+
+
+        let produtos = []
+
+        let estoque = JSON.parse(req.body.estoque)
+
+        
         if (server.products) {
             produtos = server.products
         }
@@ -150,7 +170,7 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
 
 })
 
-router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/update',functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (!server.bankData) {
@@ -250,7 +270,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     }
 })
 
-router.post('/product/delete', async (req, res) => {
+router.post('/product/delete',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (!server.bankData) {
@@ -316,7 +336,7 @@ router.post('/product/delete', async (req, res) => {
 
 })
 
-router.post('/product/getOne', async (req, res) => {
+router.post('/product/getOne',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         let productID = req.body.productID
@@ -330,7 +350,7 @@ router.post('/product/getOne', async (req, res) => {
     }
 })
 
-router.post('/product/get', async (req, res) => {
+router.post('/product/get',functions.authPostState, async (req, res) => {
     let verify = await new Promise(async (resolve, reject) => {
         try {
             let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
@@ -369,7 +389,7 @@ router.post('/product/get', async (req, res) => {
 })
 
 
-router.post('/estoque/txt', async (req, res) => {
+router.post('/estoque/txt',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (server) {
@@ -447,7 +467,7 @@ router.post('/estoque/txt', async (req, res) => {
     }
 })
 
-router.post('/product/estoqueAdd', async (req, res) => {
+router.post('/product/estoqueAdd',functions.authPostState, async (req, res) => {
     let verify = await new Promise(async (resolve, reject) => {
         try {
             let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
@@ -523,7 +543,7 @@ router.post('/product/estoqueAdd', async (req, res) => {
 })
 
 
-router.post('/product/mensage', async (req, res) => {
+router.post('/product/mensage',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         let productID = req.body.productID

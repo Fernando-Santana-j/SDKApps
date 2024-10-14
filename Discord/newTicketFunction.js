@@ -59,13 +59,15 @@ module.exports = async (client, interaction, ticketOptions) => {
                     .addComponents(
                         new Discord.ButtonBuilder()
                             .setStyle(Discord.ButtonStyle.Primary)
-                            .setLabel('⭐・Assumir Ticket')
+                            .setLabel('Assumir Ticket')
+                            .setEmoji(await require('./emojisGet').star)
                             .setCustomId(`assumirTicket-${generateProtocol.replace(/prot-\d+-/, '')}`)
                     )
                     .addComponents(
                         new Discord.ButtonBuilder()
                             .setStyle(Discord.ButtonStyle.Danger)
-                            .setLabel('❌・Fechar Ticket')
+                            .setLabel('Fechar Ticket')
+                            .setEmoji(await require('./emojisGet').cancelar)
                             .setCustomId(`closeTicket-${generateProtocol}`)
                     )
 
@@ -88,7 +90,8 @@ module.exports = async (client, interaction, ticketOptions) => {
                         .addComponents(
                             new Discord.ButtonBuilder()
                                 .setStyle(5)
-                                .setLabel('🎟・Ir para o Ticket')
+                                .setLabel('Ir para o Ticket')
+                                .setEmoji(await require('./emojisGet').redirect)
                                 .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
                         )
                 ],

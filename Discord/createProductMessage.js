@@ -261,18 +261,10 @@ module.exports = async (Discord2, client, data) => {
             files: [attachment],
             components: [
                 new Discord.ActionRowBuilder().addComponents(
-                    new Discord.StringSelectMenuBuilder()
-                        .setCustomId(`qntProduct_${data.productID}`)
-                        .setPlaceholder('Selecione a quantidade!')
-                        .setMinValues(1)
-                        .setMaxValues(1)
-                        .addOptions(...totalEstoque)
-                        .setDisabled(produto.estoque.length <= 0 ? true : false)
-                ),
-                new Discord.ActionRowBuilder().addComponents(
                     new Discord.ButtonBuilder()
-                        .setCustomId(`comprar_${data.productID}`)
+                        .setCustomId(`quantidadeEdit_${data.productID}`)
                         .setLabel('Comprar')
+                        .setEmoji(await require('./emojisGet').comprar)
                         .setStyle('3'),
                 )
             ]

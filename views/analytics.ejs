@@ -3,13 +3,13 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Analytics</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/analytics.css">
+    <link rel="stylesheet" href="/public/css/analytics.css">
 </head>
 <body>
     <div id="body-containner">
 
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:4}) %>
+            <%- include('./reusable/body.ejs',{index:5}) %>
             <main id="main-containner">
                 <div id="main-content">
                     <div id="vendas-chart-containner">
@@ -42,7 +42,7 @@
         let canceladosEstoque = JSON.parse(("<%= canceladosEstoque %>").replace(/&#34;/g, '"'))
         let paymentMetod = JSON.parse(("<%= paymentMetod %>").replace(/&#34;/g, '"'))
     </script>
-    <script src="<%= host %>/public/js/analytics.js"></script>
+    <script src="/public/js/analytics.js"></script>
     
 </body>
 </html>

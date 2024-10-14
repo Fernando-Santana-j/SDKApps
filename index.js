@@ -91,7 +91,7 @@ app.use('/', discordRouter);
 
 //TODO Mercado Pago Routes
 
-const mercadoPago = require('./mercadoPago.js')
+const mercadoPago = require('./routes/mercadoPago.js')
 app.use('/', mercadoPago);
 
 //TODO STRIPE ROUTES
@@ -107,102 +107,104 @@ const produtoRoutes = require('./stripe/productsRoutes.js');
 
 app.use('/', produtoRoutes);
 
+//TODO SEGURANCA ROUTES
 
 
+const securityRoutes = require('./routes/security.js');
 
-app.get('/pass', async (req, res) => {
-    res.render('tempPassPage.ejs', { host: `${webConfig.host}`, })
-})
-
-app.post('/verify/pass', (req, res) => {
-    let pass = req.body.pass
-
-    if (pass && pass.trim() == process.env.PASS) {
-        req.session.pass = true
-        if (!res.headersSent) {
-            res.status(200).json({ success: true})
-        }
-    } else {
-        if (!res.headersSent) {
-            res.status(200).json({ success: false, data: 'Senha incorreta!' })
-        }
-    }
-})
-
+app.use('/', securityRoutes);
 
 
 app.get('/', async (req, res) => {
-    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
+    res.render('index', { host: `${webConfig.host}`,isloged: req.session.uid && req.session.email ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
 })
 
 
-app.get('/dashboard', async (req, res) => {
-    if (req.session.uid) {
-        let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-        let server = await functions.reqServerByTime(user, functions.findServers)
-        let servidoresEnd = []
-        if (server.error) {
-            if (user.lastServers) {
-                for (let index = 0; index < user.lastServers.length; index++) {
-                    const element = user.lastServers[index];
-                    let Findserver = await db.findOne({ colecao: 'servers', doc: element })
-                    if (Findserver.error == false) {
-                        servidoresEnd.push(Findserver)
-                    }
-                }
-            } else {
-                res.redirect('/redirect/discord')
-            }
-        } else {
-            let lastServers = []
-            for (let i = 0; i < server.length; i++) {
-                let element = server[i]
+app.get('/dashboard', functions.authGetState, async (req, res) => {
 
-                let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
+    let server = await functions.reqServerByTime(user, functions.findServers)
+    let servidoresEnd = []
+    if (server.error) {
+        if (user.lastServers) {
+            for (let index = 0; index < user.lastServers.length; index++) {
+                const element = user.lastServers[index];
+                let Findserver = await db.findOne({ colecao: 'servers', doc: element })
                 if (Findserver.error == false) {
                     servidoresEnd.push(Findserver)
-                    lastServers.push(Findserver.id)
-                } else {
-                    servidoresEnd.push(element)
                 }
-
             }
-            db.update('users', user.id, {
-                lastServers: lastServers
-            })
+        } else {
+            res.redirect('/redirect/discord')
         }
-        let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
-        let chatItens = []
-        if ('ticketOptions' in adminServer) {
-            chatItens = adminServer.ticketOptions.motivos
-        }
-        res.render('dashboard', { host: `${webConfig.host}`, chatItens: chatItens, user: user, servers: servidoresEnd })
-
-
     } else {
-        res.redirect('/?error=Logue novamente!')
+        let lastServers = []
+        for (let i = 0; i < server.length; i++) {
+            let element = server[i]
+
+            let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
+            if (Findserver.error == false) {
+                servidoresEnd.push(Findserver)
+                lastServers.push(Findserver.id)
+            } else {
+                servidoresEnd.push(element)
+            }
+
+        }
+        db.update('users', user.id, {
+            lastServers: lastServers
+        })
     }
+    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
+    let chatItens = []
+    if ('ticketOptions' in adminServer) {
+        chatItens = adminServer.ticketOptions.motivos
+    }
+    res.render('dashboard', { host: `${webConfig.host}`, chatItens: chatItens, user: user, servers: servidoresEnd })
+
+})
+
+
+app.get('/user/config', functions.authGetState, async (req, res) => {
+
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
+
+    res.render('userConfig', { host: `${webConfig.host}`, user: user })
+
 })
 
 
 app.get('/logout', async (req, res) => {
     try {
+        try {
+            res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
+            res.cookie('verifyEmail', '', { httpOnly: true, expires: new Date(0) });
+            res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
+        } catch (error) { }
         if (req.session.uid) {
             const sessionID = req.session.id;
             req.sessionStore.destroy(sessionID, (err) => {
                 if (err) {
                     return console.error(err)
                 } else {
-                    res.redirect('/')
+                    res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
                 }
             })
+
         } else {
-            res.redirect('/')
+            res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
         }
     } catch (error) {
-        res.redirect('/')
+        res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
     }
 })
+
 
 app.get('/payment/:id', async (req, res) => {
     if (!req.params.id || !req.session.uid) {
@@ -210,6 +212,9 @@ app.get('/payment/:id', async (req, res) => {
         return
     }
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne({ colecao: 'servers', doc: req.params.id })
     let exist = false
     let type = null
@@ -224,7 +229,7 @@ app.get('/payment/:id', async (req, res) => {
     res.render('payment', { host: `${webConfig.host}`, user: user, server: server, exist: exist, type: type })
 })
 
-app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     const guilds = client.guilds.cache;
     const isBotInServer = guilds.has(serverID);
@@ -233,6 +238,9 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
         return
     }
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (!server || !user) {
         res.redirect('/?error=Erro ao recuperar o servidor ou o seu usuario!')
@@ -266,9 +274,12 @@ app.get('/server/:id', functions.subscriptionStatus, async (req, res) => {
 })
 
 
-app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (!server) {
         return
@@ -300,14 +311,39 @@ app.get('/server/sales/:id', functions.subscriptionStatus, async (req, res) => {
     if (adminServer && 'ticketOptions' in adminServer) {
         chatItens = adminServer.ticketOptions.motivos
     }
-    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, channels: textChannels, formatarMoeda: functions.formatarMoeda })
+    const roles = guild.roles.cache;
+    const filteredRoles = roles.filter(role => {
+        return role.name !== '@everyone' && role.managed !== true;
+    });
+    const roleObjects = filteredRoles.map(role => {
+        return {
+            name: role.name,
+            id: role.id
+        };
+    });
+
+    let productsSimple = server.products.map(product => {
+        return {
+            name: product.productName,
+            desc: `Preço: ${functions.formatarMoeda(product.price)} • Estoque: ${product.estoque.length}`,
+            value: product.productID
+        }
+    })
+
+    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server,cargosString: JSON.stringify(roleObjects), channels: textChannels, channelsString: JSON.stringify(textChannels), formatarMoeda: functions.formatarMoeda,productString : JSON.stringify(productsSimple) })   
 })
 
 
+app.post('/test',upload.none(), (req, res) => {
+    console.log(req.body);
+})
 
-app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/personalize/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (server.plan == 'inicial') {
         res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
@@ -353,9 +389,12 @@ app.get('/server/personalize/:id', functions.subscriptionStatus, async (req, res
 
 
 
-app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/analytics/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (server.plan == 'inicial') {
         res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
@@ -387,10 +426,13 @@ app.get('/server/analytics/:id', functions.subscriptionStatus, async (req, res) 
 })
 
 
-app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/permissions/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
@@ -422,10 +464,13 @@ app.get('/server/permissions/:id', functions.subscriptionStatus, async (req, res
 })
 
 
-app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
     if (server.plan == 'inicial') {
         res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
@@ -481,10 +526,13 @@ app.get('/server/ticket/:id', functions.subscriptionStatus, async (req, res) => 
     res.render('ticket', { host: `${webConfig.host}`, chatItens: chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
-app.get('/server/cupom/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/cupom/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
@@ -522,10 +570,13 @@ app.get('/server/cupom/:id', functions.subscriptionStatus, async (req, res) => {
 
 
 
-app.get('/server/config/:id', functions.subscriptionStatus, async (req, res) => {
+app.get('/server/config/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     try {
         let serverID = req.params.id
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+        if ('pass' in user == true) {
+            delete user.security
+        }
         let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
         const guilds = client.guilds.cache;
         const isBotInServer = guilds.has(serverID);
@@ -566,17 +617,14 @@ app.get('/redirect/cancel', (req, res) => {
     res.render('redirect', { host: `${webConfig.host}` })
 })
 
-
 app.get('/redirect/discord', (req, res) => {
     res.redirect(webConfig.loginURL)
 })
 
 
-
 app.get('/adm', (req, res) => {
     res.render('admin', { host: `${webConfig.host}` })
 })
-
 
 app.get('/copyText/:copy', async (req, res) => {
     res.render('copyText', { host: `${webConfig.host}`, copyText: req.params.copy })
@@ -587,11 +635,11 @@ app.get('/copyText/:copy', async (req, res) => {
 
 //-----POST-------
 
-app.post('/firebase/configs', (req, res) => {
+app.post('/firebase/configs', functions.authPostState, (req, res) => {
     res.status(200).json({ success: true, projectId: require('./config/firebase.json').project_id, data: require('./config/firebase.json') })
 })
 
-app.post('/accout/delete', async (req, res) => {
+app.post('/accout/delete', functions.authPostState, async (req, res) => {
     try {
         if (!req.session.uid || !req.body.serverID) {
             res.status(200).json({ success: false, data: 'Erro ao tentar deletar a conta!' })
@@ -635,7 +683,7 @@ app.post('/accout/delete', async (req, res) => {
 })
 
 
-app.post("/config/notify", async (req, res) => {
+app.post("/config/notify", functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         let newconfigs = {}
@@ -655,7 +703,7 @@ app.post("/config/notify", async (req, res) => {
 })
 
 
-app.post('/config/change', async (req, res) => {
+app.post('/config/change', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server.error == false) {
@@ -680,7 +728,7 @@ app.post('/config/change', async (req, res) => {
     }
 })
 
-app.post('/config/blockbank', async (req, res) => {
+app.post('/config/blockbank', functions.authPostState, async (req, res) => {
     try {
         let bank = req.body.bank
         let possiveisBanks = ['Banco Inter S.A.', "Picpay Serviços S.A."]
@@ -722,7 +770,7 @@ app.post('/config/blockbank', async (req, res) => {
 })
 
 
-app.post('/perms/changeOne', async (req, res) => {
+app.post('/perms/changeOne', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         let roleID = await req.body.roleID
@@ -763,7 +811,7 @@ app.post('/perms/changeOne', async (req, res) => {
     }
 })
 
-app.post('/perms/get', async (req, res) => {
+app.post('/perms/get', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         let roleID = await req.body.roleID
@@ -803,7 +851,7 @@ app.post('/perms/get', async (req, res) => {
     }
 })
 
-app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) => {
+app.post('/personalize/avatarbot', functions.authPostState, upload.single('avatarBot'), async (req, res) => {
     try {
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
@@ -860,7 +908,7 @@ app.post('/personalize/avatarbot', upload.single('avatarBot'), async (req, res) 
         }
     }
 })
-app.post('/personalize/change', async (req, res) => {
+app.post('/personalize/change', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -906,7 +954,7 @@ app.post('/personalize/change', async (req, res) => {
         }
     }
 })
-app.post('/personalize/productIcon', async (req, res) => {
+app.post('/personalize/productIcon', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -929,7 +977,7 @@ app.post('/personalize/productIcon', async (req, res) => {
         }
     }
 })
-app.post('/personalize/feedback', async (req, res) => {
+app.post('/personalize/feedback', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -952,7 +1000,7 @@ app.post('/personalize/feedback', async (req, res) => {
         }
     }
 })
-app.post('/personalize/welcome', async (req, res) => {
+app.post('/personalize/welcome', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -980,7 +1028,7 @@ app.post('/personalize/welcome', async (req, res) => {
         }
     }
 })
-app.post('/personalize/welcomeActive', async (req, res) => {
+app.post('/personalize/welcomeActive', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1003,7 +1051,7 @@ app.post('/personalize/welcomeActive', async (req, res) => {
         }
     }
 })
-app.post('/personalize/welcomeDesactive', async (req, res) => {
+app.post('/personalize/welcomeDesactive', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1027,7 +1075,7 @@ app.post('/personalize/welcomeDesactive', async (req, res) => {
         }
     }
 })
-app.post('/personalize/lembrete', async (req, res) => {
+app.post('/personalize/lembrete', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1054,7 +1102,7 @@ app.post('/personalize/lembrete', async (req, res) => {
         }
     }
 })
-app.post('/personalize/lembreteToogle', async (req, res) => {
+app.post('/personalize/lembreteToogle', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1086,7 +1134,7 @@ app.post('/personalize/lembreteToogle', async (req, res) => {
         }
     }
 })
-app.post('/sales/privateLog', async (req, res) => {
+app.post('/sales/privateLog', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1115,7 +1163,7 @@ app.post('/sales/privateLog', async (req, res) => {
         }
     }
 })
-app.post('/sales/publicLog', async (req, res) => {
+app.post('/sales/publicLog', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -1145,7 +1193,7 @@ app.post('/sales/publicLog', async (req, res) => {
     }
 })
 
-app.post('/ticket/create', async (req, res) => {
+app.post('/ticket/create', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         const user = await client.users.fetch(body.userID);
@@ -1164,7 +1212,7 @@ app.post('/ticket/create', async (req, res) => {
     }
 })
 
-app.post('/ticket/saveSend', async (req, res) => {
+app.post('/ticket/saveSend', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1203,7 +1251,7 @@ app.post('/ticket/saveSend', async (req, res) => {
         console.log(error);
     }
 })
-app.post('/ticket/motivoDEL', async (req, res) => {
+app.post('/ticket/motivoDEL', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1231,7 +1279,7 @@ app.post('/ticket/motivoDEL', async (req, res) => {
     }
 })
 
-app.post('/ticket/motivoUPD', async (req, res) => {
+app.post('/ticket/motivoUPD', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1261,7 +1309,7 @@ app.post('/ticket/motivoUPD', async (req, res) => {
     }
 })
 
-app.post('/ticket/motivoADD', async (req, res) => {
+app.post('/ticket/motivoADD', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1303,7 +1351,7 @@ app.post('/ticket/motivoADD', async (req, res) => {
 })
 
 
-app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
+app.post('/ticket/banner', functions.authPostState, upload.single('BannerTicket'), async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         var DiscordServer = await client.guilds.cache.get(req.body.serverID);
@@ -1355,7 +1403,7 @@ app.post('/ticket/banner', upload.single('BannerTicket'), async (req, res) => {
 })
 
 
-app.post('/ticket/horario', async (req, res) => {
+app.post('/ticket/horario', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1389,7 +1437,7 @@ app.post('/ticket/horario', async (req, res) => {
         console.log(error);
     }
 })
-app.post('/ticket/privatelog', async (req, res) => {
+app.post('/ticket/privatelog', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1423,7 +1471,7 @@ app.post('/ticket/privatelog', async (req, res) => {
         console.log(error);
     }
 })
-app.post('/ticket/desc', async (req, res) => {
+app.post('/ticket/desc', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1460,7 +1508,7 @@ app.post('/ticket/desc', async (req, res) => {
         console.log(error);
     }
 })
-app.post('/ticket/publiclog', async (req, res) => {
+app.post('/ticket/publiclog', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         let server = await db.findOne({ colecao: 'servers', doc: body.serverID })
@@ -1493,7 +1541,7 @@ app.post('/ticket/publiclog', async (req, res) => {
     }
 })
 
-app.post('/cupom/create', async (req, res) => {
+app.post('/cupom/create', functions.authPostState, async (req, res) => {
     try {
         let body = await req.body
         console.log(body);
@@ -1535,7 +1583,7 @@ app.post('/cupom/create', async (req, res) => {
     }
 })
 
-app.post('/send/discordMensage', async (req, res) => {
+app.post('/send/discordMensage', functions.authPostState, async (req, res) => {
     try {
         var DiscordServer = await client.guilds.cache.get(req.body.guildId);
         var DiscordChannel = await DiscordServer.channels.cache.get(req.body.channelId)
@@ -1595,7 +1643,7 @@ app.post('/send/discordMensage', async (req, res) => {
 })
 
 
-app.post('/verify/adm', (req, res) => {
+app.post('/verify/adm', functions.authPostState, (req, res) => {
     if (req.body.pass == process.env.ADMINPASS && req.body.userID == process.env.ADMINLOGIN) {
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: req.body.userID })
@@ -1608,7 +1656,7 @@ app.post('/verify/adm', (req, res) => {
 })
 
 
-app.post('/get/server', async (req, res) => {
+app.post('/get/server', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (server) {
@@ -1628,7 +1676,7 @@ app.post('/get/server', async (req, res) => {
 })
 
 
-app.post('/statusBotVendas', async (req, res) => {
+app.post('/statusBotVendas', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {

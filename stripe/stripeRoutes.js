@@ -12,10 +12,12 @@ const sharp = require('sharp');
 const axios = require('axios');
 let client = require('../Discord/discordIndex').client
 
-router.post('/subscription/create', async (req, res) => {
+router.post('/subscription/create',functions.authPostState, async (req, res) => {
     try {
         let user = await db.findOne({ colecao: 'users', doc: req.body.uid })
-
+        if ('pass' in user == true) {
+            delete user.security
+        }
         let time = req.body.time
         let plan = req.body.plan
         let indexPrice = time == 1 ? 0 : time == 3 ? 1 : 2
@@ -55,7 +57,7 @@ router.post('/subscription/create', async (req, res) => {
 })
 
 
-router.post('/subscription/update', async (req, res) => {
+router.post('/subscription/update',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
         if (server) {
@@ -183,7 +185,7 @@ router.post('/webhook/stripe/payment', async (req, res) => {
 })
 
 
-router.post('/addDadosBanc', async (req, res) => {
+router.post('/addDadosBanc',functions.authPostState, async (req, res) => {
     try {
         if (!req.session.uid) {
             res.status(200).json({ success: false, data: 'Sessao invalida' })
@@ -272,7 +274,7 @@ router.post('/addDadosBanc', async (req, res) => {
     }
 })
 
-router.post('/account/modify', async (req, res) => {
+router.post('/account/modify',functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (server.bankData && server.bankData.bankID) {
@@ -294,9 +296,9 @@ router.post('/account/modify', async (req, res) => {
 })
 
 
-router.get('/accountLink/:account/:serverID', async (req, res) => {
+router.get('/accountLink/:account/:serverID',functions.authGetState, async (req, res) => {
     if (!req.session.uid || !req.params.account) {
-        return res.redirect('/?error=Erri ao recuperar a sessao!')
+        return res.redirect('/?error=Erro ao recuperar a sessao!')
     }
     const accountLink = await stripe.accountLinks.create({
         account: req.params.account,
@@ -309,8 +311,7 @@ router.get('/accountLink/:account/:serverID', async (req, res) => {
 })
 
 
-
-router.post('/subscription/exist', async (req, res) => {
+router.post('/subscription/exist',functions.authPostState, async (req, res) => {
 
     try {
         let preserver = await db.findOne({ colecao: `preServers`, doc: req.body.serverID })

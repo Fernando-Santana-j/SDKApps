@@ -22,8 +22,8 @@
 
 #pagamentos-containner,
 #produtos-containner {
-    width: 40%;
-    height: 45em;
+    width: 45%;
+    height: 50em;
     padding: 1em;
     display: flex;
     flex-direction: column;
@@ -34,9 +34,9 @@
 #pagamentos-produtos-containner {
     width: 90%;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-
+    
 }
 
 #pagamentos-content {
@@ -161,34 +161,30 @@
 }
 .product-cadastro-content {
     padding: 1em;
-    width: 90%;
+    width: 100%;
     border-radius: var(--border-radius-min);
     background-color: var(--secundary-color);
 
     .cadastro-content {
         width: 100%;
-        height: calc(100% - 2.5em);
+        height: 100% ;
         display: flex;
         padding: 1em;
-        gap: 1em;
+        gap: 3em;
         justify-content: space-around;
         align-items: center;
 
-        .cadastro-left-content,
-        .cadastro-rigth-content {
-            width: 45%;
-            height: 100%;
-            padding: 1em;
-            margin-top: 1em;
-        }
 
         .cadastro-left-content {
             display: flex;
+            width: 30%;
             align-items: center;
             justify-content: space-around;
             flex-direction: column;
-            gap: 1em;
-
+            height: 100%;
+            gap: 4em;
+            padding: 1em;
+            margin-top: 1em;
             .channels-containner {
                 display: flex;
                 flex-direction: column;
@@ -205,81 +201,7 @@
                 }
             }
 
-            .backGround-containner {
-                display: flex;
-                flex-direction: column;
-                gap: 1.5em;
-
-                .backGround-title {
-                    text-align: center;
-                    font-size: 1.2em;
-                    font-weight: 500;
-                    color: var(--color-text-primary);
-                    font-family: 'poppins';
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    #svg-premium {
-                        width: 2em;
-                    }
-                }
-
-                .backGround-content {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 1.5em;
-                    justify-content: space-around;
-
-                    .backGround-image-preview {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        width: 100%;
-                        text-align: center;
-                    }
-
-                    .backGround-image-preview label {
-                        font-size: 0.8em;
-                        font-weight: 400;
-                        color: var(--color-text-primary);
-                        font-family: 'poppins';
-                    }
-
-                    .backGround-image-preview img {
-                        width: 80%;
-                        max-width: 14em;
-                        height: 10em;
-                        object-fit: cover;
-                        border-radius: var(--border-radius-min);
-
-                    }
-
-                    .backGround-image-input-content {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        width: 100%;
-
-                        .image-lable {
-                            border: 2px solid var(--secundary-color-purple);
-                            border-radius: var(--border-radius-mid);
-                            width: 80%;
-                            height: 3em;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            font-size: 1.2em;
-                            font-weight: 500;
-                            color: var(--color-text-primary);
-                            font-family: 'poppins';
-                            cursor: pointer;
-                        }
-                    }
-                }
-            }
-
+            
 
         }
 
@@ -289,15 +211,18 @@
             justify-content: space-around;
             flex-direction: column;
             gap: 1em;
-
+            flex: 1;
+            padding: 2em;
+            margin-top: 1em;
 
 
             .rigth-content {
                 display: flex;
+                width: 100%;
                 justify-content: space-around;
                 align-items: center;
                 flex-direction: column;
-                gap: 1em;
+                gap: 2em;
 
                 .inputs-containner {
                     width: 100%;
@@ -312,32 +237,33 @@
                 .unic-containner {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 1em;
+                    gap: 2em;
                     width: 100%;
                     justify-content: space-between;
                     align-items: center;
-                    height: 100%;
-
+                    height: 25em;
+                    text-align: center;
                     .doble-containner {
-                        width: 60%;
+                        height: 100%;
                         display: flex;
                         flex-direction: column;
                         gap: 1em;
+                        flex: 1;
                         justify-content: space-between;
                     }
 
                     .product-logo-content {
                         display: flex;
-                        align-items: center;
                         flex-direction: column;
                         gap: 1em;
-                        width: 30%;
-                        justify-content: center;
-
+                        flex: 1;
+                        height: 100%; 
+                        align-items: center;
+                        justify-content: space-between;
                         #logo-preview {
                             cursor: pointer;
-                            width: 8em;
-                            height: 8em;
+                            width: 10em;
+                            height: 10em;
                             border-radius: var(--border-radius-mid);
                         }
                     }
@@ -548,9 +474,7 @@
                 align-items: center;
                 justify-content: center;
 
-                #svg-premium {
-                    width: 2em;
-                }
+                
             }
 
             #backGround-content {
@@ -687,7 +611,10 @@
     color: var(--color-text-primary);
     font-family: 'poppins';
     transition: 0.7s;
-
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     &:hover {
         transition: 0.7s;
         opacity: 0.8;
@@ -734,7 +661,7 @@
         text-align: center;
         padding: 2em;
         width: 30em;
-        z-index: 999999999999999999999999999999999;
+        z-index: 99999999999999;
         border-radius: var(--border-radius-min);
         background-color: var(--tertiary-color);
     }
@@ -767,8 +694,8 @@
 #cadastro-estoque-config-containner {
     margin-top: 1em;
     width: 100%;
-    gap: 1em;
-
+    gap: 2em;
+    flex-direction: column;
     #estoque-config-content {
         display: flex;
         flex-direction: column;
@@ -933,7 +860,7 @@
 #add-pix-popup-close{
     width: 100vw;
     height: 100vh;
-    z-index: 999999999999999;
+    z-index: 999999;
     position: fixed;
     background-color: rgba(0, 0, 0, 0.5);
 }
@@ -944,14 +871,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999999999999999;
+    z-index: 9999999;
     #add-pix-popup-content{
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         padding: 1em;
         border-radius: var(--border-radius-mid); 
-        z-index: 9999999999999999;
+        z-index: 99999999;
         width: 50em;
         height: 25em;
         align-items: center;
@@ -1023,9 +950,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
-    justify-content: space-around;
+    justify-content: space-between;
     #private-log-content,#public-log-content{
-        width: 40%;
+        width: 45%;
         display: flex;
         flex-direction: column;
         gap: 1em;
@@ -1194,6 +1121,288 @@
     resize: none;
     height: 6em;
 }
+
+#cadastro-estoque-config-single{
+    width: 100%;
+    padding: 2em;
+    gap: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.backGround-title {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    #svg-premium {
+        width: 2em;
+    }
+}
+
+
+.backGround-image-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+}
+
+.backGround-image-preview label {
+    width: 80%;
+}
+
+.backGround-image-preview img {
+    width: 100%;
+    max-width: 14em;
+    height: 10em;
+    min-width: 10em;
+    object-fit: cover;
+    border-radius: var(--border-radius-min);
+
+}
+
+.backGround-image-input-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+    
+}
+    
+
+#svg-premium {
+    
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+#svg-premium svg{
+    width: 2em;
+
+}
+.image-lable {
+    border: 2px solid var(--secundary-color-purple);
+    border-radius: var(--border-radius-mid);
+    width: 80%;
+    text-align: center;
+    height: 3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+    cursor: pointer;
+}
+
+
+@-webkit-keyframes scale-up-center {
+    0% {
+      -webkit-transform: scale(0.3);
+              transform: scale(0.3);
+    }
+    100% {
+      -webkit-transform: scale(1);
+              transform: scale(1);
+    }
+  }
+  @keyframes scale-up-center {
+    0% {
+      -webkit-transform: scale(0.3);
+              transform: scale(0.3);
+    }
+    100% {
+      -webkit-transform: scale(1);
+              transform: scale(1);
+    }
+  }
+
+@-webkit-keyframes scale-down-center {
+    0% {
+      -webkit-transform: scale(1);
+              transform: scale(1);
+    }
+    100% {
+      -webkit-transform: scale(0.3);
+              transform: scale(0.3);
+    }
+  }
+@keyframes scale-down-center {
+    0% {
+      -webkit-transform: scale(1);
+              transform: scale(1);
+    }
+    100% {
+      -webkit-transform: scale(0.3);
+              transform: scale(0.3);
+    }
+}
+  
+
+.radio-list{
+    width: 100%;
+}
+
+#type-product-select{
+    width: 100%;
+}
+#type-product-select-content,#type-embend-select-content{
+    display: flex;
+    width: 100%;
+
+}
+#infos-prod-select{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+#infos-prod-select li,#infos-embend-select li{
+    width: 30px;
+    height: 30px;
+    margin-top: 2em;
+    cursor: help;
+}
+
+
+#infos-select-popup{
+    position: fixed;
+    width: 28em;
+    height: 22em;
+    transition: all 0.4s ease; 
+    z-index: -1;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    opacity: 0;
+    transform: scale(0.5);
+    padding: 1em;
+    border-radius: var(--border-radius-min);
+    background-color: var(--tertiary-color);
+}
+#info-select-popup-text{
+    width: 100%;
+    
+}
+#info-select-popup-img{
+    width: 100%;
+}
+#select-type-embend-content{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+#cadastro-estoque-config-selectType{
+    display: flex;
+    gap: 1em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1em;
+    width: 100%;
+}
+
+
+#estoque-config-txt-content{
+    display: flex;
+    gap: 2em;
+}
+#estoque-config-text-file{
+    width: 100%;
+}
+#estoque-config-txt-file-content{
+    width: 100%;
+}
+#estoque-config-input-title-txt{
+    height: calc(100% - 1.5em);
+
+}
+#estoque-config-txt-file-selected{
+    margin-bottom: 1em;
+    font-weight: 500;
+}
+#select-menu-channel-create-product{
+    width: 100%;
+}
+
+#cadastro-number-estoque-config-containner{
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+#cadastro-number-estoque-config{
+    display: flex;
+    gap: 2em;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#cadastro-assinatura-estoque-config-containner,#cadastro-estoque-multi-product{
+    margin-top: 2em;
+    flex-direction: column;
+    align-items: center;
+}
+#cadastro-assinatura-estoque-config{
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+    align-items: center;
+    width: 100%;
+
+}
+#select-type-time-content{
+    flex: 0.6;
+}
+#other-configs-assintura{
+    flex: 1;
+    padding: 1em;
+    padding-left: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+#cargo-configs-assintura{
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+}
+#select-cargo-assinatura,#time-number-input-assinatura{
+    min-width: 15em !important;
+    width: 60% !important;
+}
+
+
+
+#buttons-cadastro-clear-product{
+    display: flex;
+    gap: 2em;
+    justify-content: space-between;
+    padding: 1em;
+}
+#clear-product-cadastro{
+    width: 40%;
+}
+
 @media screen and (max-width:800px) {
     #pagamentos-produtos-containner{
         flex-direction: column;
@@ -1201,7 +1410,7 @@
          width: 100%;
     }
     #pagamentos-containner,#produtos-containner{
-        width: 90% !important; 
+        width: 100% !important; 
     }
     .cadastro-content{
         flex-direction: column;
@@ -1245,7 +1454,16 @@
     .product-cadastro-containner{
         width: 100% !important;
     }
-    #cadastro-content{
-        gap: 0.5em !important;
+
+}
+
+
+@media screen and (max-width:1400px) {
+    .cadastro-content{
+        flex-direction: column;
     }
+    .cadastro-left-content,#select-type-embend-content,.cadastro-rigth-content,.channels-containner,.rigth-content{
+        width: 100% !important;
+    }
+    
 }

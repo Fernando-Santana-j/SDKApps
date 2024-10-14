@@ -3,13 +3,13 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Personalizar</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/personalize.css">
+    <link rel="stylesheet" href="/public/css/personalize.css">
 </head>
 <body>
     <div id="body-containner">
 
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:3}) %>
+            <%- include('./reusable/body.ejs',{index:4}) %>
             <main id="main-containner">
                 <h1 class="title-col">Modifique o seu bot da maneira que desejar!</h1>
                 <p class="desc-col">As alterações são salvas assim que modificadas!</p>
@@ -52,7 +52,7 @@
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
                             <label id="lableAvatar" for="avatarBotPerso">
-                                <img src="<%= host %>/public/img/LOGOFUNDO.png" id="avatarPreview">
+                                <img src="/public/img/LOGOFUNDO.png" id="avatarPreview">
                                 <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="avatarBotPerso">
                             </label>
                         </div>
@@ -151,6 +151,6 @@
     </div>
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/personalize.js"></script>
+    <script src="/public/js/personalize.js"></script>
 </body>
 </html>

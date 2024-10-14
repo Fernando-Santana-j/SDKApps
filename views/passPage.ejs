@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pass</title>
+    <%- include('./reusable/head.ejs') %>
+    <style>
+        body{
+            background-color: var(--opacity-color-purple);
+        }
+    </style>
+</head>
+<body>
+    
+    <div>
+        <div id="containner"></div>
+        <%- include('./reusable/script.ejs') %>
+       
+        <script>
+            let first = '<%= firstSend %>'
+            let mensage = '<%= mensage %>'
+            if (mensage.length > 0 ) {
+                mensageNotify(mensage)
+            }
+            passVerify(null,'geral',"/dashboard",first == 'true' ? 'first' : null)
+        </script>
+    </div>
+</body>
+</html>

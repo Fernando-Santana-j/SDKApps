@@ -10,9 +10,9 @@ module.exports = async (Discord, client, data) => {
         if (serverData.bankData && serverData.bankData.mercadoPagoToken && serverData.bankData.mercadoPagoToken != '') {
             paymentFields.unshift(
                 await new Discord.StringSelectMenuOptionBuilder()
-                .setLabel('PIX')
-                .setDescription('Método mais comum de pagamento no Brasil!')
-                .setValue('PIX')
+                    .setLabel('PIX')
+                    .setDescription('Método mais comum de pagamento no Brasil!')
+                    .setValue('PIX')
             )
         }
         if (serverData.bankData && serverData.bankData.bankID) {
@@ -27,39 +27,10 @@ module.exports = async (Discord, client, data) => {
                     .setValue('boleto')
             )
         }
-        const row = new Discord.ActionRowBuilder().addComponents(
-            new Discord.StringSelectMenuBuilder()
-                .setCustomId('payment')
-                .setPlaceholder('Selecione o método de pagamento desejado!')
-                .setMinValues(1)
-                .setMaxValues(1)
-                .addOptions(...paymentFields)
-        )
-        const row2 = new Discord.ActionRowBuilder()
-            .addComponents(
-                new Discord.ButtonBuilder()
-                    .setCustomId(`confirm`)
-                    .setLabel('Confirmar')
-                    .setStyle('3'),
-            )
-            .addComponents(
 
-                new Discord.ButtonBuilder()
-                    .setCustomId('cancel')
-                    .setLabel('Cancelar')
-                    .setStyle('4')
-            ).addComponents(
-                new Discord.ButtonBuilder()
-                    .setCustomId(`remove`)
-                    .setLabel('Remover produto')
-                    .setStyle('4')
-            )
-            // .addComponents(
-            //     new Discord.ButtonBuilder()
-            //         .setCustomId(`cupombutton`)
-            //         .setLabel('Adicionar Cupom')
-            //         .setStyle('1')
-            // );
+        console.log(await require('./emojisGet'));
+        
+
 
         let fields = []
         let carrinhos = require('./discordIndex').carrinhos
@@ -79,8 +50,8 @@ module.exports = async (Discord, client, data) => {
             let valorTotalFormatado = valorTotalReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             produtcs = produtcs.toString()
             fields.unshift({ name: '\u200B', value: '\u200B' },)
-            fields.unshift({ name: `Quantidade de produtos: `, value: "` " + produtcs + " `", inline:true })
-            fields.unshift({ name: `Valor total: `, value: "` " + valorTotalFormatado + " `", inline:true })
+            fields.unshift({ name: `Quantidade de produtos: `, value: "` " + produtcs + " `", inline: true })
+            fields.unshift({ name: `Valor total: `, value: "` " + valorTotalFormatado + " `", inline: true })
         } else {
             DiscordChannel.delete()
             return
@@ -88,57 +59,71 @@ module.exports = async (Discord, client, data) => {
         let contentEmbend = {
             embeds: [
                 new Discord.EmbedBuilder()
-                    .setTitle('Selecione abaixo o metodo de pagamento depois confirme para gerar o seu link de pagamento!')
-                    .setDescription(`Clique em cancelar caso desista de fazer a compra.
-
-                        Abaixo são os itens do seu carrinho.`)
-                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png`})
+                    .setTitle('Siga as etapas abaixo com os botões para concluir sua compra.')
+                    .setDescription(`Abaixo temos o total de itens, o preço total do carrinho e cada produto que você adicionou no carrinho com a quantidade e seu preço base!`)
+                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
                     .addFields(...[...fields, { name: '\u200B', value: '\u200B' },])
                     .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
                     .setThumbnail(`https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp`)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
-            components: [row, row2],
+            components: [
+
+                new Discord.ActionRowBuilder()
+                    .addComponents(
+                        new Discord.ButtonBuilder()
+                            .setCustomId(`cartEditQuantidade`)
+                            .setLabel('Editar quantidade')
+                            .setEmoji(await require('./emojisGet').editar)
+                            .setStyle(Discord.ButtonStyle.Primary)
+                    )
+                    .addComponents(
+                        new Discord.ButtonBuilder()
+                            .setCustomId(`remove`)
+                            .setEmoji(await require('./emojisGet').apagar)
+                            .setLabel('Remover produto')
+                            .setStyle('4')
+                    ),
+
+                // .addComponents(
+                //     new Discord.ButtonBuilder()
+                //         .setCustomId(`cupombutton`)
+                //         .setLabel('Adicionar Cupom')
+                //         .setStyle('1')
+                // );
+
+                new Discord.ActionRowBuilder()
+                    .addComponents(
+                        new Discord.ButtonBuilder()
+                            .setCustomId(`paymentSelect`)
+                            .setLabel('Ir para o pagamento')
+                            .setEmoji(await require('./emojisGet').comprar)
+                            .setStyle('3'),
+                    )
+                    .addComponents(
+
+                        new Discord.ButtonBuilder()
+                            .setCustomId('cancelCart')
+                            .setLabel('Cancelar')
+                            .setEmoji(await require('./emojisGet').cancelar)
+                            .setStyle('4')
+                    ),
+
+            ],
             files: []
         }
 
         if (data.edit == true) {
             const botMessages = await DiscordChannel.messages.cache.filter(msg => msg.author.id === client.user.id);
 
-            // Pegue a última mensagem enviada pelo bot
             const lastBotMessage = await botMessages.first();
             lastBotMessage.edit(contentEmbend)
         } else {
             await DiscordChannel.send(contentEmbend);
         }
-        if ('personalize' in serverData && 'lembreteMensage' in serverData.personalize && serverData.personalize.lembreteMensage.active == true) {
-            let discordChannel = await DiscordServer.channels.cache.get(data.channelID)
-            if (discordChannel && !carrinhosMensage.includes(data.channelID)) {
-                setTimeout(async()=>{
-                    try {
-                        const userD = await client.users.fetch(user)
-                        require('../Discord/discordIndex').sendDiscordMensageUser(userD,serverData.personalize.lembreteMensage.title,serverData.personalize.lembreteMensage.mensage,`https://discord.com/channels/${DiscordServer.id}/${data.channelID}`,'🛒・Ir para o carrinho')
-                        carrinhosMensage.push(data.channelID)
-                    } catch (error) {}
-                },600000)
-            }
-            
-        }
-        setTimeout(async()=>{
-            try {
-                await DiscordServer.channels.cache.get(data.channelID).delete()
-                const userD = await client.users.fetch(user)
-                userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-            } catch (error) {}
-        },1000000)
     } catch (error) {
-        console.log("MainCartERROR: ",error);
+        console.log("MainCartERROR: ", error);
     }
-
-
-    //remove product
-
-
 
 };
 

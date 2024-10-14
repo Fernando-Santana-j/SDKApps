@@ -30,6 +30,7 @@ document.addEventListener('click', async (event) => {
         try {
             let session = await fetch('/ticket/create', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -72,6 +73,7 @@ init()
 async function init() {
     let session = await fetch('/firebase/configs', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -196,6 +198,7 @@ async function sendMensage() {
     document.getElementById('chat-input-mensage').value = ''
     let session = await fetch('/send/discordMensage', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

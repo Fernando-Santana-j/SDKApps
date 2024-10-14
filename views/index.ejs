@@ -2,9 +2,9 @@
 <html>
 
 <head>
-    <%- include('./reusable/head.ejs') %>
+    <%- include('./reusable/head.ejs',{host:host}) %>
     <title>SDK - Inicio</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/style.css">
+    <link rel="stylesheet" href="/public/css/style.css">
 </head>
 
 <body>
@@ -12,7 +12,7 @@
         <div id="containner">
             <div id="top-fixed-menu">
                 <div id="fixed-menu-logo" class="flex-center">
-                    <img src="<%= host %>/public/img/logo-color-1.png">
+                    <img src="/public/img/logo-color-1.png">
                 </div>
                 <div id="fixed-menu-buttons">
                     <a href="/help" class="buttons-fixed-menu flex-center" id="buttons-support">Contato</a>
@@ -101,8 +101,8 @@
                 </section>
                 <section id="comunity-section">
                     <div class="comunity-containners" id="left-comunity-containner">
-                        <h1 class="comunity-titles">Novidades</h1>
-                        <%- include('./reusable/updates.ejs') %>
+                        <h1 class="comunity-titles">Comunidade SDK</h1>
+                        <iframe id="discord-iframe" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
                     </div>
                     <div class="comunity-containners" id="rigth-comunity-containner">
                         <h1 class="comunity-titles">Bem-vindo a SDK</h1>
@@ -124,11 +124,38 @@
                         </div>
                     </div>
                 </section>
+                <section id="other-section">
+                    <div class="other-containners" >
+                        <h1 class="comunity-titles">Novidades</h1>
+                        <%- include('./reusable/updates.ejs') %>
+                    </div>
+                    <div class="other-containners">
+                        <h1 class="other-titles">Colaboradores</h1>
+                        <div class="carousel-container">
+                            <div class="title-col">Em breve</div>
+                            <!-- <div id="carousel" class="carousel-content">
+                                <div class="carousel-inner">
+                                    <%# collaborators.concat(collaborators).forEach((collaborator, index) => { %>
+                                        <div class="carousel-item">
+                                            <img src="<%#= collaborator.image %>" alt="<%#= collaborator.name %>" class="carrossel-image">
+                                            <h3 class="mini-title-col"><%#= collaborator.name %></h3>
+                                            <div class="text-center">
+                                                <a href="<%#= collaborator.link %>" class="carrossel-button" target="_blank" rel="noopener noreferrer">
+                                                    Ver Servidor
+                                                </a>
+                                            </div>
+                                        </div>
+                                    <%# }); %>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                </section>
                 <footer>
                     <div id="dual-group">
                         <div id="left-containner">
                             <div id="footer-logo-containner">
-                                <img id="footer-logo-img" src="<%= host %>/public/img/logo-text-dark.png" alt="">
+                                <img id="footer-logo-img" src="/public/img/logo-text-dark.png" alt="">
                             </div>
                             <div id="redes-containner">
                                 <a class="redes-icon" target="_blank" href="https://discord.gg/sdkapps">
@@ -204,12 +231,7 @@
     
                             </div>
                         </div>
-                        <script>
-                            let theme = localStorage.getItem('theme')
-                            if (theme == 'dark') {
-                                document.getElementById('footer-logo-img').src = '<%= host %>/public/img/logo-text-ligth.png'
-                            }
-                        </script>
+
                         <div id="mid-containner">
                             <p id="direitos-reservados">
                                 © 2024 SDKApps. Todos os direitos reservados. Desenvolvido por <a
@@ -242,7 +264,7 @@
                                 <a href="">
                                     <li class="rigth-itens">Reviews</li>
                                 </a>
-                                <a href="https://discord.gg/sdkapp">
+                                <a href="https://discord.gg/sdkapps">
                                     <li class="rigth-itens">Servidor Discord</li>
                                 </a>
                             </ul>
@@ -252,27 +274,15 @@
             </main>
         </div>
     </div>
-    <%- include('./reusable/script.ejs') %>
     <div>
         <script>
-            let discordUrl
-            if (localStorage.getItem('access_token')) {
-                discordUrl = `/auth/verify/${localStorage.getItem('access_token')}`
-            } else {
-                discordUrl = "/redirect/discord"
-            }
-            
             let isloged = '<%= isloged %>'
-            document.querySelectorAll('.button-assinar').forEach(element => {
-                if (isloged == 'true') {
-                    element.href = '/dashboard'
-                } else {
-                    element.href = discordUrl
-                }
-            })
-            document.getElementById('buttons-login').href = isloged == 'true' ? '/dashboard' : discordUrl 
+            // let collaborators = '<%#= JSON.stringify(collaborators) %>'
         </script>
     </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/script.js"></script>
+    
 </body>
 
 </html>

@@ -8,7 +8,7 @@ const Discord = require("discord.js");
 const mercadoPagoData = require('../config/mercadoPagoData.json');
 const botConfig = require('../config/bot-config.js');
 const functions = require('../functions.js');
-const client = new Discord.Client({ intents: botConfig.intents })
+const client = new Discord.Client({ intents: botConfig.intents, shards: 'auto', })
 var ncp = require("copy-paste");
 const discordTranscripts = require('discord-html-transcripts');
 const webConfig = require('../config/web-config');
@@ -24,19 +24,19 @@ require('./handler/commands.js')(client)
 
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isAutocomplete()) {
-		const command = interaction.client.commands.get(interaction.commandName);
+        const command = interaction.client.commands.get(interaction.commandName);
 
-		if (!command) {
-			console.error(`No command matching ${interaction.commandName} was found.`);
-			return;
-		}
+        if (!command) {
+            console.error(`No command matching ${interaction.commandName} was found.`);
+            return;
+        }
 
-		try {
-			await command.autocomplete(interaction,client);
-		} catch (error) {
-			console.error(error);
-		}
-	}
+        try {
+            await command.autocomplete(interaction, client);
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     if (interaction.isChatInputCommand()) {
         const command = interaction.client.commands.get(interaction.commandName);
@@ -48,7 +48,7 @@ client.on(Events.InteractionCreate, async interaction => {
         } catch (error) {
             console.error(error);
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: 'Ocorreu um erro ao executar este comando!', ephemeral: true }).then(()=>{}).catch((err)=>{})
+                await interaction.followUp({ content: 'Ocorreu um erro ao executar este comando!', ephemeral: true }).then(() => { }).catch((err) => { })
             }
         }
     }
@@ -122,7 +122,7 @@ module.exports = (Discord2, client) => {
                 var DeleteDiscordChannel = await DiscordServer.channels.cache.get(deleteChannel)
                 await DeleteDiscordChannel.delete()
                 if (interection && interection.replied) {
-                    interection.editReply({ content: 'O seu carrinho expirou vamos apaga-lo! \n Status: Carrinho apagado!', ephemeral: true })
+                    await interection.editReply({ content: 'O seu carrinho expirou vamos apaga-lo! \n Status: Carrinho apagado!', ephemeral: true })
                 }
             } catch (error) {
                 console.log(error);
@@ -132,11 +132,22 @@ module.exports = (Discord2, client) => {
 
         async function comprarFunction(productID, interaction) {
             try {
+                let server = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+
+                var product = await server.products.find(product => product.productID == productID)
+
+                let quantidade = interaction.fields.getTextInputValue('quantidadeText');
+
+                if (!/^\d+$/.test(quantidade)) {
+                    return interaction.reply({ content: 'Por favor, insira apenas números.', ephemeral: true });
+                }
+
+                if (quantidade > product.estoque.length) {
+                    return interaction.reply({ content: `Valor inválido, o máximo que temos no estoque e ${product.estoque.length.toString()} selecione um valor abaixo disso!`, ephemeral: true });
+                }
+
                 var DiscordServer = await client.guilds.cache.get(interaction.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(interaction.channelId);
-
-                let server = await db.findOne({ colecao: "servers", doc: interaction.guildId })
-                let product = await server.products.find(product => product.productID == productID)
                 let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
                 if (server.vendasActive == false) {
                     await interaction.reply({
@@ -160,11 +171,13 @@ module.exports = (Discord2, client) => {
                                 new Discord.ButtonBuilder()
                                     .setCustomId(`solicitarStok_${productID}`)
                                     .setLabel('Solicitar estoque')
+                                    .setEmoji(await require('./emojisGet').stock)
                                     .setStyle(Discord.ButtonStyle.Success),
                             ).addComponents(
                                 new Discord.ButtonBuilder()
                                     .setCustomId(`privateAviso_${productID}`)
                                     .setLabel('Receber aviso')
+                                    .setEmoji(await require('./emojisGet').notice)
                                     .setStyle(Discord.ButtonStyle.Primary),
                             )
                         ],
@@ -194,25 +207,10 @@ module.exports = (Discord2, client) => {
 
                     return
                 }
-                async function findUniCarrinhos() {
-                    let prodid = productID
-                    let findItem
-                    if (preCarrinhos[interaction.user.id]) {
-                        findItem = await preCarrinhos[interaction.user.id].find(element => element.product == prodid)
-                    } else {
-                        findItem = null
-                    }
-                    if (!carrinhos[interaction.user.id]) {
-                        carrinhos[interaction.user.id] = []
-                    }
-                    if (findItem) {
-                        carrinhos[interaction.user.id].push(findItem)
-                    } else {
-                        carrinhos[interaction.user.id].push({
-                            product: prodid,
-                            quantidade: 1
-                        })
-                    }
+
+                let cartChannelID = {
+                    id: null,
+                    edit: true
                 }
                 if (findChannel) {
                     if (!carrinhos[interaction.user.id]) {
@@ -220,42 +218,33 @@ module.exports = (Discord2, client) => {
                         await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
                         return
                     }
-                    let prodid = await productID
-                    let findProductCart = await carrinhos[interaction.user.id].find((item) => item.product == prodid)
-                    let findProductCartIndex = await carrinhos[interaction.user.id].findIndex((item) => item.product == prodid)
+                    let findProductCart = await carrinhos[interaction.user.id].find(element => element.product == product.productID)
                     if (findProductCart) {
-                        carrinhos[interaction.user.id][findProductCartIndex].quantidade = parseInt(carrinhos[interaction.user.id][findProductCartIndex].quantidade) + 1
-                    } else {
-                        findUniCarrinhos()
+                        return interaction.reply({ content: 'Você já tem esse produto no carrinho! ', ephemeral: true })
                     }
-
+                    cartChannelID = {
+                        id: await findChannel.id,
+                        edit: true
+                    }
                     interaction.reply({
                         embeds: [
                             new Discord.EmbedBuilder()
                                 .setColor("#C21010")
-                                .setTitle(`⚠️| Você já possui um carrinho aberto!`)
-                                .setDescription(`Adicionamos esse produto ao seu carrinho!`)
+                                .setTitle(`🛍| Adicionamos mais esse produto a seu carrinho!`)
+                                .setDescription(`Você já tinha um carrinho criado, então adicionamos esse produto ao carrinho.`)
                         ],
                         components: [
                             new Discord.ActionRowBuilder()
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('🛒・Ir para o Carrinho')
+                                        .setLabel('Ir para o Carrinho')
+                                        .setEmoji(await require('./emojisGet').cart)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
                                 )
                         ],
                         ephemeral: true
                     })
-
-                    require('./createCartMessage')(Discord, client, {
-                        serverID: interaction.guild.id,
-                        user: interaction.user,
-                        member: interaction.member,
-                        channelID: await findChannel.id,
-                        edit: true
-                    })
-
                 } else {
                     await interaction.reply({
                         content: `🛒 | Criando o Carrinho...`,
@@ -286,6 +275,10 @@ module.exports = (Discord2, client) => {
                         }]
                     })
                     if (newChannel) {
+                        cartChannelID = {
+                            id: await newChannel.id,
+                            edit: false
+                        }
                         await interaction.editReply({
                             content: ` `,
                             embeds: [
@@ -299,7 +292,8 @@ module.exports = (Discord2, client) => {
                                     .addComponents(
                                         new Discord.ButtonBuilder()
                                             .setStyle(5)
-                                            .setLabel('🛒・Ir para o Carrinho')
+                                            .setLabel('Ir para o Carrinho')
+                                            .setEmoji(await require('./emojisGet').cart)
                                             .setURL(`https://discord.com/channels/${interaction.guild.id}/${newChannel.id}`)
                                     )
                             ],
@@ -308,18 +302,18 @@ module.exports = (Discord2, client) => {
                         if ('personalize' in server && 'lembreteMensage' in server.personalize && server.personalize.lembreteMensage.active == true) {
                             let channelID = newChannel.id
                             let userID = interaction.user.id
-                            setTimeout(async()=>{
+                            setTimeout(async () => {
                                 try {
                                     let discordChannelVerify = await DiscordServer.channels.cache.get(channelID)
                                     if (discordChannelVerify) {
                                         const userD = await client.users.fetch(userID)
                                         if (userD) {
-                                            require('../Discord/discordIndex').sendDiscordMensageUser(userD,server.personalize.lembreteMensage.title,server.personalize.lembreteMensage.mensage,`https://discord.com/channels/${interaction.guild.id}/${discordChannelVerify.id}`,'🛒・Ir para o carrinho')
+                                            require('../Discord/discordIndex').sendDiscordMensageUser(userD, server.personalize.lembreteMensage.title, server.personalize.lembreteMensage.mensage, `https://discord.com/channels/${interaction.guild.id}/${discordChannelVerify.id}`, '🛒・Ir para o carrinho')
                                         }
                                     }
-                                } catch (error) {}
-                            },600000)
-                            setTimeout(async()=>{
+                                } catch (error) { }
+                            }, 600000)
+                            setTimeout(async () => {
                                 try {
                                     let discordChannelDelete = await DiscordServer.channels.cache.get(channelID)
                                     if (discordChannelDelete) {
@@ -329,22 +323,34 @@ module.exports = (Discord2, client) => {
                                             userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
                                         }
                                     }
-                                    
-                                } catch (error) {}
-                            },1000000)
+
+                                } catch (error) { }
+                            }, 1000000)
                         }
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                     }
-                    findUniCarrinhos()
-                    require('./createCartMessage')(Discord, client, {
-                        serverID: interaction.guild.id,
-                        user: interaction.user,
-                        member: interaction.member,
-                        channelID: await newChannel.id,
-                        edit: false
-                    })
                 }
+
+                if (!carrinhos[interaction.user.id]) {
+                    carrinhos[interaction.user.id] = []
+                }
+
+
+
+
+                carrinhos[interaction.user.id].push({
+                    product: product.productID,
+                    quantidade: quantidade
+                })
+                require('./createCartMessage')(Discord, client, {
+                    serverID: interaction.guild.id,
+                    user: interaction.user,
+                    member: interaction.member,
+                    channelID: await cartChannelID.id,
+                    edit: cartChannelID.edit
+                })
+
             } catch (error) {
                 console.log('ComprarFunctionError: ', error);
 
@@ -454,7 +460,7 @@ module.exports = (Discord2, client) => {
 
                 }
                 if (interaction.guildId) {
-                    let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
+                    let serverData = await db.findOne({ colecao: `servers`, doc: await interaction.guildId })
                     if (serverData.botActive == false) {
                         await interaction.reply({
                             content: `⚠️| O vendedor desativou o bot desse servidor!`,
@@ -466,7 +472,7 @@ module.exports = (Discord2, client) => {
                 async function createRemoveEmbend() {
                     try {
                         var fields = []
-                        let serverData = await db.findOne({colecao:`servers`,doc:await interaction.guildId})
+                        let serverData = await db.findOne({ colecao: `servers`, doc: await interaction.guildId })
                         for (let index = 0; index < carrinhos[interaction.user.id].length; index++) {
                             const element = carrinhos[interaction.user.id][index].product;
                             let produto = await serverData.products.find(product => product.productID == element)
@@ -489,13 +495,15 @@ module.exports = (Discord2, client) => {
                                 new Discord.ButtonBuilder()
                                     .setCustomId(`exclud`)
                                     .setLabel('Excluir')
+                                    .setEmoji(require('./emojisGet.js').apagar)
                                     .setStyle('4'),
                             )
                             .addComponents(
                                 new Discord.ButtonBuilder()
-                                    .setCustomId('back')
+                                    .setCustomId('returnCard')
                                     .setLabel('Voltar')
-                                    .setStyle('3')
+                                    .setStyle(Discord.ButtonStyle.Danger)
+                                    .setEmoji(require('./emojisGet.js').voltar)
                             )
                         await lastBotMessage.edit({
                             embeds: [
@@ -546,10 +554,8 @@ module.exports = (Discord2, client) => {
                 // interacao do botao de compra de um produto
                 if (interaction.customId && interaction.customId.includes('comprar')) {
                     comprarFunction(interaction.customId.replace('comprar_', ''), interaction)
-                }
 
-                if (interaction.customId == 'multSelectProduct') {
-                    comprarFunction(interaction.values[0], interaction)
+
                 }
 
                 if (interaction.customId && interaction.customId.includes('privateAviso')) {
@@ -609,12 +615,120 @@ module.exports = (Discord2, client) => {
 
 
 
-                if (interaction.customId == 'payment') {
-                    let userID = interaction.user.id
-                    paymentMetod[userID] = interaction.values[0]
+                if (interaction.customId == 'paymentSelect') {
+                    if (!carrinhos[interaction.user.id]) {
+                        if (interaction.replied) {
+                            interaction.deleteReply()
+                        }
+                        await interaction.reply('Não foi encontrado nenhum produto nesse carrinho vamos deleta-lo!');
+                        setTimeout(() => {
+                            DiscordChannel.delete()
+                        }, 6000);
+                        return
+                    }
                     interaction.deferReply();
+
+                    let buttonsRow = new Discord.ActionRowBuilder();
+                    let serverData = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+                    if ('bankData' in serverData && 'mercadoPagoToken' in serverData.bankData && serverData.bankData.mercadoPagoToken != '') {
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId('confirm_pix')
+                            .setLabel('Pix')
+                            .setEmoji(require('./emojisGet.js').pix)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+                    }
+                    if ('bankData' in serverData && 'bankID' in serverData.bankData) {
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId('confirm_card')
+                            .setLabel('Cartão de crédito / debito')
+                            .setEmoji(require('./emojisGet.js').card)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId('confirm_boleto')
+                            .setLabel('Boleto')
+                            .setEmoji(require('./emojisGet.js').boleto)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+                    }
+
+                    const message = await DiscordChannel.messages.fetch(interaction.message.id);
+                    await message.edit({
+                        embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setTitle(`Clique no método de pagamento desejado para concluir sua compra!`)],
+                        components: [
+                            buttonsRow,
+                            new Discord.ActionRowBuilder().addComponents(new Discord.ButtonBuilder()
+                                .setCustomId('returnCard')
+                                .setLabel('Voltar')
+                                .setEmoji(require('./emojisGet.js').voltar)
+                                .setStyle(Discord.ButtonStyle.Secondary))
+
+
+                        ]
+                    });
                     interaction.deleteReply()
                 }
+
+                if (interaction.customId == 'returnCard') {
+                    if (!carrinhos[interaction.user.id]) {
+                        if (interaction.replied) {
+                            interaction.deleteReply()
+                        }
+                        await interaction.reply('Não foi encontrado nenhum produto nesse carrinho vamos deleta-lo!');
+                        setTimeout(() => {
+                            DiscordChannel.delete()
+                        }, 6000);
+                        return
+                    }
+                    interaction.deferReply();
+                    const message = await DiscordChannel.messages.fetch(interaction.message.id);
+                    await message.edit({
+                        embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setTitle(`Siga as etapas abaixo com os botões para concluir sua compra.`)],
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`editQuantidadeCart`)
+                                        .setLabel('Editar quantidade')
+                                        .setEmoji(await require('./emojisGet').editar)
+                                        .setStyle(Discord.ButtonStyle.Primary)
+                                )
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`removeProduct`)
+                                        .setEmoji(await require('./emojisGet').apagar)
+                                        .setLabel('Remover produto')
+                                        .setStyle('4')
+                                ),
+
+                            // .addComponents(
+                            //     new Discord.ButtonBuilder()
+                            //         .setCustomId(`cupombutton`)
+                            //         .setLabel('Adicionar Cupom')
+                            //         .setStyle('1')
+                            // );
+
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`paymentSelect`)
+                                        .setLabel('Ir para o pagamento')
+                                        .setEmoji(await require('./emojisGet').comprar)
+                                        .setStyle('3'),
+                                )
+                                .addComponents(
+
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId('cancelCart')
+                                        .setLabel('Cancelar')
+                                        .setEmoji(await require('./emojisGet').cancelar)
+                                        .setStyle('4')
+                                ),
+
+                        ]
+                    });
+                    interaction.deleteReply()
+                }
+
 
                 if (interaction.customId && interaction.customId.includes('confirm')) {
                     try {
@@ -628,16 +742,8 @@ module.exports = (Discord2, client) => {
                             }, 6000);
                             return
                         }
-                        if (!paymentMetod[interaction.user.id]) {
-                            const sentMessage = await interaction.reply('Selecione algum metodo de pagamento primeiro!');
-                            setTimeout(() => {
-                                sentMessage.delete()
-                            }, 8000);
-                            return
-                        }
-
                         let carrinho = carrinhos[interaction.user.id]
-                        let paymentMetodUser = paymentMetod[interaction.user.id]
+                        let paymentMetodUser = interaction.customId.replace('confirm_', '')
                         let serverData = await db.findOne({ colecao: "servers", doc: await interaction.guildId })
                         async function getLineItemsAndPrice(carrinho, server) {
                             let line_items = []
@@ -709,7 +815,8 @@ module.exports = (Discord2, client) => {
                                         .addComponents(
                                             new Discord.ButtonBuilder()
                                                 .setStyle(5)
-                                                .setLabel('🛍️・Ir para o pagamento')
+                                                .setLabel('Ir para o pagamento')
+                                                .setEmoji(require('./emojisGet.js').redirect)
                                                 .setURL(paymentLinkCard.url)
                                         )
                                 ],
@@ -717,6 +824,8 @@ module.exports = (Discord2, client) => {
                             })
 
                         } else {
+                            interaction.deferReply();
+
                             try {
                                 const Mercadoclient = new MercadoPagoConfig({ accessToken: serverData.bankData.mercadoPagoToken, options: { timeout: 5000 } });
                                 const payment = new Payment(Mercadoclient);
@@ -754,21 +863,23 @@ module.exports = (Discord2, client) => {
                                                 .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
                                                 .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
                                         ],
-                                        components: [new Discord.ActionRowBuilder()
-                                            .addComponents(
-                                                new Discord.ButtonBuilder()
-                                                    .setCustomId('pixCancel')
-                                                    .setLabel('Cancelar')
-                                                    .setStyle('4')
-                                            )],
                                         files: [attachment],
                                         components: [new Discord.ActionRowBuilder()
                                             .addComponents(
                                                 new Discord.ButtonBuilder()
                                                     .setURL(`${webConfig.host}/copyText/${cpc}`)
                                                     .setLabel('Copiar Codigo')
+                                                    .setEmoji(require('./emojisGet.js').copy)
                                                     .setStyle(Discord.ButtonStyle.Link),
-                                            )]
+                                            ).addComponents(
+                                                new Discord.ButtonBuilder()
+                                                    .setCustomId('returnCard')
+                                                    .setLabel('voltar')
+                                                    .setEmoji(require('./emojisGet.js').voltar)
+                                                    .setStyle('4')
+                                            )
+
+                                        ]
 
                                     })
                                 }).catch((error) => {
@@ -777,28 +888,128 @@ module.exports = (Discord2, client) => {
                             } catch (error) {
                                 console.log(error);
                             }
+                            interaction.deleteReply()
                         }
+
                     } catch (error) {
                         console.log(error);
                     }
                 }
 
+                if (interaction.customId == 'cartEditQuantidade') {
+                    if (!carrinhos[interaction.user.id]) {
+                        if (interaction.replied) {
+                            interaction.deleteReply()
+                        }
+                        await interaction.reply('Não foi encontrado nenhum produto nesse carrinho vamos deleta-lo!');
+                        setTimeout(() => {
+                            DiscordChannel.delete()
+                        }, 6000);
+                        return
+                    }
+
+                    const modal = new Discord.ModalBuilder()
+                        .setCustomId('cartEditQuantidadeModal')
+                        .setTitle('Editar Quantidade');
+
+                    modal.addComponents(
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('inputProductCart')
+                                .setLabel("Insira o numero do produto que esta na lista!")
+                                .setPlaceholder('Somente números, siga a lista dos produtos no carrinho!')
+                                .setStyle(Discord.TextInputStyle.Short)
+                                .setMinLength(1)
+                                .setRequired(true)
+
+                        ),
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('inputQuantidadeCart')
+                                .setLabel("Insira a nova quantidade do produto!")
+                                .setStyle(Discord.TextInputStyle.Short)
+                                .setPlaceholder('Somente números!')
+                                .setMinLength(1)
+                                .setRequired(false)
+                        )
+                    );
+                    await interaction.showModal(modal);
+
+                }
+                if (interaction.customId == 'cartEditQuantidadeModal') {
+                    if (!carrinhos[interaction.user.id]) {
+                        if (interaction.replied) {
+                            interaction.deleteReply()
+                        }
+                        await interaction.reply('Não foi encontrado nenhum produto nesse carrinho vamos deleta-lo!');
+                        setTimeout(() => {
+                            DiscordChannel.delete()
+                        }, 6000);
+                        return
+                    }
+                    let produto = interaction.fields.getTextInputValue('inputProductCart');
+                    let quantidade = interaction.fields.getTextInputValue('inputQuantidadeCart');
+                    let server = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+
+                    if (!/^\d+$/.test(produto)) {
+                        return interaction.reply({ content: 'Por favor, insira apenas números no input de produto', ephemeral: true });
+                    }
+                    if (!/^\d+$/.test(quantidade)) {
+                        return interaction.reply({ content: 'Por favor, insira apenas números no input de quantidade', ephemeral: true });
+                    }
+                    if (parseInt(produto) == 0 || parseInt(quantidade) == 0) {
+                        return interaction.reply({ content: 'Por favor, insira um produto e uma quantidade válida', ephemeral: true });
+                    }
+                    if (parseInt(produto) > carrinhos[interaction.user.id].length) {
+                        return interaction.reply({ content: `Valor inválido, o maximo que temos no carrinho e ${carrinhos[interaction.user.id].length.toString()} selecione um valor abaixo disso!`, ephemeral: true });
+                    }
+
+                    let product = await server.products.find(product => product.productID == carrinhos[interaction.user.id][parseInt(produto) - 1].product)
+
+
+                    if (parseInt(quantidade) > product.estoque.length) {
+                        return interaction.reply({ content: `Valor inválido, o maximo que temos no estoque e ${product.estoque.length.toString()} selecione um valor abaixo disso!`, ephemeral: true });
+                    }
+
+                    carrinhos[interaction.user.id][parseInt(produto) - 1].quantidade = quantidade
+
+                    interaction.deferReply();
+                    require('./createCartMessage')(Discord, client, {
+                        serverID: interaction.guild.id,
+                        user: interaction.user,
+                        member: interaction.member,
+                        channelID: await DiscordChannel.id,
+                        edit: true
+                    })
+                    interaction.deleteReply()
+                }
                 if (interaction.customId == 'pixCancel') {
                     try {
-                        require('./createCartMessage')(Discord, client, {
-                            serverID: interaction.guild.id,
-                            user: interaction.user,
-                            member: interaction.member,
-                            channelID: await DiscordChannel.id,
-                            edit: true
-                        })
+
+                        if (carrinhos[interaction.user.id]) {
+                            interaction.deferReply();
+                            require('./createCartMessage')(Discord, client, {
+                                serverID: interaction.guild.id,
+                                user: interaction.user,
+                                member: interaction.member,
+                                channelID: await DiscordChannel.id,
+                                edit: true
+                            })
+                            interaction.deleteReply()
+                        } else {
+                            await interaction.reply('Não foi encontrado nenhum produto nesse carrinho vamos deleta-lo!');
+                            setTimeout(() => {
+                                DiscordChannel.delete()
+                            }, 6000);
+                        }
+
                     } catch (error) {
                         console.log(error);
                     }
                 }
 
 
-                if (interaction.customId == 'cancel') {
+                if (interaction.customId == 'cancelCart') {
                     carrinhos[interaction.user.id] = null
                     paymentMetod[interaction.user.id] = null
 
@@ -813,7 +1024,7 @@ module.exports = (Discord2, client) => {
                     }
                 }
 
-                if (interaction.customId && interaction.customId.includes('remove')) {
+                if (interaction.customId && interaction.customId.includes('removeProduct')) {
                     if (!carrinhos[interaction.user.id]) {
                         await DiscordChannel.delete()
                         return
@@ -940,7 +1151,8 @@ module.exports = (Discord2, client) => {
                                         .addComponents(
                                             new Discord.ButtonBuilder()
                                                 .setStyle(5)
-                                                .setLabel('🎫・Ir para o Ticket')
+                                                .setLabel('Ir para o Ticket')
+                                                .setEmoji(await require('./emojisGet').ticket)
                                                 .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
                                         )
                                 ],
@@ -1033,7 +1245,7 @@ module.exports = (Discord2, client) => {
                         } catch (error) {
 
                         }
-                    } catch (error) {}
+                    } catch (error) { }
                     if (userInput <= 2) {
                         interaction.reply(`😢 | Sinto muito que sua experiência com o suporte não tenha sido boa, iremos trabalhar para melhorar cada vez mais 💖!`)
                     } else if (userInput == 3) {
@@ -1104,7 +1316,8 @@ module.exports = (Discord2, client) => {
                                                 .addComponents(
                                                     new Discord.ButtonBuilder()
                                                         .setStyle(Discord.ButtonStyle.Success)
-                                                        .setLabel('⭐ | Avaliar')
+                                                        .setLabel('Avaliar')
+                                                        .setEmoji(await require('./emojisGet').star)
                                                         .setCustomId('openModalAva')
                                                 )
                                         ]
@@ -1224,7 +1437,8 @@ module.exports = (Discord2, client) => {
                                             .addComponents(
                                                 new Discord.ButtonBuilder()
                                                     .setStyle(5)
-                                                    .setLabel('🎫・Ir para o Ticket')
+                                                    .setLabel('Ir para o Ticket')
+                                                    .setEmoji(await require('./emojisGet').ticket)
                                                     .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
                                             )
                                     ],
@@ -1266,7 +1480,8 @@ module.exports = (Discord2, client) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('🎟・Ir para o Ticket')
+                                        .setLabel('Ir para o Ticket')
+                                        .setEmoji(await require('./emojisGet').ticket)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${interaction.channelId}`)
                                 )
                         ]
@@ -1287,19 +1502,22 @@ module.exports = (Discord2, client) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(Discord.ButtonStyle.Primary)
-                                        .setLabel('⏰・Notificar usuario')
+                                        .setLabel('Notificar usuario')
+                                        .setEmoji(await require('./emojisGet').notify)
                                         .setCustomId(`notifyTicket-${generateProtocol}`)
                                 )
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(Discord.ButtonStyle.Primary)
-                                        .setLabel('📞・Criar canal de voz')
+                                        .setLabel('Criar canal de voz')
+                                        .setEmoji(await require('./emojisGet').phone)
                                         .setCustomId(`voiceTicket-${generateProtocol}`)
                                 )
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(Discord.ButtonStyle.Danger)
-                                        .setLabel('❌・Fechar Ticket')
+                                        .setLabel('Fechar Ticket')
+                                        .setEmoji(await require('./emojisGet').cancelar)
                                         .setCustomId(`closeTicket-${generateProtocol}`)
                                 )
 
@@ -1359,7 +1577,8 @@ module.exports = (Discord2, client) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('🎟・Ir para o canal de voz')
+                                        .setLabel('Ir para o canal de voz')
+                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
                                 )
                         ]
@@ -1376,7 +1595,8 @@ module.exports = (Discord2, client) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('🎟・Ir para o canal de voz')
+                                        .setLabel('Ir para o canal de voz')
+                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
                                 )
                         ]
@@ -1396,13 +1616,15 @@ module.exports = (Discord2, client) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(Discord.ButtonStyle.Primary)
-                                        .setLabel('⏰・Notificar usuario')
+                                        .setLabel('Notificar usuario')
+                                        .setEmoji(await require('./emojisGet').notify)
                                         .setCustomId(`notifyTicket-${generateProtocol}`)
                                 )
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(Discord.ButtonStyle.Danger)
-                                        .setLabel('❌・Fechar Ticket')
+                                        .setLabel('Fechar Ticket')
+                                        .setEmoji(await require('./emojisGet').cancelar)
                                         .setCustomId(`closeTicket-${generateProtocol}`)
                                 )
 
@@ -1433,7 +1655,8 @@ module.exports = (Discord2, client) => {
                                     .addComponents(
                                         new Discord.ButtonBuilder()
                                             .setStyle(5)
-                                            .setLabel('🎟・Ir para o Ticket')
+                                            .setLabel('Ir para o Ticket')
+                                            .setEmoji(await require('./emojisGet').redirect)
                                             .setURL(`https://discord.com/channels/${interaction.guild.id}/${interaction.channelId}`)
                                     )
                             ]
@@ -1501,23 +1724,88 @@ module.exports = (Discord2, client) => {
                             await message.edit({
                                 embeds: [Discord.EmbedBuilder.from(interaction.message.embeds[0]).setDescription(`Você ja recusou essa cobrança!`)],
                             });
-                        } catch (error) {}
-                    } catch (error) {}
+                        } catch (error) { }
+                    } catch (error) { }
                 }
-                if (interaction.customId == `paymentMCobranca`) {
-                    paymentMCobranca[interaction.user.id] = interaction.values[0]
+                if (interaction.customId && interaction.customId.includes('paymentCobranca')) {
                     interaction.deferReply();
+                    const channel = await client.channels.fetch(interaction.channelId);
+                    const message = await channel.messages.fetch(interaction.message.id);
+                    let buttonsRow = new Discord.ActionRowBuilder();
+                    let serverData = await db.findOne({ colecao: 'servers', doc: message.embeds[0].data.fields[4].value })
+                    if (serverData.error == true) {
+                        return interaction.reply({ content: 'Erro ao executar o comando!', ephemeral: true })
+                    }
+                    if ('bankData' in serverData && 'mercadoPagoToken' in serverData.bankData && serverData.bankData.mercadoPagoToken != '') {
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId((await interaction.customId.replace(`paymentCobranca`, 'cobrancaPayment')) + `_pix`)
+                            .setLabel('Pix')
+                            .setEmoji(require('./emojisGet.js').pix)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+                    }
+                    if ('bankData' in serverData && 'bankID' in serverData.bankData) {
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId((await interaction.customId.replace(`paymentCobranca`, 'cobrancaPayment')) + '_card')
+                            .setLabel('Cartão de crédito / debito')
+                            .setEmoji(require('./emojisGet.js').card)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+
+                        buttonsRow.addComponents(new Discord.ButtonBuilder()
+                            .setCustomId((await interaction.customId.replace(`paymentCobranca`, 'cobrancaPayment')) + '_boleto')
+                            .setLabel('Boleto')
+                            .setEmoji(require('./emojisGet.js').boleto)
+                            .setStyle(Discord.ButtonStyle.Secondary))
+                    }
+
+                    await message.edit({
+                        components: [
+                            buttonsRow,
+                            new Discord.ActionRowBuilder().addComponents(new Discord.ButtonBuilder()
+                                .setCustomId('returnCobranca')
+                                .setLabel('Voltar')
+                                .setEmoji(require('./emojisGet.js').voltar)
+                                .setStyle(Discord.ButtonStyle.Secondary))
+
+
+                        ]
+                    });
                     interaction.deleteReply()
                 }
+
+                if (interaction.customId == 'returnCobranca') {
+                    const channel = await client.channels.fetch(interaction.channelId);
+                    const message = await channel.messages.fetch(interaction.message.id);
+                    await message.edit({
+                        components: [
+                            new Discord.ActionRowBuilder()
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`paymentCobranca_${message.embeds[0].data.fields[4].value}_${interaction.user.id}_${(message.embeds[0].data.fields[1].value).replace('R$','').replace(',','').trim()}`)
+                                        .setLabel('Pagar')
+                                        .setEmoji(await require('./emojisGet').comprar)
+                                        .setStyle('3'),
+                                )
+                                .addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`cobrancaRecuse_${interaction.user.id}`)
+                                        .setLabel('Cancelar')
+                                        .setEmoji(await require('./emojisGet').cancelar)
+                                        .setStyle('4')
+                                )
+                        ]
+                    })
+                }
+
                 if (interaction.customId && interaction.customId.includes('cobrancaPayment')) {
-                    let values = await interaction.customId.replace(`cobrancaPayment_`)
+                    let values = await interaction.customId.replace(`cobrancaPayment_`, '')
                     values = values.split(`_`)
-                    let serverID = values[0].includes('undefined') ? values[0].replace('undefined', ``) : values[0]
+                    let serverID = values[0]
                     let userID = values[1]
                     let valor = values[2]
+                    let paymentMetod = values[3]
                     let serverData = await db.findOne({ colecao: `servers`, doc: serverID })
                     const user = await client.users.fetch(userID)
-                    let paymentMetod = paymentMCobranca[interaction.user.id]
+ 
                     if (paymentMetod == 'card' || paymentMetod == 'boleto') {
                         let valueStripe = await valor < 100 ? 100 : valor
                         let isProduct1n = await valor < 100 ? true : false
@@ -1538,10 +1826,10 @@ module.exports = (Discord2, client) => {
                                 user: interaction.user.id,
                                 userCobrador: userID,
                                 serverID: serverID,
-                                channelID:interaction.channelId,
+                                channelID: interaction.channelId,
                                 mensageID: interaction.message.id,
                                 valor: valueStripe
-                                
+
                             },
                             payment_intent_data: {
                                 transfer_data: {
@@ -1567,7 +1855,8 @@ module.exports = (Discord2, client) => {
                                     .addComponents(
                                         new Discord.ButtonBuilder()
                                             .setStyle(5)
-                                            .setLabel('🛍️・Ir para o pagamento')
+                                            .setLabel('Ir para o pagamento')
+                                            .setEmoji(await require('./emojisGet').comprar)
                                             .setURL(paymentLinkCard.url)
                                     )
                             ],
@@ -1576,6 +1865,7 @@ module.exports = (Discord2, client) => {
 
                     } else {
                         try {
+                            interaction.deferReply();
                             const Mercadoclient = new MercadoPagoConfig({ accessToken: serverData.bankData.mercadoPagoToken, options: { timeout: 5000 } });
                             const payment = new Payment(Mercadoclient);
                             let numeroComPonto = valor / 100;
@@ -1591,7 +1881,7 @@ module.exports = (Discord2, client) => {
                                     user: interaction.user.id,
                                     userCobrador: userID,
                                     serverID: serverID,
-                                    channelID:interaction.channelId,
+                                    channelID: interaction.channelId,
                                     mensageID: interaction.message.id,
                                     valor: valor,
                                     action: 'cobrancaPay',
@@ -1603,8 +1893,8 @@ module.exports = (Discord2, client) => {
                                 const cpc = response.point_of_interaction.transaction_data.qr_code
                                 const buffer = Buffer.from(response.point_of_interaction.transaction_data.qr_code_base64, "base64");
                                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'qrcodepix.png' })
-                                const botMessages = await DiscordChannel.messages.cache.filter(msg => msg.author.id === client.user.id);
-                                const lastBotMessage = await botMessages.first();
+                                const channel = await client.channels.fetch(interaction.channelId);
+                                const lastBotMessage = await channel.messages.fetch(interaction.message.id);
                                 lastBotMessage.edit({
                                     embeds: [
                                         new Discord.EmbedBuilder()
@@ -1613,23 +1903,20 @@ module.exports = (Discord2, client) => {
                                                     ${'**```' + cpc + '```**'}`)
                                             .setImage('attachment://qrcodepix.png')
                                     ],
-                                    components: [new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setCustomId('pixCancel')
-                                                .setLabel('Cancelar')
-                                                .setStyle('4')
-                                        )],
                                     files: [attachment],
                                     components: [new Discord.ActionRowBuilder()
                                         .addComponents(
                                             new Discord.ButtonBuilder()
-                                                .setCustomId(`copyPix`)
+                                                .setURL(`${webConfig.host}/copyText/${cpc}`)
                                                 .setLabel('Copiar Codigo')
-                                                .setStyle('2'),
-                                        )]
+                                                .setEmoji(require('./emojisGet.js').copy)
+                                                .setStyle(Discord.ButtonStyle.Link),
+                                        )
+                                        
+                                    ]
 
                                 })
+                                interaction.deleteReply()
                             }).catch((error) => {
                                 console.error(error);
                             });
@@ -1638,7 +1925,51 @@ module.exports = (Discord2, client) => {
                         }
                     }
                     
+
                 }
+
+
+
+
+                if (interaction.customId && interaction.customId.includes('quantidadeEdit')) {
+                    let productId = null
+                    if (interaction.isButton()) {
+                        productId = interaction.customId.replace('quantidadeEdit_', '')
+                    } else if (interaction.isStringSelectMenu()) {
+                        productId = interaction.values[0]
+                    }
+
+                    let serverDb = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
+                    var produto = await serverDb.products.find(product => product.productID == productId)
+
+                    if (produto.estoque.length == 0) {
+                        return interaction.reply({ content: `Esse produto não tem estoque!`, ephemeral: true });
+                    }
+
+                    let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
+
+
+                    if (findChannel && !carrinhos[interaction.user.id]) {
+                        interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
+                        return await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
+                    }
+                    const modal = new Discord.ModalBuilder()
+                        .setCustomId(`comprar_${productId}`)
+                        .setTitle(`Editar quantidade do produto ${produto.productName}`)
+
+                    modal.addComponents(
+                        new Discord.ActionRowBuilder().addComponents(
+                            new Discord.TextInputBuilder()
+                                .setCustomId('quantidadeText')
+                                .setLabel(`Insira a quantidade em numeros abaixo: `)
+                                .setStyle(Discord.TextInputStyle.Short)
+                                .setPlaceholder(`Estoque disponivel: ${produto.estoque.length.toString()}`)
+                        )
+                    );
+
+                    await interaction.showModal(modal);
+                }
+
             } catch (error) {
                 console.log(error);
             }
@@ -1836,11 +2167,13 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                                 ),
                                                 new Discord.ActionRowBuilder().addComponents(
                                                     new Discord.ButtonBuilder()
-                                                        .setCustomId(`comprar_${product.productID}`)
+                                                        .setCustomId(`quantidadeEdit_${product.productID}`)
                                                         .setLabel('Comprar')
+                                                        .setEmoji(await require('./emojisGet').comprar)
                                                         .setStyle('3'),
                                                 )
                                             ]
+
                                         }).catch((err) => {
                                             reSendMensage(product.embendType, product.channel, params.serverID, element.product)
                                         })
@@ -1882,25 +2215,29 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 const buffer = Buffer.from(concatenatedString, 'utf-8');
                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                 function sendTxtMensage(target) {
-                    target.send({
-                        embeds: [
-                            new Discord.EmbedBuilder()
-                                .setTitle('💫 | Sua entrega chegou!')
-                                .setDescription(`Abaixo estão os dados da sua entrega:`)
-                                .setFields(
-                                    {
-                                        name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
-                                    },
-                                    {
-                                        name: "💖 | Muito obrigado por comprar conosco!", value: `${DiscordServer.name} agradece o seu carinho!`
-                                    },
-                                )
-                                .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                                .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                        ],
-                    })
-                    target.send({ files: [attachment] }).catch(() => { });
+                    try {
+                        target.send({
+                            embeds: [
+                                new Discord.EmbedBuilder()
+                                    .setTitle('💫 | Sua entrega chegou!')
+                                    .setDescription(`Abaixo estão os dados da sua entrega:`)
+                                    .setFields(
+                                        {
+                                            name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
+                                        },
+                                        {
+                                            name: "💖 | Muito obrigado por comprar conosco!", value: `${DiscordServer.name} agradece o seu carinho!`
+                                        },
+                                    )
+                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
+                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                            ],
+                        })
+                        target.send({ files: [attachment] }).catch(() => { });
+                    } catch (error) {
+                        console.log('Produtos:',concatenatedString);
+                    }
                 }
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
@@ -1930,7 +2267,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('📤・Produto')
+                                        .setLabel('Ir para o produto')
+                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
                                 )]
                         }
@@ -1976,30 +2314,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             ],
                         })
                         findChannelPrivate.send({ files: [attachment] }).catch(() => { });
-                    } catch (error) { }
+                    } catch (error) {
+                        console.log('Produtos:',concatenatedString);
+                    }
                 } else {
                     try {
-                        await dono.send({
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setTitle(`Nova compra no servidor: ${DiscordServer.name}`)
-                                    .setDescription(`Abaixo estão os dados que foram entregues:`)
-                                    .addFields(
-                                        { name: '\u200B', value: '\u200B' },
-                                        { name: 'Nome do usuario comprador', value: user.username, inline: true },
-                                        { name: 'ID do usuario', value: user.id, inline: true },
-                                        { name: 'ID da compra', value: findChannel.id },
-                                        { name: 'Data e hora da compra', value: dataHoraFormatada },
-                                        { name: '\u200B', value: '\u200B' },
-                                        ...fields
-                                    )
-                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                            ],
-                        })
-                        dono.send({ files: [attachment] }).catch(() => { });
-                    } catch (error) {
                         await dono.send({
                             embeds: [
                                 new Discord.EmbedBuilder()
@@ -2019,6 +2338,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             ],
                         })
                         sendTxtMensage(dono)
+                    } catch (error) {
+                        console.log('Produtos:',concatenatedString);
+                        
                     }
                 }
 
@@ -2077,10 +2399,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                 .addComponents(
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
-                                        .setLabel('💫 ・ Deixe o seu feedback')
+                                        .setLabel('Deixe o seu feedback')
+                                        .setEmoji(await require('./emojisGet').star)
                                         .setURL(`https://discord.com/channels/${DiscordServer.id}/${serverData.personalize.feedbackChannel}`)
                                 )]
-                        }).then(()=>{}).catch(()=>{})
+                        }).then(() => { }).catch(() => { })
                     }, 400000)
 
                 }

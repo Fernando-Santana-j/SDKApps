@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Dashboard</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/dashboard.css">
+    <link rel="stylesheet" href="/public/css/dashboard.css">
     
 <body>
     <div  id="body-containner">
@@ -53,13 +53,14 @@
             </main>
         </div>
     </div>
-    
-    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
-    <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/dashboard.js"></script>
     <script>
         localStorage.setItem('access_token','<%= user.access_token %>')
         let serverList = document.querySelectorAll('#serversID-list .serverID-col')
+        passVerify('test','geral')
     </script>
+    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/dashboard.js"></script>
+    
 </body>
 </html>
