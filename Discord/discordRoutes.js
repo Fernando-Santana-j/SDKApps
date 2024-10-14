@@ -28,6 +28,10 @@ router.get('/auth/verify/:acesstoken', async (req, res) => {
                 }
             }).then((res) => { return res.data })
             if (userResponse) {
+                let user = await db.findOne({colecao:'users',doc:userResponse.id})
+                if (user && user.blocked == true) {
+                    return res.redirect('/logout?error=Conta bloqueada!')
+                }
                 req.session.uid = userResponse.id
                 res.redirect('/dashboard')
             } else {
@@ -80,6 +84,9 @@ router.get('/auth/callback', async (req, res) => {
 
                 let user = await db.findOne({colecao:'users',doc:userResponse.id})
                 if (user && user.error == false) {
+                    if (user && user.blocked == true) {
+                        return res.redirect('/logout?error=Conta bloqueada!')
+                    }
                     await db.update('users', userResponse.id,{
                         username: userResponse.username,
                         profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
