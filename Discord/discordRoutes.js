@@ -77,7 +77,7 @@ router.get('/auth/callback', async (req, res) => {
                 }).then((res) => { return res.data }).catch((err) => {
                     console.error(err)
                 });
-
+                req.session.uid = userResponse.id;
 
                 let user = await db.findOne({ colecao: 'users', doc: userResponse.id })
                 if ('pass' in user == true) {
@@ -265,7 +265,7 @@ router.get('/auth/callback', async (req, res) => {
                         usersLoginBlock:[]
                     })
                 }
-                req.session.uid = userResponse.id;
+                
                 res.redirect('/dashboard')
             }
         }
