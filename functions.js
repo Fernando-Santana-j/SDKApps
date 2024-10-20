@@ -166,7 +166,6 @@ module.exports = {
     },
     authGetState: async (req, res, next) => {
         try {
-            console.log(req.session.uid);
             
             if (!req.session.uid) return res.redirect('/?error=Faca login novamente!');
 
