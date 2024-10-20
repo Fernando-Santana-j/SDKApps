@@ -63,7 +63,7 @@ async function passVerify(functions, type, redirect = null, others = null) {
                     type = null
                     successNotify('Senha verificada com sucesso!')
                     if (functions) {
-                        functionPass(functions, type, others)
+                        functions()
                     }
                 } else {
                     errorNotify(session.data)

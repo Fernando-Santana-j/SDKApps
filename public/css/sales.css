@@ -22,7 +22,7 @@
 
 #pagamentos-containner,
 #produtos-containner {
-    width: 45%;
+    width: 50%;
     height: 50em;
     padding: 1em;
     display: flex;
@@ -36,7 +36,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
+    gap: 5em;
 }
 
 #pagamentos-content {
@@ -143,13 +143,6 @@
     }
 }
 
-
-
-.estoque-config-input-content-conteudo {
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-}
 
 .product-cadastro-containner{
     width: 90%;
@@ -386,219 +379,6 @@
     }
 }
 
-#produtos-config-containner {
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-
-    #produtos-config-background {
-        background-color: #0000004f;
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
-        z-index: 999;
-    }
-}
-
-
-#produtos-config-content {
-    width: 70%;
-    padding: 1em;
-    height: 70%;
-    overflow: auto;
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--border-radius-min);
-    background-color: var(--secundary-color);
-}
-
-#produtos-config-row {
-    padding: 1em;
-    width: 100%;
-    height: 100%;
-    z-index: 99999;
-    padding: 1em;
-    display: flex;
-    gap: 1em;
-    justify-content: space-around;
-    align-items: center;
-
-    #cadastro-left-content,
-    #cadastro-rigth-content {
-        width: 45%;
-        height: 100%;
-        padding: 1em;
-        margin-top: 1em;
-    }
-
-    #cadastro-left-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        flex-direction: column;
-        gap: 1em;
-
-        #product-logo-content {
-            display: flex;
-            align-items: center;
-            flex-direction: column;
-            gap: 1em;
-            width: 30%;
-            justify-content: center;
-
-            #logo-preview-edit {
-                cursor: pointer;
-                width: 9em;
-                height: 9em;
-                border-radius: var(--border-radius-mid);
-            }
-        }
-
-        #backGround-containner {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5em;
-
-            #backGround-title {
-                text-align: center;
-                font-size: 1.2em;
-                font-weight: 500;
-                color: var(--color-text-primary);
-                font-family: 'poppins';
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                
-            }
-
-            #backGround-content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 1.5em;
-                justify-content: space-around;
-
-                #backGround-image-preview {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 100%;
-                    text-align: center;
-                }
-
-                #backGround-image-preview label {
-                    font-size: 0.8em;
-                    font-weight: 400;
-                    color: var(--color-text-primary);
-                    font-family: 'poppins';
-                }
-
-                #backGround-image-preview img {
-                    width: 80%;
-                    max-width: 14em;
-                    height: 10em;
-                    object-fit: cover;
-                    border-radius: var(--border-radius-min);
-
-                }
-
-                #backGround-image-input-content {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    width: 100%;
-
-                    #button-backGround-input-edit {
-                        border: 2px solid var(--secundary-color-purple);
-                        border-radius: var(--border-radius-mid);
-                        width: 80%;
-                        height: 3em;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-size: 1.2em;
-                        font-weight: 500;
-                        color: var(--color-text-primary);
-                        font-family: 'poppins';
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    #cadastro-rigth-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        flex-direction: column;
-        gap: 1em;
-
-        .rigth-content-title,
-        .logo-title {
-            font-size: 1.2em;
-            font-weight: 500;
-            color: var(--color-text-primary);
-            font-family: 'poppins';
-        }
-
-        #rigth-content {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-direction: column;
-            gap: 1.5em;
-
-            .inputs-containner {
-                width: 100%;
-
-            }
-
-            #product-desc-edit {
-                resize: none;
-                height: 6em;
-            }
-
-            #unic-containner-edit {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 2.5em;
-                justify-content: space-between;
-                align-items: center;
-                height: 100%;
-                width: 100%;
-
-                #doble-containner-edit {
-                    width: 100%;
-                    display: flex;
-
-                    gap: 1em;
-                    justify-content: space-between;
-
-                    #send-mensage-edit,
-                    #price-containner {
-                        width: 45%;
-
-                    }
-                }
-
-
-
-            }
-
-        }
-
-    }
-}
-
 .main-button-product {
     border: none;
     border-radius: var(--border-radius-mid);
@@ -621,20 +401,7 @@
     }
 }
 
-#close-button-popup-config-produc {
-    width: 4em;
-    height: 4em;
-    position: absolute;
-    margin: 1em;
-    cursor: pointer;
-    transition: 0.7s;
-    z-index: 99999999999999999999999999999;
 
-    &:hover {
-        opacity: 0.8;
-        transition: 0.7s;
-    }
-}
 
 #buttons-containner {
     display: flex;
@@ -648,214 +415,7 @@
 }
 
 
-#confirm-exclud-produto-containner {
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999999;
 
-    #confirm-exclud-produto-content {
-        text-align: center;
-        padding: 2em;
-        width: 30em;
-        z-index: 99999999999999;
-        border-radius: var(--border-radius-min);
-        background-color: var(--tertiary-color);
-    }
-}
-
-#confirm-exclud-buttons {
-    display: flex;
-    gap: 1em;
-}
-
-#confim-exclud-title {
-    margin-bottom: 1em;
-    font-size: 1.2em;
-    font-weight: 500;
-    color: var(--color-text-primary);
-    font-family: 'poppins';
-}
-
-#product-cancel-exclud-button {
-    color: var(--white-color);
-    background-color: var(--tertiary-color);
-}
-
-#product-confirm-exclud-button {
-    background-color: var(--red-color);
-}
-
-
-
-#cadastro-estoque-config-containner {
-    margin-top: 1em;
-    width: 100%;
-    gap: 2em;
-    flex-direction: column;
-    #estoque-config-content {
-        display: flex;
-        flex-direction: column;
-        gap: 5em;
-
-        #estoque-config-add {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            #estoque-config-add-button {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 2em;
-                cursor: pointer;
-                width: 50% !important;
-            }
-        }
-
-        #estoque-config-row {
-            overflow: auto;
-            display: flex;
-            padding: 1em;
-            flex-direction: column;
-            gap: 2em;
-            justify-content: center;
-            align-items: center;
-
-            .estoque-config-col {
-                width: 80%;
-                display: flex;
-                flex-direction: column;
-                gap: 1em;
-
-                .estoque-config-col-top-content {
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 2em;
-
-                    .estoque-config-exclud-estoque {
-                        width: 2.5em;
-                        cursor: pointer;
-                    }
-
-                    .estoque-config-exclud-estoque * {
-                        fill: var(--red-color);
-                    }
-                }
-
-                .estoque-config-inputs-containner {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1em;
-                    width: 100%;
-                    align-items: center;
-                    justify-content: center;
-
-                    .estoque-config-inputs {
-                        width: 100%;
-                        display: flex;
-                        gap: 2em;
-                        justify-content: space-between;
-                        align-items: center;
-
-                        .estoque-config-exclud-input {
-                            cursor: pointer;
-                            width: 2em;
-                            height: 100%;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                        }
-
-                        .estoque-config-exclud-input * {
-                            fill: var(--red-color);
-                        }
-
-                        .estoque-config-input-content-title {
-                            width: 35%;
-                        }
-
-                        .estoque-config-input-content-conteudo {
-                            width: 55%;
-                        }
-                    }
-                }
-
-                .estoque-config-new-data {
-                    width: 100%;
-                    margin-top: 2em;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .estoque-config-new-data-button {
-                        border: none;
-                        text-decoration: underline;
-                        background-color: transparent;
-                        font-size: 1.2em;
-                        font-weight: 400;
-                        color: var(--color-text-primary);
-                        font-family: 'poppins';
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 1em;
-                        cursor: pointer;
-                    }
-
-                    .estoque-config-new-data-button svg {
-                        width: 2em;
-
-                    }
-                }
-            }
-        }
-
-    }
-}
-
-
-
-#edit-estoque-inputs-containner {
-    display: flex;
-    padding: 1em;
-    flex-direction: column;
-    gap: 1em;
-
-    .estoque-config-inputs {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1.5em;
-    }
-}
-
-#edit-estoque-config-containner {
-    padding: 1em;
-    margin-top: 1em;
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
-}
-
-#edit-estoque-config-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 2em;
-}
-
-#new-estoque-create {
-    width: 50%;
-}
 
 #add-pix-popup-close{
     width: 100vw;
@@ -948,11 +508,10 @@
 #logs-sales-containner{
     width: 90%;
     display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
+    gap: 5em;
     justify-content: space-between;
     #private-log-content,#public-log-content{
-        width: 45%;
+        width: 50%;
         display: flex;
         flex-direction: column;
         gap: 1em;
@@ -1280,11 +839,13 @@
 
 #infos-select-popup{
     position: fixed;
-    width: 28em;
-    height: 22em;
+    max-width: 28em;
+    max-height: 22em;
     transition: all 0.4s ease; 
     z-index: -1;
     display: flex;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     gap: 1em;
     opacity: 0;
@@ -1295,10 +856,12 @@
 }
 #info-select-popup-text{
     width: 100%;
-    
 }
 #info-select-popup-img{
+    height: 18em;
     width: 100%;
+    border-radius: var(--border-radius-min);
+    
 }
 #select-type-embend-content{
     display: flex;
@@ -1403,11 +966,148 @@
     width: 40%;
 }
 
+#produtos-config-containner{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2em;
+    padding: 1em;
+    height: 100%;
+    position: fixed;
+    z-index: 999;
+    background-color: var(--primary-color-opacity);
+}
+
+#produtos-config-content{
+    width: 80%;
+    overflow: auto;
+    margin-top: 2em;
+    z-index: 9999;
+    border-radius: var(--border-radius-mid);
+    background-color: var(--menu-color);
+    padding: 1em;
+}
+
+#produtos-config-row{
+    flex: 1;
+    display: flex;
+    gap: 4em;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2em;
+}
+#produtos-config-left,#produtos-config-rigth{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 3em;
+    align-items: center;
+    justify-content: start;
+}
+#produtos-config-new-imagens-containnner{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 1em;
+}
+#new-logo-preview{
+    width: 10em;
+    height: 10em;
+    border-radius: var(--border-radius-mid);
+}
+#produtos-config-new-background{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+}
+#produtos-config-new-logo{
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+}
+#produtos-config-dados-containnner{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+#new-product-config-desc{
+    resize: none;
+}
+#produtos-config-new-style,#produtos-config-new-style-content{
+    width: 100%;
+}
+
+
+#produtos-config-buttons{
+    width: 100%;
+    display: flex;
+    margin-top: 3em;
+    gap: 1.5em;
+}
+#produtos-config-estoque{
+    padding: 1em;
+}
+#produtos-estoque-edit-normal{
+    width: 100%;
+}
+#produtos-estoque-edit-normal-txt-content{
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    margin-top: 2em;
+}
+#produtos-estoque-edit-normal-txt{
+    margin-top: 2em;
+    gap: 1em;
+    width: 100%;
+}
+#produtos-estoque-edit-normal-individual-content{
+    margin-top: 2em;
+}
+#produtos-estoque-edit-normal-individual{
+    margin-top: 2em;
+    display: flex;
+    gap: 1em;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+#produtos-config-title{
+    display: flex;
+    justify-content: space-between;
+}
+#close-config-popup{
+    width: 4em;
+    height: 4em;
+    cursor: pointer;
+}
+
+#produtos-estoque-edit-single{
+    display: flex;
+    gap: 1.5em;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
 @media screen and (max-width:800px) {
     #pagamentos-produtos-containner{
         flex-direction: column;
         gap: 1em;
          width: 100%;
+    }
+    #produtos-config-buttons{
+        flex-wrap: wrap;
+    }
+    #logs-sales-containner{
+        flex-wrap: wrap;
     }
     #pagamentos-containner,#produtos-containner{
         width: 100% !important; 
@@ -1454,7 +1154,18 @@
     .product-cadastro-containner{
         width: 100% !important;
     }
-
+    #produtos-config-content{
+        height: auto !important;
+        overflow: auto;
+        margin-top: 2em;
+        width: 90%;
+    }
+    #produtos-config-row{
+        flex-direction: column-reverse !important;
+    }
+    #produtos-config-left,#produtos-config-rigth{
+        width: 100% !important;
+    }
 }
 
 

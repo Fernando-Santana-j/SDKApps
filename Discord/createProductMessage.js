@@ -13,6 +13,7 @@ registerFont(fontNormal, { family: 'Poppins' });
 registerFont(fontSemiBold, { family: 'Poppins_Semi' })
 registerFont(fontBold, { family: 'Poppins_Bold' })
 let Discord = require('discord.js')
+const functions = require('../functions');
 module.exports = async (Discord2, client, data) => {
 
     try {
@@ -230,44 +231,49 @@ module.exports = async (Discord2, client, data) => {
         let serverDb = await db.findOne({ colecao: 'servers', doc: serverId })
         let produtos = await serverDb.products
         let productId = await data.productID
-    
         var produto = await serverDb.products.find(product => product.productID == productId)
+        let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
         var index = await serverDb.products.findIndex(product => product.productID == productId)
-        let preco = await (produto.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        let preco = ''
+        if (typeProduct != 'multiple' && produto.preco && produto.preco != '') {
+            preco = (produto.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
         let background = fs.readFileSync(produto.backGround == null ? path.join(__dirname, "..", 'public/img/LOGOFUNDO.png') : path.join(__dirname, "..",  produto.backGround))
-        let buffer = await createImage(produto.productName, produto.producDesc, background, produto.productLogo, await preco, produto.estoque.length,serverDb.bankData.mercadoPagoToken ? true : false, serverDb.bankData.bankID ? true : false)
+        let buffer = await createImage(produto.productName, produto.producDesc, background, produto.productLogo, await preco, data.numberEstoque,serverDb.bankData.mercadoPagoToken ? true : false, serverDb.bankData.bankID ? true : false)
         const attachment = new Discord.AttachmentBuilder(buffer, { name: 'ProductImage.jpeg' })
-        let totalEstoque = []
-        if (produto.estoque.length > 0) {
-            let estoque = produto.estoque.length > 25 ? 25 : produto.estoque.length
-            for (let index = 0; index < estoque; index++) {
-                let indexSring1 = `${index + 1}`
-                if (index == 0) {
-                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)
-                }else{
-                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1),)
-                }
-                
+        
+        
+        let components = []
+       
+        if (typeProduct == 'multiple') {
+            let productsArrayOptions = []
+            let productList = produto.multipleProducts
+            for (let index = 0; index < productList.length; index++) {
+                const element = await productList[index];
+                let produto = await serverDb.products.find(product => product.productID == element)
+                await productsArrayOptions.push(
+                    await new Discord.StringSelectMenuOptionBuilder().setLabel(produto.productName).setDescription(`${functions.formatarMoeda(produto.price)} • Estoque: ${'typeProduct' in produto ? produto.typeProduct == 'normal' ? produto.estoque.length : produto.estoque : produto.estoque.length}`).setValue(produto.productID)
+                )
             }
+            components = [await new Discord.ActionRowBuilder().addComponents(
+                new Discord.StringSelectMenuBuilder()
+                    .setCustomId(`quantidadeEdit_${data.productID}`)
+                    .setOptions(productsArrayOptions)
+            )]
+        }else{
+            components = [new Discord.ActionRowBuilder().addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId(`quantidadeEdit_${data.productID}`)
+                    .setLabel('Comprar')
+                    .setEmoji(await require('./emojisGet').comprar)
+                    .setStyle('3'),
+            )]
         }
-        if (totalEstoque.length > 25) {
-            const numToRemove = totalEstoque.length - 25;
-            await totalEstoque.splice(-numToRemove);
-        }
-        if (totalEstoque.length <= 0) {
-            totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel('Sem estoque').setValue('null').setDefault(true),)
-        }
+        
+        
         let embed = await DiscordChannel.send({
             files: [attachment],
-            components: [
-                new Discord.ActionRowBuilder().addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId(`quantidadeEdit_${data.productID}`)
-                        .setLabel('Comprar')
-                        .setEmoji(await require('./emojisGet').comprar)
-                        .setStyle('3'),
-                )
-            ]
+            components: components
         });
         try {
             DiscordChannel.setTopic(data.productID)

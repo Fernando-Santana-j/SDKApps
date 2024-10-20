@@ -28,10 +28,6 @@ module.exports = async (Discord, client, data) => {
             )
         }
 
-        console.log(await require('./emojisGet'));
-        
-
-
         let fields = []
         let carrinhos = require('./discordIndex').carrinhos
 

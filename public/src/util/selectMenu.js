@@ -5,6 +5,7 @@ class DropdownBase {
         this.onChange = onChange;
         this.render();
         this.setupEventListeners();
+        this.initializeSelectedOptions();
     }
 
     render() {
@@ -12,7 +13,7 @@ class DropdownBase {
             <div class="dropdown">
                 <input type="text" class="dropdown__input" placeholder="Selecione uma opção...">
                 <div class="dropdown__select">
-                    ${this.options.map(option => `<div class="dropdown__select-option" data-name="${option.name}" data-value="${option.value}">${option.name} ${option.desc ? `<div class="dropdown-select-desc">${option.desc}</div>` : ''} </div>`).join('')}
+                    ${this.options.map(option => `<div class="dropdown__select-option" data-name="${option.name}" data-value="${option.value}" ${option.selected ? 'data-selected="true"' : ''}>${option.name} ${option.desc ? `<div class="dropdown-select-desc">${option.desc}</div>` : ''} </div>`).join('')}
                     <div class="dropdown__no-results" style="display: none; padding: 10px; text-align: center;">Nenhuma opção encontrada…</div>
                 </div>
             </div>
@@ -70,13 +71,11 @@ class DropdownBase {
     handleOptionClick(option) {
        
     }
-    /**
-     * @returns {string} The currently selected value in the dropdown.
-     */
 
     getValue() {
 
     }
+
     clearSelection() {
         this.input.value = '';
         this.selectOptions.forEach(option => {
@@ -90,6 +89,18 @@ class DropdownSingle extends DropdownBase {
     constructor(containerId, options, onChange = null) {
         super(containerId, options, onChange);
         this.selectedOption = null;
+    }
+
+    initializeSelectedOptions() {
+        const preSelectedOptions = Array.from(this.selectOptions).filter(option => 
+            option.getAttribute('data-selected') === 'true'
+        );
+
+        if (preSelectedOptions.length > 0) {
+            // Se houver mais de uma opção marcada como selecionada, 
+            // seleciona apenas a primeira no modo single
+            this.handleOptionClick(preSelectedOptions[0]);
+        }
     }
 
     handleOptionClick(option) {
@@ -114,6 +125,7 @@ class DropdownSingle extends DropdownBase {
             value: this.selectedOption.getAttribute('data-value')
         } : null;
     }
+
     clearSelection() {
         super.clearSelection();
         this.selectedOption = null;
@@ -124,6 +136,16 @@ class DropdownMulti extends DropdownBase {
     constructor(containerId, options, onChange = null) {
         super(containerId, options, onChange);
         this.selectedOptions = [];
+    }
+
+    initializeSelectedOptions() {
+        const preSelectedOptions = Array.from(this.selectOptions).filter(option => 
+            option.getAttribute('data-selected') === 'true'
+        );
+
+        preSelectedOptions.forEach(option => {
+            this.handleOptionClick(option);
+        });
     }
 
     handleOptionClick(option) {
@@ -150,6 +172,7 @@ class DropdownMulti extends DropdownBase {
     getValue() {
         return this.selectedOptions;
     }
+
     clearSelection() {
         super.clearSelection();
         this.selectedOptions = [];

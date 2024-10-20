@@ -223,8 +223,6 @@ module.exports = {
                     }
                 }
             }
-
-            
             next()
         } catch (error) {
             console.log(error);
@@ -233,17 +231,20 @@ module.exports = {
     },
     authPostState: async (req, res, next) => {
         try {
-            if (!req.session.uid) {
-                res.redirect('/logout?error=Faca login!')
-                return
-            }
+            if (!req.session.uid) return res.redirect('/logout?error=Faca login!');
+            let user = await db.findOne({colecao:'users',doc:req.session.uid})
+            if (user && 'status' in user && user.status && user.status.type != 'active'  ) {
+                if (user.status.type == 'banned') {
+                    return res.redirect('/logout?error=Sua conta foi banida!')
+                }
+            };
+
     
             let verifyToken = await verificarToken(req, res, req.cookies.token)
             if (verifyToken == 'invalid' || !req.cookies.token) {
                 try {
                     let newToken = await renovarToken(req, res, req.cookies.token, process.env.TOKENCODE, 'token')
                     if (newToken == 'invalid') {
-                        res.redirect('/logout?error=Logue novamente, seu token e invalido!')
                         if (!res.headersSent) {
                             res.status(200).json({ success: false, data: 'Logue novamente, seu token e invalido' })
                         }
@@ -254,7 +255,6 @@ module.exports = {
                     if (!res.headersSent) {
                         res.status(200).json({ success: false, data: 'Não foi possível concluir sua solicitação' })
                     }
-                    res.redirect('/logout?error=Não foi possível concluir sua solicitação!')
                 }
             } else {
                 next()
@@ -263,7 +263,6 @@ module.exports = {
             console.log(error);
             
         }
-
     },
     generateSession: async (req, res, email, uid) => {
         try {
@@ -434,22 +433,14 @@ module.exports = {
             return { error: true, err: error };
         }
     },
+
     comprimAndRecort: async (arquivoOrigem, novoCaminho) => {
-        await sharp(arquivoOrigem).jpeg({ quality: 70 }).toFile(novoCaminho, (err, info) => {
-            if (err) {
-                console.error('Erro ao comprimir a imagem:', err);
-                return { error: true, err: err }
-            } else {
-                return fs.unlink(arquivoOrigem, (err) => {
-                    if (err) {
-                        console.error('Erro ao apagar o arquivo original:', err);
-                        return { error: true, err: err }
-                    } else {
-                        return null
-                    }
-                });
-            }
-        });
+        const metadata = await sharp(arquivoOrigem).metadata();
+        return await sharp(arquivoOrigem, { animated: metadata.pages > 1 })
+            [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'png']({ quality: 70 })
+            .toFile(novoCaminho)
+            .then(() => fs.unlink(arquivoOrigem))
+            .catch(err => ({ error: true, err }));
     },
     formatarMoeda: (numeroCentavos) => {
         const valorReal = numeroCentavos / 100;
@@ -479,24 +470,25 @@ module.exports = {
         return dia + '/' + mes + '/' + ano;
     },
     discordDB: async (imagePath, client, Discord, isFullPath = false) => {
-        let bannerPath = null
-        if (isFullPath == true) {
-            bannerPath = path.join(imagePath)
-        } else {
-            bannerPath = path.join(__dirname, imagePath);
-        }
-        let file = await fs.readFileSync(bannerPath);
-        let buffer = Buffer.from(file, 'binary');
-        let newBuffer = await sharp(buffer).jpeg().toBuffer()
-        const attachment = new Discord.AttachmentBuilder(newBuffer, { name: 'test.jpg' });
-        let dbBannerDiscordServer = await client.guilds.cache.get(botConfig.dbServer)
-        let dbBannerDiscordChannel = await dbBannerDiscordServer.channels.cache.get(botConfig.dbChannel)
-        let dbres = await dbBannerDiscordChannel.send({
-            files: [attachment]
-        })
-        let linkImage = await dbres.attachments.first()
+        const bannerPath = isFullPath ? imagePath : path.join(__dirname, imagePath);
+        const file = await fs.readFileSync(bannerPath);
+        const buffer = Buffer.from(file, 'binary');
+        const metadata = await sharp(buffer).metadata();
+        
+        const newBuffer = await sharp(buffer, { animated: metadata.pages > 1 })
+            [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpeg']()
+            .toBuffer();
+            
+        const attachment = new Discord.AttachmentBuilder(newBuffer, { 
+            name: `image.${metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpg'}` 
+        });
 
-        return linkImage.url
+        const dbChannel = await client.guilds.cache.get(botConfig.dbServer)
+            .channels.cache.get(botConfig.dbChannel);
+            
+        const dbres = await dbChannel.send({ files: [attachment] });
+        
+        return dbres.attachments.first().url;
     },
     addFreeMonthSubscription: async (subscriptionID,) => {
         try {

@@ -27,32 +27,53 @@ module.exports = async (Discord2, client, data) => {
         var index = await serverDb.products.findIndex(product => product.productID == productId)
         let preco = await (produto.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        let totalEstoque = []
-        if (produto.estoque.length > 0) {
-            let estoque = produto.estoque.length > 25 ? 25 : produto.estoque.length
-            for (let index = 0; index < estoque; index++) {
-                let indexSring1 = `${index + 1}`
-                if (index == 0) {
-                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)
-                } else {
-                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1),)
-                }
+        let backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround, client, Discord) : null
+        let logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo, client, Discord) : null
 
+
+        let components = []
+        let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
+        if (typeProduct == 'multiple') {
+            let productsArrayOptions = []
+            let productList = produto.multipleProducts
+            for (let index = 0; index < productList.length; index++) {
+                const element = await productList[index];
+                let produto = await serverDb.products.find(product => product.productID == element)
+                await productsArrayOptions.push(
+                    await new Discord.StringSelectMenuOptionBuilder().setLabel(produto.productName).setDescription(`${functions.formatarMoeda(produto.price)} • Estoque: ${'typeProduct' in produto ? produto.typeProduct == 'normal' ? produto.estoque.length : produto.estoque : produto.estoque.length}`).setValue(produto.productID)
+                )
             }
+            components = [await new Discord.ActionRowBuilder().addComponents(
+                new Discord.StringSelectMenuBuilder()
+                    .setCustomId(`quantidadeEdit_${data.productID}`)
+                    .setOptions(productsArrayOptions)
+            )]
+        }else{
+            components = [new Discord.ActionRowBuilder().addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId(`quantidadeEdit_${data.productID}`)
+                    .setLabel('Comprar')
+                    .setEmoji(await require('./emojisGet').comprar)
+                    .setStyle('3'),
+            )]
         }
-        if (totalEstoque.length > 25) {
-            const numToRemove = totalEstoque.length - 25;
-            await totalEstoque.splice(-numToRemove);
+        let fields  = [
+            
+        ]
+        
+        if (typeProduct != 'multiple') {
+            
+            let estoqueNumber = typeProduct == 'single' ? produto.estoque : produto.estoque ?  produto.estoque.length : 0 
+            fields.push({
+                name: 'Estoque:',
+                value: '`` ' + estoqueNumber + ' ``',
+                inline: true
+            },{
+                name: 'Preço:',
+                value: '`` ' + preco.toString() + ' ``',
+                inline: true
+            },)
         }
-        if (totalEstoque.length <= 0) {
-            totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel('Sem estoque').setValue('null').setDefault(true),)
-        }
-        let backGroundLink = null
-        let logoLink = null
-        backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround, client, Discord) : null
-        logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo, client, Discord) : null
-
-
         let embed = await DiscordChannel.send({
             embeds: [
                 new Discord.EmbedBuilder()
@@ -60,28 +81,12 @@ module.exports = async (Discord2, client, data) => {
                     .setDescription(produto.producDesc)
                     .setColor('personalize' in serverDb && 'colorDest' in serverDb.personalize ? serverDb.personalize.colorDest : '#6E58C7')
                     .setTimestamp()
-                    .setFields({
-                        name: 'Preço:',
-                        value: '`` ' + preco.toString() + ' ``',
-                        inline: true
-                    }, {
-                        name: "Estoque:",
-                        value: '`` ' + produto.estoque.length.toString() + ' ``',
-                        inline: true
-                    })
+                    .setFields(...fields)
                     .setThumbnail(logoLink)
                     .setImage(backGroundLink)
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
-            components: [
-                new Discord.ActionRowBuilder().addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId(`quantidadeEdit_${data.productID}`)
-                        .setLabel('Comprar')
-                        .setEmoji(await require('./emojisGet').comprar)
-                        .setStyle('3'),
-                )
-            ]
+            components: components
         });
         try {
             DiscordChannel.setTopic(data.productID)

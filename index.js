@@ -322,10 +322,27 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
         };
     });
 
-    let productsSimple = server.products.map(product => {
+    
+    let productsSimple = server.products.filter(product => {
+        let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal';
+        return typeProduct != 'multiple';
+    }).map(product => {
+        let estoqueNumber = 0
+        let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
+        switch (typeProduct) {
+            case 'single':
+                estoqueNumber = product.estoque
+                break;
+            case 'subscription':
+
+                break;
+            case 'normal':
+                estoqueNumber = product.estoque.length
+                break;
+        }
         return {
             name: product.productName,
-            desc: `Preço: ${functions.formatarMoeda(product.price)} • Estoque: ${product.estoque.length}`,
+            desc: `Preço: ${functions.formatarMoeda(product.price)} • Estoque: ${estoqueNumber}`,
             value: product.productID
         }
     })
@@ -334,7 +351,7 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
 })
 
 
-app.post('/test',upload.none(), (req, res) => {
+app.post('/test', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), (req, res) => {
     console.log(req.body);
 })
 

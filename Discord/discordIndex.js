@@ -136,14 +136,39 @@ module.exports = (Discord2, client) => {
 
                 var product = await server.products.find(product => product.productID == productID)
 
-                let quantidade = interaction.fields.getTextInputValue('quantidadeText');
+                let quantidade = 1
+                if (interaction.fields) {
+                    try {
+                        quantidade =  interaction.fields.getTextInputValue('quantidadeText');
+                    } catch (error) {
+                        quantidade = 1
+                    }
+                }
+                if (!product) {
+                    return interaction.reply({ content: 'Não foi possivel encontrar esse produto.', ephemeral: true });
+                }
+                let estoqueNumber = 0
+                let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
+                switch (typeProduct) {
+                    case 'single':
+                        estoqueNumber = product.estoque
+                        break;
+                    case 'subscription':
 
+                        break;
+                    case 'multiple':
+
+                        break;
+                    case 'normal':
+                        estoqueNumber = product.estoque.length
+                        break;
+                }
                 if (!/^\d+$/.test(quantidade)) {
                     return interaction.reply({ content: 'Por favor, insira apenas números.', ephemeral: true });
                 }
 
-                if (quantidade > product.estoque.length) {
-                    return interaction.reply({ content: `Valor inválido, o máximo que temos no estoque e ${product.estoque.length.toString()} selecione um valor abaixo disso!`, ephemeral: true });
+                if (estoqueNumber < parseInt(quantidade)) {
+                    return interaction.reply({ content: `Valor inválido, o máximo que temos no estoque e ${estoqueNumber.toString()} selecione um valor abaixo disso!`, ephemeral: true });
                 }
 
                 var DiscordServer = await client.guilds.cache.get(interaction.guildId);
@@ -163,7 +188,7 @@ module.exports = (Discord2, client) => {
                     })
                     return
                 }
-                if (!product || server.error == true || product.estoque.length <= 0) {
+                if (!product || server.error == true || estoqueNumber <= 0) {
                     await interaction.reply({
                         content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
                         components: [
@@ -1780,7 +1805,7 @@ module.exports = (Discord2, client) => {
                             new Discord.ActionRowBuilder()
                                 .addComponents(
                                     new Discord.ButtonBuilder()
-                                        .setCustomId(`paymentCobranca_${message.embeds[0].data.fields[4].value}_${interaction.user.id}_${(message.embeds[0].data.fields[1].value).replace('R$','').replace(',','').trim()}`)
+                                        .setCustomId(`paymentCobranca_${message.embeds[0].data.fields[4].value}_${interaction.user.id}_${(message.embeds[0].data.fields[1].value).replace('R$', '').replace(',', '').trim()}`)
                                         .setLabel('Pagar')
                                         .setEmoji(await require('./emojisGet').comprar)
                                         .setStyle('3'),
@@ -1805,7 +1830,7 @@ module.exports = (Discord2, client) => {
                     let paymentMetod = values[3]
                     let serverData = await db.findOne({ colecao: `servers`, doc: serverID })
                     const user = await client.users.fetch(userID)
- 
+
                     if (paymentMetod == 'card' || paymentMetod == 'boleto') {
                         let valueStripe = await valor < 100 ? 100 : valor
                         let isProduct1n = await valor < 100 ? true : false
@@ -1912,7 +1937,7 @@ module.exports = (Discord2, client) => {
                                                 .setEmoji(require('./emojisGet.js').copy)
                                                 .setStyle(Discord.ButtonStyle.Link),
                                         )
-                                        
+
                                     ]
 
                                 })
@@ -1924,7 +1949,7 @@ module.exports = (Discord2, client) => {
                             console.log(error)
                         }
                     }
-                    
+
 
                 }
 
@@ -1941,8 +1966,21 @@ module.exports = (Discord2, client) => {
 
                     let serverDb = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
                     var produto = await serverDb.products.find(product => product.productID == productId)
+                    let estoqueNumber = 0
+                    let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
+                    
+                    switch (typeProduct) {
+                        case 'single':
+                            estoqueNumber = produto.estoque
+                            break;
+                        case 'subscription':
 
-                    if (produto.estoque.length == 0) {
+                            break;
+                        case 'normal':
+                            estoqueNumber = produto.estoque.length
+                            break;
+                    }
+                    if (estoqueNumber <= 0) {
                         return interaction.reply({ content: `Esse produto não tem estoque!`, ephemeral: true });
                     }
 
@@ -1953,9 +1991,10 @@ module.exports = (Discord2, client) => {
                         interaction.reply({ content: 'O seu carrinho expirou vamos apaga-lo! Apos isso você poderá adicionar produtos ao seu novo carrinho! ', ephemeral: true })
                         return await deleteExpiredCart(interaction.guildId, interaction, findChannel.id)
                     }
+                    let textT = `Editar quantidade do produto ${produto.productName}`
                     const modal = new Discord.ModalBuilder()
                         .setCustomId(`comprar_${productId}`)
-                        .setTitle(`Editar quantidade do produto ${produto.productName}`)
+                        .setTitle(textT.length > 44 ? textT.slice(0, 41) + '...' : textT)
 
                     modal.addComponents(
                         new Discord.ActionRowBuilder().addComponents(
@@ -1963,7 +2002,7 @@ module.exports = (Discord2, client) => {
                                 .setCustomId('quantidadeText')
                                 .setLabel(`Insira a quantidade em numeros abaixo: `)
                                 .setStyle(Discord.TextInputStyle.Short)
-                                .setPlaceholder(`Estoque disponivel: ${produto.estoque.length.toString()}`)
+                                .setPlaceholder(`Estoque disponivel: ${estoqueNumber.toString()}`)
                         )
                     );
 
@@ -2002,20 +2041,35 @@ module.exports.sendProductPayment = async (params, id, type) => {
     let serverData = await db.findOne({ colecao: "servers", doc: params.serverID })
     if (DiscordServer && findChannel && serverData) {
         let carrinho = JSON.parse(params.carrinhos)
-        let result = await new Promise((resolve, reject) => {
-            const promises = carrinho.map(async (element) => {
+        let result = await new Promise(async(resolve, reject) => {
+            for (let [chave, element] of Object.entries(carrinho)) {
                 const produto = serverData.products.find(product => product.productID == element.product);
-                if (!produto || produto.estoque.length < element.quantidade) {
-                    return false;
-                }
-                return true;
-            });
-            Promise.all(promises)
-                .then(results => {
-                    const hasNoStock = results.some(result => !result);
-                    resolve(!hasNoStock);
-                })
-                .catch(reject);
+                    let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
+                    switch (typeProduct) {
+                        case 'single':
+                            if (produto.estoque <= 0) {
+                                resolve(false)
+                            }else{
+                                resolve(true)
+                            }
+                            break;
+                        case 'subscription':
+
+                            break;
+                        case 'multiple':
+
+                            break;
+                        case 'normal':
+                            if (produto.estoque.length <= 0) {
+                                resolve(false)
+                            }else{
+                                resolve(true)
+                            }
+                            break;
+                    }
+            }
+            
+            
         });
         async function refound() {
             const fetched = await findChannel.messages.fetch({ limit: 100 });
@@ -2052,9 +2106,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     await stripe.refunds.create({
                         payment_intent: id,
                     });
-                } catch (error) {
-
-                }
+                } catch (error) { }
             }
             let analytics = await db.findOne({ colecao: "analytics", doc: serverData.id })
 
@@ -2079,129 +2131,74 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
             carrinhos[params.userID] = null
         }
-
+        
         if (result == true) {
-            async function createTextContentFromObjects(objectsArray, prodName) {
-                let prefieldArr = []
-                await objectsArray.forEach(async (obj, index) => {
-                    await obj.forEach((line, index2) => {
-                        let prefield = { name: '\u200B', value: "" }
-                        if (index == 0) {
-                            prefield.name += `${prodName} : `
-                        }
-                        prefield.name += line.title
-                        prefield.value += "``" + line.content + "``"
-                        prefieldArr.push(prefield)
-                    })
-                });
-
-                return prefieldArr;
-            }
-
-
             const user = await client.users.fetch(params.userID);
-            let fields = []
-            let products = []
+
+            let arrayItensTxt = []
+
+            let productsName = []
+
+
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
-                try {
-                    var product = await serverData.products.find(product => product.productID == element.product)
-                    var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
-                    let estoqueData = await serverData.products[productIndex].estoque
-                    let arrayCarrinhoProd = []
-                    products.push(product.productName)
-                    if (parseInt(element.quantidade) <= estoqueData.length) {
-                        for (let index = 0; index < parseInt(element.quantidade); index++) {
-                            arrayCarrinhoProd.push(estoqueData[0].conteudo)
-                            await estoqueData.splice(0, 1);
-                            if (index == parseInt(element.quantidade) - 1) {
-                                function reSendMensage(productEmbendType, channelID, serverID, productID) {
-                                    if (productEmbendType == 0) {
-                                        require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                                            channelID: channelID,
-                                            serverID: serverID,
-                                            productID: productID,
-                                            edit: true
-                                        })
-                                    } else {
-                                        require('../Discord/createProductMessage.js')(Discord, client, {
-                                            channelID: channelID,
-                                            serverID: serverID,
-                                            productID: productID,
-                                            edit: true
-                                        })
-                                    }
-                                }
-                                try {
-                                    let DiscordServer = await client.guilds.cache.get(serverData.id);
-                                    let findProductChannel = DiscordServer.channels.cache.find(c => c.id === product.channel)
-                                    const fetchedMessage = await findProductChannel.messages.fetch(product.mensageID);
-                                    if (fetchedMessage) {
-                                        let totalEstoque = []
-                                        if (product.estoque.length > 0) {
-                                            let estoque = product.estoque.length > 25 ? 25 : product.estoque.length
-                                            for (let index2 = 0; index2 < estoque; index2++) {
-                                                let indexSring1 = `${index2 + 1}`
-                                                if (index == 0) {
-                                                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1).setDefault(true),)
-                                                } else {
-                                                    totalEstoque.push(new Discord.StringSelectMenuOptionBuilder().setLabel(indexSring1).setValue(indexSring1),)
-                                                }
 
-                                            }
-                                        }
-                                        if (totalEstoque.length > 25) {
-                                            const numToRemove = totalEstoque.length - 25;
-                                            await totalEstoque.splice(-numToRemove);
-                                        }
-                                        fetchedMessage.edit({
-                                            components: [
-                                                new Discord.ActionRowBuilder().addComponents(
-                                                    new Discord.StringSelectMenuBuilder()
-                                                        .setCustomId(`qntProduct_${product.productID}`)
-                                                        .setPlaceholder('Selecione a quantidade!')
-                                                        .setMinValues(1)
-                                                        .setMaxValues(1)
-                                                        .addOptions(...totalEstoque)
-                                                        .setDisabled(product.estoque.length <= 0 ? true : false)
-                                                ),
-                                                new Discord.ActionRowBuilder().addComponents(
-                                                    new Discord.ButtonBuilder()
-                                                        .setCustomId(`quantidadeEdit_${product.productID}`)
-                                                        .setLabel('Comprar')
-                                                        .setEmoji(await require('./emojisGet').comprar)
-                                                        .setStyle('3'),
-                                                )
-                                            ]
-
-                                        }).catch((err) => {
-                                            reSendMensage(product.embendType, product.channel, params.serverID, element.product)
-                                        })
-                                    } else {
-                                        reSendMensage(product.embendType, product.channel, params.serverID, element.product)
-                                    }
-
-                                } catch (error) {
-                                    reSendMensage(product.embendType, product.channel, params.serverID, element.product)
-                                }
-                            }
+                var product = await serverData.products.find(product => product.productID == element.product)
+                var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
+                const requestedQuantity = element.quantidade;
+                let productEstoque = product.estoque
+                let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
+                productsName.push(`${product.productName} - ${element.quantidade}x`);
+                switch (typeProduct) {
+                    case 'single':
+                        try {
+                            
+                            arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
+                            productEstoque = parseInt(productEstoque) - parseInt(element.quantidade) 
+                        } catch (error) {
+                            console.log(error);
+                            
+                            return refound();
                         }
+                        break;
+                    case 'subscription':
+                        return errorNotify('Funcionalidade em desenvolvimento!')
+                        break;
+                    case 'multiple':
 
-                    } else {
-                        refound()
-                        return
-                    }
-                    let content = await createTextContentFromObjects(arrayCarrinhoProd, product.productName);
-                    fields = [...fields, ...content]
-                    product.estoque = estoqueData
-                    serverData.products[productIndex] = product
-                    await db.update('servers', serverData.id, {
-                        products: serverData.products
-                    })
-                } catch (error) {
-                    console.log(error);
+                        break;
+                    case 'normal':
+                        try {
+                            let itens = await productEstoque.splice(0, requestedQuantity).map(item => item.conteudo)
+                            itens.forEach(item => {
+                                arrayItensTxt.push(item[0].content)
+                            })
+                        } catch (mainError) {
+                            return refound();
+                        }
+                        break;
                 }
+
+                serverData.products[productIndex].estoque = productEstoque
+                
+                await db.update('servers', serverData.id, {
+                    products: serverData.products
+                })
+                try {
+                    const messageCreator = require(`../Discord/create${product.embendType == 1 ? 'ProductMessage' : 'ProductMessageEmbend'}.js`);
+                    await messageCreator(Discord, client, {
+                        channelID: product.channel,
+                        serverID: serverData.id,
+                        productID: product.productID,
+                        numberEstoque: productEstoque.length,
+                        edit: true
+                    });
+                } catch (error) { }
             }
+
+
+
+
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
@@ -2209,9 +2206,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
-                let productText = await products.join('\n');
+                let productText = await productsName.join('\n');
 
-                const concatenatedString = await fields.map(obj => `${obj.value.replace(/``/g, '')}`).join('\n');
+                const concatenatedString = await arrayItensTxt.join('\n');
                 const buffer = Buffer.from(concatenatedString, 'utf-8');
                 const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                 function sendTxtMensage(target) {
@@ -2236,7 +2233,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         target.send({ files: [attachment] }).catch(() => { });
                     } catch (error) {
-                        console.log('Produtos:',concatenatedString);
+                        console.log('Produtos:', concatenatedString);
                     }
                 }
                 let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
@@ -2305,6 +2302,9 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                         { name: 'Nome do usuario comprador', value: user.username, inline: true },
                                         { name: 'ID do usuario', value: user.id, inline: true },
                                         { name: 'ID da compra', value: findChannel.id },
+                                        {
+                                            name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
+                                        },
                                         { name: 'Data e hora da compra', value: dataHoraFormatada },
                                         { name: '\u200B', value: '\u200B' },
                                     )
@@ -2315,7 +2315,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         findChannelPrivate.send({ files: [attachment] }).catch(() => { });
                     } catch (error) {
-                        console.log('Produtos:',concatenatedString);
+                        console.log('Produtos:', concatenatedString);
                     }
                 } else {
                     try {
@@ -2339,8 +2339,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         sendTxtMensage(dono)
                     } catch (error) {
-                        console.log('Produtos:',concatenatedString);
-                        
+                        console.log('Produtos:', concatenatedString);
+
                     }
                 }
 
@@ -2388,7 +2388,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 carrinhos[params.userID] = []
             } catch (error) {
                 console.log(error);
-                console.log(fields);
+                console.log(arrayItensTxt);
             }
             try {
                 if ('personalize' in serverData && 'feedbackChannel' in serverData.personalize) {

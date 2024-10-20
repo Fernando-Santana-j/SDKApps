@@ -29,88 +29,127 @@
                 </div>
             </div>
         </div>
-        <div id="confirm-exclud-produto-containner" style="display: none;">
-            <div id="confirm-exclud-produto-content">
-                <h1 id="confim-exclud-title">Realmente deseja excluir o produto?</h1>
-                <div id="confirm-exclud-buttons">
-                    <button class="main-button-product" id="product-cancel-exclud-button">Cancelar</button>
-                    <button class="main-button-product" id="product-confirm-exclud-button">Confirmar</button>
-                </div>
-            </div>
-        </div>
+        
         <div id="produtos-config-containner" style="display: none;">
-            <div id="produtos-config-background"></div>
-            <div enctype="multipart/form-data" id="produtos-config-content">
-                <div id="close-button-popup-config-produc">
-                    <svg class="SvgFill" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path class="SvgFill" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg>
+            <div style="width: 100%; height: 100%; position: fixed; top: 0; left: 0;" class="close-config-popup"></div>
+            <div id="produtos-config-content">
+                <div id="produtos-config-title">
+                    <div style="width: 4em;"></div>
+                    <h1 class="title-col">Configuracoes de produtos</h1>
+                    <div id="close-config-popup" class="close-config-popup"><svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg></div>
                 </div>
+                <div class="linha"></div>
                 <div id="produtos-config-row">
-                    <div id="cadastro-left-content">
-                        <div id="product-logo-content">
-                            <h1 class="logo-title">Mudar logo:</h1>
-                            <label for="logo-input-edit">
-                                <img id="logo-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                            </label>
-                            <input accept="image/*" hidden type="file" id="logo-input-edit">
+                    <div id="produtos-config-left">
+                        <div id="produtos-config-new-channel-content">
+                            <h1 class="mini-title-col">Selecione o canal de anuncio do produto:</h1>
+                            <div id="produtos-config-new-channel"></div>
                         </div>
-                        <div id="backGround-containner">
-                            <h1 id="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
-                            <div id="backGround-content">
-                                <div id="backGround-image-preview">
-                                    <label for="backGround-preview-edit">Preview da imagem</label>
-                                    <img id="backGround-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                        <div id="produtos-config-new-imagens-containnner">
+                            <div id="produtos-config-new-background">
+                                <h1 class="backGround-title">Imagem de fundo: </h1>
+                                <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
+                                <div class="backGround-image-preview">
+                                    <label for="new-background-input">
+                                        <img id="new-background-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                    </label>
                                 </div>
-                                <div id="backGround-image-input-content">
-                                    <label id="button-backGround-input-edit" class="buttons-background-select" data-plan="<%= server.plan %>" for="backGround-input-edit">Anexar Imagem</label>
-                                    <input accept="image/*" hidden type="file" <%= server.plan == 'inicial' ? 'disabled' : '' %> id="backGround-input-edit">
+                                <div class="backGround-image-input-content">
+                                    <label id="button-new-background-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-background-input">Anexar Fundo</label>
+                                    <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="new-background-input">
                                 </div>
+                                
+                            </div>
+                            <div id="produtos-config-new-logo">
+                                <h1 class="backGround-title">Imagem da logo:</h1>
+                                <div style="height: 32px;"></div>
+                                <label for="new-logo-input">
+                                    <img id="new-logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                </label>
+                                <label id="button-new-logo-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-logo-input">Anexar Logo</label>
+                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="new-logo-input">
                             </div>
                         </div>
                     </div>
-                    <div id="cadastro-rigth-content">
-                        <h1 id="rigth-content-title">Dados do produto:</h1>
-                        <div id="rigth-content">
-                            <div class="inputs-containner" id="product-name-content">
-                                <label class="lable-padrao" for="product-name-edit">Nome do produto</label>
-                                <input required  class="input-padrao" placeholder="Nome do produto" type="text" id="product-name-edit">
+                    <div id="produtos-config-rigth">
+                        <div id="produtos-config-dados-containnner">
+                            <div class="inputs-containner">
+                                <label for="product-config-new-name" class="lable-padrao">Nome do produto: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-name" placeholder="Nome do produto">
                             </div>
-                            <div class="inputs-containner" id="product-desc-content-edit">
-                                <label class="lable-padrao" for="product-desc">Descrição do produto</label>
-                                <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc-edit"></textarea>
+                            <div class="inputs-containner">
+                                <label for="new-product-config-desc" class="lable-padrao">Descrição do produto: </label>
+                                <textarea name="productConfigDesc" class="input-padrao" id="new-product-config-desc" placeholder="Descrição"></textarea>
                             </div>
-                            
-                            <div id="unic-containner-edit">
-                                <div id="doble-containner-edit">
-                                    <div id="price-containner">
-                                        <label class="lable-padrao" for="product-price-edit">Preço do produto</label>
-                                        <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price-edit">
-                                    </div>
-                                    <button class="main-button-product" id="send-mensage-edit">Reenviar Mensagem</button>
-                                </div>
-                                <div id="buttons-containner">
-                                    <button class="main-button-product" id="product-save-edit-button">Salvar</button>
-                                    <button type="button" class="main-button-product" style="background-color: var(--red-color);" id="product-excluir-edit-button">Excluir</button>
-                                </div>
+                            <div class="inputs-containner">
+                                <label for="product-config-new-price" class="lable-padrao">Preço do produto: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-price" placeholder="Preço">
                             </div>
+                        </div>
+                        <div id="produtos-config-new-style">
+                            <h1 class="mini-title-col">Selecione o estilo: </h1>
+                            <div id="produtos-config-new-style-content"></div>
                         </div>
                     </div>
                 </div>
-                <div id="verifyLine" class="linha" style="margin-top: 1em; display: none;"></div>
-                <div id="add-estoque-txt-containner">
+                <div class="linha"></div>
+                <div id="produtos-config-estoque">
+                    <h1 class="title-col">Configure o estoque : </h1>
 
-                </div>
-                <div class="linha" style="margin-top: 1em;"></div>
-                <div id="edit-estoque-config-containner">
-                    <h1 class="title-col">Adicionar estoque!</h1>
-                    <div id="edit-estoque-config-content">
-                        <div id="edit-estoque-inputs-containner">
-                            
+                    <div id="produtos-config-estoque-content">
+                        <div id="produtos-estoque-edit-normal" style="display: none;">
+                            <div id="produtos-estoque-edit-normal-txt" >
+                                <h1 class="mini-title-col">Adicionar estoque por txt</h1>
+                                <div id="produtos-estoque-edit-normal-txt-content">
+                                    
+                                    <div style="display: flex; flex-direction: column; justify-content: end; width: 40%;">
+                                        <label for="produtos-estoque-edit-normal-txt-title" class="lable-padrao">Titulo dos itens do txt</label>
+                                        <input type="text"  id="produtos-estoque-edit-normal-txt-title" class="input-padrao" placeholder="Padrão: Itens">
+                                    </div>
+
+                                    <div id="estoque-config-txt-file-content">
+                                        <p class="desc-col" id="estoque-config-txt-file-selected">Nenhum arquivo selecionado :(</p>
+                                        <label type="button" class="main-button-product" for="produtos-estoque-edit-normal-txt-file">Adiconar arquivo txt!</label>
+                                        <input type="file" hidden accept=".txt" id="produtos-estoque-edit-normal-txt-file">
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <!-- <div id="produtos-estoque-edit-normal-individual-content">
+                                <h1 class="mini-title-col">Adicionar estoque individual</h1>
+                                <div id="produtos-estoque-edit-normal-individual">
+                                    
+                                    <div class="inputs-containner">
+                                        <label for="product-config-new-individual-title" class="lable-padrao">Titulo do item: </label>
+                                        <input type="text" class="input-padrao" id="product-config-new-individual-title" placeholder="Titulo do item">
+                                    </div>
+                                    <div class="inputs-containner">
+                                        <label for="product-config-new-individual-conteudo" class="lable-padrao">Conteudo do item: </label>
+                                        <input type="number" class="input-padrao" id="product-config-new-individual-conteudo" placeholder="Conteudo do item">
+                                    </div>
+                                </div>
+                            </div> -->
                         </div>
-                        <button type="button" class="main-button-product" id="new-estoque-create">Adiconar estoque!</button>
+                        <div id="produtos-estoque-edit-single" style="display: none;">
+                            <div class="inputs-containner">
+                                <label for="product-config-new-single-content" class="lable-padrao">Conteudo do item: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-single-content" placeholder="Conteudo do item">
+                            </div>
+                            <div class="inputs-containner">
+                                <label for="product-config-new-single-number" class="lable-padrao">Quantidade de estoque: </label>
+                                <input type="number" class="input-padrao" id="product-config-new-single-number" placeholder="Quantidade de estoque">
+                            </div>
+                        </div>
                     </div>
+                
+                </div>
+                <div class="linha"></div>
+                <div id="produtos-config-buttons">
+                    <button class="button-padrao redColor" id="delete-product">Deletar produto</button>
+                    <button class="button-padrao" id="send-new-mensage">Reenviar Mensagem</button>
+                    <button class="button-padrao greenColor" id="save-new-product">Salvar</button>
                 </div>
             </div>
-            
         </div>
         <div id="containner">
             <%- include('./reusable/body.ejs',{index:2}) %>
@@ -218,7 +257,7 @@
                                             </div>
                                             
                                             <div class="produtos-estoque-content">
-                                                <p class="produtos-estoque-value"><%= element.estoque.length %> em estoque</p>
+                                                <p class="produtos-estoque-value"><%= 'typeProduct' in element ? element.typeProduct == 'normal' ? element.estoque.length + ' em estoque' : element.typeProduct == 'multiple' ? element.estoque : element.estoque + ' em estoque' : element.estoque.length + ' em estoque'  %></p>
                                             </div>
                                             <button data-id="<%= element.productID %>" class="produtos-configure-button">Configure</button>
                                         </div>
@@ -287,48 +326,20 @@
                                         
                                     </div>
                                     <div class="linha"></div>
-                                    <div id="infos-select-popup">
+                                    <div id="infos-select-popup" >
                                         <p id="info-select-popup-text" class="mini-title-col"></p>
 
                                         <img src="" id="info-select-popup-img">
                                     </div>
                                     <div id="type-product-select">
                                         <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o tipo de produto:</h2>
-                                        <div id="type-product-select-content">
-                                            
-                                        </div>
+                                        <div id="type-product-select-content"></div>
                                     </div>
                                     <div class="linha"></div>
                                     <div id="select-type-embend-content">
                                         <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o estilo:</h2>
                                         <div id="type-embend-select-content">
-                                            <ul class="radio-list">
-                                                <li title="Use esse tipo para criar uma mensagem de embend padrao do discord!">
-                                                    <input type="radio" id="embend-option-mensage" checked name="type-embend-select">
-                                                    <label class="label-radius" for="embend-option-mensage">Mensagem</label>
-                                                    
-                                                    <label for="embend-option-mensage" class="check"></label>
-                                                </li>
-                                                <li title="Use esse tipo para criar uma mensagem em formato de imagem, mais moderna e visualmente agradavel!">
-                                                    <input type="radio" id="embend-option-image" name="type-embend-select">
-                                                    <label class="label-radius" for="embend-option-image">Imagem</label>
-                                    
-                                                    <label for="embend-option-image" class="check">
-                                                        <div class="inside"></div>
-                                                    </label>
-                                
-                                                </li>
-                                            </ul>
                                            
-                                            <ul id="infos-embend-select">
-                                                <li class="infos-select-list" id="info-select-mensagem" title="Use esse tipo para criar uma mensagem de embend padrao do discord!">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                                                </li>
-                                                <li class="infos-select-list" id="info-select-imagem" style="margin-top: 2.4em;" title="Use esse tipo para criar uma mensagem em formato de imagem, mais moderna e visualmente agradavel!">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                                                </li>
-                                            </ul>
-                                            
                                         </div>
                                     </div>
                                 </div>
@@ -352,40 +363,7 @@
                                     <div id="cadastro-assinatura-estoque-config">
                                         <div id="select-type-time-content">
                                             <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione a unidades de tempo:</h2>
-                                            <ul class="radio-list">
-                                                <li>
-                                                    <input type="radio" id="product-option-horas" checked name="type-time-select">
-                                                        <label class="label-radius"  for="product-option-horas">Horas </label>
-                                                        <label for="product-option-horas" class="check"></label>
-                                                </li>
-                                                <li>
-                                                    <input type="radio" id="time-option-dias" name="type-time-select">
-                                                    <label class="label-radius" for="time-option-dias">Dias</label>
-                                    
-                                                    <label for="time-option-dias" class="check">
-                                                        <div class="inside"></div>
-                                                    </label>
-                                
-                                                </li>
-                                                <li>
-                                                    <input type="radio" id="time-option-meses" name="type-time-select">
-                                                    <label class="label-radius" for="time-option-meses">Meses</label>
-                                    
-                                                    <label for="time-option-meses" class="check">
-                                                        <div class="inside"></div>
-                                                    </label>
-                                                </li>
-                                    
-                                                <li >
-                                                    <input type="radio" id="time-option-vitalicio" name="type-time-select">
-                                                    <label class="label-radius" for="time-option-vitalicio">Vitalicio</label>
-                                    
-                                                    <label for="time-option-vitalicio" class="check">
-                                                        <div class="inside"></div>
-                                                    </label>
-                                                </li>
-                                                
-                                            </ul>
+                                            <div id="subscription-time-select-content"></div>
                                         </div>
                                         <div id="other-configs-assintura">
                                             <div id="cargo-configs-assintura">
@@ -454,103 +432,6 @@
                         </div>
                     </div>
 
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="product-cadastro-containner">
-                        <div class="product-cadastro-content" id="form-prodc-mult">
-                            <h1 class="title-col">Cadastrar de multi Produtos </h1>
-                            <div style="width: 100%; display: flex; justify-content: center; align-items: center;"><svg style="width: 3em;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg> (Premium)</div>
-                            <div class="linha"></div>
-                            <div class="cadastro-content">
-                                <div class="cadastro-left-content">
-                                    <div class="channels-containner">
-                                        <h1 class="cannels-title">Selecione o canal de anuncio do produto:</h1>
-                                        <div class="channels-content">
-                                            <input required type="text" class="input-padrao" list="channels-input-list" placeholder="Pesquise o canal..." id="channel-multi-input">
-                                            <datalist id="channel-multi-list">
-                                                <% channels.forEach(element => { %>
-                                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                                <% }) %>
-                                            </datalist>
-                                        </div>
-                                    </div>
-                                    <div class="backGround-containner">
-                                        <h1 class="backGround-title">Imagem de fundo do produto: </h1>
-                                        <div class="backGround-content">
-                                            <div class="backGround-image-preview">
-                                                <label for="image-preview-multi">Preview da imagem</label>
-                                                <img id="image-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                            </div>
-                                            <div class="backGround-image-input-content">
-                                                <label id="button-image-input-multi" class="image-lable" data-plan="<%= server.plan %>" for="image-input-multi">Anexar Imagem</label>
-                                                <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input-multi">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="cadastro-rigth-content">
-                                    <h1 class="rigth-content-title">Dados do multi produto:</h1>
-                                    <div class="rigth-content">
-                                        <div class="inputs-containner" id="product-name-content">
-                                            <label class="lable-padrao" for="product-name-mult">Nome do multi produto</label>
-                                            <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name-mult">
-                                        </div>
-                                        <div class="inputs-containner" id="product-desc-content">
-                                            <label class="lable-padrao" for="product-desc-multi">Descrição do multi produto</label>
-                                            <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc-multi"></textarea>
-                                        </div>
-                                        <div class="unic-containner">
-                                            <div class="doble-containner">
-                                                <div class="triple-containner">
-                                                    <div id="select-product-containner">
-                                                        <div id="select-product-content">
-                                                            <div id="select-product-focus">
-                                                                <button class="button-padrao" id="select-product-focus-button" type="button">Selecionar produtos</button>
-                                                                
-                                                            </div>
-                                                            <div id="select-product-row">
-                                                                
-                                                            </div>
-                                                        </div>
-                                                        <div id="select-product-options-containner" style="display: none;">
-                                                            <div id="select-product-options-row">
-                                                                
-                                                            </div>
-                                                        </div>
-                                                        
-                                                    </div>
-                                                </div>
-                                                <button type="submit" class="main-button-product" id="product-cadastro-multi-button">Cadastrar</button>
-                                            </div>
-                                            <div class="product-logo-content">
-                                                <h1 class="logo-title">Adicionar logo:</h1>
-                                                <label for="logo-input-multi">
-                                                    <img id="logo-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                                </label>
-                                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="logo-input-multi">
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -578,333 +459,6 @@
         </script>
     </div>
 
-    <script>
-
-        let serverID = location.pathname.replace('/server/sales/', "")
-
-        let multiCreateProductsSelect = new DropdownMulti('select-menu-multi-product',productsString);
-        let channelInputCreateProduct = new DropdownSingle('select-menu-channel-create-product', channelItensSelectMenu);
-        let cargoInputCreateProduct = new DropdownSingle('select-cargo-assinatura', cargoItensSelectMenu);
-        
-        let createProductOptions = {}
-        const productTypeOptions = [
-            { label: 'Normal', value: 'normal', title: 'Use esse tipo para criar um produto unico e com conteudos diferentes!', checked: true, rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'info-select-normal' },
-            { label: 'Single', value: 'single', title: 'Use esse tipo para criar produtos com mesmo conteudo!', rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'info-select-single' },
-            { label: 'Assinatura', value: 'subscription', title: 'Use esse tipo para criar produtos que sejam assinaturas!', rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'info-select-assinatura' },
-            { label: 'Multiple', value: 'multiple', title: 'Use para criar uma mensagem com varios produtos selecionaveis!', rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'info-select-multiple' }
-        ];
-
-        const selectProductType = new RadioList('type-product-select-content', 'productSelectType' ,productTypeOptions, (selectedOption, index) => {
-            let estoqueNormalContainner = document.getElementById('cadastro-estoque-config-containner')
-            let estoqueNumberContainner = document.getElementById('cadastro-number-estoque-config-containner')
-            let estoqueAssinaturaContainner = document.getElementById('cadastro-assinatura-estoque-config-containner')
-            let estoqueMultiContainner = document.getElementById('cadastro-estoque-multi-product')
-            function HideAll() {
-                estoqueNormalContainner.style.display = 'none';
-                estoqueNumberContainner.style.display = 'none';
-                estoqueAssinaturaContainner.style.display = 'none';
-                estoqueMultiContainner.style.display = 'none';
-            }
-            switch (selectedOption.value) {
-                case 'normal':
-                    HideAll()
-                    estoqueNormalContainner.style.display = 'flex';
-                    break;
-                case 'single':
-                    HideAll()
-                    estoqueNumberContainner.style.display = 'flex';
-                    break;
-                case 'subscription':
-                    HideAll()
-                    estoqueAssinaturaContainner.style.display = 'flex';
-                    break;
-                case 'multiple':
-                    HideAll()
-                    estoqueMultiContainner.style.display = 'flex';
-                    break;
-                default:
-                    break;
-            } 
-        });
-
-
-
-        const embendTypeOptions = [
-            { label: 'Mensagem', value: '0', title: 'Use esse tipo para criar uma mensagem de embend padrao do discord!', checked: true, rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'embend-option-mensage' },
-            { label: 'Imagem', value: '1', title: 'Use esse tipo para criar uma mensagem em formato de imagem, mais moderna e visualmente agradavel!', rightImage: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>',imageClass:'infos-select-list', imageId:'embend-option-mensage' },
-         
-        ];
-
-        const selectEmbendType = new RadioList('type-embend-select-content', 'embendSelectType' ,embendTypeOptions, (selectedOption, index) => {
-            let estoqueNormalContainner = document.getElementById('cadastro-estoque-config-containner')
-            let estoqueNumberContainner = document.getElementById('cadastro-number-estoque-config-containner')
-            let estoqueAssinaturaContainner = document.getElementById('cadastro-assinatura-estoque-config-containner')
-            let estoqueMultiContainner = document.getElementById('cadastro-estoque-multi-product')
-            function HideAll() {
-                estoqueNormalContainner.style.display = 'none';
-                estoqueNumberContainner.style.display = 'none';
-                estoqueAssinaturaContainner.style.display = 'none';
-                estoqueMultiContainner.style.display = 'none';
-            }
-            switch (selectedOption.value) {
-                case 'normal':
-                    HideAll()
-                    estoqueNormalContainner.style.display = 'flex';
-                    break;
-                case 'single':
-                    HideAll()
-                    estoqueNumberContainner.style.display = 'flex';
-                    break;
-                case 'subscription':
-                    HideAll()
-                    estoqueAssinaturaContainner.style.display = 'flex';
-                    break;
-                case 'multiple':
-                    HideAll()
-                    estoqueMultiContainner.style.display = 'flex';
-                    break;
-                default:
-                    break;
-            } 
-        });
-
-
-
-        document.addEventListener('change', (event) => {
-            if (event.target.name == 'type-time-select') {
-                let timeInput = document.getElementById('time-number-input-assinatura')
-                if (event.target.id == 'time-option-vitalicio') {
-                    timeInput.style.opacity = 0.8
-                    timeInput.setAttribute('disabled','')
-                }else{
-                    timeInput.style.opacity = 1
-                    timeInput.removeAttribute('disabled','')
-                }
-            }
-            if (event.target.id == 'select-null-stock-checkbox') {
-                let inputTitle = document.getElementById('estoque-config-input-title-txt')
-                let buttonFile = document.getElementById('estoque-config-text-file')
-                let inputFile = document.getElementById('estoque-config-input-file')
-                if (event.target.checked) {
-                    createProductOptions.estoque = false
-                    inputTitle.setAttribute('disabled','')
-                    inputTitle.style.opacity = 0.5
-                    buttonFile.setAttribute('disabled','')
-                    buttonFile.style.opacity = 0.5
-                    inputFile.setAttribute('disabled','')
-                    buttonFile.style.cursor = 'not-allowed'
-                }else{
-                    createProductOptions.estoque = true
-                    inputTitle.removeAttribute('disabled')
-                    inputTitle.style.opacity = 1
-                    buttonFile.removeAttribute('disabled')
-                    buttonFile.style.opacity = 1
-                    inputFile.removeAttribute('disabled') 
-                    buttonFile.style.cursor = 'pointer'
-                }
-            }
-        });
-        
-        document.querySelectorAll('.infos-select-list').forEach((element) => {
-            element.addEventListener('mousemove', (event) => {
-                let infosSelectPopup = document.getElementById('infos-select-popup')
-                infosSelectPopup.style.left = `${(event.pageX + 20) - 448}px`; 
-                infosSelectPopup.style.top = `${event.pageY + 30}px`; 
-                infosSelectPopup.style.opacity = 1;
-                infosSelectPopup.style.zIndex = 9999999;
-                infosSelectPopup.style.animation = 'scale-up-center 0.4s forwards';
-                
-
-
-                document.getElementById('info-select-popup-text').innerText = "Abaixo está a prévia do tipo " + element.id.replace('info-select-','') + ': '
-            })
-            element.addEventListener('mouseleave', () => {
-                let infosSelectPopup = document.getElementById('infos-select-popup')
-                infosSelectPopup.style.animation = 'scale-down-center 0.4s forwards';
-                setTimeout(() => {
-                    infosSelectPopup.style.opacity = 0;
-                    infosSelectPopup.style.zIndex = -1;
-                },200)
-                
-            });
-        })
-
-
-
-        document.getElementById('product-price').addEventListener('input', () => {
-            var valor = document.getElementById('product-price').value.replace(/\D/g, ''); 
-            var cents = valor.slice(-2);
-            var integerPart = valor.slice(0, -2);
-            integerPart = integerPart.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-            document.getElementById('product-price').value = integerPart + ',' + cents;
-        })
-
-
-
-
-        function previewImage(input, preview) {
-            if (input.files && input.files[0]) {
-                let file = input.files[0]
-                var fileType = file.type;
-                var validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-                if (validImageTypes.includes(fileType)) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        preview.setAttribute('src', e.target.result);
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    input.value = ''
-                    errorNotify('O arquivo que você selecinou não e uma imagem!')
-                }
-            } else {
-                input.value = ''
-                errorNotify('O arquivo não pode ser carregado tente novamente ou insira outro arquivo!')
-            }
-
-        }
-
-        document.getElementById('logo-input').addEventListener('change', function () {
-            previewImage(this, document.getElementById('logo-preview'));
-        });
-
-        document.getElementById('image-input').addEventListener('change', function () {
-            previewImage(this, document.getElementById('image-preview'));
-        });
-        document.getElementById('estoque-config-input-file').addEventListener('change', function () {
-            let file = this.files[0]
-            if (!file.name.endsWith('.txt')) return errorNotify('O arquivo que você selecionou não é um txt!');
-            document.getElementById('estoque-config-txt-file-selected').innerText = file.name
-        });
-
-
-        function clearCadastroProduct() {
-            document.getElementById('product-price').value = ''
-            document.getElementById('product-desc').value = ''
-            document.getElementById('product-name').value = ''
-            document.getElementById('logo-input').value = ''
-            document.getElementById('image-input').value = ''
-            document.getElementById('logo-preview').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
-            document.getElementById('image-preview').src = 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg'
-            document.getElementById('estoque-config-input-title-txt').value = ''
-            document.getElementById('estoque-config-input-file').value = ''
-            document.getElementById('estoque-config-txt-file-selected').innerText = 'Nenhum arquivo selecionado :('
-            document.getElementById('content-number-estoque-input').value = ''
-            document.getElementById('number-estoque-input').value = ''
-            document.getElementById('time-number-input-assinatura').value = ''
-            channelInputCreateProduct.clearSelection()
-            cargoInputCreateProduct.clearSelection()
-            multiCreateProductsSelect.clearSelection()
-        }
-
-        document.getElementById('clear-product-cadastro').addEventListener('click', () => {
-            clearCadastroProduct()
-        })
-
-
-        document.getElementById('save-product-cadastro').addEventListener('click', async() => {
-            let name = document.getElementById('product-name').value
-            let desc = document.getElementById('product-desc').value
-            let price = document.getElementById('product-price').value.replace(/\D/g, '')
-            const typeProduct = await selectProductType.getValue().value
-            let channelID = channelInputCreateProduct.getValue()
-
-
-            if (!document.getElementById('logo-input').files[0]) return errorNotify('Nenhuma logo foi inserida!');
-            if (name.trim().length <= 0)return errorNotify('Escreva o nome do seu produto primeiro!');
-            if (desc.trim().length <= 0)return errorNotify('Escreva a descrição do seu produto primeiro!');
-            if (price.trim().length <= 0)return errorNotify('Escreva o valor do seu produto primeiro!');
-            if (channelID == null) return errorNotify('Escolha o canal do seu produto primeiro!');
-
-            
-            var formData = new FormData();
-
-            await formData.append('price', parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')));
-            await formData.append('productName', document.getElementById('product-name').value.trim());
-            await formData.append('producDesc', document.getElementById('product-desc').value.trim());
-            await formData.append('serverID', serverID);
-            await formData.append('channelID', channelID.value);
-            await formData.append('typeProduct', typeProduct);
-            await formData.append('productLogo', document.getElementById('logo-input').files[0]);
-            await formData.append('embendType', await selectEmbendType.getValue().value);
-            
-            if (document.getElementById('image-input').files[0]) {
-                formData.append('backGround', document.getElementById('image-input').files[0]);
-            }
-
-            switch (typeProduct) {
-                case 'normal':
-                    let normalTitle = document.getElementById('estoque-config-input-title-txt').value
-                    let txtFileEstoque = document.getElementById('estoque-config-input-file')
-                    if (normalTitle.trim().length <= 0) normalTitle = 'Itens';
-                    if (!txtFileEstoque.files[0]) return errorNotify('Escolha o arquivo do seu estoque primeiro!'); 
-                    let file = txtFileEstoque.files[0]
-                    if (!file.name.toLowerCase().endsWith('.txt')) return errorNotify('O arquivo não e um txt valido!');
-                    let linhas = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        
-                        reader.onload = function (event) {
-                            const conteudo = event.target.result;
-                            let linhas = conteudo.split('\n').map(linha => linha.replace(/\r/g, '').trim()).filter(linha => linha.length > 0);
-                            resolve(linhas); 
-                        };
-
-
-
-                        reader.onerror = function (error) {
-                            reject(error); 
-                        };
-
-                        reader.readAsText(file);
-                    });
-                    await formData.append('normalTitleEstoque', normalTitle);
-                    await formData.append('normalTxtEstoque', linhas);
-                    break;
-                case 'single':
-                    
-                    break;
-                case 'subscription':
-                    
-                    break;
-                case 'multiple':
-                    
-                    break;
-            }
-        
-
-            
-            
-            // if (document.getElementById('image-input').files[0]) {
-            //     formData.append('backGround', document.getElementById('image-input').files[0]);
-            // }
-
-            clearCadastroProduct()
-            
-            $.ajax({
-                traditional: true,
-                url: '/test',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    if (response.success) {
-                        successNotify('Produto criado!')
-                        getProducts()
-                    } else {
-                        errorNotify(response.data)
-                    }
-
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                }
-            })
-
-        })    
-
-    </script>
-    <!-- <script src="<%#= host %>/public/js/sales.js"></script> -->
+   <script src="/public/js/sales.js"></script>
 </body>
 </html>
