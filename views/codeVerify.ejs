@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title></title>
+        <link rel="stylesheet" href="/public/css/">
+        <style>
+            body {
+                background-color: var(--opacity-color-purple);
+            }
+
+            #main-containner {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #popup-content {
+                min-width: 25em;
+                margin: 1em;
+                max-width: 75em;
+                padding: 1.5em;
+                min-height: 30em;
+                max-height: 40em;
+                position: fixed;
+                border-radius: var(--border-radius-mid);
+                background-color: var(--tertiary-color);
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+            }
+
+            .inputs-code {
+                font-size: 1.6em;
+                padding: 0.2em;
+                width: 3em;
+                height: 3.5em;
+                border: 3px solid var(--main-color-purple) !important;
+                color: var(--color-text-primary);
+                background-color: transparent;
+                border: none;
+                border-radius: var(--border-radius-min);
+                font-family: 'poppins';
+                text-align: center;
+                transition: border-color 0.5s ease;
+            }
+
+            #inpusts-containner {
+                flex: 1;
+                margin-top: 1em;
+                margin-bottom: 1em;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1.5em;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
+</head>
+
+<body>
+    <div id="body-containner">
+        <div id="containner">
+            <main id="main-containner">
+                <div id="popup-content">
+                    <div>
+                        <h1 class="title-col" style="font-weight: bold; font-size: 2em;"><%= type == 'email' ? 'Verifique seu email!' : 'Verificação multifatorial.' %></h1>
+                        <p class="desc-col" style="font-weight: normal; font-size: 1em; margin-top: 1em;"> <%= type == 'email'? 'Foi enviada uma mensagem com um codigo para o e-mail cadastrado dessa conta, não será possível logar na conta se o email não for verificado!' : 'Acesse seu aplicativo autenticador e digite o token de autenticação de 6 dígitos abaixo!' %></p>
+                    </div>
+                    <div id="inpusts-containner">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                        <input type="number" maxlength="1" min="1" class="inputs-code">
+                    </div>
+                    <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                        <button style="height: 3em; width: 15em;" id="resend-code" class="button-padrao">Reenviar
+                            codigo</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+        <script>
+            const inputs = document.querySelectorAll('.inputs-code');
+
+            let type = '<%= type %>'
+
+            let colorChangeTimeout;
+
+            function changeBorderColor(index) {
+                if (index < inputs.length) {
+                    inputs[index].style.borderColor = 'var(--green-color) !important';
+                    colorChangeTimeout = setTimeout(() => {
+                        changeBorderColor(index + 1);
+                    }, 200);
+                }
+            }
+
+            function stopColorChange() {
+                clearTimeout(colorChangeTimeout);
+                inputs.forEach(input => {
+                    input.style.borderColor = 'var(--red-color) !important';
+                });
+            }
+
+
+
+            inputs.forEach(async (input, index) => {
+                input.addEventListener('paste', (event) => {
+                    const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+                    const cleanedData = pasteData.replace(/\s+/g, ''); // Remove os espaços
+                    console.log(cleanedData);
+                    
+                    if (cleanedData.length === inputs.length) {
+                        // Distribui cada dígito para seu respectivo input
+                        inputs.forEach((input, i) => {
+                            input.value = cleanedData[i] || ''; // Garante que apenas os primeiros 6 caracteres sejam usados
+                        });
+                        inputs[inputs.length - 1].focus(); // Foca no último input
+                        verifySendCode(); // Verifica o código automaticamente
+                    }
+
+                    event.preventDefault(); // Previne o comportamento padrão de colar
+                });
+                input.addEventListener('input', async () => {
+                    if (input.value.length > 1) {
+                        input.value = input.value.slice(0, 1);
+                    }
+
+                    if (input.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+
+                    verifySendCode()
+
+                });
+
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+            });
+            async function verifySendCode() {
+                const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+                if (allFilled) {
+                    toggleInputs(true)
+                    changeBorderColor(0);
+                    let verifyCode = await fetch('/security/code/verify', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            code: Array.from(inputs).map(input => input.value).join(''),
+                            type:type
+                        }),
+                    }).then(response => { return response.json() })
+                    if (verifyCode.success == true) {
+                        successNotify('Código verificado, você será redirecionado para o dashboard!')
+                        setTimeout(()=>{
+                            location.href = '/dashboard'
+                        },1000)
+                    } else {
+                        
+                        errorNotify(verifyCode.data)
+                        stopColorChange()
+                        toggleInputs(false)
+                        inputs.forEach(input => {
+                            input.value = 'disable';
+                        });
+                    }
+                }
+
+            }
+            function toggleInputs(disable) {
+                inputs.forEach(input => {
+                    input.disabled = disable;
+                });
+            }
+
+
+            document.getElementById('resend-code').addEventListener('click', async () => {
+                document.getElementById('resend-code').style.display = 'none'
+                let sendCode = await fetch('/security/email/resend', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                    }),
+                }).then(response => { return response.json() })
+                if (sendCode.success == true) {
+                    successNotify(sendCode.data)
+                    setTimeout(() => {
+                        document.getElementById('resend-code').style.display = 'block'
+                    }, 60000)
+                } else {
+                    errorNotify(sendCode.data)
+                    document.getElementById('resend-code').style.display = 'block'
+                }
+
+            })
+        </script>
+        <script src="/public/js/"></script>
+</body>
+
+</html>

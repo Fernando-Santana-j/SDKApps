@@ -30,12 +30,13 @@ module.exports = {
                     let carrinhos = require("../../discordIndex").carrinhos
                     let carrinho = carrinhos[DiscordChannel.topic]
                     try {
+                        await interaction.deferReply({ ephemeral: true });
                         await require("../../discordIndex").sendProductPayment({
                             serverID: interaction.guildId,
                             userID: DiscordChannel.topic,
                             carrinhos: JSON.stringify(carrinho),
                         }, null, 'aprovado')
-                        interaction.reply({content:'Compra Aprovada!',ephemeral:true})
+                        await interaction.editReply({ content: 'Compra Aprovada!' });
                     } catch (error) {
                         console.log(error);
                         interaction.reply({content:'Erro ao aprovar o carrinho!',ephemeral:true})

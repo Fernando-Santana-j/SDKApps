@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title></title>
-    <link rel="stylesheet" href="<%= host %>/public/css/ticket.css">
+    <link rel="stylesheet" href="/public/css/ticket.css">
 </head>
 <body>
     <div id="body-containner">
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:6}) %>
+            <%- include('./reusable/body.ejs',{index:6}) %>
             <main id="main-containner">
                 <h1 class="title-col">Seu bot de tickets pessoal!</h1>
                 <p class="desc-col">Um bot de tickets completo e integrado com o sistema de vendas!</p>
@@ -206,6 +206,6 @@
         })
     </script>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/ticket.js"></script>
+    <script src="/public/js/ticket.js"></script>
 </body>
 </html>

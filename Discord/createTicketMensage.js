@@ -44,85 +44,85 @@ module.exports = async (client, channelID, serverID) => {
                     .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
             ],
             components: [
-                new Discord.ActionRowBuilder().addComponents(
-                    new Discord.StringSelectMenuBuilder()
-                        .setCustomId('idiomaTicket')
-                        .setPlaceholder('Selecione o seu idioma!')
-                        .setMinValues(1)
-                        .setMaxValues(1)
-                        .setDisabled(true)
-                        .addOptions(
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Português ')
-                                .setDescription('Idioma original')
-                                .setValue('pt')
-                                .setDefault(true),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Inglês')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('en'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Espanhol')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('es'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Francês ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('fr'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Alemão ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('de'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Italiano ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('it'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Chinês ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('zh-CN'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Japonês ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('ja'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Coreano ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('ko'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Árabe ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('ar'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Russo ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('ru'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Turco ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('tr'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Holandês ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('nl'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Sueco ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('sv'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Polonês ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('pl'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Vietnamita ')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('vi'),
-                            await new Discord.StringSelectMenuOptionBuilder()
-                                .setLabel('Tailandês')
-                                .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
-                                .setValue('th'),
-                        )
-                ),
+                // new Discord.ActionRowBuilder().addComponents(
+                //     new Discord.StringSelectMenuBuilder()
+                //         .setCustomId('idiomaTicket')
+                //         .setPlaceholder('Selecione o seu idioma!')
+                //         .setMinValues(1)
+                //         .setMaxValues(1)
+                //         .setDisabled(true)
+                //         .addOptions(
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Português ')
+                //                 .setDescription('Idioma original')
+                //                 .setValue('pt')
+                //                 .setDefault(true),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Inglês')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('en'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Espanhol')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('es'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Francês ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('fr'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Alemão ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('de'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Italiano ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('it'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Chinês ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('zh-CN'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Japonês ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('ja'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Coreano ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('ko'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Árabe ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('ar'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Russo ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('ru'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Turco ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('tr'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Holandês ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('nl'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Sueco ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('sv'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Polonês ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('pl'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Vietnamita ')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('vi'),
+                //             await new Discord.StringSelectMenuOptionBuilder()
+                //                 .setLabel('Tailandês')
+                //                 .setDescription('Esse idioma e traduzido do português e pode apresentar erros de digitação')
+                //                 .setValue('th'),
+                //         )
+                // ),
                 new Discord.ActionRowBuilder().addComponents(
                     new Discord.StringSelectMenuBuilder()
                         .setCustomId('motivoTicket')

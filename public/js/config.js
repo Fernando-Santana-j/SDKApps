@@ -21,6 +21,7 @@ document.getElementById('save-configs').addEventListener('click', async () => {
 
     let session = await fetch('/config/change', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -46,6 +47,7 @@ document.getElementById('changePaymentMethod').addEventListener('click', async (
     try {
         let session = await fetch('/subscription/update', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -82,6 +84,7 @@ document.getElementById('confirmCancelSubscription').addEventListener('click', a
     mensageNotify('Aguarde estamos deletando a sua conta!')
     let session = await fetch('/accout/delete', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -114,6 +117,7 @@ document.getElementById('block-bank-button').addEventListener('click',async()=>{
     }
     let blockBank = await fetch('/config/blockbank', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

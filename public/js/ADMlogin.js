@@ -9,6 +9,7 @@ async function initLogin() {
     } else {
         let session = await fetch('/verify/adm', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },

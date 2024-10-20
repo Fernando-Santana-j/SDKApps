@@ -29,6 +29,7 @@ document.getElementById('roles-row').addEventListener('click',async function (ev
         permRow.setAttribute('data-rolesIdEdit', id)
         let permsActual = await fetch('/perms/get', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -132,6 +133,7 @@ function sendModifyPerm(item) {
     if (itemDOM && itemName &&  role) {
         fetch('/perms/changeOne', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },

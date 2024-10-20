@@ -151,20 +151,43 @@
 
 #top-header-profile-options{
     position: absolute;
-    right: 2em;
-    top: 4em;
+    right: 0em;
+    top: 5em;
+    min-width: 10em;
+    max-width: 12.5em;
 }
-#top-header-profile-options-logout{
-    width: 3em;
-    height: 1.5em;
+#top-header-profile-options-content{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 100%;
+    height: 100%;
+    background-color: var(--menu-color);
+    border-radius: var(--border-radius-min) ;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+    justify-content: center;
+    padding: 1em;
+    align-items: center;
+}
+.top-header-profile-options-item{
     font-size: 1.5em;
     display: flex;
+    width: fit-content;
+    height: fit-content;
     justify-content: center;
+    padding: 0.5em;
     align-items: center;
     color: var(--color-text-primary);
     font-family: 'ubuntu',sans-serif;
     border-radius: var(--border-radius-min);
-    background-color: var(--secundary-color);
+    background-color: var(--tertiary-color);
+    transition: 0.7s;
+    opacity: 1;
+    &:hover{
+        transition: 0.7s;
+        opacity: 0.8;
+    }
 }
 #top-header-notification{
     width: 2em;
@@ -175,7 +198,7 @@
 <div id="top-header-containner">
     <div id="top-header-left-content">
         <div id="top-header-logo" class="flex-center">
-            <img src="<%= host %>/public/img/logo-color-1.png" alt="">
+            <img src="/public/img/logo-color-1.png" alt="">
         </div>
         
     </div>
@@ -228,9 +251,15 @@
         <p id="profile-display-name"><%= user.displayName %></p>
     </div>
     <div id="top-header-profile-options" style="display: none;">
-        <a id="top-header-profile-options-logout">
-            sair
-        </a>
+        <div id="top-header-profile-options-content">
+            <a href="/user/config" class="top-header-profile-options-item">
+                Configurações
+            </a>
+            <a id="top-header-profile-options-logout" class="top-header-profile-options-item">
+                sair
+            </a>
+            
+        </div>
     </div>
 </div>
 

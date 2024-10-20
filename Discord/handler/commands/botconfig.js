@@ -30,7 +30,8 @@ module.exports = {
                         .addComponents(
                             new Discord.ButtonBuilder()
                                 .setStyle(5)
-                                .setLabel('⚙️・Ir para a plataforma')
+                                .setLabel('Ir para a plataforma')
+                                .setEmoji(await require('../../emojisGet').redirect)
                                 .setURL(`https://skapps.com.br/server/${interaction.guildId}`)
                         )
                 ],

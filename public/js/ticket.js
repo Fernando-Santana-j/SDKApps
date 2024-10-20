@@ -5,6 +5,7 @@ let serverID = location.pathname.replace('/server/ticket/', "")
 async function updateMotivo() {
     let session = await fetch('/get/server', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -62,6 +63,7 @@ document.getElementById('motivo-responsavel-ticket-edit').addEventListener('blur
 document.getElementById('save-channel-ticket').addEventListener('click',async()=>{
     let server = await fetch('/get/server', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -87,6 +89,7 @@ document.getElementById('save-channel-ticket').addEventListener('click',async()=
     });
     let session = await fetch('/ticket/saveSend', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -127,6 +130,7 @@ document.getElementById('save-privateLog-ticket').addEventListener('click',async
     });
     let session = await fetch('/ticket/privatelog', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -167,6 +171,7 @@ document.getElementById('save-publicLog-ticket').addEventListener('click',async(
     });
     let session = await fetch('/ticket/publiclog', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -197,6 +202,7 @@ document.getElementById('add-ticket-motivo').addEventListener('click',async()=>{
     });
     let session = await fetch('/ticket/motivoADD', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -229,6 +235,7 @@ document.addEventListener('click', async (event) => {
     if (target.closest('.motivo-index-config-button')) {
         let session = await fetch('/get/server', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -307,6 +314,7 @@ document.getElementById('save-horario-date-ticket').addEventListener('click',asy
     }
     let session = await fetch('/ticket/horario', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -326,6 +334,7 @@ document.getElementById('exclud-motivo-edit').addEventListener('click',async()=>
     if (document.getElementById('config-motivo-popup-cotainner').getAttribute('data-motivoID')) {
         let session = await fetch('/ticket/motivoDEL', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -356,6 +365,7 @@ document.getElementById('save-motivo-edit').addEventListener('click',async()=>{
     });
     let session = await fetch('/ticket/motivoUPD', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -376,6 +386,7 @@ document.getElementById('save-motivo-edit').addEventListener('click',async()=>{
 document.getElementById('save-desc-ticket').addEventListener('click',async()=>{
     let session = await fetch('/ticket/desc', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

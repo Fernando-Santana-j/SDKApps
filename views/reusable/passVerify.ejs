@@ -1,77 +1,69 @@
-<style>
-    #containner-pass-verify {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: var(--primary-color-opacity);
-        z-index: 999999999999999;
-    }
+<div id="full-pass-containner" style="display: none;">
+    <style>
+        #full-pass-containner{
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            position: fixed;
+            z-index: 99999999999999999999999999999999999999999999999;
+        }
+        #containner-pass-verify {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-color-opacity);
+            z-index: 999999999999999999999999999999999999999999999999;
+        }
 
-    #content-pass-verify {
-        width: 40em;
-        margin: 1em;
-        padding: 1.5em;
-        height: 18em;
-        z-index: 99999999999999999;
-        background-color: var(--tertiary-color);
-        border-radius: var(--border-radius-mid);
-        display: flex;
-        gap: 1em;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-    }
+        #content-pass-verify {
+            min-width: 20em;
+            max-width: 60em;
+            margin: 1em;
+            padding: 1.5em;
+            max-height: 30em;
+            min-height: 20;
+            z-index: 999999999999999999999999999999999999999999999999999;
+            background-color: var(--tertiary-color);
+            border-radius: var(--border-radius-mid);
+            display: flex;
+            gap: 1em;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    #inputs-pass-verify {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
-        align-items: center;
-    }
+        #inputs-pass-verify {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            align-items: center;
+        }
 
-    #pass-verify-button {
-        width: 15em;
-    }
-</style>
+        #pass-verify-button {
+            width: 15em;
+        }
+    </style>
 
-<div id="containner-pass-verify">
-    <div id="content-pass-verify">
-        <div id="texts-pass-verify">
-            <h1 id="title-pass-verify" class="title-col">Digite sua senha!</h1>
-            <p id="mensage-pass-verify" class="desc-col">Esse é um procedimento de verificação <b>temporário</b>, caso
-                não saiba a senha,fale com algum administrador da SDKApps!</p>
-        </div>
-        <div id="inputs-pass-verify">
-            <input type="password" name="" class="input-padrao" id="pass-verify-input">
-            <button class="button-padrao" id="pass-verify-button">Entrar</button>
+    <div id="containner-pass-verify">
+        <div id="content-pass-verify">
+            <div id="texts-pass-verify">
+                <h1 id="title-pass-verify" class="title-col">Digite sua senha!</h1>
+                <p id="mensage-pass-verify" class="desc-col">Esse é um procedimento de verificação de segurança, Essas
+                    senhas são vitais, no email enviado com o conteúdo da senha tem uma explicação básica sobre ela.</p>
+            </div>
+            <div id="inputs-pass-verify">
+                <input type="password" name="" class="input-padrao" id="pass-verify-input">
+                <div id="resend-pass">
+                    
+                </div>
+                <button class="button-padrao" id="pass-verify-button">Entrar</button>
+            </div>
         </div>
     </div>
-</div>
-<div>
 
-    <script>
-        document.getElementById('pass-verify-button').addEventListener('click',async() => {
-            let session = await fetch('/verify/pass', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    pass: document.getElementById('pass-verify-input').value,
-                }),
-            }).then(response => { return response.json() })
-            if (session.success == true) {
-                console.log(session);
-                
-                location.href = '/dashboard'
-            } else {
-                errorNotify(session.data)
-            }
-        })
-
-    </script>
 </div>

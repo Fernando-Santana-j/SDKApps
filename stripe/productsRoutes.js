@@ -35,24 +35,24 @@ const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
 
-router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/mult', functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
-        let server = await db.findOne({colecao:'servers', doc:req.body.serverID})
-        if (server.plan != 'inicial') {
+        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+        if (server.plan == 'inicial') {
             if (!res.headersSent) {
                 res.status(200).json({ success: false, data: 'Seu plano não dá acesso a essa funcionalidade!' })
             }
             return
         }
-        await require('../Discord/createMultiProductMensage.js')(Discord,client,{
+        await require('../Discord/createMultiProductMensage.js')(Discord, client, {
             serverID: req.body.serverID,
             channelID: req.body.channelID,
-            backGround:req.files.backGround[0].path,
-            logo:req.files.productLogo[0].path,
+            backGround: req.files.backGround ? req.files.backGround[0].path : null,
+            logo: req.files.productLogo[0].path,
             productsList: req.body.productsList,
             productName: req.body.productName,
             producDesc: req.body.producDesc,
-            edit:false
+            edit: false
         })
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Mensagem enviada!' })
@@ -65,59 +65,119 @@ router.post('/product/mult', upload.fields([{ name: 'productLogo', maxCount: 1 }
     }
 })
 
-router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/create', functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
-        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
+
+        let { price, productName, producDesc, channelID, serverID, typeProduct } = req.body
+        
+
+        let server = await db.findOne({ colecao: 'servers', doc: serverID })
+
         if (!server.bankData) {
             res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
             return
         }
-        const product = await stripe.products.create({
-            name: req.body.productName,
-            description: req.body.producDesc,
-        });
 
-        const price = await stripe.prices.create({
-            unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
-            currency: 'brl',
-            product: product.id,
-        });
+        if ((isNaN(parseInt(price)) || !price) && typeProduct != 'multiple') return res.status(200).json({ success: false, data: 'Adicione o preço do produto!' });
+        if (!productName) return res.status(200).json({ success: false, data: 'Adicione o nome do produto!' });
+        if (!producDesc) return res.status(200).json({ success: false, data: 'Adicione a descricão do produto!' });
+        if (!channelID) return res.status(200).json({ success: false, data: 'Selecione um canal valido!' });
+        if (!req.files.productLogo) return res.status(200).json({ success: false, data: 'Adicione o logo do seu produto!' });
 
-        await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
         let backGround = null
         if (req.files.backGround && server.plan != 'inicial') {
             backGround = `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`
             await functions.comprimAndRecort(req.files.backGround[0].path, path.join(__dirname, '..', `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`))
         }
 
-
-
-
-
-        let produtos = []
-
-        let estoque = JSON.parse(req.body.estoque)
-
+        await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
+        
+        let productStripe = {
+            id: require('crypto').randomBytes(10).toString('hex')
+        }
+        let priceStripe = {
+            id: require('crypto').randomBytes(10).toString('hex')
+        }
+        if (typeProduct != 'multiple') {
+            productStripe = await stripe.products.create({
+                name: req.body.productName,
+                description: req.body.producDesc,
+            })
+    
+            priceStripe = await stripe.prices.create({
+                unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
+                currency: 'brl',
+                product: productStripe.id,
+            });
+        }
+        let numberEstoque = 0
         let model = {
-            productID: await product.id,
-            productName: await req.body.productName,
-            producDesc: await req.body.producDesc,
-            estoque: estoque,
-            channel: await req.body.channelID,
+            productID: await productStripe.id,
+            productName: productName,
+            producDesc: producDesc,
+            estoque: '',
+            channel: channelID,
             productLogo: `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`,
             backGround: backGround,
-            price: await req.body.price,
-            priceID: await price.id,
-            estoqueModel: estoque.length > 0 ? estoque[0] : {
-                conteudo:[
+            price: price,
+            priceID: await priceStripe.id,
+            estoqueModel: {
+                conteudo: [
                     {
-                        title:'',
-                        content:''
+                        title: '',
+                        content: ''
                     }
                 ]
             },
-            embendType: req.body.embend
+            embendType: req.body.embendType,
+            typeProduct: typeProduct
         }
+        switch (typeProduct) {
+            case 'normal':
+                if ('normalTxtEstoque' in req.body) {
+                    let estoqueFront = JSON.parse(req.body.normalTxtEstoque)
+                    let preEstoque = []
+                    for (let index = 0; index < estoqueFront.length; index++) {
+                        const element = estoqueFront[index];
+                        preEstoque.push({conteudo:[{ title: req.body.normalTitleEstoque, content: element }]})
+                    }
+                    numberEstoque = preEstoque.length
+                    model.estoque = preEstoque
+                    model.estoqueModel = {
+                        conteudo: [
+                            {
+                                title: req.body.normalTitleEstoque,
+                                content: ''
+                            }
+                        ]
+                    }
+                }
+                
+                break;
+            case 'single':
+                model.estoque = req.body.singleEstoqueNumber
+                numberEstoque = req.body.singleEstoqueNumber
+                model.estoqueModel = {
+                    conteudo: [
+                        {
+                            title: '',
+                            content: req.body.singleContent
+                        }
+                    ]
+                }
+                break;
+            case 'subscription':
+
+                break;
+            case 'multiple':
+                model.estoque = 'multiple'
+                let produtos = JSON.parse(req.body.arrayProdutos)
+                model.multipleProducts = produtos
+                break;
+        }
+        
+        let produtos = []
+
         if (server.products) {
             produtos = server.products
         }
@@ -127,101 +187,140 @@ router.post('/product/create', upload.fields([{ name: 'productLogo', maxCount: 1
             products: await produtos
         })
 
-        if (estoque.length > 0) {
-            if (req.body.embend == '0') {
+
+       
+        if ((typeProduct == 'normal' && model.estoque.length > 0) || (typeProduct == 'single' && model.estoque > 0) || (typeProduct == 'multiple')) {
+            if (req.body.embendType == '0') {
                 require('../Discord/createProductMessageEmbend.js')(Discord, client, {
                     channelID: req.body.channelID,
                     serverID: req.body.serverID,
-                    productID: product.id,
+                    productID: productStripe.id,
                 })
             } else {
                 require('../Discord/createProductMessage.js')(Discord, client, {
                     channelID: req.body.channelID,
                     serverID: req.body.serverID,
-                    productID: product.id,
+                    productID: productStripe.id,
                 })
             }
         }
-
-        res.status(200).json({ success: true, data: model })
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: model })
+        }
     } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao criar o produto!' })
+        }
         console.log(error);
     }
 
 })
 
-router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
+router.post('/product/update', functions.authPostState, upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-        if (!server.bankData) {
-            res.status(200).json({ success: false, data: 'Cadastre uma conta bancaria antes de criar um produto!' })
-            return
-        }
+
+        if (!req.body.productName) return res.status(200).json({ success: false, data: 'Adicione o nome do produto!' });
+        if (!req.body.producDesc) return res.status(200).json({ success: false, data: 'Adicione a descricão do produto!' });
         let productID = req.body.productID
         var produto = await server.products.find(product => product.productID == productID)
         var index = await server.products.findIndex(product => product.productID == productID)
+        
         if (produto == null || index < 0 || produto == undefined) {
             res.status(200).json({ success: false, data: 'Nenhum produto encontrado' })
             return
         }
 
-        // if (isNaN(parseInt(req.body.price)) || req.body.price < 100 || req.body.price == undefined) {
-        //     res.status(200).json({ success: false, data: 'Preço incorreto!' })
-        //     return
-        // }
-
-        let logo = null
-        if (req.files.productLogo) {
-            logo = `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`
-            await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
-            fs.unlink(path.join(__dirname, '..', produto.productLogo), (err) => {
-                if (err) {
-                    console.error('Erro ao apagar o arquivo original:', err);
-                    return { error: true, err: err }
-                }
-            });
-        }
-        let backGround = null
+        let backGround = produto.backGround
         if (req.files.backGround && server.plan != 'inicial') {
             backGround = `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`
             await functions.comprimAndRecort(req.files.backGround[0].path, path.join(__dirname, '..', `/uploads/produtos/background/${'background_' + req.files.backGround[0].filename}`))
-            if (produto.backGround != null) {
-                fs.unlink(path.join(__dirname, '..', produto.backGround), (err) => {
-                    if (err) {
-                        console.error('Erro ao apagar o arquivo original:', err);
-                        return { error: true, err: err }
-                    }
-                });
-            }
         }
 
-        let lastPrice = produto.priceID
-        await stripe.prices.update(lastPrice, {
-            active: false,
-        });
+        let logo = produto.productLogo
+        if (req.files.productLogo) {
+            logo = await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
+        }
 
-        const price = await stripe.prices.create({
-            unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
-            currency: 'brl',
-            product: productID,
-        });
+        let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
+        
+        let price = produto.priceID
+        if (req.body.price && (typeProduct != 'multiple' && req.body.price != produto.price)) {
+            let lastPrice =  produto.priceID
+            await stripe.prices.update(lastPrice, {
+                active: false,
+            });
+    
+            const newPrice = await stripe.prices.create({
+                unit_amount: parseInt(req.body.price) < 100 ? 100 : parseInt(req.body.price),
+                currency: 'brl',
+                product: productID,
+            });
+            price = newPrice.id
+        }
 
 
+        let model = {
+            estoque: produto.estoque ? produto.estoque : []
+        }
+        switch (typeProduct) {
+            case 'normal':
+                
+                if ('normalTxtEstoque' in req.body) {
+                    
+                    let estoqueFront = JSON.parse(req.body.normalTxtEstoque)
+                    
+                    for (let index = 0; index < estoqueFront.length; index++) {
+                        const element = estoqueFront[index];
+                        model.estoque.push({conteudo:[{ title: req.body.normalTitleEstoque, content: element }]})
+                    }
+                    
+                    model.estoqueModel = {
+                        conteudo: [
+                            {
+                                title: req.body.normalTitleEstoque,
+                                content: ''
+                            }
+                        ]
+                    }
+                }
+                
+                break;
+            case 'single':
+                model.estoque = req.body.singleEstoqueNumber
+               
+                numberEstoque = req.body.singleEstoqueNumber
+                model.estoqueModel = {
+                    conteudo: [
+                        {
+                            title: '',
+                            content: req.body.singleContent
+                        }
+                    ]
+                }
+                break;
+            case 'subscription':
+
+                break;
+           
+        }
 
 
         let produtos = server.products
-
+        
         produto.productName = req.body.productName,
-            produto.producDesc = req.body.producDesc,
-            produto.price = req.body.price,
-            produto.priceID = price.id
-        if (logo != null) {
-            produto.productLogo = logo
+        produto.producDesc = req.body.producDesc,
+        produto.price = req.body.price,
+        produto.priceID = price
+        produto.productLogo = logo
+        produto.backGround = backGround
+        produto.embendType = req.body.embendType
+        produto.estoqueModel = model.estoqueModel
+        produto.estoque = model.estoque
+        if (req.body.channelID) {
+            produto.channel = req.body.channelID
         }
-        if (backGround != null) {
-            produto.backGround = backGround
-        }
-
+        
 
         produtos[index] = produto;
 
@@ -250,7 +349,7 @@ router.post('/product/update', upload.fields([{ name: 'productLogo', maxCount: 1
     }
 })
 
-router.post('/product/delete', async (req, res) => {
+router.post('/product/delete', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         if (!server.bankData) {
@@ -301,8 +400,8 @@ router.post('/product/delete', async (req, res) => {
             DiscordChannel.messages.fetch(produto.mensageID).then((res) => {
                 try {
                     res.delete()
-                } catch (error) {}
-            })
+                } catch (error) { }
+            }).catch((err) => { })
         } catch (error) {
             console.log(error);
         }
@@ -316,7 +415,7 @@ router.post('/product/delete', async (req, res) => {
 
 })
 
-router.post('/product/getOne', async (req, res) => {
+router.post('/product/getOne', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         let productID = req.body.productID
@@ -330,7 +429,7 @@ router.post('/product/getOne', async (req, res) => {
     }
 })
 
-router.post('/product/get', async (req, res) => {
+router.post('/product/get', functions.authPostState, async (req, res) => {
     let verify = await new Promise(async (resolve, reject) => {
         try {
             let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
@@ -369,85 +468,8 @@ router.post('/product/get', async (req, res) => {
 })
 
 
-router.post('/estoque/txt', async (req, res) => {
-    try {
-        let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
-        if (server) {
-            let productID = req.body.productID
-            let produtos = server.products
-            let product = await produtos.find(product => product.productID == productID)
-            var index = await produtos.findIndex(product => product.productID == productID)
-            let file = req.body.txt
-            let title = req.body.title
 
-
-            if (index != -1 && product && file && title) {
-                let finalEstoqueArr = []
-
-                if (product.estoque) {
-                    finalEstoqueArr = product.estoque
-                }
-
-
-                await file.forEach(element => {
-                    element = element.trim()
-                    if (element && element != '' && element != null && element != undefined) {
-                        finalEstoqueArr.push({
-                            conteudo: [
-                                {
-                                    title: title,
-                                    content: element
-                                }
-                            ]
-                        })
-                    }
-                });
-                finalEstoqueArr = await finalEstoqueArr.filter(linha => linha.conteudo[0].content.length > 0)
-                if (`estoqueAviso` in product) {
-                    for (let index = 0; index < product.estoqueAviso.length; index++) {
-                        const element = product.estoqueAviso[index];
-                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto')
-                    }
-                    product.estoqueAviso = []
-                }
-                produtos[index] = product
-
-                db.update('servers', req.body.serverID, {
-                    products: produtos
-                })
-                if (product.embendType == 0) {
-                    require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                        channelID: product.channel,
-                        serverID: req.body.serverID,
-                        productID: productID,
-                        edit: true
-                    })
-                } else {
-                    require('../Discord/createProductMessage.js')(Discord, client, {
-                        channelID: product.channel,
-                        serverID: req.body.serverID,
-                        productID: productID,
-                        edit: true
-                    })
-                }
-            }
-            if (!res.headersSent) {
-                res.status(200).json({ success: true })
-            }
-        } else {
-            if (!res.headersSent) {
-                res.status(200).json({ success: false })
-            }
-        }
-    } catch (error) {
-        if (!res.headersSent) {
-            res.status(200).json({ success: false })
-        }
-        console.log(error);
-    }
-})
-
-router.post('/product/estoqueAdd', async (req, res) => {
+router.post('/product/estoqueAdd', functions.authPostState, async (req, res) => {
     let verify = await new Promise(async (resolve, reject) => {
         try {
             let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
@@ -467,7 +489,7 @@ router.post('/product/estoqueAdd', async (req, res) => {
                 if (`estoqueAviso` in product) {
                     for (let index = 0; index < product.estoqueAviso.length; index++) {
                         const element = product.estoqueAviso[index];
-                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element,`O produto ${product.productName} ja esta em estoque!`,'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!',`https://discord.com/channels/${req.body.serverID}/${product.channel}`,'📤・Ir para o produto',)
+                        await require(`../Discord/discordIndex.js`).sendDiscordMensageUser(element, `O produto ${product.productName} ja esta em estoque!`, 'O produto que você tentou comprar anteriormente já está em estoque, aproveite para comprar antes que se esgote novamente!', `https://discord.com/channels/${req.body.serverID}/${product.channel}`, '📤・Ir para o produto',)
                     }
                     product.estoqueAviso = []
                 }
@@ -523,24 +545,43 @@ router.post('/product/estoqueAdd', async (req, res) => {
 })
 
 
-router.post('/product/mensage', async (req, res) => {
+router.post('/product/mensage', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: 'servers', doc: req.body.serverID })
         let productID = req.body.productID
         let produtos = server.products
         let produto = await produtos.find(product => product.productID == productID)
+        let typeProduct = 'typeProduct' in produtos ? produtos.typeProduct : 'normal'
+        let numberEstoque = 0
+        switch (typeProduct) {
+            case 'normal':
+                if (!produtos.estoque) {
+                    numberEstoque = 0
+                }else{
+                    numberEstoque = produtos.estoque.length
+                }
+                break;
+        
+            case 'single':
+                numberEstoque = produtos.estoque
+                
+                break;
+        }
+        
         if (produto.embendType == 0) {
             require('../Discord/createProductMessageEmbend.js')(Discord, client, {
-                channelID: req.body.channelID,
+                channelID: produto.channel,
                 serverID: req.body.serverID,
                 productID: req.body.productID,
+                numberEstoque: numberEstoque,
                 edit: true
             })
         } else {
             require('../Discord/createProductMessage.js')(Discord, client, {
-                channelID: req.body.channelID,
+                channelID: produto.channel,
                 serverID: req.body.serverID,
                 productID: req.body.productID,
+                numberEstoque: numberEstoque,
                 edit: true
             })
         }

@@ -3,13 +3,13 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Permissões</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/perms.css">
+    <link rel="stylesheet" href="/public/css/perms.css">
 </head>
 <body>
     <div id="body-containner">
 
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:5}) %>
+            <%- include('./reusable/body.ejs',{index:3}) %>
             <main id="main-containner">
                 <div id="main-content">
                     <div id="roles-containner">
@@ -47,6 +47,6 @@
     </div>
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/perms.js"></script>
+    <script src="/public/js/perms.js"></script>
 </body>
 </html>

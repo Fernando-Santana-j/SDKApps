@@ -3,7 +3,7 @@
 <head>
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Vendas</title>
-    <link rel="stylesheet" href="<%= host %>/public/css/sales.css">
+    <link rel="stylesheet" href="/public/css/sales.css">
 </head>
 <body>
     
@@ -29,91 +29,130 @@
                 </div>
             </div>
         </div>
-        <div id="confirm-exclud-produto-containner" style="display: none;">
-            <div id="confirm-exclud-produto-content">
-                <h1 id="confim-exclud-title">Realmente deseja excluir o produto?</h1>
-                <div id="confirm-exclud-buttons">
-                    <button class="main-button-product" id="product-cancel-exclud-button">Cancelar</button>
-                    <button class="main-button-product" id="product-confirm-exclud-button">Confirmar</button>
-                </div>
-            </div>
-        </div>
+        
         <div id="produtos-config-containner" style="display: none;">
-            <div id="produtos-config-background"></div>
-            <div enctype="multipart/form-data" id="produtos-config-content">
-                <div id="close-button-popup-config-produc">
-                    <svg class="SvgFill" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path class="SvgFill" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg>
+            <div style="width: 100%; height: 100%; position: fixed; top: 0; left: 0;" class="close-config-popup"></div>
+            <div id="produtos-config-content">
+                <div id="produtos-config-title">
+                    <div style="width: 4em;"></div>
+                    <h1 class="title-col">Configuracoes de produtos</h1>
+                    <div id="close-config-popup" class="close-config-popup"><svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg></div>
                 </div>
+                <div class="linha"></div>
                 <div id="produtos-config-row">
-                    <div id="cadastro-left-content">
-                        <div id="product-logo-content">
-                            <h1 class="logo-title">Mudar logo:</h1>
-                            <label for="logo-input-edit">
-                                <img id="logo-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                            </label>
-                            <input accept="image/*" hidden type="file" id="logo-input-edit">
+                    <div id="produtos-config-left">
+                        <div id="produtos-config-new-channel-content">
+                            <h1 class="mini-title-col">Selecione o canal de anuncio do produto:</h1>
+                            <div id="produtos-config-new-channel"></div>
                         </div>
-                        <div id="backGround-containner">
-                            <h1 id="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
-                            <div id="backGround-content">
-                                <div id="backGround-image-preview">
-                                    <label for="backGround-preview-edit">Preview da imagem</label>
-                                    <img id="backGround-preview-edit" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                        <div id="produtos-config-new-imagens-containnner">
+                            <div id="produtos-config-new-background">
+                                <h1 class="backGround-title">Imagem de fundo: </h1>
+                                <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
+                                <div class="backGround-image-preview">
+                                    <label for="new-background-input">
+                                        <img id="new-background-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                    </label>
                                 </div>
-                                <div id="backGround-image-input-content">
-                                    <label id="button-backGround-input-edit" class="buttons-background-select" data-plan="<%= server.plan %>" for="backGround-input-edit">Anexar Imagem</label>
-                                    <input accept="image/*" hidden type="file" <%= server.plan == 'inicial' ? 'disabled' : '' %> id="backGround-input-edit">
+                                <div class="backGround-image-input-content">
+                                    <label id="button-new-background-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-background-input">Anexar Fundo</label>
+                                    <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="new-background-input">
                                 </div>
+                                
+                            </div>
+                            <div id="produtos-config-new-logo">
+                                <h1 class="backGround-title">Imagem da logo:</h1>
+                                <div style="height: 32px;"></div>
+                                <label for="new-logo-input">
+                                    <img id="new-logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                </label>
+                                <label id="button-new-logo-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-logo-input">Anexar Logo</label>
+                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="new-logo-input">
                             </div>
                         </div>
                     </div>
-                    <div id="cadastro-rigth-content">
-                        <h1 id="rigth-content-title">Dados do produto:</h1>
-                        <div id="rigth-content">
-                            <div class="inputs-containner" id="product-name-content">
-                                <label class="lable-padrao" for="product-name-edit">Nome do produto</label>
-                                <input required  class="input-padrao" placeholder="Nome do produto" type="text" id="product-name-edit">
+                    <div id="produtos-config-rigth">
+                        <div id="produtos-config-dados-containnner">
+                            <div class="inputs-containner">
+                                <label for="product-config-new-name" class="lable-padrao">Nome do produto: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-name" placeholder="Nome do produto">
                             </div>
-                            <div class="inputs-containner" id="product-desc-content-edit">
-                                <label class="lable-padrao" for="product-desc">Descrição do produto</label>
-                                <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc-edit"></textarea>
+                            <div class="inputs-containner">
+                                <label for="new-product-config-desc" class="lable-padrao">Descrição do produto: </label>
+                                <textarea name="productConfigDesc" class="input-padrao" id="new-product-config-desc" placeholder="Descrição"></textarea>
                             </div>
-                            
-                            <div id="unic-containner-edit">
-                                <div id="doble-containner-edit">
-                                    <div id="price-containner">
-                                        <label class="lable-padrao" for="product-price-edit">Preço do produto</label>
-                                        <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price-edit">
-                                    </div>
-                                    <button class="main-button-product" id="send-mensage-edit">Reenviar Mensagem</button>
-                                </div>
-                                <div id="buttons-containner">
-                                    <button class="main-button-product" id="product-save-edit-button">Salvar</button>
-                                    <button type="button" class="main-button-product" style="background-color: var(--red-color);" id="product-excluir-edit-button">Excluir</button>
-                                </div>
+                            <div class="inputs-containner">
+                                <label for="product-config-new-price" class="lable-padrao">Preço do produto: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-price" placeholder="Preço">
                             </div>
+                        </div>
+                        <div id="produtos-config-new-style">
+                            <h1 class="mini-title-col">Selecione o estilo: </h1>
+                            <div id="produtos-config-new-style-content"></div>
                         </div>
                     </div>
                 </div>
-                <div id="verifyLine" class="linha" style="margin-top: 1em; display: none;"></div>
-                <div id="add-estoque-txt-containner">
+                <div class="linha"></div>
+                <div id="produtos-config-estoque">
+                    <h1 class="title-col">Configure o estoque : </h1>
 
-                </div>
-                <div class="linha" style="margin-top: 1em;"></div>
-                <div id="edit-estoque-config-containner">
-                    <h1 class="title-col">Adicionar estoque!</h1>
-                    <div id="edit-estoque-config-content">
-                        <div id="edit-estoque-inputs-containner">
-                            
+                    <div id="produtos-config-estoque-content">
+                        <div id="produtos-estoque-edit-normal" style="display: none;">
+                            <div id="produtos-estoque-edit-normal-txt" >
+                                <h1 class="mini-title-col">Adicionar estoque por txt</h1>
+                                <div id="produtos-estoque-edit-normal-txt-content">
+                                    
+                                    <div style="display: flex; flex-direction: column; justify-content: end; width: 40%;">
+                                        <label for="produtos-estoque-edit-normal-txt-title" class="lable-padrao">Titulo dos itens do txt</label>
+                                        <input type="text"  id="produtos-estoque-edit-normal-txt-title" class="input-padrao" placeholder="Padrão: Itens">
+                                    </div>
+
+                                    <div id="estoque-config-txt-file-content">
+                                        <p class="desc-col" id="estoque-config-txt-file-selected">Nenhum arquivo selecionado :(</p>
+                                        <label type="button" class="main-button-product" for="produtos-estoque-edit-normal-txt-file">Adiconar arquivo txt!</label>
+                                        <input type="file" hidden accept=".txt" id="produtos-estoque-edit-normal-txt-file">
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <!-- <div id="produtos-estoque-edit-normal-individual-content">
+                                <h1 class="mini-title-col">Adicionar estoque individual</h1>
+                                <div id="produtos-estoque-edit-normal-individual">
+                                    
+                                    <div class="inputs-containner">
+                                        <label for="product-config-new-individual-title" class="lable-padrao">Titulo do item: </label>
+                                        <input type="text" class="input-padrao" id="product-config-new-individual-title" placeholder="Titulo do item">
+                                    </div>
+                                    <div class="inputs-containner">
+                                        <label for="product-config-new-individual-conteudo" class="lable-padrao">Conteudo do item: </label>
+                                        <input type="number" class="input-padrao" id="product-config-new-individual-conteudo" placeholder="Conteudo do item">
+                                    </div>
+                                </div>
+                            </div> -->
                         </div>
-                        <button type="button" class="main-button-product" id="new-estoque-create">Adiconar estoque!</button>
+                        <div id="produtos-estoque-edit-single" style="display: none;">
+                            <div class="inputs-containner">
+                                <label for="product-config-new-single-content" class="lable-padrao">Conteudo do item: </label>
+                                <input type="text" class="input-padrao" id="product-config-new-single-content" placeholder="Conteudo do item">
+                            </div>
+                            <div class="inputs-containner">
+                                <label for="product-config-new-single-number" class="lable-padrao">Quantidade de estoque: </label>
+                                <input type="number" class="input-padrao" id="product-config-new-single-number" placeholder="Quantidade de estoque">
+                            </div>
+                        </div>
                     </div>
+                
+                </div>
+                <div class="linha"></div>
+                <div id="produtos-config-buttons">
+                    <button class="button-padrao redColor" id="delete-product">Deletar produto</button>
+                    <button class="button-padrao" id="send-new-mensage">Reenviar Mensagem</button>
+                    <button class="button-padrao greenColor" id="save-new-product">Salvar</button>
                 </div>
             </div>
-            
         </div>
         <div id="containner">
-            <%- include('./reusable/header.ejs',{index:2}) %>
+            <%- include('./reusable/body.ejs',{index:2}) %>
             <main id="main-containner">
                 <div id="main-content">
                     <div id="logs-sales-containner">
@@ -210,7 +249,7 @@
                                     <% server.products.forEach(element => { %>
                                         <div class="produtos-col">
                                             <div class="produtos-left">
-                                                <img src="<%= host %><%= element.productLogo %>">
+                                                <img src="<%= element.productLogo %>">
                                                 <div class="produtos-name-price-content">
                                                     <p class="produtos-name" title="<%= element.productName %>"><%= element.productName %></p>
                                                     <p class="produtos-price" title="<%= formatarMoeda(element.price) %>"><%= formatarMoeda(element.price) %></p>
@@ -218,7 +257,7 @@
                                             </div>
                                             
                                             <div class="produtos-estoque-content">
-                                                <p class="produtos-estoque-value"><%= element.estoque.length %> em estoque</p>
+                                                <p class="produtos-estoque-value"><%= 'typeProduct' in element ? element.typeProduct == 'normal' ? element.estoque.length + ' em estoque' : element.typeProduct == 'multiple' ? element.estoque : element.estoque + ' em estoque' : element.estoque.length + ' em estoque'  %></p>
                                             </div>
                                             <button data-id="<%= element.productID %>" class="produtos-configure-button">Configure</button>
                                         </div>
@@ -231,229 +270,195 @@
                     </div>
                     
                     <div class="product-cadastro-containner">
-                        <form class="product-cadastro-content" id="form-prodc" enctype="multipart/form-data" >
+                        <div class="product-cadastro-content" id="form-prodc">
                             <h1 class="title-col">Cadastrar Produto</h1>
                             <div class="linha"></div>
                             <div class="cadastro-content">
-                                <div class="cadastro-left-content">
-                                    <div class="channels-containner">
-                                        <h1 class="cannels-title">Selecione o canal de anuncio do produto:</h1>
-                                        <div class="channels-content">
-                                            <input required type="text" class="input-padrao" list="channels-input-list" placeholder="Pesquise o canal..." id="channel-name-input">
-                                            <datalist id="channels-input-list">
-                                                <% channels.forEach(element => { %>
-                                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                                <% }) %>
-                                            </datalist>
-                                        </div>
-                                    </div>
-                                    <div class="backGround-containner">
-                                        <h1 class="backGround-title">Imagem de fundo do produto: <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div></h1>
-                                        <div class="backGround-content">
-                                            <div class="backGround-image-preview">
-                                                <label for="image-preview">Preview da imagem</label>
-                                                <img id="image-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                            </div>
-                                            <div class="backGround-image-input-content">
-                                                <label id="button-image-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="image-input">Anexar Imagem</label>
-                                                <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="cadastro-rigth-content">
                                     <h1 class="rigth-content-title">Dados do produto:</h1>
                                     <div class="rigth-content">
                                         <div class="inputs-containner" id="product-name-content">
-                                            <label class="lable-padrao" for="product-name">Nome do produto</label>
+                                            <label class="lable-padrao" for="product-name"><span class="obrigatorio">* </span>Nome do produto</label>
                                             <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name">
                                         </div>
                                         <div class="inputs-containner" id="product-desc-content">
-                                            <label class="lable-padrao" for="product-desc">Descrição do produto</label>
+                                            <label class="lable-padrao" for="product-desc"><span class="obrigatorio">* </span>Descrição do produto</label>
                                             <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc"></textarea>
+                                        </div>
+                                        <div class="inputs-containner" id="product-price-content">
+                                            <label class="lable-padrao" for="product-price"><span class="obrigatorio">* </span>Preço do produto</label>
+                                            <input required placeholder="Preço do produto" class="input-padrao" id="product-price"></input>
                                         </div>
                                         <div class="unic-containner">
                                             <div class="doble-containner">
-                                                <div class="triple-containner">
-                                                    <div id="price-containner">
-                                                        <label class="lable-padrao" for="product-price">Preço do produto</label>
-                                                        <input required placeholder="Preço R$" class="input-padrao" type="text" id="product-price">
-                                                    </div>
-                                                    <div id="embend-type-containner">
-                                                        <label class="lable-padrao" for="product-price">Tipo da embend <br>(Apague o texto abaixo para ver os outros modelos)</label>
-                                                        <input required type="text" class="input-padrao" value="Mensagem" list="embend-input-list" placeholder="Pesquise o canal..." id="embend-type-input">
-                                                        <datalist id="embend-input-list">
-                                                            <option data-embend="0" selected value="Mensagem">Uma mensagem padrão do discord como em todos os bots!</option>
-                                                            <option data-embend="1" value="Imagem">Uma imagem gerada com as informações trazendo uma melhor qualidade visual!</option>
-                                                        </datalist>
-                                                    </div>
+                                                
+                                                <h1 class="backGround-title">Imagem de fundo: </h1>
+                                                <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
+                                                <div class="backGround-image-preview">
+                                                    <label for="image-input">
+                                                        <img id="image-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
+                                                    </label>
                                                 </div>
-                                                <button class="main-button-product" id="product-cadastro-button">Cadastrar</button>
+                                                <div class="backGround-image-input-content">
+                                                    <label id="button-image-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="image-input">Anexar Fundo</label>
+                                                    <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input">
+                                                </div>
+                                                
                                             </div>
                                             <div class="product-logo-content">
-                                                <h1 class="logo-title">Adicionar logo:</h1>
+                                                <h1 class="logo-title"><span class="obrigatorio">* </span> Imagem da logo:</h1>
+                                                <div style="height: 50px;"></div>
                                                 <label for="logo-input">
                                                     <img id="logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                                 </label>
+                                                <label id="button-logo-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="logo-input">Anexar Logo</label>
                                                 <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="logo-input">
                                             </div>
                                         </div>
                                         
                                     </div>
                                 </div>
+                                <div class="cadastro-left-content">
+                                    <div class="channels-containner">
+                                        <h1 class="cannels-title"><span class="obrigatorio">* </span>Selecione o canal de anuncio do produto:</h1>
+                                        
+                                        <div id="select-menu-channel-create-product"></div>
+                                        
+                                    </div>
+                                    <div class="linha"></div>
+                                    <div id="infos-select-popup" >
+                                        <p id="info-select-popup-text" class="mini-title-col"></p>
+
+                                        <img src="" id="info-select-popup-img">
+                                    </div>
+                                    <div id="type-product-select">
+                                        <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o tipo de produto:</h2>
+                                        <div id="type-product-select-content"></div>
+                                    </div>
+                                    <div class="linha"></div>
+                                    <div id="select-type-embend-content">
+                                        <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o estilo:</h2>
+                                        <div id="type-embend-select-content">
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                
                                 
                                 
                             </div>
                             <div class="linha" style="margin-top: 1em;"></div>
-                            <div id="cadastro-estoque-config-containner">
-                                <h1 class="title-col">Configure o seu estoque!</h1>
-                                <div id="estoque-config-content">
-                                    <div id="estoque-config-row">
-                                        <div class="estoque-config-col" data-index="1">
-                                            <div class="estoque-config-col-top-content">
-                                                <h1 class="title-col">Estoque 1</h1>
-                                                <div class="estoque-config-exclud-estoque">
-                                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(2,2)"><path d="M49,1c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3h30c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3zM24,15c-7.17,0 -13,5.83 -13,13c0,7.17 5.83,13 13,13h77v63c0,9.37 -7.63,17 -17,17h-40c-9.37,0 -17,-7.63 -17,-17v-52c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3v52c0,12.68 10.32,23 23,23h40c12.68,0 23,-10.32 23,-23v-63.35937c5.72,-1.36 10,-6.50062 10,-12.64062c0,-7.17 -5.83,-13 -13,-13zM24,21h80c3.86,0 7,3.14 7,7c0,3.86 -3.14,7 -7,7h-80c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7zM50,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3zM78,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3z"></path></g></g></svg>
-                                                </div>
-                                            </div>
-                                            <div class="estoque-config-inputs-containner">
-                                                <div data-estoque="1" data-input="1" class="estoque-config-inputs">
-                                                    <div class="estoque-config-input-content-title">
-                                                        <label class="lable-padrao" title="Aqui você vai colocar um titulo para o conteudo que sera fornecido ao usuario!" for="product-price">Titulo do conteudo</label>
-                                                        <input name="estoque-title-input" placeholder="EX: Email, senha, username" maxlength="20" class="input-padrao title-estoque-input" type="text">
-                                                    </div>
-                                                    <div class="estoque-config-input-content-conteudo">
-                                                        <label class="lable-padrao" title="E aqui onde você ira colocar o conteudo que vai ser enviado para o usuario!" for="product-price">Conteudo</label>
-                                                        <input name="estoque-content-input" placeholder="EX: test@gmail.com" class="input-padrao conteudo-estoque-input" type="text">
-                                                    </div>
-                                                    <div class="estoque-config-exclud-input">
-                                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(2,2)"><path d="M49,1c-1.66,0 -3,1.34 -3,3c0,1.66 1.34,3 3,3h30c1.66,0 3,-1.34 3,-3c0,-1.66 -1.34,-3 -3,-3zM24,15c-7.17,0 -13,5.83 -13,13c0,7.17 5.83,13 13,13h77v63c0,9.37 -7.63,17 -17,17h-40c-9.37,0 -17,-7.63 -17,-17v-52c0,-1.66 -1.34,-3 -3,-3c-1.66,0 -3,1.34 -3,3v52c0,12.68 10.32,23 23,23h40c12.68,0 23,-10.32 23,-23v-63.35937c5.72,-1.36 10,-6.50062 10,-12.64062c0,-7.17 -5.83,-13 -13,-13zM24,21h80c3.86,0 7,3.14 7,7c0,3.86 -3.14,7 -7,7h-80c-3.86,0 -7,-3.14 -7,-7c0,-3.86 3.14,-7 7,-7zM50,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3zM78,55c-1.66,0 -3,1.34 -3,3v46c0,1.66 1.34,3 3,3c1.66,0 3,-1.34 3,-3v-46c0,-1.66 -1.34,-3 -3,-3z"></path></g></g></svg>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="estoque-config-new-data">
-                                                <button type="button" data-indice="1" class="estoque-config-new-data-button">
-                                                    <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50px" height="50px" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.6907,0 -23,10.3093 -23,23c0,12.69071 10.3093,23 23,23c12.69071,0 23,-10.30929 23,-23c0,-12.6907 -10.30929,-23 -23,-23zM25,4c11.60982,0 21,9.39018 21,21c0,11.60982 -9.39018,21 -21,21c-11.60982,0 -21,-9.39018 -21,-21c0,-11.60982 9.39018,-21 21,-21zM24.98438,16.98633c-0.55152,0.00862 -0.99193,0.46214 -0.98437,1.01367v6h-6c-0.36064,-0.0051 -0.69608,0.18438 -0.87789,0.49587c-0.18181,0.3115 -0.18181,0.69676 0,1.00825c0.18181,0.3115 0.51725,0.50097 0.87789,0.49587h6v6c-0.0051,0.36064 0.18438,0.69608 0.49587,0.87789c0.3115,0.18181 0.69676,0.18181 1.00825,0c0.3115,-0.18181 0.50097,-0.51725 0.49587,-0.87789v-6h6c0.36064,0.0051 0.69608,-0.18438 0.87789,-0.49587c0.18181,-0.3115 0.18181,-0.69676 0,-1.00825c-0.18181,-0.3115 -0.51725,-0.50097 -0.87789,-0.49587h-6v-6c0.0037,-0.2703 -0.10218,-0.53059 -0.29351,-0.72155c-0.19133,-0.19097 -0.45182,-0.29634 -0.72212,-0.29212z"></path></g></g></svg>
-                                                    Adicionar novo conteudo
-                                                </button>
-                                            </div>
+                            <div id="others-configs-product-containner">
+                                <div id="cadastro-estoque-multi-product" style="display: none;">
+                                    <h1 class="title-col">Configure seu multi produto</h1>
+                                    <div style="width: 60%; min-width: 20em;">
+                                        <label for="select-menu-multi-product" class="lable-padrao">Selecione os produtos</label>
+                                        <div id="select-menu-multi-product"></div>
+                                    </div>
+                                   
+                                </div>
+                                <div id="cadastro-assinatura-estoque-config-containner" style="display: none;">
+                                    <h1 class="title-col">Configure a assinatura:</h1>
+                                    <div id="cadastro-assinatura-estoque-config">
+                                        <div id="select-type-time-content">
+                                            <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione a unidades de tempo:</h2>
+                                            <div id="subscription-time-select-content"></div>
                                         </div>
+                                        <div id="other-configs-assintura">
+                                            <div id="cargo-configs-assintura">
+                                                <h2 class="mini-title-col"><span class="obrigatorio">*</span> Coloque o tempo da assinatura abaixo:</h2>
+                                                <input type="number" id="time-number-input-assinatura" placeholder="Coloque o numero de horas, dias ou meses da assinatura" class="input-padrao">
+                                            </div>
+                                            <div class="linha"></div>
+                                            <div id="cargo-configs-assintura">
+                                                <h2 class="mini-title-col">Caso deseje que o usuário receba um cargo ao assinar o produto, coloque abaixo:</h2>
+                                                <div id="select-cargo-assinatura"></div>
+                                            </div>
+                                            
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="cadastro-number-estoque-config-containner" style="display: none;">
+                                    <h1 class="title-col">Quantidade de estoque:</h1>
+                                    <div id="cadastro-number-estoque-config">
+                                        <div>
+                                            <label for="content-number-estoque-input" class="lable-padrao" title="Aqui você vai colocar o conteudo que sera enviado para o usuario"><span class="obrigatorio">*</span>Conteudo do estoque</label>
+                                            <input type="text" id="content-number-estoque-input" class="input-padrao" placeholder="EX: Abra um ticket para ativacao">
+                                        </div>
+                                        <div>
+                                            <label for="number-estoque-input" class="lable-padrao"><span class="obrigatorio">*</span>Quantidade de estoque</label>
+                                            <input type="number" id="number-estoque-input" class="input-padrao" placeholder="Numero de itens no estoque">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="cadastro-estoque-config-containner">
+                                    <h1 class="title-col">Configure o seu estoque!</h1>
+                                    <div id="cadastro-estoque-config-selectType">
+                                        <h1 style="text-align: start; width: fit-content;" class="mini-title-col">Marque essa opção caso não queira adicionar o estoque por agora: </h1>
+                                        <label id="select-null-stock-label" for="select-null-stock-checkbox" class="switch">
+                                            <input id="select-null-stock-checkbox" class="checkbox" type="checkbox">
+                                            <span class="slider round"></span>
+                                        </label>
                                     </div>
                                     
-                                    <div id="estoque-config-add">
-                                        <button type="button" class="main-button-product" id="estoque-config-add-button">
-                                            <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="50px" height="50px" viewBox="0,0,256,256"><g fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.6907,0 -23,10.3093 -23,23c0,12.69071 10.3093,23 23,23c12.69071,0 23,-10.30929 23,-23c0,-12.6907 -10.30929,-23 -23,-23zM25,4c11.60982,0 21,9.39018 21,21c0,11.60982 -9.39018,21 -21,21c-11.60982,0 -21,-9.39018 -21,-21c0,-11.60982 9.39018,-21 21,-21zM24.98438,16.98633c-0.55152,0.00862 -0.99193,0.46214 -0.98437,1.01367v6h-6c-0.36064,-0.0051 -0.69608,0.18438 -0.87789,0.49587c-0.18181,0.3115 -0.18181,0.69676 0,1.00825c0.18181,0.3115 0.51725,0.50097 0.87789,0.49587h6v6c-0.0051,0.36064 0.18438,0.69608 0.49587,0.87789c0.3115,0.18181 0.69676,0.18181 1.00825,0c0.3115,-0.18181 0.50097,-0.51725 0.49587,-0.87789v-6h6c0.36064,0.0051 0.69608,-0.18438 0.87789,-0.49587c0.18181,-0.3115 0.18181,-0.69676 0,-1.00825c-0.18181,-0.3115 -0.51725,-0.50097 -0.87789,-0.49587h-6v-6c0.0037,-0.2703 -0.10218,-0.53059 -0.29351,-0.72155c-0.19133,-0.19097 -0.45182,-0.29634 -0.72212,-0.29212z"></path></g></g></svg>
-                                            Adicionar item ao estoque
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="product-cadastro-containner">
-                        <form class="product-cadastro-content" id="form-prodc-mult" enctype="multipart/form-data" >
-                            <h1 class="title-col">Cadastrar de multi Produtos </h1>
-                            <div style="width: 100%; display: flex; justify-content: center; align-items: center;"><svg style="width: 3em;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg> (Premium)</div>
-                            <div class="linha"></div>
-                            <div class="cadastro-content">
-                                <div class="cadastro-left-content">
-                                    <div class="channels-containner">
-                                        <h1 class="cannels-title">Selecione o canal de anuncio do produto:</h1>
-                                        <div class="channels-content">
-                                            <input required type="text" class="input-padrao" list="channels-input-list" placeholder="Pesquise o canal..." id="channel-multi-input">
-                                            <datalist id="channel-multi-list">
-                                                <% channels.forEach(element => { %>
-                                                    <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                                <% }) %>
-                                            </datalist>
-                                        </div>
-                                    </div>
-                                    <div class="backGround-containner">
-                                        <h1 class="backGround-title">Imagem de fundo do produto: </h1>
-                                        <div class="backGround-content">
-                                            <div class="backGround-image-preview">
-                                                <label for="image-preview-multi">Preview da imagem</label>
-                                                <img id="image-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                            </div>
-                                            <div class="backGround-image-input-content">
-                                                <label id="button-image-input-multi" class="image-lable" data-plan="<%= server.plan %>" for="image-input-multi">Anexar Imagem</label>
-                                                <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input-multi">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="cadastro-rigth-content">
-                                    <h1 class="rigth-content-title">Dados do multi produto:</h1>
-                                    <div class="rigth-content">
-                                        <div class="inputs-containner" id="product-name-content">
-                                            <label class="lable-padrao" for="product-name-mult">Nome do multi produto</label>
-                                            <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name-mult">
-                                        </div>
-                                        <div class="inputs-containner" id="product-desc-content">
-                                            <label class="lable-padrao" for="product-desc-multi">Descrição do multi produto</label>
-                                            <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc-multi"></textarea>
-                                        </div>
-                                        <div class="unic-containner">
-                                            <div class="doble-containner">
-                                                <div class="triple-containner">
-                                                    <div id="select-product-containner">
-                                                        <div id="select-product-content">
-                                                            <div id="select-product-focus">
-                                                                <button class="button-padrao" id="select-product-focus-button" type="button">Selecionar produtos</button>
-                                                                
-                                                            </div>
-                                                            <div id="select-product-row">
-                                                                
-                                                            </div>
-                                                        </div>
-                                                        <div id="select-product-options-containner" style="display: none;">
-                                                            <div id="select-product-options-row">
-                                                                
-                                                            </div>
-                                                        </div>
-                                                        
-                                                    </div>
+                                    <div id="estoque-config-content">
+                                        <h1 class="title-col">Adicionar estoque por txt!</h1>
+                                        <div id="estoque-config-txt">
+                                            <div id="estoque-config-txt-content">
+                                                <div style="display: flex; flex-direction: column; justify-content: end; width: 40%;">
+                                                    <label for="estoque-config-input-title-txt" class="lable-padrao">Titulo dos itens do txt</label>
+                                                    <input type="text"  id="estoque-config-input-title-txt" class="input-padrao" placeholder="Padrão: Itens">
                                                 </div>
-                                                <button type="submit" class="main-button-product" id="product-cadastro-multi-button">Cadastrar</button>
-                                            </div>
-                                            <div class="product-logo-content">
-                                                <h1 class="logo-title">Adicionar logo:</h1>
-                                                <label for="logo-input-multi">
-                                                    <img id="logo-preview-multi" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                                </label>
-                                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="logo-input-multi">
+
+                                                <div id="estoque-config-txt-file-content">
+                                                    <p class="desc-col" id="estoque-config-txt-file-selected">Nenhum arquivo selecionado :(</p>
+                                                    <label type="button" class="main-button-product" for="estoque-config-input-file" id="estoque-config-text-file">Adiconar arquivo txt!</label>
+                                                    <input type="file" hidden accept=".txt" id="estoque-config-input-file">
+                                                </div>
                                             </div>
                                         </div>
-                                        
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            <div style="margin-top: 2em; margin-bottom: 2em;" class="linha"></div>
+                            <div id="buttons-cadastro-clear-product">
+                                <button type="button" class="main-button-product redColor" id="clear-product-cadastro">Limpar</button>
+                                <button type="button" class="main-button-product greenColor" id="save-product-cadastro">Cadastrar</button>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </main>
         </div>
     </div>
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
-    <script src="<%= host %>/public/js/sales.js"></script>
+    
+    <div>
+        <script>
+            let channels =  JSON.parse(("<%= channelsString %>").replace(/&#34;/g, '"')) 
+            let channelItensSelectMenu = channels.map(element => {
+                return {
+                    name: element.name,
+                    value: element.id
+                }
+            })
+            let cargo =  JSON.parse(("<%= cargosString %>").replace(/&#34;/g, '"')) 
+            let cargoItensSelectMenu = cargo.map(element => {
+                return {
+                    name: element.name,
+                    value: element.id
+                }
+            })
+            let productsString =  JSON.parse(("<%= productString %>").replace(/&#34;/g, '"')) 
+        </script>
+    </div>
+
+   <script src="/public/js/sales.js"></script>
 </body>
 </html>

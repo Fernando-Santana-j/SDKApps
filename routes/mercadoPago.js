@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const functions = require('./functions')
-const db = require('./Firebase/models')
+const functions = require('../functions')
+const db = require('../Firebase/models')
 const axios = require('axios')
 
-let client = require('./Discord/discordIndex').client
+let client = require('../Discord/discordIndex').client
 const { Payment, MercadoPagoConfig } = require('mercadopago');
-const mercadoPagoData = require('./config/mercadoPagoData.json');
-const webConfig = require('./config/web-config');
+const mercadoPagoData = require('../config/mercadoPagoData.json');
+const webConfig = require('../config/web-config');
 
 
 router.post('/mercadopago/webhook', async (req, res) => {
@@ -44,14 +44,14 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                                 Authorization: `Bearer ${params.token}`
                                             }
                                         })
-                                        require("./Discord/discordIndex").sendDiscordMensageChannel(metadataC.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadataC.user, false)
+                                        require("../Discord/discordIndex").sendDiscordMensageChannel(metadataC.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadataC.user, false)
                                     } catch (error) {
                                         console.log(error);
                                     }
                                 } else {
                                     try {
-                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
-                                        require("./Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador, '✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null, null)
+                                        require("../Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
+                                        require("../Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador, '✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null, null)
                                         try {
                                             const channel = await client.channels.fetch(metadataC.channelID);
                                             const message = await channel.messages.fetch(metadataC.mensageID);
@@ -89,13 +89,13 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                                 Authorization: `Bearer ${params.token}`
                                             }
                                         })
-                                        require("./Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadata.userID, false)
+                                        require("../Discord/discordIndex").sendDiscordMensageChannel(metadata.serverID, null, 'Reembolso', `Esse servidor não está aceitando pagamentos desta instituição ${bank}, seu dinheiro foi reembolsado, tente novamente usando outro banco.`, metadata.userID, false)
                                     } catch (error) {
                                         console.log(error);
                                     }
                                 } else {
                                     try {
-                                        require("./Discord/discordIndex").sendProductPayment(metadata, id, 'pix')
+                                        require("../Discord/discordIndex").sendProductPayment(metadata, id, 'pix')
                                     } catch (error) {
                                         console.log(error);
                                     }
@@ -210,8 +210,8 @@ router.post('/pix/create', async (req, res) => {
             description: `Cobranca do plano ${plan} na plataforma SDKApps`,
             payment_method_id: 'pix',
             external_reference: req.body.uid,
-            payer: require(`./config/mercadoPagoData.json`).payer,
-            notification_url: `${require(`./config/mercadoPagoData.json`).notification_url}/mercadopago/webhook?token=${webConfig.mercadoPagoToken}`,
+            payer: require(`../config/mercadoPagoData.json`).payer,
+            notification_url: `${require(`../config/mercadoPagoData.json`).notification_url}/mercadopago/webhook?token=${webConfig.mercadoPagoToken}`,
             metadata: {
                 userID: req.body.uid,
                 serverID: req.body.serverID,

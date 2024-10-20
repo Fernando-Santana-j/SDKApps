@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title></title>
+    <link rel="stylesheet" href="/public/css/controlLogin.css">
+</head>
+<body>
+    <div id="body-containner">
+        <div id="containner">
+            <main id="main-containner">
+                <div id="main-content">
+                    <div id="infos-adicionais-containner">
+                        <div class="box-content" id="infos-adicionais-content">
+                            <h1 class="title-col" id="title-dados-tec">Dados tecnicos do login: </h1>
+                            <hr style="width: calc(100% + 2em); position: relative; left: -1em; border: none; color: var(--primary-color); border-bottom: 2px solid var(--primary-color);">
+                            <div id="dados-tecnicos">
+                                <div id="so-content">
+                                    <h1 class="mini-title-col">Sistema operacional:</h1>
+                                    <div id="so-data">
+                                        <p class="mini-title-col"><%= loginData.os %></p>
+                                        <img id="so-logo" src="/public/img/<%= loginData.os == 'Mac' || loginData.os == 'iPad' || loginData.os == 'iPhone' ? 'IOSPC.png' : loginData.os == 'Windows' ? 'WINDOWSPC.png' : loginData.os == 'Linux' ? 'LINUXPC.png' : loginData.os == 'Android' ? 'ANDROIDPC.png' : "DESCONHECIDOPC.png" %>" alt="<%= loginData.os %>">
+                                    </div>
+                                </div>
+                                <div id="browser-content">
+                                    <h1 class="mini-title-col">Navegador:</h1>
+                                    <div id="browser-data">
+                                        
+                                        <p class="mini-title-col"><%= loginData.navegador %></p>
+                                        <img id="browser-logo" src="/public/img/<%= loginData.navegador %>.png">
+                                    </div>
+                                </div>
+                                <div id="other-informations-content">
+                                    <h1 class="mini-title-col">Outras Informações:</h1>
+                                    <ul id="other-information-list">
+                                        <li class="other-information-list-item" onclick="copyText(this)"><p class="other-information-list-name">IP DELE: </p> <p class="other-information-list-value textToCopy" title="<%= loginData.ip ? loginData.ip : 'Não foi possível localizar o IP!' %>"><%= loginData.ip ? loginData.ip : 'Não foi possível localizar o IP!' %></p></li>
+                                        <li class="other-information-list-item" onclick="copyText(this)"><p class="other-information-list-name">SEU IP: </p> <p class="other-information-list-value textToCopy" title="<%= loginData.Myip %>"><%= loginData.Myip %></p></li>
+                                        <li class="other-information-list-item" onclick="copyText(this)"><p class="other-information-list-name">TOKEN: </p> <p title="<%= loginData.token ? loginData.token : 'Não foi possível localizar o TOKEN!'%>" class="other-information-list-value textToCopy"><%= loginData.token ? loginData.token : 'Não foi possível localizar o TOKEN!'%></p></li>
+                                        <li class="other-information-list-item" onclick="copyText(this)"><p class="other-information-list-name">DATA: </p> <p class="other-information-list-value textToCopy" title="<%= loginData.date %>"><%= loginData.date %></p></li>
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="infos-importantes-containner">
+                        <div class="box-content" id="infos-importantes-content">
+                            <div class="texts-containner" style="height: fit-content;">
+                                <h1 class="title-col">Localizacao do login</h1>
+                                <p class="desc-col">A localização pode ter um erro básico, a casa pode estar errada ou a cidade, porém ele sempre apontará para a região do login, então não ocorrerá do estado estar errado, por exemplo!</p>
+                                <hr style="width: calc(100% + 2em); margin-top: 0.5em; position: relative; left: -1em; border: none; color: var(--primary-color); border-bottom: 2px solid var(--primary-color);">
+                            </div>
+                            <div id="loc-data">
+                                <div id="loc-data-other">
+                                    <div class="loc-data-other-item">
+                                        <p class="loc-data-other-item-name"><b>Loc:</b> <%= loginData.loc %></p>
+                                    </div>
+                                    <div class="loc-data-other-item">
+                                        <p class="loc-data-other-item-name"><b>Pais:</b> <%= loginData.pais %></p>
+                                    </div>
+                                    <div class="loc-data-other-item">
+                                        <p class="loc-data-other-item-name"><b>Estado:</b> <%= loginData.estado %></p>
+                                    </div>
+                                    <div class="loc-data-other-item">
+                                        <p class="loc-data-other-item-name"><b>Cidade:</b> <%= loginData.city %></p>
+                                    </div>
+                                    <div class="loc-data-other-item">
+                                        <p class="loc-data-other-item-name"><b>Codigo postal:</b> <%= loginData.postal %></p>
+                                    </div>
+                                </div>
+                                <iframe id="maps-iframe" style="border:0;" loading="lazy" allowfullscreen src="https://www.google.com/maps?q=-10.9172,-37.6500&hl=pt-BR&z=14&output=embed"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="main-buttons-containner">
+                        <div class="box-content" id="buttons-mensage-content">
+                            <p class="desc-col">⚠ | <b>ATENÇÃO</b>, ao clicar em algum dos botões abaixo, você estará permitindo ou bloqueando o acesso completo à sua conta. Essa função é <b>irreversível</b>, então tenha muito cuidado com sua escolha!</p>
+                            <div id="buttons-content">
+                                <button id="aceitar-login-button" class="button-padrao greenColor" title="Muita atenção ao aceitar o login, você estará permitindo que o IP citado acima possa entrar livremente na sua conta!">Aceitar login</button>
+                                <button id="recusar-login-button" class="button-padrao redColor" title="Muita atenção ao recusar o login, você estará bloqueando o IP citado acima, fazendo com que ele não possa mais entrar na sua conta!">Recusar login</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <div>
+        <script>
+            let ip = '<%= loginData.ip ? loginData.ip : null %>'
+            let user = '<%= loginData.user ? loginData.user : null %>'
+            let id = '<%= loginData.id ? loginData.id : null %>'
+        </script>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/controlLogin.js"></script>
+</body>
+</html>

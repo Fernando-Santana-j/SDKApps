@@ -1,6 +1,7 @@
 const { REST, Routes, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+
 let webConfig = require('../../config/web-config');
 let botConfig = require('../../config/bot-config');
     // FUNCAO PARA APAGAR OS COMANDOS ANTIGOS

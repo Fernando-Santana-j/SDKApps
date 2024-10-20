@@ -10,6 +10,7 @@ init()
 async function init(params) {
     let session = await fetch('/firebase/configs', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -128,8 +129,10 @@ async function sendMensage() {
     document.getElementById('input-mensage').value = ''
     let session = await fetch('/send/discordMensage', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
+            
         },
         body: JSON.stringify({
             guildId: ticket.serverID,
