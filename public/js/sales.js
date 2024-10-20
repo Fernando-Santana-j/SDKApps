@@ -783,7 +783,6 @@ document.addEventListener('click', async (event) => {
         
         if (productData.success == true) {
             productData = productData.data
-            editTypeProduct = productData.typeProduct
             function formatarMoeda(numeroCentavos) {
                 const valorReal = numeroCentavos / 100;
                 return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -804,6 +803,7 @@ document.addEventListener('click', async (event) => {
             document.getElementById('produtos-estoque-edit-normal').style.display = 'none'
             document.getElementById('produtos-estoque-edit-single').style.display = 'none'
             let typeProduct = 'typeProduct' in productData ? productData.typeProduct : 'normal'
+            editTypeProduct = typeProduct
             if (typeProduct == 'normal') {
                 document.getElementById('produtos-estoque-edit-normal').style.display = 'flex'
                 document.getElementById('produtos-estoque-edit-normal-txt-title').value = productData.estoqueModel.conteudo[0].title
@@ -890,7 +890,6 @@ document.getElementById('save-new-product').addEventListener('click', async () =
             if (document.getElementById('new-background-input').files[0]) {
                 formData.append('backGround', document.getElementById('new-background-input').files[0]);
             }
-            console.log(editTypeProduct);
             
             switch (editTypeProduct) {
                 case 'normal':
