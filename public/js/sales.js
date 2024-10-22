@@ -574,7 +574,7 @@ document.getElementById('estoque-config-input-file').addEventListener('change', 
 document.getElementById('produtos-estoque-edit-normal-txt-file').addEventListener('change', function () {
     let file = this.files[0]
     if (!file.name.endsWith('.txt')) return errorNotify('O arquivo que você selecionou não é um txt!');
-    document.getElementById('estoque-config-txt-file-selected').innerText = file.name
+    document.getElementById('estoque-config-txt-file-selected-edit').innerText = file.name
 });
 
 function clearCadastroProduct() {

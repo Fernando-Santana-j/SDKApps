@@ -2139,66 +2139,64 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             let productsName = []
 
-
+            
+            let products = serverData.products
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
-
-                var product = await serverData.products.find(product => product.productID == element.product)
-                var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
-                const requestedQuantity = element.quantidade;
-                let productEstoque = product.estoque
+                var product = await products.find(product => product.productID == element.product)
+                var productIndex = await products.findIndex(product => product.productID == element.product)
+                const requestedQuantity = parseInt(element.quantidade);
                 let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
                 productsName.push(`${product.productName} - ${element.quantidade}x`);
+                
                 switch (typeProduct) {
                     case 'single':
                         try {
-                            
                             arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
-                            productEstoque = parseInt(productEstoque) - parseInt(element.quantidade) 
+                            product.estoque = parseInt(product.estoque) - parseInt(element.quantidade)
                         } catch (error) {
-                            console.log(error);
-                            
+                            console.log('SendProductSingleERROR',error);
                             return refound();
                         }
                         break;
                     case 'subscription':
-                        return errorNotify('Funcionalidade em desenvolvimento!')
+                       
                         break;
                     case 'multiple':
 
                         break;
                     case 'normal':
                         try {
-                            let itens = await productEstoque.splice(0, requestedQuantity).map(item => item.conteudo)
+                            let itens = await product.estoque.splice(0, requestedQuantity).map(item => item.conteudo)
                             itens.forEach(item => {
                                 arrayItensTxt.push(item[0].content)
                             })
                         } catch (mainError) {
+                            console.log('SendProductNormalERROR',mainError)
                             return refound();
                         }
                         break;
                 }
-
-                serverData.products[productIndex].estoque = productEstoque
-                
+                products[productIndex] = product
                 await db.update('servers', serverData.id, {
-                    products: serverData.products
+                    products: products
                 })
+    
                 try {
                     const messageCreator = require(`../Discord/create${product.embendType == 1 ? 'ProductMessage' : 'ProductMessageEmbend'}.js`);
                     await messageCreator(Discord, client, {
                         channelID: product.channel,
                         serverID: serverData.id,
                         productID: product.productID,
-                        numberEstoque: productEstoque.length,
                         edit: true
                     });
-                } catch (error) { }
+                } catch (error) { 
+                    console.log(error);
+                }
             }
 
 
-
-
+            
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
