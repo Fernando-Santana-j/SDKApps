@@ -2193,7 +2193,10 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         numberEstoque: productEstoque.length,
                         edit: true
                     });
-                } catch (error) { }
+                } catch (error) {
+                    console.log('SendProductMessageERROR',error);
+                    
+                 }
             }
 
 
