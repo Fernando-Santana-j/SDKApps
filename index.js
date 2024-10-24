@@ -242,6 +242,7 @@ app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, asy
         delete user.security
     }
     let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+
     if (!server || !user) {
         res.redirect('/?error=Erro ao recuperar o servidor ou o seu usuario!')
         return
@@ -1151,6 +1152,41 @@ app.post('/personalize/lembreteToogle', functions.authPostState, async (req, res
         }
     }
 })
+
+
+
+app.post('/personalize/autoReact', functions.authPostState, async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            personalize.react = 'react' in personalize ? personalize.react : []
+            personalize.react.push({
+                channel:req.body.channelID,
+                emoji: req.body.emoji
+            })
+            
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar mudar a personalização!' })
+        }
+    }
+})
+
+
+
 app.post('/sales/privateLog', functions.authPostState, async (req, res) => {
     try {
         let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })

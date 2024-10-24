@@ -390,6 +390,19 @@ module.exports = (Discord2, client) => {
             try {
                 var DiscordServer = await client.guilds.cache.get(message.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(message.channelId)
+                let server = await db.findOne({ colecao: "servers", doc: message.guildId })
+                if (server && 'personalize' in server && 'react' in server.personalize) {
+                    server.personalize.react.forEach(async (react) => {
+                        if (react.channel == message.channel.id) {
+                            if (react.emoji.includes(':')) {
+                                const emoji = DiscordServer.emojis.cache.find(emoji => emoji.name == react.emoji.replace(/:/g, ""));
+                                message.react(emoji).then(() => {}).catch(() => {});
+                            }else{
+                                message.react(react.emoji).then(() => {}).catch(() => {});
+                            }
+                        }
+                    })
+                }
                 if (DiscordChannel && DiscordChannel.topic && DiscordChannel.topic.includes('prot-')) {
                     let ticket = await db.findOne({ colecao: 'tickets', doc: DiscordChannel.topic })
                     if (ticket && message.channel.id == ticket.channel) {
