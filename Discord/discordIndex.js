@@ -2144,6 +2144,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
             carrinhos[params.userID] = null
         }
+        console.log('ResultEstoque:', result);
         
         if (result == true) {
             const user = await client.users.fetch(params.userID);
@@ -2154,6 +2155,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             
             let products = serverData.products
+            console.log('Carrinho:', carrinho);
+            
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
                 var product = await products.find(product => product.productID == element.product)
@@ -2162,34 +2165,33 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
                 productsName.push(`${product.productName} - ${element.quantidade}x`);
                 
-                switch (typeProduct) {
-                    case 'single':
-                        try {
-                            arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
-                            product.estoque = parseInt(product.estoque) - parseInt(element.quantidade)
-                        } catch (error) {
-                            console.log('SendProductSingleERROR',error);
-                            return refound();
-                        }
-                        break;
-                    case 'subscription':
-                       
-                        break;
-                    case 'multiple':
 
-                        break;
-                    case 'normal':
-                        try {
-                            let itens = await product.estoque.splice(0, requestedQuantity).map(item => item.conteudo)
-                            itens.forEach(item => {
-                                arrayItensTxt.push(item[0].content)
-                            })
-                        } catch (mainError) {
-                            console.log('SendProductNormalERROR',mainError)
-                            return refound();
-                        }
-                        break;
+                if (typeProduct == 'single') {
+                    try {
+                        arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
+                        product.estoque = parseInt(product.estoque) - parseInt(element.quantidade)
+                    } catch (error) {
+                        console.log('SendProductSingleERROR',error);
+                        return refound();
+                    }
                 }
+
+                if (typeProduct == 'normal') {
+                    try {
+                        let itensCortados = await product.estoque.splice(0, requestedQuantity)
+                        console.log(`itensCortados ${index}`,itensCortados);
+                        let itens = itensCortados.map(item => item.conteudo)
+                        console.log(`item${index}`,itens);
+                        
+                        itens.forEach(item => {
+                            arrayItensTxt.push(item[0].content)
+                        })
+                    } catch (mainError) {
+                        console.log('SendProductNormalERROR',mainError)
+                        return refound();
+                    }
+                }
+
                 products[productIndex] = product
                 await db.update('servers', serverData.id, {
                     products: products
@@ -2208,7 +2210,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             }
 
-
+            console.log('arrayItensTxt',arrayItensTxt);
             
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
