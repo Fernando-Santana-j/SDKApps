@@ -1,5 +1,3 @@
-const { credential } = require("firebase-admin");
-
 let serverID = location.pathname.replace('/payment/', "")
 
 $.ajax({
@@ -281,7 +279,6 @@ $.ajax({
                             traditional: true,
                             url: '/pix/create',
                             type: 'POST',
-                            credential: 'include',
                             contentType: 'application/json',
                             data: JSON.stringify({
                                 serverID: serverID,
@@ -325,7 +322,6 @@ $.ajax({
 
                         let session = await fetch('/subscription/update', {
                             method: 'POST',
-                            credentials: 'include',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
