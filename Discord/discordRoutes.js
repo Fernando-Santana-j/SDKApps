@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+require('dotenv').config()
 const stripe = require('stripe')(require('../config/web-config').stripe);
 const Discord = require("discord.js");
 const db = require('../Firebase/models')
@@ -12,6 +12,7 @@ const botConfig = require('../config/bot-config.js');
 const { default: axios } = require("axios");
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
+
 
 router.get('/auth/verify/:acesstoken', async (req, res) => {
     let param = req.params.acesstoken
@@ -41,7 +42,50 @@ router.get('/auth/verify/:acesstoken', async (req, res) => {
     }
 })
 
+router.get('/discord/verify', async (req, res) => {
+    try {
+        if (!req.query.code) {
+            res.redirect('/?error=Codigo invalido')
+        } else {
+            let param = new URLSearchParams({
+                client_id: webConfig.clientId,
+                client_secret: webConfig.secret,
+                grant_type: 'authorization_code',
+                code: req.query.code,
+                redirect_uri: process.env.DISCORDURI
+            })
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept-Encoding': 'application/x-www-form-urlencoded'
+            };
+            const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
+                console.error(err)
+            })
+            if (!response) {
+                res.redirect('/?error=Erro ao autenticar')
+                return
+            }
+            let userResponse = await axios.get('https://discord.com/api/users/@me', {
+                headers: {
+                    Authorization: `Bearer ${response.data.access_token}`,
+                    ...headers
+                }
+            }).then((res) => { return res.data }).catch((err) => {
+                console.error(err)
+            });
+            
+            
+            
+            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            
 
+        }
+    } catch (error) {
+        res.redirect('/logout')
+        console.log(error);
+
+    }
+})
 
 router.get('/auth/callback', async (req, res) => {
     try {
@@ -86,7 +130,7 @@ router.get('/auth/callback', async (req, res) => {
                 let loginsOpen = 'loginsOpen' in user ? user.loginsOpen : {}
                 const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
                 let userLoginAccept = 'usersLoginAccept' in user ? true : false
-                let findLogin = Object.values(loginsOpen).find(element=>element.ip == ip)
+                let findLogin = Object.values(loginsOpen).find(element => element.ip == ip)
                 if ('usersLoginAccept' in user && user.usersLoginBlock.includes(ip)) {
                     res.redirect('/logout?error=Seu acesso a essa conta foi bloqueado!')
                     return
@@ -231,10 +275,10 @@ router.get('/auth/callback', async (req, res) => {
                                 ip: ip ? ip : null,
                                 sessao: req.session.id ? req.session.id : null,
                                 pais: data.country ? data.country : null,
-                                estado: data.region ?  data.region : null,
+                                estado: data.region ? data.region : null,
                                 cidade: data.city ? data.city : null,
                                 os: os,
-                                postal: data.postal ? data.postal :null,
+                                postal: data.postal ? data.postal : null,
                                 navegador: browser,
                                 date: dataFormatada,
                                 token: req.cookies.token ? req.cookies.token : null,
@@ -261,11 +305,11 @@ router.get('/auth/callback', async (req, res) => {
                         displayName: userResponse.global_name,
                         email: userResponse.email,
                         access_token: response.data.access_token,
-                        usersLoginAccept:[ip],
-                        usersLoginBlock:[]
+                        usersLoginAccept: [ip],
+                        usersLoginBlock: []
                     })
                 }
-                
+
                 res.redirect('/dashboard')
             }
         }
@@ -279,7 +323,7 @@ router.get('/auth/callback', async (req, res) => {
 
 
 
-router.get('/addbot/:serverID',functions.authGetState, (req, res) => {
+router.get('/addbot/:serverID', functions.authGetState, (req, res) => {
     if (!req.params.serverID) {
         res.redirect(`/`)
         return

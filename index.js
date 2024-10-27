@@ -215,18 +215,7 @@ app.get('/payment/:id', async (req, res) => {
     if ('pass' in user == true) {
         delete user.security
     }
-    let server = await db.findOne({ colecao: 'servers', doc: req.params.id })
-    let exist = false
-    let type = null
-    if (server.error == false) {
-        exist = true
-        type = server.type
-        if (server.isPaymented == true) {
-            res.redirect('/dashboard')
-            return
-        }
-    }
-    res.render('payment', { host: `${webConfig.host}`, user: user, server: server, exist: exist, type: type })
+    res.render('payment', { host: `${webConfig.host}`, user: user})
 })
 
 app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {

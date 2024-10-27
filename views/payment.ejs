@@ -28,157 +28,16 @@
                 </div>
             </div>
             <div id="change-containner">
-                <input hidden type="text" id="plan-server" value="<%= server.plan %>">
-                <% if (exist == true) { %>
-                    <% if (type == 'stripe') { %>
-                       <div class="mensage-containner">
-                            <div class="mensage-content">
-                                <h1 class="title-col">Sua assinatura esta vencida clique no botao abaixo para ser redirecionado para a pagina do stripe para renovar sua assinatura!</h1>
-                                <button class="button-padrao" id="signature-situation-button">Renovar</button>
-                            </div>
-                       </div>
-                    <% } else  { %>
-                        <div class="mensage-containner">
-                            <div class="mensage-content">
-                                <h1 class="title-col">Sua assinatura esta vencida clique no botao abaixo para pagar realizar o pagamento via pix para renovar sua assinatura!</h1>
-                                <label class="lable-padrao" for="time-input">Escolha o tempo de assinatura</label>
-                                <input required type="text" class="input-padrao" list="time-input-list-renovar" placeholder="Pesquise o tempo..."  id="time-input-renovar">
-                                <datalist id="time-input-list-renovar">
-                                    <option value="mensal">Mensal</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="anual">Anual</option>
-                                </datalist>
-                                <button class="button-padrao" id="signature-pix-button">Renovar</button>
-                            </div>
-                       </div>
-                    <% } %>
-                <% } else { %>
-                    <section id="plans-section">
-                        <div id="plans-title-containner">
-                            <h1 id="plans-title">Seu servidor esta inativo escolha um dos nossos planos!</h1>
-                        </div>
-                        <div id="plans-row-containner">
-                            <div id="plans-row">
-                                <div class="plans-col">
-                                    <div class="plans-col-top-fit"></div>
-                                    <div class="plans-col-wrap">
-                                        <div class="plans-col-mini-title">
-                                            <p class="mini-title">
-                                                Plano inicial
-                                            </p>
-                                        </div>
-                                        <div class="plans-col-precos-containner">
-                                            <div class="precos-moeda">R$</div>
-                                            <div class="precos-valor">12,99</div>
-                                            <div class="precos-tempo">/ Mês</div>
-                                        </div>
-                                        <div class="plans-col-beneficios">
-                                            <p class="beneficios-title">Benefícios:</p>
-                                            <ul class="beneficios-list">
-                                                <li class="beneficios-list-item">Bot de vendas</li>
-                                                <li class="beneficios-list-item">Suporte</li>
-                                            </ul>
-                                        </div>
-                                        <div class="plans-col-button">
-                                            <a class="button-assinar" href="#" id="plan-init">Assinar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="plans-col" id="details">
-                                    <div class="plans-col-top-fit"></div>
-                                    <div class="plans-col-wrap">
-                                        <div class="plans-col-mini-title">
-                                            <p class="mini-title">
-                                                Dados do seu plano!
-                                            </p>
-                                        </div>
-                                        <div id="data-subscription">
-                                            <div id="data-subscription-plan">
-                                                <label class="lable-padrao" for="plan-input">Escolha seu
-                                                    plano</label>
-                                                <input required type="text" class="input-padrao"
-                                                    list="plan-input-list" placeholder="Pesquise o seu plano..."
-                                                    id="plan-input">
-                                                <datalist id="plan-input-list">
-                                                    <option value="inicial">Plano inicial</option>
-                                                    <option value="premium">Plano premium</option>
-                                                </datalist>
-                                            </div>
-                                            <div id="data-subscription-time">
-                                                <label class="lable-padrao" for="time-input">Escolha o tempo de
-                                                    assinatura</label>
-                                                <input required type="text" class="input-padrao"
-                                                    list="time-input-list" placeholder="Pesquise o tempo..."
-                                                    id="time-input">
-                                                <datalist id="time-input-list">
-                                                    <option value="mensal">Mensal</option>
-                                                    <option value="trimestral">Trimestral</option>
-                                                    <option value="anual">Anual</option>
-                                                </datalist>
-                                            </div>
-                                            <div id="data-subscription-method">
-                                                <label class="lable-padrao" for="method-input">Escolha o metodo de
-                                                    pagamento</label>
-                                                <input required type="text" class="input-padrao"
-                                                    list="method-input-list" placeholder="Pesquise o metodo..."
-                                                    id="method-input">
-                                                <datalist id="method-input-list">
-                                                    <option value="pix">PIX</option>
-                                                    <option value="stripe">Cartão ou Boleto</option>
-                                                </datalist>
-                                            </div>
-                                        </div>
-                                        <div id="final-price">
-                                            <p class="desc-col" id="total-price"
-                                                style="text-decoration: line-through !important;">R$ 0,00</p>
-                                            <h1 class="title-col" id="desconto-price">R$ 0,00</h1>
-                                        </div>
-                                        <div class="plans-col-button">
-                                            <a class="button-assinar" id="confirm-subscription"
-                                                href="#">Confirmar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="plans-col" id="mid-col">
-                                    <div class="plans-col-top-fit"></div>
-                                    <div class="plans-col-wrap">
-                                        <div class="plans-col-mini-title">
-                                            <p class="mini-title">
-                                                Plano premium
-                                            </p>
-
-                                        </div>
-                                        <div class="plans-col-precos-containner">
-                                            <div class="precos-moeda">R$</div>
-                                            <div class="precos-valor">26,99</div>
-                                            <div class="precos-tempo">/ Mês</div>
-                                        </div>
-                                        <div class="plans-col-beneficios">
-                                            <p class="beneficios-title">Benefícios:</p>
-                                            <ul class="beneficios-list">
-                                                <li class="beneficios-list-item">Tudo do primeiro plano e +</li>
-                                                <li class="beneficios-list-item">Configurações premium</li>
-                                                <li class="beneficios-list-item">Bot personalizavel</li>
-                                                <li class="beneficios-list-item">Bot de tickets</li>
-                                                <li class="beneficios-list-item">Sistema de cupons</li>
-                                            </ul>
-                                        </div>
-                                        <div class="plans-col-button">
-                                            <a class="button-assinar" id="plan-premium" href="#">Assinar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                <% } %>
+                
             </div>
 
         </div>
     </div>
 
     <div>
-        <script>let uid = '<%= user.id %>'</script>
+        <script>
+            let uid = '<%= user.id %>'
+        </script>
     </div>
     <%- include('./reusable/script.ejs') %>
         <script src="/public/js/payment.js"></script>
