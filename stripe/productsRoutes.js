@@ -304,8 +304,7 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
                 break;
            
         }
-
-
+     
         let produtos = server.products
         
         produto.productName = req.body.productName,
@@ -321,7 +320,6 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
             produto.channel = req.body.channelID
         }
         
-
         produtos[index] = produto;
 
         db.update('servers', req.body.serverID, {

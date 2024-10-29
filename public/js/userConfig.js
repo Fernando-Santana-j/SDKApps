@@ -65,12 +65,18 @@ document.addEventListener('click', async (event) => {
     const target = event.target;
 
     if (target.closest('#desative-2fa')) {
-        passVerify('toogle2fa', 'admin', null, false)
+        passVerify(()=>{
+            toogle2fa(false)
+        }, 'admin', null, false)
     }
     if (target.closest('#active-2fa')) {
-        passVerify('toogle2fa', 'admin', null, true)
+        passVerify(()=>{
+            toogle2fa(true)
+        }, 'admin', null, true)
     }
     if (target.closest('#cadastro-2fa-button')) {
-        passVerify('cadastro2fa', 'admin', null)
+        passVerify(()=>{
+            cadastrar2fa()
+        }, 'admin', null)
     }
 })

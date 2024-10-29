@@ -63,7 +63,7 @@ module.exports = async (Discord2, client, data) => {
         
         if (typeProduct != 'multiple') {
             
-            let estoqueNumber = typeProduct == 'single' ? produto.estoque : produto.estoque ?  produto.estoque.length : 0 
+            let estoqueNumber = typeProduct == 'normal' ? produto.estoque.length : produto.estoque
             fields.push({
                 name: 'Estoque:',
                 value: '`` ' + estoqueNumber + ' ``',

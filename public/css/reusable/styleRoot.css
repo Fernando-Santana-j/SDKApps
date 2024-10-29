@@ -486,7 +486,7 @@ input[type=radio]:checked ~ .label-radius {
 
 .dropdown {
     width: 100%;
-    z-index: 9;
+
     position: relative;
     font-family: 'poppins', sans-serif;
     font-weight: 300;
@@ -536,7 +536,7 @@ input[type=radio]:checked ~ .label-radius {
     position: absolute;
     top: 100%;
     left: 0;
-    z-index: 9999999999999999;
+    z-index: 999;
     width: 100%;
     margin-top: 5px;
     overflow-y: auto;

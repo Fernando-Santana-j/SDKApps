@@ -139,14 +139,38 @@
                             <button id="save-mensage-welcome" class="button-padrao">Salvar Mensagem</button>
                         </div>
                     </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">Auto reação!</h1>
+                        <p class="desc-col">Selecione um canal e para o bot reagir a todas as mensagens com um emoji!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <div class="inputs-col-content">
+                                <label for="emoji-name-react" class="lable-padrao">Nome do emoji!</label>
+                                <input required type="text" class="input-padrao" placeholder="EX: :nome: ou ❤️" id="emoji-name-react">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="select-channel-react-containner" class="lable-padrao">Canal da reação!</label>
+                                <div id="select-channel-react-containner"></div>
+                            </div>
+                            <button id="save-auto-react" class="button-padrao">Salvar reação</button>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
     <div>
         <div id="serverData" data-server="<%= JSON.stringify(server) %>"></div>
+        <div id="channelsData" data-channel="<%= JSON.stringify(channels) %>"></div>
         <script>
             let server = JSON.parse(document.getElementById('serverData').getAttribute('data-server'))
+            let channels = JSON.parse(document.getElementById('channelsData').getAttribute('data-channel'))
+            let channelItensSelectMenu = channels.map(element => {
+                return {
+                    name: element.name,
+                    value: element.id
+                }
+            })
         </script>
     </div>
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>

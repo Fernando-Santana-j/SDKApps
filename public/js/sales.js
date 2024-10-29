@@ -574,7 +574,7 @@ document.getElementById('estoque-config-input-file').addEventListener('change', 
 document.getElementById('produtos-estoque-edit-normal-txt-file').addEventListener('change', function () {
     let file = this.files[0]
     if (!file.name.endsWith('.txt')) return errorNotify('O arquivo que você selecionou não é um txt!');
-    document.getElementById('estoque-config-txt-file-selected').innerText = file.name
+    document.getElementById('estoque-config-txt-file-selected-edit').innerText = file.name
 });
 
 function clearCadastroProduct() {
@@ -754,118 +754,6 @@ document.getElementById('save-product-cadastro').addEventListener('click', async
 
 })    
 
-document.getElementById('save-product-cadastro').addEventListener('click', async() => {
-    let name = document.getElementById('product-name').value
-    let desc = document.getElementById('product-desc').value
-    let price = document.getElementById('product-price').value.replace(/\D/g, '')
-    const typeProduct = await selectProductType.getValue().value
-    let channelID = channelInputCreateProduct.getValue()
-
-
-    if (!document.getElementById('logo-input').files[0]) return errorNotify('Nenhuma logo foi inserida!');
-    if (name.trim().length <= 0)return errorNotify('Escreva o nome do seu produto primeiro!');
-    if (desc.trim().length <= 0)return errorNotify('Escreva a descrição do seu produto primeiro!');
-    if (price.trim().length <= 0 && typeProduct != 'multiple')return errorNotify('Escreva o valor do seu produto primeiro!');
-    if (channelID == null) return errorNotify('Escolha o canal do seu produto primeiro!');
-
-    
-    var formData = new FormData();
-
-    await formData.append('price', parseInt(document.getElementById('product-price').value.replace(/[^\d,]/g, '').replace(',', '')));
-    await formData.append('productName', document.getElementById('product-name').value.trim());
-    await formData.append('producDesc', document.getElementById('product-desc').value.trim());
-    await formData.append('serverID', serverID);
-    await formData.append('channelID', channelID.value);
-    await formData.append('typeProduct', typeProduct);
-    await formData.append('productLogo', document.getElementById('logo-input').files[0]);
-    await formData.append('embendType', await selectEmbendType.getValue().value);
-    
-    if (document.getElementById('image-input').files[0]) {
-        formData.append('backGround', document.getElementById('image-input').files[0]);
-    }
-
-    switch (typeProduct) {
-        case 'normal':
-            let normalTitle = document.getElementById('estoque-config-input-title-txt').value
-            let txtFileEstoque = document.getElementById('estoque-config-input-file')
-            if (!document.getElementById('select-null-stock-checkbox').checked) {
-                if (normalTitle.trim().length <= 0) normalTitle = 'Itens';
-                if (!txtFileEstoque.files[0]) return errorNotify('Escolha o arquivo do seu estoque primeiro!'); 
-                let file = txtFileEstoque.files[0]
-                if (!file.name.toLowerCase().endsWith('.txt')) return errorNotify('O arquivo não e um txt valido!');
-                let linhas = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                        
-                    reader.onload = async function (event) {
-                            const conteudo = event.target.result;
-                            const linhasArray = [];
-                            
-                            const linhasArquivo = conteudo.split('\n');
-                            
-                            for (const linha of linhasArquivo) {
-                                const linhaTratada = linha.replace(/\r/g, '').trim();
-                                if (linhaTratada.length > 0) {
-                                    await new Promise(resolve => setTimeout(resolve, 0)); 
-                                    linhasArray.push(linhaTratada);
-                                }
-                            }
-                            
-                            resolve(linhasArray);
-                        };
-
-
-
-                        reader.onerror = function (error) {
-                            reject(error); 
-                        };
-
-                        reader.readAsText(file);
-                });
-                await formData.append('normalTitleEstoque', normalTitle);
-                await formData.append('normalTxtEstoque', JSON.stringify(linhas));
-            }
-            break;
-        case 'single':
-            await formData.append('singleEstoqueNumber', document.getElementById('number-estoque-input').value.trim())
-            await formData.append('singleContent', document.getElementById('content-number-estoque-input').value.trim())
-            break;
-        case 'subscription':
-            
-            break;
-        case 'multiple':
-            let arrayProdutos = multiCreateProductsSelect.getValue().map((itens)=>{
-                return itens.value
-            })
-            await formData.append('arrayProdutos', JSON.stringify(arrayProdutos))
-            break;
-    }
-
-
-    clearCadastroProduct()
-    
-    $.ajax({
-        traditional: true,
-        url: '/product/create',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (response) {
-            if (response.success) {
-                successNotify('Produto criado!')
-                getProducts()
-            } else {
-                errorNotify(response.data)
-            }
-
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-        }
-    })
-
-})    
-
 
 
 //TODO configuracoes do produto
@@ -895,7 +783,6 @@ document.addEventListener('click', async (event) => {
         
         if (productData.success == true) {
             productData = productData.data
-            editTypeProduct = productData.typeProduct
             function formatarMoeda(numeroCentavos) {
                 const valorReal = numeroCentavos / 100;
                 return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -915,12 +802,14 @@ document.addEventListener('click', async (event) => {
             document.getElementById('produtos-config-containner').style.display = 'flex'
             document.getElementById('produtos-estoque-edit-normal').style.display = 'none'
             document.getElementById('produtos-estoque-edit-single').style.display = 'none'
-            if (productData.typeProduct == 'normal') {
+            let typeProduct = 'typeProduct' in productData ? productData.typeProduct : 'normal'
+            editTypeProduct = typeProduct
+            if (typeProduct == 'normal') {
                 document.getElementById('produtos-estoque-edit-normal').style.display = 'flex'
                 document.getElementById('produtos-estoque-edit-normal-txt-title').value = productData.estoqueModel.conteudo[0].title
             }
 
-            if (productData.typeProduct == 'single') {
+            if (typeProduct == 'single') {
                 document.getElementById('produtos-estoque-edit-single').style.display = 'flex'
                 document.getElementById('product-config-new-single-content').value = productData.estoqueModel.conteudo[0].content
                 document.getElementById('product-config-new-single-number').value = productData.estoque
@@ -1001,7 +890,6 @@ document.getElementById('save-new-product').addEventListener('click', async () =
             if (document.getElementById('new-background-input').files[0]) {
                 formData.append('backGround', document.getElementById('new-background-input').files[0]);
             }
-            console.log(editTypeProduct);
             
             switch (editTypeProduct) {
                 case 'normal':

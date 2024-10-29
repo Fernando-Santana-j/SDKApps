@@ -166,6 +166,7 @@ module.exports = {
     },
     authGetState: async (req, res, next) => {
         try {
+            
             if (!req.session.uid) return res.redirect('/?error=Faca login novamente!');
 
             let user = await db.findOne({colecao:'users',doc:req.session.uid})

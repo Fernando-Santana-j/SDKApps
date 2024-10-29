@@ -18,6 +18,9 @@ if ('personalize' in server) {
 
 
 
+let selectChannelReact = new DropdownSingle('select-channel-react-containner',channelItensSelectMenu);
+
+
 
 async function sendPersonalize(type,data) {
     let session = await fetch('/personalize/change', {
@@ -283,7 +286,34 @@ document.getElementById('saveChannelFeedback').addEventListener('click',async()=
 
 
 
-
+document.getElementById('save-auto-react').addEventListener('click',async()=>{
+    if (document.getElementById(`emoji-name-react`).value.trim().length <= 0) {
+        errorNotify(`Insira um emoji primeiro!`)
+        return
+    }
+    if (!selectChannelReact.getValue().value) {
+        errorNotify(`Insira um canal primeiro!`)
+        return
+    }
+    let session = await fetch('/personalize/autoReact', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            emoji:document.getElementById(`emoji-name-react`).value.trim(),
+            channelID:selectChannelReact.getValue().value,
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify('Reacao criada!')
+        
+    }else{
+        errorNotify(session.data)
+    }
+})
 
 
 

@@ -30,27 +30,21 @@ module.exports = {
             }
             
             try {
-                interaction.deferReply();
-                if (condition) {
-                    
-                }else{
-                    if (product.embendType == 0) {
-                        await require('../../createProductMessageEmbend.js')(Discord, client, {
-                            channelID: interaction.channelId,
-                            serverID: interaction.guildId,
-                            productID: produto,
-                            edit: true
-                        })
-                    } else {
-                        await require('../../createProductMessage.js')(Discord, client, {
-                            channelID: interaction.channelId,
-                            serverID: interaction.guildId,
-                            productID: produto,
-                            edit: true
-                        })
-                    }
+                if (product.embendType == 0) {
+                    await require('../../createProductMessageEmbend.js')(Discord, client, {
+                        channelID: interaction.channelId,
+                        serverID: interaction.guildId,
+                        productID: produto,
+                        edit: true
+                    })
+                } else {
+                    await require('../../createProductMessage.js')(Discord, client, {
+                        channelID: interaction.channelId,
+                        serverID: interaction.guildId,
+                        productID: produto,
+                        edit: true
+                    })
                 }
-                
                 interaction.deleteReply()
             } catch (error) {
                 console.log(error);
