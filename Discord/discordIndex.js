@@ -390,6 +390,19 @@ module.exports = (Discord2, client) => {
             try {
                 var DiscordServer = await client.guilds.cache.get(message.guildId);
                 var DiscordChannel = await DiscordServer.channels.cache.get(message.channelId)
+                let server = await db.findOne({ colecao: "servers", doc: message.guildId })
+                if (server && 'personalize' in server && 'react' in server.personalize) {
+                    server.personalize.react.forEach(async (react) => {
+                        if (react.channel == message.channel.id) {
+                            if (react.emoji.includes(':')) {
+                                const emoji = DiscordServer.emojis.cache.find(emoji => emoji.name == react.emoji.replace(/:/g, ""));
+                                message.react(emoji).then(() => {}).catch(() => {});
+                            }else{
+                                message.react(react.emoji).then(() => {}).catch(() => {});
+                            }
+                        }
+                    })
+                }
                 if (DiscordChannel && DiscordChannel.topic && DiscordChannel.topic.includes('prot-')) {
                     let ticket = await db.findOne({ colecao: 'tickets', doc: DiscordChannel.topic })
                     if (ticket && message.channel.id == ticket.channel) {
@@ -2131,6 +2144,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
             carrinhos[params.userID] = null
         }
+        console.log('ResultEstoque:', result);
         
         if (result == true) {
             const user = await client.users.fetch(params.userID);
@@ -2139,69 +2153,65 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             let productsName = []
 
-
+            
+            let products = serverData.products
+            console.log('Carrinho:', carrinho);
+            
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
-
-                var product = await serverData.products.find(product => product.productID == element.product)
-                var productIndex = await serverData.products.findIndex(product => product.productID == element.product)
-                const requestedQuantity = element.quantidade;
-                let productEstoque = product.estoque
+                var product = await products.find(product => product.productID == element.product)
+                var productIndex = await products.findIndex(product => product.productID == element.product)
+                const requestedQuantity = parseInt(element.quantidade);
                 let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
                 productsName.push(`${product.productName} - ${element.quantidade}x`);
-                switch (typeProduct) {
-                    case 'single':
-                        try {
-                            
-                            arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
-                            productEstoque = parseInt(productEstoque) - parseInt(element.quantidade) 
-                        } catch (error) {
-                            console.log(error);
-                            
-                            return refound();
-                        }
-                        break;
-                    case 'subscription':
-                        return errorNotify('Funcionalidade em desenvolvimento!')
-                        break;
-                    case 'multiple':
+                
 
-                        break;
-                    case 'normal':
-                        try {
-                            let itens = await productEstoque.splice(0, requestedQuantity).map(item => item.conteudo)
-                            itens.forEach(item => {
-                                arrayItensTxt.push(item[0].content)
-                            })
-                        } catch (mainError) {
-                            return refound();
-                        }
-                        break;
+                if (typeProduct == 'single') {
+                    try {
+                        arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
+                        product.estoque = parseInt(product.estoque) - parseInt(element.quantidade)
+                    } catch (error) {
+                        console.log('SendProductSingleERROR',error);
+                        return refound();
+                    }
                 }
 
-                serverData.products[productIndex].estoque = productEstoque
-                
+                if (typeProduct == 'normal') {
+                    try {
+                        let itensCortados = await product.estoque.splice(0, requestedQuantity)
+                        console.log(`itensCortados ${index}`,itensCortados);
+                        let itens = itensCortados.map(item => item.conteudo)
+                        console.log(`item${index}`,itens);
+                        
+                        itens.forEach(item => {
+                            arrayItensTxt.push(item[0].content)
+                        })
+                    } catch (mainError) {
+                        console.log('SendProductNormalERROR',mainError)
+                        return refound();
+                    }
+                }
+
+                products[productIndex] = product
                 await db.update('servers', serverData.id, {
-                    products: serverData.products
+                    products: products
                 })
+    
                 try {
                     const messageCreator = require(`../Discord/create${product.embendType == 1 ? 'ProductMessage' : 'ProductMessageEmbend'}.js`);
                     await messageCreator(Discord, client, {
                         channelID: product.channel,
                         serverID: serverData.id,
                         productID: product.productID,
-                        numberEstoque: productEstoque.length,
                         edit: true
                     });
-                } catch (error) {
-                    console.log('SendProductMessageERROR',error);
-                    
-                 }
+                } catch (error) { 
+                    console.log(error);
+                }
             }
 
-
-
-
+            console.log('arrayItensTxt',arrayItensTxt);
+            
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
