@@ -116,7 +116,7 @@ app.use('/', securityRoutes);
 
 
 app.get('/', async (req, res) => {
-    res.render('index', { host: `${webConfig.host}`,isloged: req.session.uid && req.session.email ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
+    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid && req.session.email ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
 })
 
 
@@ -215,7 +215,7 @@ app.get('/payment/:id', async (req, res) => {
     if ('pass' in user == true) {
         delete user.security
     }
-    res.render('payment', { host: `${webConfig.host}`, user: user})
+    res.render('payment', { host: `${webConfig.host}`, user: user })
 })
 
 app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
@@ -312,7 +312,7 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
         };
     });
 
-    
+
     let productsSimple = server.products.filter(product => {
         let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal';
         return typeProduct != 'multiple';
@@ -337,13 +337,9 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
         }
     })
 
-    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server,cargosString: JSON.stringify(roleObjects), channels: textChannels, channelsString: JSON.stringify(textChannels), formatarMoeda: functions.formatarMoeda,productString : JSON.stringify(productsSimple) })   
+    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, cargosString: JSON.stringify(roleObjects), channels: textChannels, channelsString: JSON.stringify(textChannels), formatarMoeda: functions.formatarMoeda, productString: JSON.stringify(productsSimple) })
 })
 
-
-app.post('/test', upload.fields([{ name: 'productLogo', maxCount: 1 }, { name: 'backGround', maxCount: 1 }]), (req, res) => {
-    console.log(req.body);
-})
 
 app.get('/server/personalize/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
     let serverID = req.params.id
@@ -394,6 +390,35 @@ app.get('/server/personalize/:id', functions.authGetState, functions.subscriptio
     res.render('personalize', { host: `${webConfig.host}`, channels: textChannels, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
 
+app.get('/server/backups/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+    let serverID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('pass' in user == true) {
+        delete user.security
+    }
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    if (server.plan == 'inicial') {
+        res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
+        return
+    }
+    let backupCode
+    if ('backupCode' in server == false) {
+        backupCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
+        while (await db.findOne({colecao:'servers', where:['backupCode','==', backupCode]}).then(data=>data.error == false)) {
+            backupCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
+            break
+        }
+        db.update('servers', serverID,{backupCode:backupCode})
+    }else{
+        backupCode = server.backupCode
+    }
+    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
+    if (verifyPerms.error == true) {
+        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
+        return
+    }
+    res.render('backups', { host: `${webConfig.host}`,backupCode:backupCode ,user: user, server: server })
+})
 
 
 app.get('/server/analytics/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
@@ -636,8 +661,6 @@ app.get('/adm', (req, res) => {
 app.get('/copyText/:copy', async (req, res) => {
     res.render('copyText', { host: `${webConfig.host}`, copyText: req.params.copy })
 })
-
-
 
 
 //-----POST-------
@@ -1151,14 +1174,14 @@ app.post('/personalize/autoReact', functions.authPostState, async (req, res) => 
             let personalize = 'personalize' in server ? server.personalize : {}
             personalize.react = 'react' in personalize ? personalize.react : []
             personalize.react.push({
-                channel:req.body.channelID,
+                channel: req.body.channelID,
                 emoji: req.body.emoji
             })
-            
+
             db.update('servers', req.body.serverID, {
                 personalize: personalize
             })
-            
+
             if (!res.headersSent) {
                 res.status(200).json({ success: true, })
             }

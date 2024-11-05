@@ -368,7 +368,7 @@ a {
     flex-direction: column;
     position: relative;
     border-radius: var(--border-radius-mid);
-    background-color: var(--tertiary-color);
+    background-color: var(--secundary-color);
 }
 .itens-content-col{
     width: 100%;
@@ -382,6 +382,7 @@ a {
 .inputs-col-content{
     width: 100%;
     display: flex;
+    gap: 0.1em;
     flex-direction: column;
 }
 .hidden{

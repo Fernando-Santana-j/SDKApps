@@ -1616,7 +1616,6 @@ module.exports = (Discord2, client) => {
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
                                         .setLabel('Ir para o canal de voz')
-                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
                                 )
                         ]
@@ -1634,7 +1633,6 @@ module.exports = (Discord2, client) => {
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
                                         .setLabel('Ir para o canal de voz')
-                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${voiceChannel.id}`)
                                 )
                         ]
@@ -1694,7 +1692,6 @@ module.exports = (Discord2, client) => {
                                         new Discord.ButtonBuilder()
                                             .setStyle(5)
                                             .setLabel('Ir para o Ticket')
-                                            .setEmoji(await require('./emojisGet').redirect)
                                             .setURL(`https://discord.com/channels/${interaction.guild.id}/${interaction.channelId}`)
                                     )
                             ]
@@ -2144,8 +2141,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
             }
             carrinhos[params.userID] = null
         }
-        console.log('ResultEstoque:', result);
-        
+
         if (result == true) {
             const user = await client.users.fetch(params.userID);
 
@@ -2155,8 +2151,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             
             let products = serverData.products
-            console.log('Carrinho:', carrinho);
-            
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
                 var product = await products.find(product => product.productID == element.product)
@@ -2278,7 +2272,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                                     new Discord.ButtonBuilder()
                                         .setStyle(5)
                                         .setLabel('Ir para o produto')
-                                        .setEmoji(await require('./emojisGet').redirect)
                                         .setURL(`https://discord.com/channels/${params.serverID}/${findChannelProduct.id}`)
                                 )]
                         }
