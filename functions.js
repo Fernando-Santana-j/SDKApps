@@ -166,13 +166,13 @@ module.exports = {
     },
     authGetState: async (req, res, next) => {
         try {
-            
+
             if (!req.session.uid) return res.redirect('/?error=Faca login novamente!');
 
-            let user = await db.findOne({colecao:'users',doc:req.session.uid})
+            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
 
 
-    
+
             if (req.cookies && 'token' in req.cookies) {
                 let verify = await verificarToken(req, res, await req.cookies.token, process.env.TOKENCODE)
                 if (verify == 'invalid') {
@@ -188,9 +188,9 @@ module.exports = {
             if (!req.session.pass && !req.url.includes('/security/pass')) {
                 return res.redirect(`/security/pass`);
             }
-    
-            
-            
+
+
+
             if (!req.url.includes('/security/code')) {
                 let securityExist = 'security' in user
                 let emailVerifyExist = securityExist ? 'emailVerify' in user.security : false
@@ -204,21 +204,21 @@ module.exports = {
                 if (securityExist2FA == false || (securityExist2FA == true && user.security.data2fa.active == false)) {
                     if (req.url.includes('/security/code/2fa')) {
                         return res.redirect('/dashboard')
-                    }else{
+                    } else {
                         return next()
                     }
-                }else {
+                } else {
                     if (securityExist == true && (req.cookies && req.cookies.verify2fa)) {
                         let verify = await verificarToken(req, res, await req.cookies.verify2fa, process.env.TOKENCODE2FA)
                         if (verify == 'invalid') {
                             if (!req.url.includes('/security/code/2fa')) {
                                 await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
                                 return res.redirect('/security/code/2fa')
-                            }else{
+                            } else {
                                 return next()
                             }
                         }
-                    }else{
+                    } else {
                         await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
                         return res.redirect('/security/code/2fa')
                     }
@@ -227,20 +227,20 @@ module.exports = {
             next()
         } catch (error) {
             console.log(error);
-            
+
         }
     },
     authPostState: async (req, res, next) => {
         try {
             if (!req.session.uid) return res.redirect('/logout?error=Faca login!');
-            let user = await db.findOne({colecao:'users',doc:req.session.uid})
-            if (user && 'status' in user && user.status && user.status.type != 'active'  ) {
+            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+            if (user && 'status' in user && user.status && user.status.type != 'active') {
                 if (user.status.type == 'banned') {
                     return res.redirect('/logout?error=Sua conta foi banida!')
                 }
             };
 
-    
+
             let verifyToken = await verificarToken(req, res, req.cookies.token)
             if (verifyToken == 'invalid' || !req.cookies.token) {
                 try {
@@ -262,7 +262,7 @@ module.exports = {
             }
         } catch (error) {
             console.log(error);
-            
+
         }
     },
     generateSession: async (req, res, email, uid) => {
@@ -294,63 +294,49 @@ module.exports = {
                         return
                     }
                 }
-                const assinatura = await stripe.subscriptions.retrieve(server.subscription);
-                if (assinatura) {
-                    if ('type' in server && server.type == 'pix') {
-                        if (assinatura.status == 'past_due' || assinatura.status == 'canceled') {
+
+                const hoje = Date.now();
+                if ('type' in server && server.type == 'pix') {
+                    const expires_at = new Date(server.subscriptionData.expires_at * 1000);
+                    if (expires_at < hoje) {
+                        await db.update('servers', req.params.id, {
+                            payment_status: "paused",
+                            isPaymented: false
+                        })
+                        return res.redirect('/payment/' + server.id)
+                    }else{
+                        next()
+                    }
+                } else {
+                    const assinatura = await stripe.subscriptions.retrieve(server.subscription);
+                    if (assinatura) {
+                        const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
+                        const diferencaEmMilissegundos = tempoUnixConvert - hoje;
+                        const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
+                        if (server.payment_status == "paused" || assinatura.status == "canceled") {
                             await db.update('servers', req.params.id, {
-                                assinante: false,
+                                    
                                 payment_status: "cancel",
                                 isPaymented: false
                             })
-                            res.redirect('/dashboard?error=Assinatura vencida!')
-                        } else {
-                            next()
-                        }
-                    } else {
-
-                        const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
-                        const hoje = new Date();
-                        const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-                        const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
-                        if (server.payment_status == "paused") {
-                            res.redirect('/dashboard?error=Sua assinatura esta pausada!')
+                            res.redirect('/payment/' + server.id)
                             return
                         }
-                        switch (assinatura.status) {
-                            case 'active':
-                                if (diasRestantes <= 3) {
-                                    req.query.lastdays = diasRestantes
-                                }
-                                next()
-                                break;
-                            case 'canceled':
-                                await db.update('servers', req.params.id, {
-                                    assinante: false,
-                                    payment_status: "cancel",
-                                    isPaymented: false
-                                })
-                                res.redirect('/dashboard?error=Sua assinatura foi cancelada!')
-                                break;
-                            default:
-                                next()
-                                break;
+                        if (diasRestantes <= 3) {
+                            req.query.lastdays = diasRestantes
                         }
-
+                        next()
+                    } else {
+                        res.redirect('/?error=nao foi possivel localizar a assinatura')
                     }
-                } else {
-                    res.redirect('/?error=nao foi possivel localizar a assinatura')
                 }
-
-
-
             } catch (error) {
                 console.log(error);
 
                 res.redirect('/?error=Erro ao verificar os dados da assinatura!')
             }
         } else {
-            res.redirect('/?error=Erro ao recuperar o servidor')
+            res.redirect('/?error=Servidor nao encontrado!')
             return
         }
 
@@ -438,7 +424,7 @@ module.exports = {
     comprimAndRecort: async (arquivoOrigem, novoCaminho) => {
         const metadata = await sharp(arquivoOrigem).metadata();
         return await sharp(arquivoOrigem, { animated: metadata.pages > 1 })
-            [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'png']({ quality: 70 })
+        [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'png']({ quality: 70 })
             .toFile(novoCaminho)
             .then(() => fs.unlink(arquivoOrigem))
             .catch(err => ({ error: true, err }));
@@ -475,20 +461,20 @@ module.exports = {
         const file = await fs.readFileSync(bannerPath);
         const buffer = Buffer.from(file, 'binary');
         const metadata = await sharp(buffer).metadata();
-        
+
         const newBuffer = await sharp(buffer, { animated: metadata.pages > 1 })
-            [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpeg']()
+        [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpeg']()
             .toBuffer();
-            
-        const attachment = new Discord.AttachmentBuilder(newBuffer, { 
-            name: `image.${metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpg'}` 
+
+        const attachment = new Discord.AttachmentBuilder(newBuffer, {
+            name: `image.${metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpg'}`
         });
 
         const dbChannel = await client.guilds.cache.get(botConfig.dbServer)
             .channels.cache.get(botConfig.dbChannel);
-            
+
         const dbres = await dbChannel.send({ files: [attachment] });
-        
+
         return dbres.attachments.first().url;
     },
     addFreeMonthSubscription: async (subscriptionID,) => {
@@ -514,22 +500,12 @@ module.exports = {
     },
     createAccount: async (data, type, price, functions) => {
         let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
-        if (type == 'pix') {
-            const subscription = await stripe.subscriptions.create({
-                // customer: user.customer,
-                customer: await functions.createCustomer('test', 'test@gmail.com'),
-                items: [{
-                    price: price.id,
-                }],
-                collection_method: 'send_invoice',
-                days_until_due: 5,
-            });
-            data.subscription = await subscription.id
-            data.created = subscription.created,
-                data.payment_status = await subscription.status
-            data.customer = user.customer
+        if (type != 'pix') {
+            data.customer = await functions.createCustomer(user.username, user.email)
+            data.payment_status = 'paid'
+            data.subscription = crypto.randomBytes(10).toString('hex')
             data.customer_details = {
-                email: null,
+                email: user.email,
                 name: null,
                 phone: null
             }
@@ -537,10 +513,11 @@ module.exports = {
         let servers = await functions.reqServerByTime(user, functions.findServers)
         let filterServers = await servers.find(server => server.id == data.metadata.serverID)
 
-        var dataUnixConvert = new Date(parseInt(data.created) * 1000)
+        var dataUnixConvert = new Date(parseInt(Date.now()) * 1000)
         dataUnixConvert.setMonth(dataUnixConvert.getMonth() + 1);
         var novaDataUnix = Math.floor(dataUnixConvert.getTime() / 1000);
-        let serverADD = {
+
+        db.create('servers', data.metadata.serverID, {
             assinante: true,
             type: type,
             id: data.metadata.serverID,
@@ -554,47 +531,20 @@ module.exports = {
             vendasActive: true,
             botActive: true,
             subscriptionData: {
-                lastPayment: data.created,
-                created: data.created,
+                lastPayment: Date.now(),
+                created: Date.now(),
                 email: data.customer_details.email,
                 name: data.customer_details.name,
                 phone: data.customer_details.phone,
                 expires_at: novaDataUnix,
                 customer: data.customer
             }
-        }
-        db.create('servers', data.metadata.serverID, serverADD)
+        })
 
 
         try {
             db.delete(`preServers`, data.metadata.serverID)
         } catch (error) { }
-    },
-    renovarPix: async (subscriptionID, time) => {
-        try {
-            const subscription = await stripe.subscriptions.retrieve(subscriptionID);
-            const currentPeriodEnd = Math.floor(Date.now() / 1000);
-            const billingInterval = time ? time : subscription.items.data[0].price.recurring.interval;
-            let additionalTime;
-
-            if (billingInterval === 'month' || billingInterval == 'mensal') {
-                additionalTime = 30 * 24 * 60 * 60;
-            } else if (billingInterval === 'year' || billingInterval == 'anual') {
-                additionalTime = 365 * 24 * 60 * 60;
-            } else if (billingInterval === 'quarter' || billingInterval === 'trimestral') {
-                additionalTime = 3 * 30 * 24 * 60 * 60;
-            }
-
-            const newTrialEnd = currentPeriodEnd + additionalTime;
-
-            await stripe.subscriptions.update(subscriptionID, {
-                trial_end: newTrialEnd,
-                proration_behavior: 'none',
-            });
-        } catch (error) {
-            console.log(error);
-
-        }
     },
     sendEmail: async (email, subject, html) => {
         try {
@@ -628,15 +578,15 @@ module.exports = {
         return `${iv.toString('hex')}:${encrypted}`;
     },
 
-    descriptografar:async (encrypted, key) => {
-        const [iv, data]= await encrypted.split(':')
+    descriptografar: async (encrypted, key) => {
+        const [iv, data] = await encrypted.split(':')
         const decipher = crypto.createDecipheriv(process.env.ALGORITHM, Buffer.from(key, 'hex'), Buffer.from(iv, 'hex'));
         let decrypted = decipher.update(data, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
     },
-    readTemplate: async (relativePath, data)=>{
-        let caminho = await path.join(__dirname, '/templates',relativePath)
+    readTemplate: async (relativePath, data) => {
+        let caminho = await path.join(__dirname, '/templates', relativePath)
         return await ejs.renderFile(caminho, data);
     }
 }

@@ -1,0 +1,119 @@
+#main-containner {
+    width: calc(100% - 18em);
+    position: relative;
+    top: 5em;
+    left: 18em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+
+}
+
+#main-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1.5em;
+    margin-top: 5em;
+}
+
+
+#main-code-containner{
+    width: 100%;
+    margin-top: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+#main-code-content{
+    padding: 1.5em;
+    width: 100%;
+    border-radius: var(--border-radius-min);
+    background-color: var(--secundary-color);
+}
+
+
+#code-number-containner{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+#code-number-content{
+    display: flex;
+    gap: 2em;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.code-number-item{
+    font-size: 1.8em;
+    font-weight: 800;
+    padding: 0.8em;
+    border-radius: var(--border-radius-mid);
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+    background-color: var(--opacity-color-purple);
+}
+#code-buttons-containner{
+    margin-top: 3em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2em;
+}
+
+#copy-code-button,#generate-new-code{
+    max-width: 15em;
+}
+
+#main-content-row{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 2em;
+    padding: 1em;
+    padding-right: 3em;
+    padding-left: 3em;
+}
+#backup-options-containner{
+    display: flex;
+    gap: 3em;
+    width: 100%;
+    justify-content: space-between;
+
+}
+.itens-col{
+    width: 100%;
+}
+#auth-system-buttons{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 1.5em;
+    margin-top: 2em;
+}
+
+#auth-system-mensage{
+    height:6em;
+}
+#auth-system-inputs{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+.itens-content-col{
+    padding: 1em;
+}
+#recovery-button-init{
+    margin-top: 2em;
+}

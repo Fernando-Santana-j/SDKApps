@@ -114,7 +114,32 @@ router.post('/mercadopago/webhook', async (req, res) => {
                             }
                             let serverP = await db.findOne({ colecao: 'servers', doc: metadataP.serverID })
                             if (serverP.error == false) {
-                                await functions.renovarPix(serverP.subscription, metadataP.time)
+                                try {
+                                    const currentPeriodEnd = Math.floor(Date.now() / 1000);
+                                    let additionalTime;
+                        
+                                    if (time === 'month' || time == 'mensal') {
+                                        additionalTime = 30 * 24 * 60 * 60;
+                                    } else if (time === 'year' || time == 'anual') {
+                                        additionalTime = 365 * 24 * 60 * 60;
+                                    } else if (time === 'quarter' || time === 'trimestral') {
+                                        additionalTime = 3 * 30 * 24 * 60 * 60;
+                                    }
+                        
+                                    const newTrialEnd = currentPeriodEnd + additionalTime;
+                        
+                                    let subscriptionData = serverP.subscriptionData
+                                    subscriptionData.expires_at = newTrialEnd
+                                    subscriptionData.lastPayment = Date.now()
+                                    db.update('servers', metadataP.serverID, {
+                                        isPaymented: true,
+                                        assinante:true,
+                                        payment_status:'paid',
+                                        subscriptionData: subscriptionData
+                                    })
+                                } catch (error) {
+                                    console.log(error);
+                                }
                             } else {
                                 await functions.createAccount({
                                     metadata: {
