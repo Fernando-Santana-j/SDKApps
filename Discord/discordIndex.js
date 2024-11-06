@@ -2149,7 +2149,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
             let productsName = []
 
-            
             let products = serverData.products
             for (let index = 0; index < carrinho.length; index++) {
                 const element = carrinho[index];
@@ -2414,6 +2413,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
         } else {
             refound()
         }
+        carrinhos[params.userID] = []
         try {
             setTimeout(async () => {
                 var DiscordServer2 = await client.guilds.cache.get(params.serverID);
