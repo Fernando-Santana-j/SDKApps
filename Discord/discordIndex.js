@@ -2155,7 +2155,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 const element = carrinho[index];
                 var product = await products.find(product => product.productID == element.product)
                 var productIndex = await products.findIndex(product => product.productID == element.product)
-                const requestedQuantity = parseInt(element.quantidade);
+                const requestedQuantity = parseInt(element.quantidade) <= 0 ? 1 : parseInt(element.quantidade);
                 let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
                 productsName.push(`${product.productName} - ${element.quantidade}x`);
                 
@@ -2173,10 +2173,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 if (typeProduct == 'normal') {
                     try {
                         let itensCortados = await product.estoque.splice(0, requestedQuantity)
-                        console.log(`itensCortados ${index}`,itensCortados);
                         let itens = itensCortados.map(item => item.conteudo)
-                        console.log(`item${index}`,itens);
-                        
                         itens.forEach(item => {
                             arrayItensTxt.push(item[0].content)
                         })
