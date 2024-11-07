@@ -36,7 +36,7 @@ module.exports = {
             firebaseData = firebaseData.doc(props.doc)
         }
         if (props.hasOwnProperty('where')) {
-            firebaseData = firebaseData.where(props.where[0],props.where[1],props.where[2])
+            firebaseData = firebaseData.where(props.where[0] ,props.where[1],props.where[2])
         }
         return await firebaseData.get().then(async (res) => {
             let data 

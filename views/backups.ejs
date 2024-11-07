@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>SDK - Backups</title>
+    <link rel="stylesheet" href="/public/css/backups.css">
+</head>
+<body>
+    <div id="body-containner">
+
+        <div id="containner">
+            <%- include('./reusable/header.ejs',{index:7}) %>
+            <main id="main-containner">
+                <div id="main-content-row">
+                    <div id="main-code-containner">
+                        <div id="main-code-content">
+                            <h1 class="mini-title-col" style="margin-bottom: 1em;">Codigo de Backup desse servidor: </h1>
+                            <div id="code-number-containner">
+                                <div id="code-number-content">
+                                    <div class="code-number-item"><%= Array.from(backupCode)[0] %></div>
+                                    <div class="code-number-item"><%= Array.from(backupCode)[1] %></div>
+                                    <div class="code-number-item"><%= Array.from(backupCode)[2] %></div>
+                                    <div class="code-number-item"><%= Array.from(backupCode)[3] %></div>
+                                    <div class="code-number-item"><%= Array.from(backupCode)[4] %></div>
+                                    <div class="code-number-item"><%= Array.from(backupCode)[5] %></div>
+                                </div>
+                            </div>
+                            <div id="code-buttons-containner">
+                                <button class="button-padrao" id="generate-new-code">Gerar Novo Codigo</button>
+                                <button class="button-padrao" id="copy-code-button">Copiar Codigo</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div id="backup-options-containner">
+                        <div class="itens-col">
+                            <h1 class="title-col">Auth System</h1>
+                            <p class="desc-col">Transfira os usuários verificados para um novo servidor do Discord!</p>
+                            <div class="linha" style="margin-top: 1em;"></div>
+                            <div class="itens-content-col">
+                                <h1 class="mini-title-col">Preencha os dados abaixo para enviar uma mensagem com o link de autenticação.</h1>
+
+                                <div id="auth-system-inputs">
+                                    <div class="inputs-col-content">
+                                        <label class="lable-padrao" for="auth-system-mensage-title">Titulo da mensagem</label>
+                                        <input type="text" class="input-padrao" id="auth-system-mensage-title" placeholder="Titulo da mensagem">
+                                    </div>
+                                    <div class="inputs-col-content">
+                                        <label class="lable-padrao" for="auth-system-mensage">Mensagem</label>
+                                        <textarea placeholder="Mensagem" class="input-padrao" id="auth-system-mensage"></textarea>
+                                    </div>
+                                </div>
+
+                                <div id="auth-system-buttons">
+                                    <button class="button-padrao" id="auth-system-copy-link">Copiar o link</button></butto>
+                                    <button class="button-padrao greenColor" id="auth-system-send-mensage">Enviar Mensagem</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="itens-col">
+                            <h1 class="title-col">Recovery</h1>
+                            <p class="desc-col">Recupere dados de outro servidor para esse de forma automatica!</p>
+                            <div class="linha" style="margin-top: 1em;"></div>
+                            <div class="itens-content-col">
+                                <div class="inputs-col-content">
+                                    <label class="lable-padrao" for="recovery-code-backup">Insira o codigo de backup abaixo: </label>
+                                    <input type="text" class="input-padrao" id="recovery-code-backup" placeholder="Codigo de 6 digitos">
+                                </div>
+                                <div class="inputs-col-content">
+                                    <label class="lable-padrao" for="type-recovery-input">Tipo de recuperação</label>
+                                    <div id="type-recovery-input"></div>
+                                </div>
+                                <button class="button-padrao greenColor" id="recovery-button-init">Recuperar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/backups.js"></script>
+    <script>
+        let typeRecoveryInput = new DropdownMulti('type-recovery-input',[{
+            name: 'Substituir dados',
+            desc: 'Substitua todos os dados desse servidor pelos dados de outro!',
+            value: 'replace'
+        },{
+            name:'Priorizar este servidor',
+            desc: 'Essa opção apenas adicionará os dados nesse servidor sem substituir nada.',
+            value: 'priorize'
+        },{
+            name:'Recuperar usuarios',
+            desc: 'Essa opção recupera apenas os usuários verificados com o auth.',
+            value: 'priorize'
+        }
+    ]);
+    </script>
+</body>
+</html>

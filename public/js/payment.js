@@ -220,8 +220,6 @@ $.ajax({
                     verifyPrice()
                 })
                 document.getElementById('confirm-subscription').addEventListener('click', async () => {
-                    console.log(1);
-                    
                     if (!selectPlanInput.getValue()) {
                         errorNotify('Selecione um plano primeiro!')
                         return
@@ -243,11 +241,8 @@ $.ajax({
                             multply = 12
                         }
                     }
-                    console.log(selectMethodPlanInput.getValue().value);
-                    
+
                     if (selectMethodPlanInput.getValue().value == 'stripe') {
-                        console.log(3);
-                        
                         await $.ajax({
                             traditional: true,
                             url: '/subscription/create',
@@ -273,8 +268,6 @@ $.ajax({
                             }
                         })
                     } else {
-                        console.log(2);
-                        
                         await $.ajax({
                             traditional: true,
                             url: '/pix/create',
@@ -290,8 +283,6 @@ $.ajax({
                             }),
                             dataType: 'json',
                             success: function (response) {
-                                console.log(response);
-                                
                                 if (response.success == true) {
                                     console.log(response);
                                     document.getElementById(`popup-pix-pay-containner`).style.display = 'flex'
