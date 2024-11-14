@@ -10,6 +10,7 @@ const webConfig = require('../config/web-config');
 const sharp = require('sharp');
 const botConfig = require('../config/bot-config.js');
 const { default: axios } = require("axios");
+const e = require('express');
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 
@@ -41,25 +42,46 @@ router.get('/auth/verify/:acesstoken', async (req, res) => {
         res.redirect(webConfig.loginURL)
     }
 })
-
+// test()
+// function test(params) {
+//     const baseUrl = "https://discord.com/oauth2/authorize?";
+//     const test = new URLSearchParams({
+//         client_id: webConfig.clientId,
+//         response_type: "code",
+//         redirect_uri: webConfig.redirectAuthVerify,
+//         scope: ["guilds.join", "gdm.join", "guilds", "identify", "email", "connections"].join(" "), // O Discord espera os escopos separados por espaço
+//         state: '1295184253423980546'
+//     });
+//     console.log(baseUrl + test);
+    
+// }
 router.get('/discord/verify', async (req, res) => {
     try {
-        if (!req.query.code) {
+        console.log(req.query);
+        
+        if (!req.query.code || !req.query.state) {
             res.redirect('/?error=Codigo invalido')
         } else {
+            let server = await db.findOne({ colecao: 'servers', doc: req.query.state })
+            console.log(server);
+            
+            if (server.error == true) {
+                res.redirect('/?error=Erro ao autenticar')
+                return
+            }
             let param = new URLSearchParams({
-                client_id: webConfig.clientId,
-                client_secret: webConfig.secret,
+                client_id: '1272947467469459456',
+                client_secret: '21Fjwn97bHkeSRuJvNRUZCc95n2COimh',
                 grant_type: 'authorization_code',
                 code: req.query.code,
-                redirect_uri: process.env.DISCORDURI
+                redirect_uri: webConfig.redirectAuthVerify
             })
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Accept-Encoding': 'application/x-www-form-urlencoded'
             };
             const response = await axios.post('https://discord.com/api/oauth2/token', param, { headers }).then((res) => { return res }).catch((err) => {
-                console.error(err)
+                console.error(err.response.data)
             })
             if (!response) {
                 res.redirect('/?error=Erro ao autenticar')
@@ -76,12 +98,27 @@ router.get('/discord/verify', async (req, res) => {
             
             
             
-            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            const ip =  req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            let backups = 'backups' in server ? server.backups : {}
+            let userVerified = 'verified' in backups ? backups.verified : []
+            await userVerified.push({ 
+                id: await userResponse.id,
+                username: await userResponse.username,
+                avatar: await userResponse.avatar,
+                ip: await ip,
+                access_token:await response.data.access_token,
+                refresh_token: await response.data.refresh_token,
+                email: await userResponse.email,
+            })
             
-
+            backups.verified = userVerified
+            db.update('servers', req.query.state, {
+                backups: backups
+            })
+            res.redirect('/')
         }
     } catch (error) {
-        res.redirect('/logout')
+        res.redirect('/')
         console.log(error);
 
     }

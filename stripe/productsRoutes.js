@@ -239,7 +239,8 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
 
         let logo = produto.productLogo
         if (req.files.productLogo) {
-            logo = await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
+            logo = `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`
+            await functions.comprimAndRecort(req.files.productLogo[0].path, path.join(__dirname, '..', `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`))
         }
 
         let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
@@ -306,7 +307,6 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
         }
      
         let produtos = server.products
-        
         produto.productName = req.body.productName,
         produto.producDesc = req.body.producDesc,
         produto.price = req.body.price,
