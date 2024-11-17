@@ -313,7 +313,7 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
     });
 
 
-    let productsSimple = server.products.filter(product => {
+    let productsSimple = 'products' in server ? server.products.filter(product => {
         let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal';
         return typeProduct != 'multiple';
     }).map(product => {
@@ -335,7 +335,7 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
             desc: `Preço: ${functions.formatarMoeda(product.price)} • Estoque: ${estoqueNumber}`,
             value: product.productID
         }
-    })
+    }) : []
 
     res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, cargosString: JSON.stringify(roleObjects), channels: textChannels, channelsString: JSON.stringify(textChannels), formatarMoeda: functions.formatarMoeda, productString: JSON.stringify(productsSimple) })
 })
