@@ -2470,7 +2470,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
 
-module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true) => {
+module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true, buttonRef, buttonLabel) => {
     try {
         let serverData = await db.findOne({ colecao: 'servers', doc: server })
         var DiscordServer = await client.guilds.cache.get(server);
@@ -2479,6 +2479,19 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
             DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
         } else {
             DiscordChannel = await DiscordServer.channels.cache.get(channel)
+        }
+        let comp = null
+        if (buttonRef) {
+            comp = {
+                components: [
+                    new Discord.ActionRowBuilder().addComponents(
+                        new Discord.ButtonBuilder()
+                            .setLabel(buttonLabel)
+                            .setURL(buttonRef)
+                            .setStyle(Discord.ButtonStyle.Link),
+                    )
+                ]
+            }
         }
         let embend = new Discord.EmbedBuilder()
             .setTitle(serverName == true ? `${DiscordServer.name} | ${title}` : title)
@@ -2491,7 +2504,8 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
             embend.setImage(banner)
         }
         await DiscordChannel.send({
-            embeds: [embend]
+            embeds: [embend],
+            ...comp
         }).catch(() => { })
 
         if (deleteChannel == true) {
@@ -2535,5 +2549,7 @@ module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, 
         console.log('sendDiscordMensageUserERROR: ', error);
     }
 }
+
+
 
 module.exports.client = client

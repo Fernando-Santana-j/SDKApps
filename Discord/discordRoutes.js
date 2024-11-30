@@ -42,36 +42,20 @@ router.get('/auth/verify/:acesstoken', async (req, res) => {
         res.redirect(webConfig.loginURL)
     }
 })
-// test()
-// function test(params) {
-//     const baseUrl = "https://discord.com/oauth2/authorize?";
-//     const test = new URLSearchParams({
-//         client_id: webConfig.clientId,
-//         response_type: "code",
-//         redirect_uri: webConfig.redirectAuthVerify,
-//         scope: ["guilds.join", "gdm.join", "guilds", "identify", "email", "connections"].join(" "), // O Discord espera os escopos separados por espaço
-//         state: '1295184253423980546'
-//     });
-//     console.log(baseUrl + test);
-    
-// }
+
 router.get('/discord/verify', async (req, res) => {
     try {
-        console.log(req.query);
-        
         if (!req.query.code || !req.query.state) {
             res.redirect('/?error=Codigo invalido')
         } else {
             let server = await db.findOne({ colecao: 'servers', doc: req.query.state })
-            console.log(server);
-            
             if (server.error == true) {
                 res.redirect('/?error=Erro ao autenticar')
                 return
             }
             let param = new URLSearchParams({
-                client_id: '1272947467469459456',
-                client_secret: '21Fjwn97bHkeSRuJvNRUZCc95n2COimh',
+                client_id: webConfig.clientId,
+                client_secret: botConfig.clientSecret,
                 grant_type: 'authorization_code',
                 code: req.query.code,
                 redirect_uri: webConfig.redirectAuthVerify
@@ -115,10 +99,10 @@ router.get('/discord/verify', async (req, res) => {
             db.update('servers', req.query.state, {
                 backups: backups
             })
-            res.redirect('/')
+            res.redirect('/redirect/sucess')
         }
     } catch (error) {
-        res.redirect('/')
+        res.redirect('/redirect/cancel')
         console.log(error);
 
     }
@@ -374,6 +358,8 @@ router.get('/addbot/:serverID', functions.authGetState, (req, res) => {
     }
 
 })
+
+
 
 
 

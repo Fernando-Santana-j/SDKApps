@@ -262,12 +262,19 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
 
 
         let model = {
-            estoque: produto.estoque ? produto.estoque : []
+            estoque: produto.estoque ? produto.estoque : [],
+            estoqueModel: produto.estoqueModel ? produto.estoqueModel : {
+                conteudo: [
+                    {
+                        title: '',
+                        content: ''
+                    }
+                ]
+            },
         }
         switch (typeProduct) {
             case 'normal':
-                
-                if ('normalTxtEstoque' in req.body) {
+                if ('normalTxtEstoque' in req.body && req.body.normalTxtEstoque && req.body.normalTitleEstoque) {
                     
                     let estoqueFront = JSON.parse(req.body.normalTxtEstoque)
                     
@@ -279,7 +286,7 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
                     model.estoqueModel = {
                         conteudo: [
                             {
-                                title: req.body.normalTitleEstoque,
+                                title: req.body.normalTitleEstoque ? req.body.normalTitleEstoque : '',
                                 content: ''
                             }
                         ]
@@ -288,16 +295,18 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
                 
                 break;
             case 'single':
-                model.estoque = req.body.singleEstoqueNumber
+                if ( 'singleEstoqueNumber' in req.body && req.body.singleEstoqueNumber) {
+                    model.estoque = req.body.singleEstoqueNumber
                
-                numberEstoque = req.body.singleEstoqueNumber
-                model.estoqueModel = {
-                    conteudo: [
-                        {
-                            title: '',
-                            content: req.body.singleContent
-                        }
-                    ]
+                    numberEstoque = req.body.singleEstoqueNumber
+                    model.estoqueModel = {
+                        conteudo: [
+                            {
+                                title: '',
+                                content: req.body.singleContent
+                            }
+                        ]
+                    }
                 }
                 break;
             case 'subscription':

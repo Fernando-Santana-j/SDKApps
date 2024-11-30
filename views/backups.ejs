@@ -49,11 +49,17 @@
                                         <label class="lable-padrao" for="auth-system-mensage">Mensagem</label>
                                         <textarea placeholder="Mensagem" class="input-padrao" id="auth-system-mensage"></textarea>
                                     </div>
+                                    <div class="inputs-col-content">
+                                        <label class="lable-padrao" for="auth-channel-select-mensage">Canal de envio</label>
+                                        <div id="auth-channel-select-mensage">
+
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div id="auth-system-buttons">
-                                    <button class="button-padrao" id="auth-system-copy-link">Copiar o link</button></butto>
-                                    <button class="button-padrao greenColor" id="auth-system-send-mensage">Enviar Mensagem</button>
+                                    <button class="button-padrao" data-link="<%= authLink %>" id="auth-system-copy-link">Copiar o link</button></butto>
+                                    <button class="button-padrao greenColor" data-link="<%= authLink %>" id="auth-system-send-mensage">Enviar Mensagem</button>
                                 </div>
                             </div>
                         </div>
@@ -78,23 +84,12 @@
             </main>
         </div>
     </div>
+    <script>
+        let channels =  JSON.parse(("<%= channelsString %>").replace(/&#34;/g, '"')) 
+        let backupCode = '<%= backupCode %>'
+    </script>
     <%- include('./reusable/script.ejs') %>
     <script src="/public/js/backups.js"></script>
-    <script>
-        let typeRecoveryInput = new DropdownMulti('type-recovery-input',[{
-            name: 'Substituir dados',
-            desc: 'Substitua todos os dados desse servidor pelos dados de outro!',
-            value: 'replace'
-        },{
-            name:'Priorizar este servidor',
-            desc: 'Essa opção apenas adicionará os dados nesse servidor sem substituir nada.',
-            value: 'priorize'
-        },{
-            name:'Recuperar usuarios',
-            desc: 'Essa opção recupera apenas os usuários verificados com o auth.',
-            value: 'priorize'
-        }
-    ]);
-    </script>
+    
 </body>
 </html>
