@@ -23,6 +23,14 @@ let typeRecoveryInput = new DropdownSingle('type-recovery-input', [{
 ]);
 let selectChannelMensage = new DropdownSingle('auth-channel-select-mensage', channelItensSelectMenu);
 
+document.getElementById('download-code').addEventListener('click', () => {
+    const blob = new Blob([backupCode], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "backupCode.txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+})
 
 document.getElementById('auth-system-copy-link').addEventListener('click', () => {
     navigator.clipboard.writeText(document.getElementById('auth-system-copy-link').getAttribute('data-link')).then(() => {

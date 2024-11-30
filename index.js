@@ -1986,6 +1986,7 @@ app.post('/backups/recovery', functions.authPostState, async (req, res) => {
 
 app.post('/backups/sendMensage', functions.authPostState, async (req, res) => {
     try {
+
         if (!req.body.title) {
             if (!res.headersSent) {
                 res.status(200).json({ success: false, data: 'Insira um titulo!' })
@@ -2003,11 +2004,13 @@ app.post('/backups/sendMensage', functions.authPostState, async (req, res) => {
         }
 
 
-        await require('./discordIndex.js').sendDiscordMensageChannel(req.body.serverID, req.body.channel, req.body.title, req.body.mensage, null, false, null, null, true, req.body.link, '✅ • Verificar')
+        await require('./Discord/discordIndex.js').sendDiscordMensageChannel(req.body.serverID, req.body.channel, req.body.title, req.body.mensage, null, false, null, null, true, req.body.link, '✅ • Verificar')
         if (!res.headersSent) {
             res.status(200).json({ success: true, data: 'Mensagem enviada com sucesso!' })
         }
     } catch (error) {
+        console.log(error);
+        
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao gerar o auth!' })
         }
