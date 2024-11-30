@@ -111,6 +111,7 @@ app.use('/', produtoRoutes);
 
 
 const securityRoutes = require('./routes/security.js');
+const { error } = require("console");
 
 app.use('/', securityRoutes);
 
@@ -402,22 +403,53 @@ app.get('/server/backups/:id', functions.authGetState, functions.subscriptionSta
         return
     }
     let backupCode
+    let authLink
     if ('backupCode' in server == false) {
+        //backupCode
         backupCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
-        while (await db.findOne({colecao:'servers', where:['backupCode','==', backupCode]}).then(data=>data.error == false)) {
+        while (await db.findOne({ colecao: 'servers', where: ['backupCode', '==', backupCode] }).then(data => data.error == false)) {
             backupCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
             break
         }
-        db.update('servers', serverID,{backupCode:backupCode})
-    }else{
+
+        //authLink
+        const authData = new URLSearchParams({
+            client_id: webConfig.clientId,
+            response_type: "code",
+            redirect_uri: webConfig.redirectAuthVerify,
+            scope: ["guilds.join", "gdm.join", "guilds", "identify", "email", "connections"].join(" "),
+            state: serverID
+        });
+        let backups = 'backups' in server ? server.backups : {}
+        backups.authLink = "https://discord.com/oauth2/authorize?" + authData.toString()
+        authLink = backups.authLink
+
+
+        db.update('servers', serverID, {
+            backupCode: backupCode,
+            backups: backups
+        })
+    } else {
         backupCode = server.backupCode
+        authLink = server.backups.authLink
     }
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
         res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
-    res.render('backups', { host: `${webConfig.host}`,backupCode:backupCode ,user: user, server: server })
+    const guilds = client.guilds.cache;
+    const isBotInServer = guilds.has(serverID);
+    if (!isBotInServer) {
+        res.redirect(`/addbot/${serverID}`)
+        return
+    }
+    let guild = guilds.get(serverID)
+    const channels = guild.channels.cache;
+
+    const textChannels = channels.filter(channel => channel.type === 0);
+
+    res.render('backups', { host: `${webConfig.host}`, backupCode: backupCode, authLink: authLink, user: user, channelsString: JSON.stringify(textChannels), server: server })
 })
 
 
@@ -1770,9 +1802,221 @@ app.post('/statusBotVendas', functions.authPostState, async (req, res) => {
 })
 
 
+app.post('/backups/cancelRecovery', functions.authPostState, async (req, res) => {
+    try {
+        if (req.body.serverID) {
+            var serverID = req.body.serverID
+            let server = await db.findOne({ colecao: "servers", doc: serverID })
+            if ('backups' in server && 'lastBackup' in server.backups && server.backups.lastBackup) {
+                db.update('servers', serverID, server.backups.lastBackup)
+            }else{
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o backup!' })
+                }
+                return
+            }
+        }else{
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+        }
+    }
+})
+
+app.post('/backups/recovery', functions.authPostState, async (req, res) => {
+    try {
+        var serverID = req.body.serverID
+        let server = await db.findOne({ colecao: "servers", doc: serverID })
+        let backupServer = await db.findOne({ colecao: "servers", where: ['backupCode', '==', req.body.backupCode] })
+        if (server.error == true || backupServer.error == true) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+            return
+        }
+
+        let recoveryType = await req.body.recoveryType
+        let result = {}
+        switch (recoveryType) {
+            case 'users':
+                if ('backups' in backupServer && 'verified' in backupServer.backups && backupServer.backups.verified.length > 0) {
+                    let usersPassed = []
+                    let usersErrors = []
+                    async function recoveryUser(token, id) {
+                        return new Promise(async (resolve, reject) => {
+                            try {
+                                let param = new URLSearchParams({
+                                    client_id: webConfig.clientId,
+                                    client_secret: botConfig.clientSecret,
+                                    grant_type: 'refresh_token',
+                                    refresh_token: token
+                                })
+                                const response = await axios.post('https://discord.com/api/oauth2/token', param, {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'Accept-Encoding': 'application/x-www-form-urlencoded'
+                                }).then((res) => { return res }).catch((err) => {
+                                    resolve({ error: true, err: err })
+                                })
+                                if (!('data' in response)) {
+                                    resolve({ error: true })
+                                }
+
+                                let access_token = response.data.access_token
+
+
+                                const joinGuild = await axios.put(`https://discord.com/api/v10/guilds/${serverID}/members/${id}`, {
+                                    access_token: access_token
+                                }, {
+                                    headers: {
+                                        ["Content-Type"]: "application/json",
+                                        Authorization: `Bot ${botConfig.discordToken}`
+                                    }
+                                }).then((res) => { return res }).catch((err) => {
+                                    resolve({ error: true, err: err.response.data })
+                                })
+                                console.log(joinGuild);
+
+                                if ('data' in joinGuild) {
+                                    resolve({ error: false, data: joinGuild.data, })
+                                } else {
+                                    resolve({ error: true })
+                                }
+                            } catch (error) {
+                                resolve({ error: true, err: error })
+                            }
+                        })
+                    }
+                    let users = await backupServer.backups.verified
+                    for (let i = 0; i < users.length; i++) {
+                        let element = users[i]
+                        let pullUser = await recoveryUser(element.refresh_token, element.id)
+                        if ('error' in pullUser && pullUser.error == false) {
+                            usersPassed.push(element)
+                        } else {
+                            usersErrors.push(element)
+                        }
+                    }
+                    result.data = 'Usuários recuperados com sucesso!'
+                    result.usersPassed = usersPassed
+                    result.usersErrors = usersErrors
+                    let backups = backupServer.backups
+                    delete backups.verified
+                    await db.update('servers', backupServer.id, {
+                        backups: backups
+                    })
+                } else {
+                    result.data = 'Esse servidor não tem usuários verificados.'
+                    break
+                }
 
 
 
+                break;
+            case 'priorize':
+                let newServer = await mergeObjects(server, backupServer)
+                async function mergeObjects(obj1, obj2) {
+                    // Criar um novo objeto para armazenar a combinação
+                    const result = { ...obj2 };
+
+                    for (const key in obj1) {
+                        // Se a chave não existe no obj2 ou se os valores não são objetos, adicionar ao result
+                        if (!obj2.hasOwnProperty(key) || typeof obj1[key] !== 'object' || obj1[key] === null) {
+                            result[key] = obj1[key];
+                        } else {
+                            // Se a chave existe em ambos os objetos e o valor é um objeto, chamamos a função recursivamente
+                            result[key] = await mergeObjects(obj1[key], obj2[key]);
+                        }
+                    }
+
+                    return result;
+                }
+                let backups = 'backups' in newServer ? newServer.backups : {}
+                backups.lastServer = server
+                newServer.backups = backups
+                await db.update('servers', newServer.id, newServer)
+                result.data = 'Servidor atualizado com sucesso!'
+                break;
+            case 'replace':
+                try {
+                    let newServer = { subscriptionData: {} }
+                    newServer = await backupServer
+                    newServer.id = server.id
+                    newServer.subscriptionData.created = server.subscriptionData.created
+                    newServer.subscriptionData.lastPayment = server.subscriptionData.lastPayment
+                    newServer.subscriptionData.expires_at = server.subscriptionData.expires_at
+                    newServer.isPaymented = server.isPaymented
+                    newServer.payment_status = server.payment_status
+                    newServer.subscription = server.subscription
+                    newServer.assinante = server.assinante
+                    newServer.plan = server.plan
+                    newServer.server_pic = server.server_pic
+                    newServer.name = server.name
+                    let backups = 'backups' in newServer ? newServer.backups : {}
+                    backups.lastServer = server
+                    newServer.backups = backups
+
+
+                    await db.update('servers', newServer.id, newServer)
+                    result.data = 'Servidor substituido com sucesso!'
+
+                } catch (error) {
+                    console.log(error);
+                    result.data = 'Erro ao substituir o servidor!'
+                    result.error = error
+                }
+
+                break;
+        }
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: result })
+        }
+    } catch (error) {
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+        }
+    }
+})
+
+app.post('/backups/sendMensage', functions.authPostState, async (req, res) => {
+    try {
+
+        if (!req.body.title) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Insira um titulo!' })
+            }
+        }
+        if (!req.body.mensage) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Insira uma mensagem!' })
+            }
+        }
+        if (!req.body.link) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao gerar o auth!' })
+            }
+        }
+
+
+        await require('./Discord/discordIndex.js').sendDiscordMensageChannel(req.body.serverID, req.body.channel, req.body.title, req.body.mensage, null, false, null, null, true, req.body.link, '✅ • Verificar')
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Mensagem enviada com sucesso!' })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao gerar o auth!' })
+        }
+    }
+
+})
 
 
 
@@ -1790,15 +2034,12 @@ client.on('ready', () => {
     ].join('\n'))
 })
 
-
 app.listen(webConfig.port, () => {
     const dataHora = new Date();
     const formatado = d => ('0' + d).slice(-2);
     const dataHoraFormatada = `${formatado(dataHora.getDate())}/${formatado(dataHora.getMonth() + 1)}/${dataHora.getFullYear()} ${formatado(dataHora.getHours())}:${formatado(dataHora.getMinutes())}:${formatado(dataHora.getSeconds())}`;
     console.log(`${dataHoraFormatada} [WEB] Servidor rodando na porta ${webConfig.port}`);
 });
-
-
 
 
 

@@ -2,15 +2,74 @@
 <html lang="en">
 <head>
     <%- include('./reusable/head.ejs') %>
+    <link rel="stylesheet" href="/public/css/NotFoundPage.css">
+    <style>
+        #openDiscord{
+            margin-top: 2em;
+            padding: 1em;
+            color: var(--color-text-primary);
+            width: 10em;
+            border-radius: 40px;
+            border: 3px solid var(--color-text-primary);
+            font: 700 1em 'inter',sans-serif;
+            transition: 0.7s;
+            &:hover{
+                opacity: 0.8;
+                transition: 0.7s;
+            }
+        }
+        #ajuda2{
+            margin-top: 2em;
+            padding: 1em;
+            color: var(--color-text-primary);
+            width: 8em;
+            border-radius: 40px;
+            text-decoration: underline;
+            font: 700 1em 'inter',sans-serif;
+            transition: 0.7s;
+            &:hover{
+                opacity: 0.8;
+                transition: 0.7s;
+            }
+        }
+    </style>
     <title>SDK - redirect</title>
 </head>
 <body>
+    <div>
+        <div id="body-containner">
+            <div id="containner">
+                <main id="main-containner">
+                    <div id="logo" class="flex-center">
+                        <img src="/public/img/logo-color-1.png">
+                    </div>
+                    <div id="texts">
+                        <h1 id="textStatus"></h1>
+                        <p id="mensageStatus"></p>
+                    </div>
+                    <div id="buttons">
+                        <a href="/" id="inicio">Início</a>
+                        <a href="/support" id="openDiscord">Abrir o discord</a>
+                        <a href="/support" id="ajuda2">Ajuda</a>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <%- include('./reusable/script.ejs') %>
+    </div>
     <script>
-        try {
-            window.location = 'discord://';
-        } catch (error) {
-            window.close();
+        let status = location.pathname.replace('/redirect/', "")
+        if (status.includes('sucess')) {
+            document.getElementById('textStatus').innerText = '✅ | Sucesso!'
+            document.getElementById('mensageStatus').innerText = 'Sua última ação foi executada com sucesso.'
+        }else{
+            document.getElementById('textStatus').innerText = '❌ | Erro!'
+            document.getElementById('mensageStatus').innerText = 'Sua última ação falhou.'
         }
+        document.getElementById('openDiscord').addEventListener('click', () => {
+            window.location = 'discord://';
+        })
+
     </script>
 </body>
 </html>

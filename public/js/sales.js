@@ -896,7 +896,9 @@ document.getElementById('save-new-product').addEventListener('click', async () =
                     let normalTitle = document.getElementById('produtos-estoque-edit-normal-txt-title').value
                     let txtFileEstoque = document.getElementById('produtos-estoque-edit-normal-txt-file')
                     if (normalTitle.trim().length <= 0) normalTitle = 'Itens';
-                        if (!txtFileEstoque.files[0]) return errorNotify('Escolha o arquivo do seu estoque primeiro!'); 
+                        if (!txtFileEstoque.files[0]) {
+                            break
+                        } 
                         let file = txtFileEstoque.files[0]
                         if (!file.name.toLowerCase().endsWith('.txt')) return errorNotify('O arquivo não e um txt valido!');
                         let linhas = await new Promise((resolve, reject) => {
