@@ -2091,7 +2091,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
     let findChannel = DiscordServer.channels.cache.find(c => c.topic === params.userID && c.name && c.name.includes('🛒・carrinho・'))
     let serverData = await db.findOne({ colecao: "servers", doc: params.serverID })
     if (DiscordServer && findChannel && serverData) {
-        let carrinho = JSON.parse(params.carrinhos)
+        let carrinho = carrinhos[params.userID]
+        delete carrinhos[params.userID]
         let result = await new Promise(async(resolve, reject) => {
             for (let [chave, element] of Object.entries(carrinho)) {
                 const produto = serverData.products.find(product => product.productID == element.product);
@@ -2180,7 +2181,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     "vendas completas": []
                 })
             }
-            carrinhos[params.userID] = null
         }
 
         if (result == true) {
@@ -2454,7 +2454,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
         } else {
             refound()
         }
-        carrinhos[params.userID] = []
         try {
             setTimeout(async () => {
                 var DiscordServer2 = await client.guilds.cache.get(params.serverID);
@@ -2553,3 +2552,4 @@ module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, 
 
 
 module.exports.client = client
+
