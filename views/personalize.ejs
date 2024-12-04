@@ -15,7 +15,7 @@
                 <p class="desc-col">As alterações são salvas assim que modificadas!</p>
                 <div id="main-content-row">
                     <div class="itens-col">
-                        <h1 class="title-col">Cor destaque!</h1>
+                        <h1 class="title-col">Cor destaque</h1>
                         <p class="desc-col">Isso modifica as cores principais quando o bot enviar uma mensagem!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Cargo de comprador!</h1>
+                        <h1 class="title-col">Cargo de comprador</h1>
                         <p class="desc-col">⚠ O cargo do bot tem que está acima do cargo que sera dado ao usuario!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
@@ -37,17 +37,17 @@
                             <button id="saveCargoPay" class="button-padrao">Salvar Cargo</button>
                         </div>
                     </div>
-                    <div class="itens-col">
-                        <h1 class="title-col">Nome do bot!</h1>
+                    <!-- <div class="itens-col">
+                        <h1 class="title-col">Nome do bot</h1>
                         <p class="desc-col">Nome de exibição do bot em seu servidor!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
                             <input required type="text" class="input-padrao" placeholder="Nome" id="bot-name-input">
                             <button id="saveBotName" class="button-padrao">Salvar Nome</button>
                         </div>
-                    </div>
-                    <div class="itens-col">
-                        <h1 class="title-col">Avatar do bot!</h1>
+                    </div> -->
+                    <!-- <div class="itens-col">
+                        <h1 class="title-col">Avatar do bot</h1>
                         <p class="desc-col">Imagem de exibição do bot em seu servidor!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
@@ -56,10 +56,10 @@
                                 <input type="file" accept=".jpg, .jpeg, .png" style="opacity: 0; position: absolute; top: -200%;" hidden id="avatarBotPerso">
                             </label>
                         </div>
-                    </div>
+                    </div> -->
 
                     <div class="itens-col">
-                        <h1 class="title-col">Icone na mensagem do produto!</h1>
+                        <h1 class="title-col">Icone na mensagem do produto</h1>
                         <p class="desc-col">Caso essa opção esteja ativa ao criar um novo produto ou enviar uma nova mensagem não ira aparecer o icone do produto (Apenas na embend de mensagem)! </p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Canal do feedback!</h1>
+                        <h1 class="title-col">Canal do feedback</h1>
                         <p class="desc-col">Canal aonde o usuario ira escrever o feedback sobre um produto!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Mensagem de lembrete!</h1>
+                        <h1 class="title-col">Mensagem de lembrete</h1>
                         <p class="desc-col">Configure uma mensagem para ser enviada no privado do usuario quando ele não concluir uma compra!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
@@ -108,7 +108,7 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Mensagem de boas vindas!</h1>
+                        <h1 class="title-col">Mensagem de boas vindas</h1>
                         <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     <div class="itens-col">
-                        <h1 class="title-col">Auto reação!</h1>
+                        <h1 class="title-col">Auto reação</h1>
                         <p class="desc-col">Selecione um canal e para o bot reagir a todas as mensagens com um emoji!</p>
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col">
@@ -153,6 +153,22 @@
                                 <div id="select-channel-react-containner"></div>
                             </div>
                             <button id="save-auto-react" class="button-padrao">Salvar reação</button>
+                        </div>
+                    </div>
+                    <div class="itens-col">
+                        <h1 class="title-col">AntiFake</h1>
+                        <p class="desc-col">Usuarios fakes detectados com os parametros abaixos seram kickados!</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col">
+                            <div class="inputs-col-content">
+                                <label for="min-days-fake" class="lable-padrao">Dias mínimos da criação da conta!</label>
+                                <input required type="number" class="input-padrao" placeholder="Numero de dias" id="min-days-fake">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="names-block-fake" class="lable-padrao">Nomes bloqueados!</label>
+                                <textarea required placeholder="Digite os nomes separados por virgula" class="input-padrao" id="names-block-fake" style="height: 5em;"></textarea>
+                            </div>
+                            <button id="save-auto-react" class="button-padrao">Salvar antifake</button>
                         </div>
                     </div>
                 </div>

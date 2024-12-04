@@ -1394,7 +1394,7 @@ app.post('/ticket/motivoUPD', functions.authPostState, async (req, res) => {
                 })
                 require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
                 if (!res.headersSent) {
-                    res.status(200).json({ success: true, data: 'Motivo deletado!' })
+                    res.status(200).json({ success: true, data: 'Motivo atualizado!' })
                 }
             }
         }

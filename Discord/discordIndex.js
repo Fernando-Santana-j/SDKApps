@@ -72,6 +72,13 @@ let paymentMCobranca = {}
 // Mensagem de boas vindas
 client.on('guildMemberAdd', async member => {
     let server = await db.findOne({ colecao: 'servers', doc: member.guild.id })
+    const formattedDate = (member.user.createdAt).toLocaleDateString('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+    console.log(formattedDate);
+    
     if ('personalize' in server && 'welcomeMensage' in server.personalize && server.personalize.welcomeMensage.active == true) {
         let mensage = server.personalize.welcomeMensage.mensage
         let title = server.personalize.welcomeMensage.title

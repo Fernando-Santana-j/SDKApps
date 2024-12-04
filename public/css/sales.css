@@ -1097,6 +1097,20 @@
     justify-content: center;
     align-items: center;
 }
+
+#active-logo-product-containner,#active-logo-product-containner-edit{
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+}
+#input-active-logo-product,#input-active-logo-product-edit{
+    accent-color: var(--main-color-purple);
+}
 @media screen and (max-width:800px) {
     #pagamentos-produtos-containner{
         flex-direction: column;

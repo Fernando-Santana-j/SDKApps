@@ -28,7 +28,14 @@ module.exports = async (Discord2, client, data) => {
         let preco = await (produto.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         let backGroundLink = produto.backGround ? await functions.discordDB(produto.backGround, client, Discord) : null
-        let logoLink = produto.productLogo ? await functions.discordDB(produto.productLogo, client, Discord) : null
+        let logoLink = null
+        let logoActive = 'logoActive' in produto ? produto.logoActive : false
+
+        if (produto.productLogo && logoActive == true) {
+            logoLink = await functions.discordDB(produto.productLogo, client, Discord)
+        }else{
+            logoLink = null
+        }
 
 
         let components = []

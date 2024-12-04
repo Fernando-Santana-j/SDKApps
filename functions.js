@@ -477,8 +477,7 @@ module.exports = {
             name: `image.${metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'jpg'}`
         });
 
-        const dbChannel = await client.guilds.cache.get(botConfig.dbServer)
-            .channels.cache.get(botConfig.dbChannel);
+        const dbChannel = await client.guilds.cache.get(botConfig.dbServer).channels.cache.get(botConfig.dbChannel);
 
         const dbres = await dbChannel.send({ files: [attachment] });
 
