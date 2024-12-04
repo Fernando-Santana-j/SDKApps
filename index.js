@@ -561,13 +561,11 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
     const channels = guild.channels.cache;
 
     const textChannels = channels.filter(channel => channel.type === 0);
-    console.log(guild);
-    
+
     let roles = guild.roles.cache
-    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
+    // let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
     console.log(roles);
-    
-    console.log(rolesFilter);
+
     
     let ticketOptions = {
         motivos: [],
