@@ -337,7 +337,7 @@ module.exports = (Discord2, client) => {
                                         }
                                     }
                                 } catch (error) { }
-                            }, 600000)
+                            }, 400000)
                             setTimeout(async () => {
                                 try {
                                     let discordChannelDelete = await DiscordServer.channels.cache.get(channelID)
@@ -350,7 +350,7 @@ module.exports = (Discord2, client) => {
                                     }
 
                                 } catch (error) { }
-                            }, 1000000)
+                            }, 600000)
                         }
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
@@ -1991,7 +1991,48 @@ module.exports = (Discord2, client) => {
                             break;
                     }
                     if (estoqueNumber <= 0) {
-                        return interaction.reply({ content: `Esse produto não tem estoque!`, ephemeral: true });
+                        await interaction.reply({
+                            content: `⚠️| O produto selecionado está sem estoque!\n Clique no botão para receber um aviso no privado quando voltar o estoque!`,
+                            components: [
+                                new Discord.ActionRowBuilder().addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`solicitarStok_${productId}`)
+                                        .setLabel('Solicitar estoque')
+                                        .setEmoji(await require('./emojisGet').stock)
+                                        .setStyle(Discord.ButtonStyle.Success),
+                                ).addComponents(
+                                    new Discord.ButtonBuilder()
+                                        .setCustomId(`privateAviso_${productId}`)
+                                        .setLabel('Receber aviso')
+                                        .setEmoji(await require('./emojisGet').notice)
+                                        .setStyle(Discord.ButtonStyle.Primary),
+                                )
+                            ],
+                            ephemeral: true
+                        })
+                        let analytics = await db.findOne({ colecao: "analytics", doc: interaction.guildId })
+    
+                        if (analytics.error == false) {
+                            let canceladosEstoque = analytics['cancelados estoque']
+                            await canceladosEstoque.push(await functions.formatDate(new Date()))
+                            db.update('analytics', interaction.guildId, {
+                                "cancelados estoque": canceladosEstoque
+                            })
+                        } else {
+                            db.create('analytics', interaction.guildId, {
+                                "cancelados estoque": [await functions.formatDate(new Date())],
+                                "pagamentos": {
+                                    "PIX": 0,
+                                    "card": 0,
+                                    "boleto": 0,
+                                },
+                                "reebolsos": [],
+                                "vendas canceladas": [],
+                                "vendas completas": []
+                            })
+                        }
+    
+                        return
                     }
 
                     let findChannel = interaction.guild.channels.cache.find(c => c.topic === interaction.user.id && c.name && c.name.includes('🛒・carrinho・'))
@@ -2050,7 +2091,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
     let findChannel = DiscordServer.channels.cache.find(c => c.topic === params.userID && c.name && c.name.includes('🛒・carrinho・'))
     let serverData = await db.findOne({ colecao: "servers", doc: params.serverID })
     if (DiscordServer && findChannel && serverData) {
-        let carrinho = JSON.parse(params.carrinhos)
+        let carrinho = carrinhos[params.userID]
+        delete carrinhos[params.userID]
         let result = await new Promise(async(resolve, reject) => {
             for (let [chave, element] of Object.entries(carrinho)) {
                 const produto = serverData.products.find(product => product.productID == element.product);
@@ -2139,7 +2181,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     "vendas completas": []
                 })
             }
-            carrinhos[params.userID] = null
         }
 
         if (result == true) {
@@ -2413,7 +2454,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
         } else {
             refound()
         }
-        carrinhos[params.userID] = []
         try {
             setTimeout(async () => {
                 var DiscordServer2 = await client.guilds.cache.get(params.serverID);
@@ -2429,7 +2469,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
 
-module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true) => {
+module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true, buttonRef, buttonLabel) => {
     try {
         let serverData = await db.findOne({ colecao: 'servers', doc: server })
         var DiscordServer = await client.guilds.cache.get(server);
@@ -2438,6 +2478,19 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
             DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
         } else {
             DiscordChannel = await DiscordServer.channels.cache.get(channel)
+        }
+        let comp = null
+        if (buttonRef) {
+            comp = {
+                components: [
+                    new Discord.ActionRowBuilder().addComponents(
+                        new Discord.ButtonBuilder()
+                            .setLabel(buttonLabel)
+                            .setURL(buttonRef)
+                            .setStyle(Discord.ButtonStyle.Link),
+                    )
+                ]
+            }
         }
         let embend = new Discord.EmbedBuilder()
             .setTitle(serverName == true ? `${DiscordServer.name} | ${title}` : title)
@@ -2450,7 +2503,8 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
             embend.setImage(banner)
         }
         await DiscordChannel.send({
-            embeds: [embend]
+            embeds: [embend],
+            ...comp
         }).catch(() => { })
 
         if (deleteChannel == true) {
@@ -2495,4 +2549,7 @@ module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, 
     }
 }
 
+
+
 module.exports.client = client
+

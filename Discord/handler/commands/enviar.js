@@ -65,7 +65,6 @@ module.exports = {
         titulo = await titulo.replaceAll('@@usersend', SendUser.username)
         mensagem = await mensagem.replaceAll('@@usersend', SendUser.username)
 
-
         let verifyPermissions = await functions.verifyPermissions(interaction.user.id, interaction.guildId, Discord, client)
         if (verifyPermissions.error == false && verifyPermissions.perms.commands == true) {
             if (serverData && serverData.botActive == false) {
@@ -134,18 +133,22 @@ module.exports = {
                             interaction.reply({ content: 'Não foi possivel enviar a mensagem privado do usuario selecionado ele pode ter bloqueado o privado!', ephemeral: true })
                             return
                         }
-                        interaction.reply({
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setTitle(`✅ | Produto enviado!`)
-                                    .setDescription(`Você enviou um produto para ${user.globalName}, foi enviado em seu privado uma copia do arquivo que o usuario recebeu!`)
-                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                                    .setTimestamp()
-                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
-                            ],
-                            ephemeral: true
-                        })
+                        try {
+                            interaction.reply({
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setTitle(`✅ | Produto enviado!`)
+                                        .setDescription(`Você enviou um produto para ${user.globalName}, foi enviado em seu privado uma copia do arquivo que o usuario recebeu!`)
+                                        .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
+                                        .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                        .setTimestamp()
+                                        .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp  ` })
+                                ],
+                                ephemeral: true
+                            })
+                        } catch (error) {
+                            console.log(error);
+                        }
                         try {
                             SendUser.send({
                                 content: `Copia do ultimo produto (${product.productName}) enviado para o usuario ${user.globalName}:`,
@@ -153,7 +156,6 @@ module.exports = {
                             })
                         } catch (error) {
                             console.log(error);
-                            
                             interaction.reply({ content: 'Não foi possivel enviar a copia no seu privado ele pode estar bloqueado', ephemeral: true })
                             return
                         }
@@ -176,7 +178,7 @@ module.exports = {
                         db.update('servers', interaction.guild.id, {
                             products: serverData.products
                         })
-
+                        
                     } else {
                         interaction.reply({ content: 'Falta de estoque!', ephemeral: true })
                     }

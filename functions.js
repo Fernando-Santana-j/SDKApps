@@ -422,12 +422,19 @@ module.exports = {
     },
 
     comprimAndRecort: async (arquivoOrigem, novoCaminho) => {
-        const metadata = await sharp(arquivoOrigem).metadata();
-        return await sharp(arquivoOrigem, { animated: metadata.pages > 1 })
-        [metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'png']({ quality: 70 })
-            .toFile(novoCaminho)
-            .then(() => fs.unlink(arquivoOrigem))
-            .catch(err => ({ error: true, err }));
+        try {
+            const metadata = await sharp(arquivoOrigem).metadata();
+            const format = metadata.format === 'gif' && metadata.pages > 1 ? 'gif' : 'png';
+    
+            await sharp(arquivoOrigem, { animated: metadata.pages > 1 })
+                [format]({ quality: 70 })
+                .toFile(novoCaminho);
+    
+            await fs.unlink(arquivoOrigem);
+            return { success: true };
+        } catch (err) {
+            return { error: true, err };
+        }
     },
     formatarMoeda: (numeroCentavos) => {
         const valorReal = numeroCentavos / 100;

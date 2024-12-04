@@ -13,6 +13,8 @@ module.exports = {
     secret: process.env.CLIENTSECRET,
     clientId: process.env.CLIENTID,
     redirect: process.env.REDIRECTURL,
+    redirectAuthVerify: process.env.DISCORDAUTHREDIRECT,
+    redirectDashboard: process.env.DASHBOARDREDIRECT,
     stripe: process.env.STRIPE,
     iban: process.env.IBAN,
     stripeAccount: process.env.STRIPEACCOUNT,
