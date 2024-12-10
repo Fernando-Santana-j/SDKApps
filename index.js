@@ -81,6 +81,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+
+async function copyAccount() {
+    let s = await db.findOne({ colecao: 'servers', doc: '1315776941671841792' })
+    db.create('servers', '1316103661113577495', s)
+}
+
+
+
+
+
 //TODO------------WEB PAGE--------------
 
 
