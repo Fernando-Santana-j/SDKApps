@@ -2466,11 +2466,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             }, 60000)
         } catch (error) {
-            var DiscordServer2 = await client.guilds.cache.get(serverID);
-                let findChannel2 = await DiscordServer2.channels.cache.find(c => c.topic === userID)
-                if (findChannel2) {
-                    findChannel2.delete().catch((err) => { })
-                }
+            var DiscordServer2 = client.guilds.cache.get(serverID);
+            let findChannel2 = DiscordServer2.channels.cache.find(c => c.topic === userID)
+            if (findChannel2) {
+                findChannel2.delete().catch((err) => { })
+            }
         }
 
     }
