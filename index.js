@@ -243,6 +243,7 @@ app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, asy
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
+        console.log(error);
         res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
