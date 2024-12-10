@@ -128,6 +128,7 @@ app.get('/dashboard', functions.authGetState, async (req, res) => {
         delete user.security
     }
     let server = await functions.reqServerByTime(user, functions.findServers)
+
     let servidoresEnd = []
     if (server.error) {
         if (user.lastServers) {
@@ -563,7 +564,7 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
     const textChannels = channels.filter(channel => channel.type === 0);
 
     let roles = guild.roles.cache
-    let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
+    let rolesFilter = roles.filter(role => role.managed == false && role.name != "@everyone")
 
     let ticketOptions = {
         motivos: [],
@@ -2013,6 +2014,44 @@ app.post('/backups/sendMensage', functions.authPostState, async (req, res) => {
         
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao gerar o auth!' })
+        }
+    }
+
+})
+
+app.post('/personalize/antifake', functions.authPostState, async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            let antifake = 'antifake' in personalize ? personalize.antifake : {}
+            let antifakeDays = antifake.days ? antifake.days : 0
+            let antifakeNames = antifake.names ? antifake.names : []
+            if (req.body.antifakeDays) {
+                antifakeDays = req.body.antifakeDays
+            }
+            if (req.body.antifakeNames) {
+                antifakeNames = req.body.antifakeNames.split(',')
+            }
+            antifake.antifakeDays = antifakeDays
+            antifake.antifakeNames = antifakeNames
+            personalize.antifake = antifake
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true,data:'Antifake atualizado com sucesso!' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao atualizar o antifake!' })
         }
     }
 

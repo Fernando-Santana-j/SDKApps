@@ -506,16 +506,7 @@ module.exports = {
     },
     createAccount: async (data, type, price, functions) => {
         let user = await db.findOne({ colecao: 'users', doc: data.metadata.uid })
-        if (type != 'pix') {
-            data.customer = await functions.createCustomer(user.username, user.email)
-            data.payment_status = 'paid'
-            data.subscription = crypto.randomBytes(10).toString('hex')
-            data.customer_details = {
-                email: user.email,
-                name: null,
-                phone: null
-            }
-        }
+
         let servers = await functions.reqServerByTime(user, functions.findServers)
         let filterServers = await servers.find(server => server.id == data.metadata.serverID)
 

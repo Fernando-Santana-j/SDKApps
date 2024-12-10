@@ -72,13 +72,31 @@ let paymentMCobranca = {}
 // Mensagem de boas vindas
 client.on('guildMemberAdd', async member => {
     let server = await db.findOne({ colecao: 'servers', doc: member.guild.id })
-    const formattedDate = (member.user.createdAt).toLocaleDateString('pt-BR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    console.log(formattedDate);
-    
+    if ('personalize' in server && 'antifake' in server.personalize) {
+        let minDays = parseInt(server.personalize.antifake.antifakeDays)
+        const currentDate = new Date();
+        const accountCreationDate = member.user.createdAt
+        let username = member.user.username
+        let globalName = member.user.globalName
+        let blockedNames = server.personalize.antifake.antifakeNames
+
+        const accountAgeDays = Math.floor((currentDate - accountCreationDate) / (1000 * 60 * 60 * 24))
+
+        function kickMember(member,text) {
+            member.kick(text)
+                .then(() => {
+                    member.send(text)
+                })
+                .catch((err) => {});
+        }
+        if (accountAgeDays < minDays) {
+            kickMember(member,`Sua conta foi expulsa do servidor ${member.guild.name} por ter sido criada muito recentemente.`)
+        }
+        if (blockedNames.includes(globalName) || blockedNames.includes(username)) {
+            kickMember(member,`Sua conta foi expulsa do servidor ${member.guild.name} por ter um nome ou username proibido.`)
+        }
+    }
+
     if ('personalize' in server && 'welcomeMensage' in server.personalize && server.personalize.welcomeMensage.active == true) {
         let mensage = server.personalize.welcomeMensage.mensage
         let title = server.personalize.welcomeMensage.title
@@ -102,7 +120,7 @@ client.on('guildMemberAdd', async member => {
             title = await title.replace('@@globalname', member.user.globalName)
         }
         channel.send({
-            embeds: [
+            content: [
                 new Discord.EmbedBuilder()
                     .setTitle(title)
                     .setDescription(mensage)
@@ -2524,7 +2542,7 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
     }
 }
 
-module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
+module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel,) => {
     try {
         const userF = await client.users.fetch(user);
         let comp = null

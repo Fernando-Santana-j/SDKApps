@@ -84,9 +84,11 @@
                             <button id="saveChannelFeedback" class="button-padrao">Salvar canal</button>
                         </div>
                     </div>
+                    
                     <div class="itens-col">
                         <h1 class="title-col">Mensagem de lembrete</h1>
                         <p class="desc-col">Configure uma mensagem para ser enviada no privado do usuario quando ele não concluir uma compra!</p>
+                        
                         <div class="linha" style="margin-top: 1em;"></div>
                         <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
                             <% if ('personalize' in server && 'lembreteMensage' in server.personalize) { %>
@@ -105,38 +107,7 @@
                                 <input required type="text" value="<%= 'personalize' in server && 'lembreteMensage' in server.personalize ? server.personalize.lembreteMensage.mensage :''%>"  class="input-padrao" placeholder="Mensagem" id="mensage-lembrete">
                             </div>
                             <button id="save-mensage-lembrete" class="button-padrao">Salvar Mensagem</button>
-                        </div>
-                    </div>
-                    <div class="itens-col">
-                        <h1 class="title-col">Mensagem de boas vindas</h1>
-                        <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
-                        <div class="linha" style="margin-top: 1em;"></div>
-                        <div class="itens-content-col" style="width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: 1em;">
-                            <% if ('personalize' in server && 'welcomeMensage' in server.personalize) { %>
-                                <div id="buttons-active-desactive-welcome">
-                                    <label for="" class="lable-padrao">Ativar ou desativar a mensagem de boas vindas!</label>
-                                    <button id="desative-welcome" class="button-padrao redColor <%= server.personalize.welcomeMensage.active == true ? '' : 'hidden' %>">Desativar mensagem</button>
-                                    <button id="active-welcome" class="button-padrao greenColor <%= server.personalize.welcomeMensage.active == true ? 'hidden' : '' %>">Ativar mensagem</button>
-                                </div>
-                            <% } %>
-                            <div class="inputs-col-content">
-                                <label for="title-welcome" class="lable-padrao">Titulo da mensagem!</label>
-                                <input required type="text" value="<%= 'personalize' in server && 'welcomeMensage' in server.personalize ? server.personalize.welcomeMensage.title :''%>" class="input-padrao" placeholder="Titulo" id="title-welcome">
-                            </div>
-                            <div class="inputs-col-content">
-                                <label for="mensage-welcome" class="lable-padrao">Mensagem de boas vindas!</label>
-                                <input required type="text" value="<%= 'personalize' in server && 'welcomeMensage' in server.personalize ? server.personalize.welcomeMensage.mensage :''%>"  class="input-padrao" placeholder="Mensagem" id="mensage-welcome">
-                            </div>
-                            <div class="inputs-col-content">
-                                <label for="welcome-channel-input" class="lable-padrao">Canal de boas vindas!</label>
-                                <input required type="text" class="input-padrao" list="welcome-channel-list" placeholder="Pesquise o canal..." id="welcome-channel-input">
-                                <datalist id="welcome-channel-list">
-                                    <% channels.forEach(element => { %>
-                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                    <% }) %>
-                                </datalist>
-                            </div>
-                            <button id="save-mensage-welcome" class="button-padrao">Salvar Mensagem</button>
+
                         </div>
                     </div>
                     <div class="itens-col">
@@ -162,13 +133,153 @@
                         <div class="itens-content-col">
                             <div class="inputs-col-content">
                                 <label for="min-days-fake" class="lable-padrao">Dias mínimos da criação da conta!</label>
-                                <input required type="number" class="input-padrao" placeholder="Numero de dias" id="min-days-fake">
+                                <input required type="number" class="input-padrao" placeholder="Numero de dias" value="<%= 'personalize' in server && 'antifake' in server.personalize ? server.personalize.antifake.antifakeDays : '' %>" id="min-days-fake">
                             </div>
                             <div class="inputs-col-content">
                                 <label for="names-block-fake" class="lable-padrao">Nomes bloqueados!</label>
-                                <textarea required placeholder="Digite os nomes separados por virgula" class="input-padrao" id="names-block-fake" style="height: 5em;"></textarea>
+                                <textarea required placeholder="Digite os nomes separados por virgula"  class="input-padrao" id="names-block-fake" style="height: 5em;"> <%= 'personalize' in server && 'antifake' in server.personalize ? server.personalize.antifake.antifakeNames : '' %></textarea>
                             </div>
-                            <button id="save-auto-react" class="button-padrao">Salvar antifake</button>
+                            <button id="save-antifake" class="button-padrao">Salvar antifake</button>
+                        </div>
+                    </div>
+                    <div class="itens-col" style="width: 90% !important;">
+                        <h1 class="title-col">Mensagem de boas vindas</h1>
+                        <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do usuario que entrou</p>
+                        <div class="linha" style="margin-top: 1em;"></div>
+                        <div class="itens-content-col" style="width: 100%; display: flex; justify-content: space-between; flex-direction: row; gap: 1em;">
+                            <div id="welcome-left-containner">
+                                <% if ('personalize' in server && 'welcomeMensage' in server.personalize) { %>
+                                    <div id="buttons-active-desactive-welcome">
+                                        <label for="" class="lable-padrao">Ativar ou desativar a mensagem de boas vindas!</label>
+                                        <button id="desative-welcome" class="button-padrao redColor <%= server.personalize.welcomeMensage.active == true ? '' : 'hidden' %>">Desativar mensagem</button>
+                                        <button id="active-welcome" class="button-padrao greenColor <%= server.personalize.welcomeMensage.active == true ? 'hidden' : '' %>">Ativar mensagem</button>
+                                    </div>
+                                <% } %>
+                                <div class="inputs-col-content">
+                                    <label for="mensage-welcome" class="lable-padrao">Mensagem de boas vindas!</label>
+                                    <textarea required type="text" style="height: 6em;"  class="input-padrao" placeholder="Mensagem" id="mensage-welcome"><%= 'personalize' in server && 'welcomeMensage' in server.personalize ? server.personalize.welcomeMensage.mensage :''%></textarea>
+                                </div>
+                                <div class="inputs-col-content">
+                                    <label for="welcome-channel-input" class="lable-padrao">Canal de boas vindas!</label>
+                                    <input required type="text" class="input-padrao" list="welcome-channel-list" placeholder="Pesquise o canal..." id="welcome-channel-input">
+                                    <datalist id="welcome-channel-list">
+                                        <% channels.forEach(element => { %>
+                                            <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
+                                        <% }) %>
+                                    </datalist>
+                                </div>
+                                <button id="save-mensage-welcome" class="button-padrao">Salvar Mensagem</button>
+                            </div>
+                            <div id="welcome-rigth-containner" >
+                               
+                                <div id="welcome-buttons-containner">
+                                    <div class="inputs-col-content">
+                                        <label for="number-buttons-input" class="lable-padrao">Digite o numero de botões: </label>
+                                        <input type="number" id="number-buttons-input" placeholder="Numero de botões..." class="input-padrao">
+                                    </div>
+                                    <div class="linha"></div>
+                                    <div id="welcome-buttons-content">
+                                        <div id="welcome-buttons-row">
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="welcome-button-col">
+                                                <div class="welcome-button-col-label">
+                                                    <label for="" class="lable-padrao">Digite o label do botão: </label>
+                                                    <input type="text" class="input-padrao" placeholder="Nome do botão...">
+                                                </div>
+                                                <div class="welcome-button-col-link">
+                                                    <label class="lable-padrao" for="">Selecione o canal de redirecinamento: </label>
+                                                    <div id="test">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -192,5 +303,14 @@
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
     <script src="/public/js/personalize.js"></script>
+    <script>
+        document.getElementById('number-buttons-input').addEventListener('input', e => {
+            document.getElementById('welcome-buttons-containner').innerHTML = ''
+            for (let index = 0; index < e.target.value; index++) {
+                document.getElementById('welcome-buttons-containner').innerHTML += ``
+            }
+        })
+        let drop = new DropdownSingle('test', channelItensSelectMenu);
+    </script>
 </body>
 </html>
