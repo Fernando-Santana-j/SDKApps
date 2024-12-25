@@ -124,10 +124,16 @@ client.on('guildMemberAdd', async member => {
             })
         }
 
-        channel.send({
+        let welcomeMessage = await channel.send({
             content: mensage,
             ...comp
         })
+
+        setTimeout(() => {
+            try {
+                welcomeMessage.delete()
+            } catch (error) { }
+        }, 60000)
     }
 });
 
@@ -1199,7 +1205,7 @@ module.exports = (Discord2, client) => {
                         //     interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
                         //     return
                         // } else {
-                        
+
                         // let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
                         // if (findChannel) {
                         //     interaction.reply({
@@ -1222,27 +1228,27 @@ module.exports = (Discord2, client) => {
                         //         ephemeral: true
                         //     })
                         // } else {
-                            require('./newTicketFunction')(client, interaction, { motivo: interaction.values[0] })
-                            if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
-                                var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
-                                let dataAtual = new Date();
-                                let meses = [
-                                    "Janeiro", "Fevereiro", "Março", "Abril",
-                                    "Maio", "Junho", "Julho", "Agosto",
-                                    "Setembro", "Outubro", "Novembro", "Dezembro"
-                                ];
-                                let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
-                                let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
+                        require('./newTicketFunction')(client, interaction, { motivo: interaction.values[0] })
+                        if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
+                            var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
+                            let dataAtual = new Date();
+                            let meses = [
+                                "Janeiro", "Fevereiro", "Março", "Abril",
+                                "Maio", "Junho", "Julho", "Agosto",
+                                "Setembro", "Outubro", "Novembro", "Dezembro"
+                            ];
+                            let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+                            let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
 
-                                DiscordChannelPublicLog.send({
-                                    embeds: [
-                                        new Discord.EmbedBuilder()
-                                            .setColor('#6E58C7')
-                                            .setTitle(`🎫・Novo ticket!`)
-                                            .setFields({ name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "Motivo:", value: findMotivo.name, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
-                                    ],
-                                })
-                            }
+                            DiscordChannelPublicLog.send({
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setColor('#6E58C7')
+                                        .setTitle(`🎫・Novo ticket!`)
+                                        .setFields({ name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "Motivo:", value: findMotivo.name, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
+                                ],
+                            })
+                        }
                         // }
 
                         // }
@@ -1357,7 +1363,7 @@ module.exports = (Discord2, client) => {
                 if (interaction.customId && interaction.customId.includes('closeSingleProdTopic')) {
                     let userId = interaction.customId.replace('closeSingleProdTopic-', '')
                     console.log(interaction.guild.ownerId);
-                    
+
                     if (userId == interaction.user.id && interaction.guild.ownerId != interaction.user.id) {
                         return interaction.reply({ content: 'Você não tem permissão para fechar o tópico', ephemeral: true })
                     }
@@ -1536,7 +1542,7 @@ module.exports = (Discord2, client) => {
                     let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
                     let userTicketID = protocolo.split('-')[2]
                     console.log(userTicketID);
-                    
+
                     if (interaction.user.id == userTicketID) {
                         interaction.reply({ content: 'Você não pode assumir o seu proprio ticket!', ephemeral: true })
                         return
@@ -2248,7 +2254,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             reason: `Recebimento de produto ${product.productName} para o usuario ${user.username}`,
                         });
                         thread.send({
-                            content:`|| <@${user.id}> || || <@${dono.id}> ||  \n Aguarde ate o recebimento do produto os responsaveis ja foram notificados!`,
+                            content: `|| <@${user.id}> || || <@${dono.id}> ||  \n Aguarde ate o recebimento do produto os responsaveis ja foram notificados!`,
                             components: [
                                 new Discord.ActionRowBuilder()
                                     .addComponents(
@@ -2331,42 +2337,44 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
-                let productText = await productsName.join('\n');
+                if (arrayItensTxt.length > 0) {
+                    let productText = await productsName.join('\n');
 
-                const concatenatedString = await arrayItensTxt.join('\n');
-                const buffer = Buffer.from(concatenatedString, 'utf-8');
-                const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
-                function sendTxtMensage(target) {
-                    try {
-                        target.send({
-                            embeds: [
-                                new Discord.EmbedBuilder()
-                                    .setTitle('💫 | Sua entrega chegou!')
-                                    .setDescription(`Abaixo estão os dados da sua entrega:`)
-                                    .setFields(
-                                        {
-                                            name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
-                                        },
-                                        {
-                                            name: "💖 | Muito obrigado por comprar conosco!", value: `${DiscordServer.name} agradece o seu carinho!`
-                                        },
-                                    )
-                                    .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
-                                    .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-                                    .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
-                            ],
-                        })
-                        target.send({ files: [attachment] }).catch(() => { });
-                    } catch (error) {
-                        console.log('Produtos:', concatenatedString);
+                    const concatenatedString = await arrayItensTxt.join('\n');
+                    const buffer = Buffer.from(concatenatedString, 'utf-8');
+                    const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
+                    function sendTxtMensage(target) {
+                        try {
+                            target.send({
+                                embeds: [
+                                    new Discord.EmbedBuilder()
+                                        .setTitle('💫 | Sua entrega chegou!')
+                                        .setDescription(`Abaixo estão os dados da sua entrega:`)
+                                        .setFields(
+                                            {
+                                                name: "📦 | Produto(s) Comprado(s):", value: '```' + productText + '```'
+                                            },
+                                            {
+                                                name: "💖 | Muito obrigado por comprar conosco!", value: `${DiscordServer.name} agradece o seu carinho!`
+                                            },
+                                        )
+                                        .setAuthor({ name: "SDKApps", iconURL: `https://res.cloudinary.com/dgcnfudya/image/upload/v1711769157/vyzyvzxajoboweorxh9s.png` })
+                                        .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
+                                        .setFooter({ text: DiscordServer.name, iconURL: `https://cdn.discordapp.com/icons/${DiscordServer.id}/${DiscordServer.icon}.webp` })
+                                ],
+                            })
+                            target.send({ files: [attachment] }).catch(() => { });
+                        } catch (error) {
+                            console.log('Produtos:', concatenatedString);
+                        }
                     }
-                }
-                
-                const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
-                findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
 
-                sendTxtMensage(findChannel)
-                sendTxtMensage(user)
+                    const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
+                    findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
+
+                    sendTxtMensage(findChannel)
+                    sendTxtMensage(user)
+                }
 
                 if ('saleLogs' in serverData && serverData.saleLogs.publicLog) {
                     try {
