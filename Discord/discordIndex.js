@@ -108,7 +108,7 @@ client.on('guildMemberAdd', async member => {
             mensage = await mensage.replace('@@username', member.user.username)
         }
         if (mensage.includes('@@globalname')) {
-            mensage = await mensage.replace('@@globalname', `<@${member.user.globalName}>`)
+            mensage = await mensage.replace('@@globalname', `<@${member.user.id}>`)
         }
         let comp = {
             components: [new Discord.ActionRowBuilder()]
