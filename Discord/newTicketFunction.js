@@ -17,22 +17,30 @@ module.exports = async (client, interaction, ticketOptions) => {
             }]
         });
     }
-    const newChannel = await DiscordServer.channels.create({
-        name: `🎫・Ticket・${interaction.user.username}`,
-        type: 0,
-        parent: categoria,
-        topic: generateProtocol,
-        permissionOverwrites: [{
-            id: interaction.user.id,
-            allow: [Discord.PermissionsBitField.Flags.ViewChannel]
-        }, {
-            id: findMotivo.responsavel,
-            allow: [Discord.PermissionsBitField.Flags.ViewChannel]
-        }, {
-            id: DiscordServer.roles.everyone,
-            deny: [Discord.PermissionsBitField.Flags.ViewChannel]
-        }]
-    })
+    let ticketChannel = await DiscordServer.channels.cache.get(interaction.channelId)
+    let newChannel = await ticketChannel.threads.create({
+        name: `🎫・Ticket・${interaction.user.username}・${generateProtocol}`,
+        type: 12,
+        invitable: false,
+        reason: `Abertura de ticket por ${interaction.user.username}`,
+    });
+    // await thread.send(`  \n Aguarde ate a resposta do seu ticket, os responsaveis ja foram notificados!`)
+    // const newChannel = await DiscordServer.channels.create({
+    //     name: `🎫・Ticket・${interaction.user.username}`,
+    //     type: 0,
+    //     parent: categoria,
+    //     topic: generateProtocol,
+    //     permissionOverwrites: [{
+    //         id: interaction.user.id,
+    //         allow: [Discord.PermissionsBitField.Flags.ViewChannel]
+    //     }, {
+    //         id: findMotivo.responsavel,
+    //         allow: [Discord.PermissionsBitField.Flags.ViewChannel]
+    //     }, {
+    //         id: DiscordServer.roles.everyone,
+    //         deny: [Discord.PermissionsBitField.Flags.ViewChannel]
+    //     }]
+    // })
     if (newChannel) {
         if (ticketOptions.type != 1) {
             await interaction.reply({
@@ -43,6 +51,7 @@ module.exports = async (client, interaction, ticketOptions) => {
 
 
         await newChannel.send({
+            content:`|| <@${interaction.user.id}> || || <@${findMotivo.responsavel}> || || <@${DiscordServer.ownerId}> ||`,
             embeds: [
                 new Discord.EmbedBuilder()
                     .setColor('#6E58C7')

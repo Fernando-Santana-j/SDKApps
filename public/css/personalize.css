@@ -64,6 +64,9 @@
     align-items: center;
     justify-content: start;
 }
+#welcome-left-containner{
+    min-width: 20em;
+}
 #welcome-rigth-containner{
     flex: 1;
     display: flex;
@@ -110,6 +113,12 @@
         width: 100% !important;
         height: auto !important;
         left: 0 !important;
+    }
+
+}
+@media screen and (max-width:1360px) {
+    #welcome-full-containner{
+        flex-direction: column !important;
     }
 
 }

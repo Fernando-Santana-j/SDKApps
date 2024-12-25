@@ -78,47 +78,7 @@ document.getElementById('welcome-channel-input').addEventListener('blur', functi
         this.value = '';
     }
 });
-document.getElementById('save-mensage-welcome').addEventListener('click',async()=>{
-    if (document.getElementById(`title-welcome`).value.trim().length <= 0) {
-        errorNotify(`Insira um titulo primeiro!`)
-        return
-    }
-    if (document.getElementById(`mensage-welcome`).value.trim().length <= 0) {
-        errorNotify(`Insira uma mensagem primeiro!`)
-        return
-    }
-    if (document.getElementById(`welcome-channel-input`).value.trim().length <= 0) {
-        errorNotify(`Insira um canal primeiro!`)
-        return
-    }
-    const opcoes = document.getElementById('welcome-channel-list').querySelectorAll('option');
-    let channelID = null;
 
-    opcoes.forEach(option => {
-        if (option.value === document.getElementById('welcome-channel-input').value) {
-            channelID = option.getAttribute('data-channel');
-        }
-    });
-
-    let session = await fetch('/personalize/welcome', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            mensage:document.getElementById('mensage-welcome').value ,
-            title:document.getElementById('title-welcome').value ,
-            channel:channelID,
-            serverID:serverID
-        }),
-    }).then(response => { return response.json() })
-    if (session.success == true) {
-        successNotify('Mensagem de boas vindas salva!')
-    }else{
-        errorNotify(session.data)
-    }
-})
 
 if (document.getElementById('desative-welcome')) {
     document.getElementById('desative-welcome').addEventListener('click',async()=>{

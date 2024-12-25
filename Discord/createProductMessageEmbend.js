@@ -14,7 +14,10 @@ module.exports = async (Discord2, client, data) => {
         if (data.edit == true) {
             try {
                 const fetched = await DiscordChannel.messages.fetch({ limit: 100 });
-                await DiscordChannel.bulkDelete(fetched)
+                const messagesToDelete = fetched.filter(
+                    (msg) => !msg.hasThread && !msg.system // Ignora mensagens de sistema também
+                );
+                await DiscordChannel.bulkDelete(messagesToDelete,true)
             } catch (error) { }
         }
 
@@ -79,7 +82,17 @@ module.exports = async (Discord2, client, data) => {
                 name: 'Preço:',
                 value: '`` ' + preco.toString() + ' ``',
                 inline: true
-            },)
+            }, typeProduct == 'normal' ? {
+                name: "Tipo de entrega:",
+                value: "⚡ | Entrega automática",
+                inline: true
+
+            }:{
+                name: "Tipo de entrega:",
+                value: "🤝 | Entrega manual",
+                inline: true
+            })
+
         }
         let embed = await DiscordChannel.send({
             embeds: [
