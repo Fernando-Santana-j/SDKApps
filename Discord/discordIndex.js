@@ -2295,6 +2295,14 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         console.log('SendProductSingleERROR', error);
                         return refound();
                     }
+                    
+                    setTimeout(async () => {
+                        try{
+                            findChannel.delete()
+                        } catch (error) {
+    
+                        }   
+                    },12000)
                 }
 
                 if (typeProduct == 'normal') {
