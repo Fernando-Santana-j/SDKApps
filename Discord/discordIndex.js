@@ -2537,7 +2537,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
         }
         let serverID = params.serverID
         let userID = params.userID
-      
     }
 }
 
