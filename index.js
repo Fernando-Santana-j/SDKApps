@@ -2152,7 +2152,8 @@ async function tem(params) {
 }
 
 cron.schedule('0 * * * *',async () => {
-    let hora = await toString(new Date().getHours())
+    let hora = new Date().getHours()
+
     try {
         let firebaseDB = require("./Firebase/db.js")
         let snapshot;

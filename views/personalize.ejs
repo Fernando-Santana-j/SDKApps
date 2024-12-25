@@ -158,7 +158,8 @@
                             <div class="linha" style="margin-top: 1em;"></div>
                             <div class="itens-content-col">
                                 <div class="inputs-col-content">
-                                    <label for="min-days-fake" class="lable-padrao">Hora do dia que sera feita a repostagem: </label>
+                                    <label for="min-days-fake" class="lable-padrao">Hora do dia que sera feita a
+                                        repostagem: </label>
                                     <div id="select-hour-repost-containner">
 
                                     </div>
@@ -191,8 +192,7 @@
                             <h1 class="title-col">Mensagem de boas vindas</h1>
                             <p class="desc-col">Crie uma mensagem de boas vindas no seu server use os comandos abaixo no
                                 titulo ou na mensagem: <br>@@server para exibir o nome do servidor<br>@@username para
-                                exibir o username do usuario que entrou<br>@@globalname para exibir o nome global do
-                                usuario que entrou</p>
+                                exibir o username do usuario que entrou<br>@@globalname para marcar o usuario!</p>
                             <div class="linha" style="margin-top: 1em;"></div>
                             <div class="itens-content-col" id="welcome-full-containner"
                                 style="width: 100%; display: flex; justify-content: space-between; flex-direction: row; gap: 1em;">
@@ -265,206 +265,8 @@
         </script>
     </div>
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
-        <%- include('./reusable/script.ejs') %>
-            <script src="/public/js/personalize.js"></script>
-            <script>
-                let inputSelectRepostTime = new DropdownSingle('select-hour-repost-containner', [{
-                        name: '1 hora',
-                        value: 1
-                    }, {
-                        name: '2 horas',
-                        value: 2
-                    }, {
-                        name: '3 horas',
-                        value: 3
-                    }, {
-                        name: '4 horas',
-                        value: 4
-                    }, {
-                        name: '5 horas',
-                        value: 5
-                    },
-                    {
-                        name: '6 horas',
-                        value: 6
-                    },
-                    {
-                        name: '7 horas',
-                        value: 7
-                    },
-                    {
-                        name: '8 horas',
-                        value: 8
-                    },
-                    {
-                        name: '9 horas',
-                        value: 9
-                    },
-                    {
-                        name: '10 horas',
-                        value: 10
-                    },
-                    {
-                        name: '11 horas',
-                        value: 11
-                    },
-                    {
-                        name: '12 horas',
-                        value: 12
-                    },
-                    {
-                        name: '13 horas',
-                        value: 13
-                    },
-                    {
-                        name: '14 horas',
-                        value: 14
-                    },
-                    {
-                        name: '15 horas',
-                        value: 15
-                    },
-                    {
-                        name: '16 horas',
-                        value: 16
-                    },
-                    {
-                        name: '17 horas',
-                        value: 17
-                    },
-                    {
-                        name: '18 horas',
-                        value: 18
-                    },
-                    {
-                        name: '19 horas',
-                        value: 19
-                    },
-                    {
-                        name: '20 horas',
-                        value: 20
-                    },
-                    {
-                        name: '21 horas',
-                        value: 21
-                    },
-                    {
-                        name: '22 horas',
-                        value: 22
-                    },
-                    {
-                        name: '23 horas',
-                        value: 23
-                    },
-                    {
-                        name: '24 horas',
-                        value: 24
-                    }
-                ])
-                document.getElementById('save-repost').addEventListener('click', async () => {
-                    let hour = await inputSelectRepostTime.getValue().value
-                    console.log(hour);
-                    
-                    if (!hour) {
-                        return errorNotify('Selecione um horario!')
-                    }
-                    let session = await fetch('/personalize/repost', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            hour: hour,
-                            serverID: serverID
-                        }),
-                    }).then(response => { return response.json() })
-                    if (session.success == true) {
-                        successNotify(session.data)
-                    } else {
-                        errorNotify(session.data)
-                    }
-                })
-                let inputsSelectChannelWelcome = new DropdownSingle('welcome-channel-input', channelItensSelectMenu)
-                document.getElementById('number-buttons-input').addEventListener('input', e => {
-                    let numberButtons = e.target.value
-                    if (numberButtons > 5) {
-                        e.target.value = 5
-                        return errorNotify("O valor de botões nao pode ser maior que 5!")
-                    }
-                    document.getElementById('welcome-buttons-row').innerHTML = ''
-                    for (let index = 0; index < numberButtons; index++) {
-                        document.getElementById('welcome-buttons-row').innerHTML += `
-                    <div class="welcome-button-col">
-                        <div class="welcome-button-col-label">
-                            <label for="" class="lable-padrao">Digite o label do botão: </label>
-                            <input type="text" id="welcome-button-label-${index}" class="input-padrao" placeholder="Nome do botão...">
-                        </div>
-                        <div class="welcome-button-col-link">
-                            <label class="lable-padrao" for="">Canal de redirecinamento: </label>
-                            <div id="welcome-select-channel-${index}-containner">
-                                <input required type="text" class="input-padrao" list="welcome-select-channel-${index}-list" placeholder="selecione o canal..." id="welcome-select-channel-${index}-input">
-                                <datalist id="welcome-select-channel-${index}-list">
-                                    ${channelItensSelectMenu.map(element => {
-                            return `
-                                            <option data-channel="${element.value}" value="${element.name}"></option>
-                                        `
-                        })}
-                                </datalist>
-                            </div>
-                        </div>
-                    </div>
-                `
-                    }
-                })
-
-                document.getElementById('save-mensage-welcome').addEventListener('click', async () => {
-                    let mensage = document.getElementById('mensage-welcome').value.trim()
-                    if (!mensage) {
-                        return errorNotify('Digite uma mensagem!')
-                    }
-                    let channel = inputsSelectChannelWelcome.getValue()
-                    if (!channel) {
-                        return errorNotify('Selecione um canal!')
-                    }
-                    let buttonsArray = []
-                    let numberButtons = document.getElementById('number-buttons-input').value
-                    if (numberButtons && numberButtons > 0) {
-                        for (let index = 0; index < numberButtons; index++) {
-                            const opcoes = document.getElementById(`welcome-select-channel-${index}-list`).querySelectorAll('option');
-                            let channelID = null;
-
-                            opcoes.forEach(option => {
-                                if (option.value === document.getElementById(`welcome-select-channel-${index}-input`).value) {
-                                    channelID = option.getAttribute('data-channel');
-                                }
-                            });
-                            buttonsArray.push({
-                                label: document.getElementById(`welcome-button-label-${index}`).value,
-                                channelID: channelID
-                            })
-                        }
-                    }
-                    let session = await fetch('/personalize/welcome', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            mensage: document.getElementById('mensage-welcome').value,
-                            buttons: buttonsArray,
-                            channel: channel.value,
-                            serverID: serverID
-                        }),
-                    }).then(response => { return response.json() })
-                    if (session.success == true) {
-                        successNotify('Mensagem de boas vindas salva!')
-                    } else {
-                        errorNotify(session.data)
-                    }
-                })
-            </script>
+    <%- include('./reusable/script.ejs') %>
+    <script src="/public/js/personalize.js"></script>
 </body>
 
 </html>
