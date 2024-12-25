@@ -2539,20 +2539,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
         let userID = params.userID
         try {
 
-            setTimeout(async () => {
-                var DiscordServer2 = await client.guilds.cache.get(serverID);
-                let findChannel2 = await DiscordServer2.channels.cache.find(c => c.topic === userID)
-                if (findChannel2) {
-                    findChannel2.delete().catch((err) => { })
-                }
-            }, 60000)
-        } catch (error) {
-            var DiscordServer2 = client.guilds.cache.get(serverID);
-            let findChannel2 = DiscordServer2.channels.cache.find(c => c.topic === userID)
-            if (findChannel2) {
-                findChannel2.delete().catch((err) => { })
-            }
-        }
     }
 }
 

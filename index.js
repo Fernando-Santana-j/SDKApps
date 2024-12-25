@@ -255,6 +255,7 @@ app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, asy
 
     let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
     if (verifyPerms.error == true) {
+        console.log(verifyPerms);
         res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
         return
     }
@@ -577,6 +578,7 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
     let roles = guild.roles.cache
     let rolesFilter = roles.filter(role => role.managed == false && role.name != "@everyone")
 
+    
     let ticketOptions = {
         motivos: [],
         permissions: [],
