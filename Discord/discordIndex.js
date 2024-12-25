@@ -72,10 +72,35 @@ let paymentMCobranca = {}
 // Mensagem de boas vindas
 client.on('guildMemberAdd', async member => {
     let server = await db.findOne({ colecao: 'servers', doc: member.guild.id })
+    if ('personalize' in server && 'antifake' in server.personalize) {
+        let minDays = parseInt(server.personalize.antifake.antifakeDays)
+        const currentDate = new Date();
+        const accountCreationDate = member.user.createdAt
+        let username = member.user.username
+        let globalName = member.user.globalName
+        let blockedNames = server.personalize.antifake.antifakeNames
+
+        const accountAgeDays = Math.floor((currentDate - accountCreationDate) / (1000 * 60 * 60 * 24))
+
+        function kickMember(member, text) {
+            member.kick(text)
+                .then(() => {
+                    member.send(text)
+                })
+                .catch((err) => { });
+        }
+        if (accountAgeDays < minDays) {
+            kickMember(member, `Sua conta foi expulsa do servidor ${member.guild.name} por ter sido criada muito recentemente.`)
+        }
+        if (blockedNames.includes(globalName) || blockedNames.includes(username)) {
+            kickMember(member, `Sua conta foi expulsa do servidor ${member.guild.name} por ter um nome ou username proibido.`)
+        }
+    }
+
     if ('personalize' in server && 'welcomeMensage' in server.personalize && server.personalize.welcomeMensage.active == true) {
         let mensage = server.personalize.welcomeMensage.mensage
-        let title = server.personalize.welcomeMensage.title
         let channel = await member.guild.channels.cache.get(server.personalize.welcomeMensage.channel)
+        let buttons = server.personalize.welcomeMensage.buttons ? server.personalize.welcomeMensage.buttons : []
         if (mensage.includes('@@server')) {
             mensage = await mensage.replace('@@server', member.guild.name)
         }
@@ -85,24 +110,23 @@ client.on('guildMemberAdd', async member => {
         if (mensage.includes('@@globalname')) {
             mensage = await mensage.replace('@@globalname', member.user.globalName)
         }
-        if (title.includes('@@server')) {
-            title = await title.replace('@@server', member.guild.name)
+        let comp = {
+            components: [new Discord.ActionRowBuilder()]
         }
-        if (title.includes('@@username')) {
-            title = await title.replace('@@username', member.user.username)
+        if (buttons.length > 0) {
+            buttons.forEach((button, index) => {
+                comp.components[0].addComponents(
+                    new Discord.ButtonBuilder()
+                        .setLabel(button.label ? button.label : `Botão ${index + 1}`)
+                        .setURL(`https://discord.com/channels/${member.guild.id}/${button.channelID ? button.channelID : channel.id}`)
+                        .setStyle(Discord.ButtonStyle.Link),
+                )
+            })
         }
-        if (title.includes('@@globalname')) {
-            title = await title.replace('@@globalname', member.user.globalName)
-        }
+
         channel.send({
-            embeds: [
-                new Discord.EmbedBuilder()
-                    .setTitle(title)
-                    .setDescription(mensage)
-                    .setColor('personalize' in server && 'colorDest' in server.personalize ? server.personalize.colorDest : '#6E58C7')
-                    .setTimestamp()
-                    .setThumbnail(member.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 }))
-            ]
+            content: mensage,
+            ...comp
         })
     }
 });
@@ -139,7 +163,7 @@ module.exports = (Discord2, client) => {
                 let quantidade = 1
                 if (interaction.fields) {
                     try {
-                        quantidade =  interaction.fields.getTextInputValue('quantidadeText');
+                        quantidade = interaction.fields.getTextInputValue('quantidadeText');
                     } catch (error) {
                         quantidade = 1
                     }
@@ -396,9 +420,9 @@ module.exports = (Discord2, client) => {
                         if (react.channel == message.channel.id) {
                             if (react.emoji.includes(':')) {
                                 const emoji = DiscordServer.emojis.cache.find(emoji => emoji.name == react.emoji.replace(/:/g, ""));
-                                message.react(emoji).then(() => {}).catch(() => {});
-                            }else{
-                                message.react(react.emoji).then(() => {}).catch(() => {});
+                                message.react(emoji).then(() => { }).catch(() => { });
+                            } else {
+                                message.react(react.emoji).then(() => { }).catch(() => { });
                             }
                         }
                     })
@@ -1175,28 +1199,29 @@ module.exports = (Discord2, client) => {
                         //     interaction.reply({ content: "Adicione o motivo primeiro!", ephemeral: true })
                         //     return
                         // } else {
-                        let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
-                        if (findChannel) {
-                            interaction.reply({
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor("#C21010")
-                                        .setTitle(`⚠️| Você já possui um ticket aberto!`)
-                                        .setDescription(`Clique no botão abaixo para ir ate ele!`)
-                                ],
-                                components: [
-                                    new Discord.ActionRowBuilder()
-                                        .addComponents(
-                                            new Discord.ButtonBuilder()
-                                                .setStyle(5)
-                                                .setLabel('Ir para o Ticket')
-                                                .setEmoji(await require('./emojisGet').ticket)
-                                                .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
-                                        )
-                                ],
-                                ephemeral: true
-                            })
-                        } else {
+                        
+                        // let findChannel = DiscordServer.channels.cache.find(c => c.topic && c.topic.includes(interaction.user.id) && c.name && c.name.includes('🎫・Ticket・'))
+                        // if (findChannel) {
+                        //     interaction.reply({
+                        //         embeds: [
+                        //             new Discord.EmbedBuilder()
+                        //                 .setColor("#C21010")
+                        //                 .setTitle(`⚠️| Você já possui um ticket aberto!`)
+                        //                 .setDescription(`Clique no botão abaixo para ir ate ele!`)
+                        //         ],
+                        //         components: [
+                        //             new Discord.ActionRowBuilder()
+                        //                 .addComponents(
+                        //                     new Discord.ButtonBuilder()
+                        //                         .setStyle(5)
+                        //                         .setLabel('Ir para o Ticket')
+                        //                         .setEmoji(await require('./emojisGet').ticket)
+                        //                         .setURL(`https://discord.com/channels/${interaction.guild.id}/${findChannel.id}`)
+                        //                 )
+                        //         ],
+                        //         ephemeral: true
+                        //     })
+                        // } else {
                             require('./newTicketFunction')(client, interaction, { motivo: interaction.values[0] })
                             if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
                                 var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
@@ -1218,7 +1243,7 @@ module.exports = (Discord2, client) => {
                                     ],
                                 })
                             }
-                        }
+                        // }
 
                         // }
                     } else {
@@ -1330,8 +1355,8 @@ module.exports = (Discord2, client) => {
                 }
 
                 if (interaction.customId && interaction.customId.includes('closeTicket')) {
-                    let protocolo = DiscordChannel.topic
-                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+                    let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
+                    let userTicketID = protocolo.replace(/prot-\d+-/, '')
                     const user = await client.users.fetch(userTicketID)
                     let serverData = await db.findOne({ colecao: "servers", doc: interaction.guildId })
 
@@ -1498,8 +1523,11 @@ module.exports = (Discord2, client) => {
 
 
                 if (interaction.customId && interaction.customId.includes('assumirTicket')) {
-                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
 
+                    let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
+                    let userTicketID = protocolo.split('-')[2]
+                    console.log(userTicketID);
+                    
                     if (interaction.user.id == userTicketID) {
                         interaction.reply({ content: 'Você não pode assumir o seu proprio ticket!', ephemeral: true })
                         return
@@ -1566,7 +1594,8 @@ module.exports = (Discord2, client) => {
 
 
                 if (interaction.customId && interaction.customId.includes('voiceTicket')) {
-                    let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
+                    let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
+                    let userTicketID = protocolo.split('-')[2]
 
                     if (interaction.user.id == userTicketID) {
                         interaction.reply({ content: 'Você não pode executar essa função!', ephemeral: true })
@@ -1672,8 +1701,8 @@ module.exports = (Discord2, client) => {
                 if (interaction.customId && interaction.customId.includes('notifyTicket')) {
                     let serverData = await db.findOne({ colecao: 'servers', doc: interaction.guildId })
                     if (interaction && serverData) {
-                        let userTicketID = DiscordChannel.topic.replace(/prot-\d+-/, '')
-
+                        let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
+                        let userTicketID = protocolo.split('-')[2]
                         if (interaction.user.id == userTicketID) {
                             interaction.reply({ content: 'Você não pode usar essa função!', ephemeral: true })
                             return
@@ -1978,7 +2007,7 @@ module.exports = (Discord2, client) => {
                     var produto = await serverDb.products.find(product => product.productID == productId)
                     let estoqueNumber = 0
                     let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
-                    
+
                     switch (typeProduct) {
                         case 'single':
                             estoqueNumber = produto.estoque
@@ -2011,7 +2040,7 @@ module.exports = (Discord2, client) => {
                             ephemeral: true
                         })
                         let analytics = await db.findOne({ colecao: "analytics", doc: interaction.guildId })
-    
+
                         if (analytics.error == false) {
                             let canceladosEstoque = analytics['cancelados estoque']
                             await canceladosEstoque.push(await functions.formatDate(new Date()))
@@ -2031,7 +2060,7 @@ module.exports = (Discord2, client) => {
                                 "vendas completas": []
                             })
                         }
-    
+
                         return
                     }
 
@@ -2093,35 +2122,35 @@ module.exports.sendProductPayment = async (params, id, type) => {
     if (DiscordServer && findChannel && serverData) {
         let carrinho = carrinhos[params.userID]
         delete carrinhos[params.userID]
-        let result = await new Promise(async(resolve, reject) => {
+        let result = await new Promise(async (resolve, reject) => {
             for (let [chave, element] of Object.entries(carrinho)) {
                 const produto = serverData.products.find(product => product.productID == element.product);
-                    let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
-                    switch (typeProduct) {
-                        case 'single':
-                            if (produto.estoque <= 0) {
-                                resolve(false)
-                            }else{
-                                resolve(true)
-                            }
-                            break;
-                        case 'subscription':
+                let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
+                switch (typeProduct) {
+                    case 'single':
+                        if (produto.estoque <= 0) {
+                            resolve(false)
+                        } else {
+                            resolve(true)
+                        }
+                        break;
+                    case 'subscription':
 
-                            break;
-                        case 'multiple':
+                        break;
+                    case 'multiple':
 
-                            break;
-                        case 'normal':
-                            if (produto.estoque.length <= 0) {
-                                resolve(false)
-                            }else{
-                                resolve(true)
-                            }
-                            break;
-                    }
+                        break;
+                    case 'normal':
+                        if (produto.estoque.length <= 0) {
+                            resolve(false)
+                        } else {
+                            resolve(true)
+                        }
+                        break;
+                }
             }
-            
-            
+
+
         });
         async function refound() {
             const fetched = await findChannel.messages.fetch({ limit: 100 });
@@ -2185,7 +2214,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
         if (result == true) {
             const user = await client.users.fetch(params.userID);
-
+            let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
             let arrayItensTxt = []
 
             let productsName = []
@@ -2198,14 +2227,45 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 const requestedQuantity = parseInt(element.quantidade) <= 0 ? 1 : parseInt(element.quantidade);
                 let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
                 productsName.push(`${product.productName} - ${element.quantidade}x`);
-                
+
 
                 if (typeProduct == 'single') {
                     try {
-                        arrayItensTxt.push(product.estoqueModel.conteudo[0].content)
-                        product.estoque = parseInt(product.estoque) - parseInt(element.quantidade)
+                        let productSingleChannel = DiscordServer.channels.cache.find(c => c.topic === element.product)
+                        let thread = await productSingleChannel.threads.create({
+                            name: `Recebimento manual, ${user.username}`,
+                            type: 12,
+                            invitable: false,
+                            reason: `Recebimento de produto ${product.productName} para o usuario ${user.username}`,
+                        });
+                        thread.send(`|| <@${user.id}> || || <@${dono.id}> ||  \n Aguarde ate o recebimento do produto os responsaveis ja foram notificados!`)
+                        await user.send({
+                            content: `Foi criado um topico para o recebimento do produto ${product.productName} no canal do produto!`,
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(Discord.ButtonStyle.Link)
+                                            .setLabel('Ir para o topico')
+                                            .setURL(`https://discord.com/channels/${DiscordServer.id}/${thread.id}`)
+                                    )
+                            ]
+                        })
+                        await findChannel.send({
+                            content: `Foi criado um topico para o recebimento do produto ${product.productName} no canal do produto!`,
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(Discord.ButtonStyle.Link)
+                                            .setLabel('Ir para o topico')
+                                            .setURL(`https://discord.com/channels/${DiscordServer.id}/${thread.id}`)
+                                    )
+                            ]
+                        })
+
                     } catch (error) {
-                        console.log('SendProductSingleERROR',error);
+                        console.log('SendProductSingleERROR', error);
                         return refound();
                     }
                 }
@@ -2218,7 +2278,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             arrayItensTxt.push(item[0].content)
                         })
                     } catch (mainError) {
-                        console.log('SendProductNormalERROR',mainError)
+                        console.log('SendProductNormalERROR', mainError)
                         return refound();
                     }
                 }
@@ -2227,7 +2287,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 await db.update('servers', serverData.id, {
                     products: products
                 })
-    
+
                 try {
                     const messageCreator = require(`../Discord/create${product.embendType == 1 ? 'ProductMessage' : 'ProductMessageEmbend'}.js`);
                     await messageCreator(Discord, client, {
@@ -2236,13 +2296,13 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         productID: product.productID,
                         edit: true
                     });
-                } catch (error) { 
+                } catch (error) {
                     console.log(error);
                 }
             }
 
-            console.log('arrayItensTxt',arrayItensTxt);
-            
+            console.log('arrayItensTxt', arrayItensTxt);
+
             const dataHoraAtual = new Date();
             const dataHoraFormatada = `${String(dataHoraAtual.getDate()).padStart(2, '0')}/${String(dataHoraAtual.getMonth() + 1).padStart(2, '0')}/${dataHoraAtual.getFullYear()} ${String(dataHoraAtual.getHours()).padStart(2, '0')}:${String(dataHoraAtual.getMinutes()).padStart(2, '0')}:${String(dataHoraAtual.getSeconds()).padStart(2, '0')}`;
 
@@ -2280,7 +2340,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         console.log('Produtos:', concatenatedString);
                     }
                 }
-                let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
+                
                 const fetched = await findChannel.messages.fetch({ limit: 100 }).then(() => { }).catch(() => { });
                 findChannel.bulkDelete(fetched).then(() => { }).catch(() => { })
 
@@ -2457,21 +2517,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
         let serverID = params.serverID
         let userID = params.userID
         try {
-            
-            setTimeout(async () => {
-                var DiscordServer2 = await client.guilds.cache.get(serverID);
-                let findChannel2 = await DiscordServer2.channels.cache.find(c => c.topic === userID)
-                if (findChannel2) {
-                    findChannel2.delete().catch((err) => { })
-                }
-            }, 60000)
-        } catch (error) {
-            var DiscordServer2 = client.guilds.cache.get(serverID);
-            let findChannel2 = DiscordServer2.channels.cache.find(c => c.topic === userID)
-            if (findChannel2) {
-                findChannel2.delete().catch((err) => { })
-            }
-        }
 
     }
 }
@@ -2526,7 +2571,7 @@ module.exports.sendDiscordMensageChannel = async (server, channel, title, mensag
     }
 }
 
-module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
+module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel,) => {
     try {
         const userF = await client.users.fetch(user);
         let comp = null

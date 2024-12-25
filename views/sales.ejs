@@ -62,7 +62,10 @@
                             </div>
                             <div id="produtos-config-new-logo">
                                 <h1 class="backGround-title">Imagem da logo:</h1>
-                                <div style="height: 32px;"></div>
+                                <div id="active-logo-product-containner-edit">
+                                    Exibir logo? 
+                                    <input type="checkbox" id="input-active-logo-product-edit" >
+                                </div>
                                 <label for="new-logo-input">
                                     <img id="new-logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                 </label>
@@ -307,7 +310,10 @@
                                             </div>
                                             <div class="product-logo-content">
                                                 <h1 class="logo-title"><span class="obrigatorio">* </span> Imagem da logo:</h1>
-                                                <div style="height: 50px;"></div>
+                                                <div id="active-logo-product-containner">
+                                                    Exibir logo? 
+                                                    <input type="checkbox" id="input-active-logo-product" >
+                                                </div>
                                                 <label for="logo-input">
                                                     <img id="logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
                                                 </label>
@@ -432,6 +438,45 @@
                         </div>
                     </div>
 
+
+                    <div id="rank-buy-containner">
+                        <div id="rank-buy-content">
+                            <h1 class="title-col">Rank de compra</h1>
+                            <p class="desc-col">Configure o rank de compra!</p>
+                            <div class="linha"></div>
+                            <div id="config-rank-buy-content">
+                                <div id="config-rank-buy-left-containner">
+                                    <div id="config-rank-buy-channel-announcement">
+                                        <label for="select-config-rank-buy-channel-announcement" class="lable-padrao">Canal de anuncio:</label>
+                                        <div id="select-config-rank-buy-channel-announcement"></div>
+                                    </div>
+                                    <div id="config-rank-buy-mensage-announcement">
+                                        <label for="input-config-rank-buy-mensage-announcement" class="lable-padrao">Mensagem de anuncio: <br> (Use @@username para substituir pelo username do usuario)</label>
+                                        <textarea type="text" id="input-config-rank-buy-mensage-announcement" class="input-padrao" placeholder="Mensagem de anuncio"></textarea>
+                                    </div>
+                                    <div id="config-rank-buy-products">
+                                        <label for="select-config-rank-buy-products" class="lable-padrao">Produtos compativeis:</label>
+                                        <div id="select-config-rank-buy-products"></div>
+                                    </div>
+                                </div>
+                                <div id="config-rank-buy-right-containner">
+                                    <div id="config-rank-buy-top-containner">
+                                        <label for="input-config-rank-buy-number-ranks" class="lable-padrao">Quantidade de ranks:</label>
+                                        <input type="number" id="input-config-rank-buy-number-ranks" class="input-padrao" placeholder="Quantidade de ranks">
+                                    </div>
+                                    <div id="config-rank-buy-bottom-containner">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="linha"></div>
+                            <div id="buttons-rank-buy">
+                                <button type="button" class="main-button-product redColor" id="clear-rank-buy-config">Limpar</button>
+                                <button type="button" class="main-button-product greenColor" id="save-rank-buy-config">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </main>
         </div>
@@ -441,6 +486,10 @@
     
     <div>
         <script>
+            function formatarMoeda (numeroCentavos){
+                const valorReal = numeroCentavos / 100;
+                return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
             let channels =  JSON.parse(("<%= channelsString %>").replace(/&#34;/g, '"')) 
             let channelItensSelectMenu = channels.map(element => {
                 return {
@@ -456,6 +505,47 @@
                 }
             })
             let productsString =  JSON.parse(("<%= productString %>").replace(/&#34;/g, '"')) 
+
+            let rankBuyChannelAnnouncement = new DropdownSingle('select-config-rank-buy-channel-announcement', channelItensSelectMenu)
+            let rankBuyProducts = new DropdownMulti('select-config-rank-buy-products', productsString)
+            document.getElementById("save-rank-buy-config").addEventListener('click', () => {
+                let numberRanks = document.getElementById("input-config-rank-buy-number-ranks").value
+                let channelAnnouncement = rankBuyChannelAnnouncement.getValue()
+                let mensage = document.getElementById("input-config-rank-buy-mensage-announcement").value
+                let products = rankBuyProducts.getValue()
+                if (!numberRanks) {
+                    return errorNotify('Digite a quantidade de ranks!')
+                }
+                if (!channelAnnouncement) {
+                    return errorNotify('Selecione um canal de anuncio!')
+                }
+                if (!mensage) {
+                    return errorNotify('Digite uma mensagem de anuncio!')
+                }
+                if (products.length === 0) {
+                    return errorNotify('Selecione pelo menos um produto!')
+                }
+                fetch('/sales/rankConfig', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        numberRanks: numberRanks,
+                        channelAnnouncement: channelAnnouncement,
+                        mensage: mensage,
+                        products: products
+                    })
+                }).then(response => {
+                    return response.json()
+                }).then(response => {
+                    if (response.success == true) {
+                        successNotify('Configurações salvas!')
+                    }else{
+                        errorNotify(response.data)
+                    }
+                })
+            })
         </script>
     </div>
 

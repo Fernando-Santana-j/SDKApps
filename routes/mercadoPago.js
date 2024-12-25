@@ -141,11 +141,15 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                     console.log(error);
                                 }
                             } else {
+                                let user = await db.findOne({ colecao: 'users', doc: metadataP.uid })
                                 await functions.createAccount({
-                                    metadata: {
-                                        uid: metadataP.userID,
-                                        plan: metadataP.plan,
-                                        serverID: metadataP.serverID
+                                    customer: await functions.createCustomer(user.username, user.email),
+                                    payment_status: 'paid',
+                                    subscription: crypto.randomBytes(10).toString('hex'),
+                                    customer_details:{
+                                        email: user.email,
+                                        name: user.username,
+                                        phone: null
                                     }
                                 }, 'pix', metadataP.price, functions)
                             }

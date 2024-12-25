@@ -667,7 +667,7 @@ document.getElementById('save-product-cadastro').addEventListener('click', async
     await formData.append('typeProduct', typeProduct);
     await formData.append('productLogo', document.getElementById('logo-input').files[0]);
     await formData.append('embendType', await selectEmbendType.getValue().value);
-    
+    await formData.append('logoActive',document.getElementById('input-active-logo-product').checked)
     if (document.getElementById('image-input').files[0]) {
         formData.append('backGround', document.getElementById('image-input').files[0]);
     }
@@ -779,8 +779,6 @@ document.addEventListener('click', async (event) => {
                 serverID: serverID
             }),
         }).then(response => { return response.json() })
-        console.log(productData, productID);
-        
         if (productData.success == true) {
             productData = productData.data
             function formatarMoeda(numeroCentavos) {
@@ -792,7 +790,11 @@ document.addEventListener('click', async (event) => {
             document.getElementById('new-product-config-desc').value = productData.producDesc
             document.getElementById('new-logo-preview').src = location.origin +  productData.productLogo
             document.getElementById('new-background-preview').src = productData.backGround == null ? 'https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg' : location.origin + productData.backGround 
-            
+            let logoActive = 'logoActive' in productData ? productData.logoActive : false
+
+            if (logoActive == true) {
+                document.getElementById('input-active-logo-product-edit').checked = logoActive
+            }
             channelItensSelectMenuEdited = channelItensSelectMenu.map(item => ({
                 ...item,
                 selected: item.value == productData.channel
@@ -874,12 +876,13 @@ document.getElementById('save-new-product').addEventListener('click', async () =
             let channelID = newChannelInputProduct.getValue()
             
             var formData = new FormData();
-
+            
             await formData.append('price', parseInt(document.getElementById('product-config-new-price').value.replace(/[^\d,]/g, '').replace('R$','').replace(',', '')));
             await formData.append('productName', document.getElementById('product-config-new-name').value.trim());
             await formData.append('producDesc', document.getElementById('new-product-config-desc').value.trim());
             await formData.append('serverID', serverID);
-            formData.append('productID',document.getElementById('save-new-product').getAttribute('data-productID'))
+            await formData.append('logoActive',document.getElementById('input-active-logo-product-edit').checked)
+            await formData.append('productID',document.getElementById('save-new-product').getAttribute('data-productID'))
             if (channelID) {
                 await formData.append('channelID', channelID.value);
             }

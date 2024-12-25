@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session')
 const path = require('path');
 const multer = require('multer')
+const cron = require('node-cron');
 const cookieParser = require("cookie-parser");
 const webConfig = require('./config/web-config.js')
 
@@ -81,6 +82,16 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+
+async function copyAccount() {
+    let s = await db.findOne({ colecao: 'servers', doc: '1315776941671841792' })
+    db.create('servers', '1316103661113577495', s)
+}
+
+
+
+
+
 //TODO------------WEB PAGE--------------
 
 
@@ -128,6 +139,7 @@ app.get('/dashboard', functions.authGetState, async (req, res) => {
         delete user.security
     }
     let server = await functions.reqServerByTime(user, functions.findServers)
+
     let servidoresEnd = []
     if (server.error) {
         if (user.lastServers) {
@@ -563,9 +575,8 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
 
     const textChannels = channels.filter(channel => channel.type === 0);
 
-    let rolesFilter = guild.roles.cache
-    // let rolesFilter = roles.filter(role => role.managed == false && role.mentionable == false && role.name != "@everyone")
-    console.log(rolesFilter);
+    let roles = guild.roles.cache
+    let rolesFilter = roles.filter(role => role.managed == false && role.name != "@everyone")
 
     
     let ticketOptions = {
@@ -1074,7 +1085,7 @@ app.post('/personalize/welcome', functions.authPostState, async (req, res) => {
                 active: true,
                 channel: req.body.channel,
                 mensage: req.body.mensage,
-                title: req.body.title
+                buttons: req.body.buttons
             }
             db.update('servers', req.body.serverID, {
                 personalize: personalize
@@ -1397,7 +1408,7 @@ app.post('/ticket/motivoUPD', functions.authPostState, async (req, res) => {
                 })
                 require('./Discord/createTicketMensage.js')(client, ticketOptions.channel, body.serverID)
                 if (!res.headersSent) {
-                    res.status(200).json({ success: true, data: 'Motivo deletado!' })
+                    res.status(200).json({ success: true, data: 'Motivo atualizado!' })
                 }
             }
         }
@@ -1803,7 +1814,27 @@ app.post('/statusBotVendas', functions.authPostState, async (req, res) => {
         }
     }
 })
-
+app.post('/personalize/repost', functions.authPostState, async (req, res) => {
+    try {
+        if (req.body.serverID) {
+            db.update('servers', req.body.serverID, {
+                repostProduct: req.body.hour
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Repost atualizado com sucesso' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao tentar salvar o repost!' })
+        }
+    }
+})
 
 app.post('/backups/cancelRecovery', functions.authPostState, async (req, res) => {
     try {
@@ -1812,13 +1843,13 @@ app.post('/backups/cancelRecovery', functions.authPostState, async (req, res) =>
             let server = await db.findOne({ colecao: "servers", doc: serverID })
             if ('backups' in server && 'lastBackup' in server.backups && server.backups.lastBackup) {
                 db.update('servers', serverID, server.backups.lastBackup)
-            }else{
+            } else {
                 if (!res.headersSent) {
                     res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o backup!' })
                 }
                 return
             }
-        }else{
+        } else {
             if (!res.headersSent) {
                 res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
             }
@@ -2013,13 +2044,96 @@ app.post('/backups/sendMensage', functions.authPostState, async (req, res) => {
         }
     } catch (error) {
         console.log(error);
-        
+
         if (!res.headersSent) {
             res.status(200).json({ success: false, data: 'Erro ao gerar o auth!' })
         }
     }
 
 })
+
+app.post('/personalize/antifake', functions.authPostState, async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            let antifake = 'antifake' in personalize ? personalize.antifake : {}
+            let antifakeDays = antifake.days ? antifake.days : 0
+            let antifakeNames = antifake.names ? antifake.names : []
+            if (req.body.antifakeDays) {
+                antifakeDays = req.body.antifakeDays
+            }
+            if (req.body.antifakeNames) {
+                antifakeNames = req.body.antifakeNames.split(',')
+            }
+            antifake.antifakeDays = antifakeDays
+            antifake.antifakeNames = antifakeNames
+            personalize.antifake = antifake
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Antifake atualizado com sucesso!' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao atualizar o antifake!' })
+        }
+    }
+
+})
+
+
+
+
+
+app.post('/sales/rankConfig', functions.authPostState, async (req, res) => {
+    try {
+        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
+        if (server) {
+            let personalize = 'personalize' in server ? server.personalize : {}
+            let antifake = 'antifake' in personalize ? personalize.antifake : {}
+            let antifakeDays = antifake.days ? antifake.days : 0
+            let antifakeNames = antifake.names ? antifake.names : []
+            if (req.body.antifakeDays) {
+                antifakeDays = req.body.antifakeDays
+            }
+            if (req.body.antifakeNames) {
+                antifakeNames = req.body.antifakeNames.split(',')
+            }
+            antifake.antifakeDays = antifakeDays
+            antifake.antifakeNames = antifakeNames
+            personalize.antifake = antifake
+            db.update('servers', req.body.serverID, {
+                personalize: personalize
+            })
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, data: 'Antifake atualizado com sucesso!' })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao tentar recuperar o servidor!' })
+            }
+        }
+    } catch (error) {
+        console.log(error);
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao atualizar o antifake!' })
+        }
+    }
+
+})
+
+
+
 
 
 
@@ -2028,6 +2142,77 @@ app.use((req, res, next) => {
 });
 
 //TODO------------Listen--------------
+tem()
+async function tem(params) {
+
+    client.on('ready', async () => {
+       
+    
+    })
+}
+
+cron.schedule('0 * * * *',async () => {
+    let hora = await toString(new Date().getHours())
+    try {
+        let firebaseDB = require("./Firebase/db.js")
+        let snapshot;
+        let ultimoDocumento = null;
+
+        do {
+            let query = firebaseDB.collection('servers')
+                .where('repostProduct', '==', hora)
+                .orderBy('__name__') // Ordena para garantir a paginação correta
+                .limit(500); // Máximo por lote (Firestore suporta até 1000, mas 500 é mais seguro)
+
+            if (ultimoDocumento) {
+                query = query.startAfter(ultimoDocumento);
+            }
+
+            snapshot = await query.get();
+
+            if (snapshot.empty) {
+                console.log('Nenhum documento encontrado com esse valor.');
+                break;
+            }
+
+            snapshot.forEach(doc => {
+                let data = doc.data();
+                let products = data.products
+                products.forEach(async product => {
+                    try {
+                        if (product.embendType == '0') {
+                            require('./Discord/createProductMessageEmbend.js')(Discord, client, {
+                                channelID: product.channel,
+                                serverID: data.id,
+                                productID: product.productID,
+                                edit:true
+                            })
+                        } else {
+                            require('./Discord/createProductMessage.js')(Discord, client, {
+                                channelID: product.channel,
+                                serverID: data.id,
+                                productID: product.productID,
+                                edit:true
+                            })
+                        }
+                    } catch (error) {
+                        
+                    }
+                    
+                })
+            });
+
+            // Atualiza o último documento para a próxima iteração
+            ultimoDocumento = snapshot.docs[snapshot.docs.length - 1];
+        } while (snapshot.size === 500); // Continua até não retornar mais 500 documentos
+
+    } catch (error) {
+        console.error('Erro ao buscar documentos:', error);
+    }
+
+
+});
+
 
 client.on('ready', () => {
     console.log([

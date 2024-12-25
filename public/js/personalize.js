@@ -42,52 +42,6 @@ async function sendPersonalize(type,data) {
 }
 
 
-document.getElementById('avatarBotPerso').addEventListener('change',()=>{
-    errorNotify("Essa função esta temporariamente desativada!")
-    return
-    const fileInput = document.getElementById('avatarBotPerso');
-    const previewImage = document.getElementById('avatarPreview');
-    const file = fileInput.files[0];
-
-    if (file) {
-        const allowedTypes = ['image/jpeg', 'image/png'];
-        if (allowedTypes.includes(file.type)) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                previewImage.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            var formData = new FormData();
-            formData.append('avatarBot',file)
-            formData.append('serverID',serverID)
-
-            $.ajax({
-                traditional: true,
-                url: '/personalize/avatarbot',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    if (response.success) {
-                        successNotify('Imagem Alterada')
-                    } else {
-                        errorNotify(response.data)
-                    }
-    
-                },
-                error: function (xhr, status, error) {
-                    console.error(error);
-                }
-            })
-        } else {
-            errorNotify('Por favor, selecione um arquivo JPEG, PNG ou JPEG válido.');
-        }
-    } else {
-        errorNotify('Por favor, selecione um arquivo para enviar.');
-    }
-})
 
 document.getElementById('saveCargoPay').addEventListener('click',async()=>{
     const opcoes = document.getElementById('cargos-input-list').querySelectorAll('option');
@@ -105,15 +59,6 @@ document.getElementById('saveCargoPay').addEventListener('click',async()=>{
     sendPersonalize('cargoPay',cargosID)
 })
 
-document.getElementById('saveBotName').addEventListener('click',async()=>{
-    let name = document.getElementById('bot-name-input').value.trim()
-    if (!name) {
-        errorNotify("Selecione um cargo primeiro")
-        return
-    }
-    sendPersonalize('botName',name)
-})
-
 document.getElementById('color-dest-input').addEventListener('change',()=>{
     sendPersonalize('colorDest',document.getElementById('color-dest-input').value)
 })
@@ -122,24 +67,7 @@ document.getElementById('color-dest-input').addEventListener('input',()=>{
     document.getElementById('color-dest-preview').style.backgroundColor = document.getElementById('color-dest-input').value
 })
 
-document.getElementById('checkbox').addEventListener('change',async()=>{
-    let session = await fetch('/personalize/productIcon', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            icon:document.getElementById('checkbox').checked ,
-            serverID:serverID
-        }),
-    }).then(response => { return response.json() })
-    if (session.success == true) {
-        successNotify('Personalização alterada!')
-    }else{
-        errorNotify(session.data)
-    }
-})
+
 document.getElementById('welcome-channel-input').addEventListener('blur', function () {
     const inputValue = this.value.toLowerCase();
     const datalistOptions = Array.from(document.getElementById('welcome-channel-list').getElementsByTagName('option'));
@@ -150,47 +78,7 @@ document.getElementById('welcome-channel-input').addEventListener('blur', functi
         this.value = '';
     }
 });
-document.getElementById('save-mensage-welcome').addEventListener('click',async()=>{
-    if (document.getElementById(`title-welcome`).value.trim().length <= 0) {
-        errorNotify(`Insira um titulo primeiro!`)
-        return
-    }
-    if (document.getElementById(`mensage-welcome`).value.trim().length <= 0) {
-        errorNotify(`Insira uma mensagem primeiro!`)
-        return
-    }
-    if (document.getElementById(`welcome-channel-input`).value.trim().length <= 0) {
-        errorNotify(`Insira um canal primeiro!`)
-        return
-    }
-    const opcoes = document.getElementById('welcome-channel-list').querySelectorAll('option');
-    let channelID = null;
 
-    opcoes.forEach(option => {
-        if (option.value === document.getElementById('welcome-channel-input').value) {
-            channelID = option.getAttribute('data-channel');
-        }
-    });
-
-    let session = await fetch('/personalize/welcome', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            mensage:document.getElementById('mensage-welcome').value ,
-            title:document.getElementById('title-welcome').value ,
-            channel:channelID,
-            serverID:serverID
-        }),
-    }).then(response => { return response.json() })
-    if (session.success == true) {
-        successNotify('Mensagem de boas vindas salva!')
-    }else{
-        errorNotify(session.data)
-    }
-})
 
 if (document.getElementById('desative-welcome')) {
     document.getElementById('desative-welcome').addEventListener('click',async()=>{
@@ -309,6 +197,27 @@ document.getElementById('save-auto-react').addEventListener('click',async()=>{
     }).then(response => { return response.json() })
     if (session.success == true) {
         successNotify('Reacao criada!')
+        
+    }else{
+        errorNotify(session.data)
+    }
+})
+
+document.getElementById('save-antifake').addEventListener('click',async()=>{
+    let session = await fetch('/personalize/antifake', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            antifakeDays:document.getElementById(`min-days-fake`).value.trim(),
+            antifakeNames:document.getElementById(`names-block-fake`).value.trim(),
+            serverID:serverID
+        }),
+    }).then(response => { return response.json() })
+    if (session.success == true) {
+        successNotify(session.data)
         
     }else{
         errorNotify(session.data)

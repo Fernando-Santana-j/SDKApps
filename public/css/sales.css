@@ -144,7 +144,7 @@
 }
 
 
-.product-cadastro-containner{
+.product-cadastro-containner,#rank-buy-containner{
     width: 90%;
     flex-direction: column;
     align-items: center;
@@ -1097,6 +1097,20 @@
     justify-content: center;
     align-items: center;
 }
+
+#active-logo-product-containner,#active-logo-product-containner-edit{
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-family: 'poppins';
+}
+#input-active-logo-product,#input-active-logo-product-edit{
+    accent-color: var(--main-color-purple);
+}
 @media screen and (max-width:800px) {
     #pagamentos-produtos-containner{
         flex-direction: column;
@@ -1131,6 +1145,54 @@
 
 
 
+#rank-buy-content{
+    padding: 1em;
+    width: 100%;
+    border-radius: var(--border-radius-min);
+    background-color: var(--secundary-color);
+
+}
+#config-rank-buy-content{
+   display: flex;
+   gap: 1em;
+   justify-content: space-between;
+    padding: 1em;
+}
+
+#config-rank-buy-left-containner,#config-rank-buy-right-containner{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+#config-rank-buy-left-containner{
+    flex: 0.8;
+}
+#config-rank-buy-right-containner{
+    flex: 1.2;
+}
+#input-config-rank-buy-mensage-announcement{
+    height: 6em;
+}
+#clear-rank-buy-config{
+    flex: 0.6;
+}
+#save-rank-buy-config{
+    flex: 1.4;
+}
+#buttons-rank-buy{
+    display: flex;
+    gap: 1.5em;
+    padding: 1em;
+    margin-top: 1em;
+}
+
+#config-rank-buy-right-containner{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding-left: 1em;
+    
+}
 @media screen and (max-width:1040px) {
     #main-content{
         width: 100% !important;

@@ -115,6 +115,7 @@ router.post('/product/create', functions.authPostState, upload.fields([{ name: '
             productID: await productStripe.id,
             productName: productName,
             producDesc: producDesc,
+            logoActive: req.body.logoActive,
             estoque: '',
             channel: channelID,
             productLogo: `/uploads/produtos/logos/${'logo_' + req.files.productLogo[0].filename}`,
@@ -325,6 +326,7 @@ router.post('/product/update', functions.authPostState, upload.fields([{ name: '
         produto.embendType = req.body.embendType
         produto.estoqueModel = model.estoqueModel
         produto.estoque = model.estoque
+        produto.logoActive = req.body.logoActive
         if (req.body.channelID) {
             produto.channel = req.body.channelID
         }

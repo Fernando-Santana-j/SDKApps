@@ -441,7 +441,7 @@ a {
     max-height: 35px;
     max-width: 35px;
     cursor: pointer;
-    z-index: 5;
+
     transition: border .25s linear;
 }
 
