@@ -108,7 +108,7 @@ client.on('guildMemberAdd', async member => {
             mensage = await mensage.replace('@@username', member.user.username)
         }
         if (mensage.includes('@@globalname')) {
-            mensage = await mensage.replace('@@globalname', member.user.globalName)
+            mensage = await mensage.replace('@@globalname', `<@${member.user.globalName}>`)
         }
         let comp = {
             components: [new Discord.ActionRowBuilder()]
@@ -1354,6 +1354,15 @@ module.exports = (Discord2, client) => {
                     }
                 }
 
+                if (interaction.customId && interaction.customId.includes('closeSingleProdTopic')) {
+                    let userId = interaction.customId.replace('closeSingleProdTopic-', '')
+                    console.log(interaction.guild.ownerId);
+                    
+                    if (userId == interaction.user.id && interaction.guild.ownerId != interaction.user.id) {
+                        return interaction.reply({ content: 'Você não tem permissão para fechar o tópico', ephemeral: true })
+                    }
+                    DiscordChannel.delete()
+                }
                 if (interaction.customId && interaction.customId.includes('closeTicket')) {
                     let protocolo = interaction.message.embeds[0].data.fields[0].value.replace(/`/g, "")
                     let userTicketID = protocolo.replace(/prot-\d+-/, '')
@@ -2238,7 +2247,19 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             invitable: false,
                             reason: `Recebimento de produto ${product.productName} para o usuario ${user.username}`,
                         });
-                        thread.send(`|| <@${user.id}> || || <@${dono.id}> ||  \n Aguarde ate o recebimento do produto os responsaveis ja foram notificados!`)
+                        thread.send({
+                            content:`|| <@${user.id}> || || <@${dono.id}> ||  \n Aguarde ate o recebimento do produto os responsaveis ja foram notificados!`,
+                            components: [
+                                new Discord.ActionRowBuilder()
+                                    .addComponents(
+                                        new Discord.ButtonBuilder()
+                                            .setStyle(Discord.ButtonStyle.Danger)
+                                            .setEmoji(await require('./emojisGet').apagar)
+                                            .setLabel('Fechar topico')
+                                            .setCustomId(`closeSingleProdTopic-${user.id}`)
+                                    )
+                            ]
+                        })
                         await user.send({
                             content: `Foi criado um topico para o recebimento do produto ${product.productName} no canal do produto!`,
                             components: [
