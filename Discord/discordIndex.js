@@ -354,6 +354,21 @@ module.exports = (Discord2, client) => {
                             ],
                             ephemeral: true
                         });
+
+                        setTimeout(async () => {
+                            try {
+                                let discordChannelDelete = await DiscordServer.channels.cache.get(DiscordChannel.id)
+                                if (discordChannelDelete) {
+                                    await discordChannelDelete.delete()
+                                    const userD = await client.users.fetch(interaction.user.id)
+                                    if (userD) {
+                                        userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
+                                    }
+                                }
+        
+                            } catch (error) { }
+                        }, 600000)
+
                         if ('personalize' in server && 'lembreteMensage' in server.personalize && server.personalize.lembreteMensage.active == true) {
                             let channelID = newChannel.id
                             let userID = interaction.user.id
@@ -370,19 +385,7 @@ module.exports = (Discord2, client) => {
                             }, 400000)
                             
                         }
-                        setTimeout(async () => {
-                            try {
-                                let discordChannelDelete = await DiscordServer.channels.cache.get(findChannel.id)
-                                if (discordChannelDelete) {
-                                    await discordChannelDelete.delete()
-                                    const userD = await client.users.fetch(params.userID)
-                                    if (userD) {
-                                        userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-                                    }
-                                }
-        
-                            } catch (error) { }
-                        }, 600000)
+                        
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                     }
