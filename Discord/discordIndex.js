@@ -370,6 +370,19 @@ module.exports = (Discord2, client) => {
                             }, 400000)
                             
                         }
+                        setTimeout(async () => {
+                            try {
+                                let discordChannelDelete = await DiscordServer.channels.cache.get(findChannel.id)
+                                if (discordChannelDelete) {
+                                    await discordChannelDelete.delete()
+                                    const userD = await client.users.fetch(params.userID)
+                                    if (userD) {
+                                        userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
+                                    }
+                                }
+        
+                            } catch (error) { }
+                        }, 600000)
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                     }
@@ -2545,20 +2558,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         
                     }   
                 },5000)
-            }else{
-                setTimeout(async () => {
-                    try {
-                        let discordChannelDelete = await DiscordServer.channels.cache.get(findChannel.id)
-                        if (discordChannelDelete) {
-                            await discordChannelDelete.delete()
-                            const userD = await client.users.fetch(params.userID)
-                            if (userD) {
-                                userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-                            }
-                        }
-
-                    } catch (error) { }
-                }, 600000)
             }
 
         } else {
