@@ -368,19 +368,7 @@ module.exports = (Discord2, client) => {
                                     }
                                 } catch (error) { }
                             }, 400000)
-                            setTimeout(async () => {
-                                try {
-                                    let discordChannelDelete = await DiscordServer.channels.cache.get(channelID)
-                                    if (discordChannelDelete) {
-                                        await discordChannelDelete.delete()
-                                        const userD = await client.users.fetch(userID)
-                                        if (userD) {
-                                            userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-                                        }
-                                    }
-
-                                } catch (error) { }
-                            }, 600000)
+                            
                         }
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
@@ -2231,7 +2219,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
             const user = await client.users.fetch(params.userID);
             let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
             let arrayItensTxt = []
-
+            let numberProdsSingle = 0
+            let numberProdsNormal = 0
             let productsName = []
 
             let products = serverData.products
@@ -2246,6 +2235,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
                 if (typeProduct == 'single') {
                     try {
+                        numberProdsSingle += 1
                         let productSingleChannel = DiscordServer.channels.cache.find(c => c.topic === element.product)
                         let thread = await productSingleChannel.threads.create({
                             name: `Recebimento manual, ${user.username}`,
@@ -2291,22 +2281,18 @@ module.exports.sendProductPayment = async (params, id, type) => {
                             ]
                         })
 
+                        product.estoque -= 1
                     } catch (error) {
                         console.log('SendProductSingleERROR', error);
                         return refound();
                     }
                     
-                    setTimeout(async () => {
-                        try{
-                            findChannel.delete()
-                        } catch (error) {
-    
-                        }   
-                    },12000)
+                    
                 }
 
                 if (typeProduct == 'normal') {
                     try {
+                        numberProdsNormal += 1
                         let itensCortados = await product.estoque.splice(0, requestedQuantity)
                         let itens = itensCortados.map(item => item.conteudo)
                         itens.forEach(item => {
@@ -2455,7 +2441,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         findChannelPrivate.send({ files: [attachment] }).catch(() => { });
                     } catch (error) {
-                        console.log('Produtos:', concatenatedString);
+
+                        console.log('Produtos:', arrayItensTxt);
                     }
                 } else {
                     try {
@@ -2479,7 +2466,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         sendTxtMensage(dono)
                     } catch (error) {
-                        console.log('Produtos:', concatenatedString);
+                        console.log('Produtos:', arrayItensTxt);
 
                     }
                 }
@@ -2548,11 +2535,35 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
                 }
             } catch (error) { }
+
+            if (numberProdsNormal == 0 && numberProdsSingle > 0) {
+                setTimeout(async () => {
+                    try{
+                        findChannel.delete()
+                    } catch (error) {
+                        console.log(error);
+                        
+                    }   
+                },5000)
+            }else{
+                setTimeout(async () => {
+                    try {
+                        let discordChannelDelete = await DiscordServer.channels.cache.get(findChannel.id)
+                        if (discordChannelDelete) {
+                            await discordChannelDelete.delete()
+                            const userD = await client.users.fetch(params.userID)
+                            if (userD) {
+                                userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
+                            }
+                        }
+
+                    } catch (error) { }
+                }, 600000)
+            }
+
         } else {
             refound()
         }
-        let serverID = params.serverID
-        let userID = params.userID
     }
 }
 
