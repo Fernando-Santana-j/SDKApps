@@ -368,19 +368,7 @@ module.exports = (Discord2, client) => {
                                     }
                                 } catch (error) { }
                             }, 400000)
-                            setTimeout(async () => {
-                                try {
-                                    let discordChannelDelete = await DiscordServer.channels.cache.get(channelID)
-                                    if (discordChannelDelete) {
-                                        await discordChannelDelete.delete()
-                                        const userD = await client.users.fetch(userID)
-                                        if (userD) {
-                                            userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
-                                        }
-                                    }
-
-                                } catch (error) { }
-                            }, 600000)
+                            
                         }
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
@@ -2549,8 +2537,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
             } catch (error) { }
 
             if (numberProdsNormal == 0 && numberProdsSingle > 0) {
-                console.log(1);
-                
                 setTimeout(async () => {
                     try{
                         findChannel.delete()
@@ -2560,15 +2546,19 @@ module.exports.sendProductPayment = async (params, id, type) => {
                     }   
                 },5000)
             }else{
-                console.log(2);
-                
                 setTimeout(async () => {
-                    try{
-                        findChannel.delete()
-                    } catch (error) {
+                    try {
+                        let discordChannelDelete = await DiscordServer.channels.cache.get(findChannel.id)
+                        if (discordChannelDelete) {
+                            await discordChannelDelete.delete()
+                            const userD = await client.users.fetch(params.userID)
+                            if (userD) {
+                                userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
+                            }
+                        }
 
-                    }   
-                },600000)
+                    } catch (error) { }
+                }, 600000)
             }
 
         } else {
