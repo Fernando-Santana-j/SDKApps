@@ -357,7 +357,7 @@ module.exports = (Discord2, client) => {
 
                         setTimeout(async () => {
                             try {
-                                let discordChannelDelete = await DiscordServer.channels.cache.get(DiscordChannel.id)
+                                let discordChannelDelete = await DiscordServer.channels.cache.get(newChannel.id)
                                 if (discordChannelDelete) {
                                     await discordChannelDelete.delete()
                                     const userD = await client.users.fetch(interaction.user.id)
