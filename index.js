@@ -2153,7 +2153,8 @@ async function tem(params) {
 
 cron.schedule('0 * * * *',async () => {
     let hora = new Date().getHours()
-
+    console.log(hora);
+    
     try {
         let firebaseDB = require("./Firebase/db.js")
         let snapshot;
@@ -2161,9 +2162,9 @@ cron.schedule('0 * * * *',async () => {
 
         do {
             let query = firebaseDB.collection('servers')
-                .where('repostProduct', '==', hora)
-                .orderBy('__name__') // Ordena para garantir a paginação correta
-                .limit(500); // Máximo por lote (Firestore suporta até 1000, mas 500 é mais seguro)
+                .where('repostProduct', '==', hora.toString())
+                .orderBy('__name__') 
+                .limit(500); 
 
             if (ultimoDocumento) {
                 query = query.startAfter(ultimoDocumento);
