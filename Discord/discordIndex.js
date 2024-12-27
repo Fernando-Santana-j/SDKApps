@@ -2235,8 +2235,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
             const user = await client.users.fetch(params.userID);
             let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
             let arrayItensTxt = []
-            let numberProdsSingle = 0
-            let numberProdsNormal = 0
             let productsName = []
 
             let products = serverData.products
@@ -2552,17 +2550,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 }
             } catch (error) { }
 
-            if (numberProdsNormal == 0 && numberProdsSingle > 0) {
-                setTimeout(async () => {
-                    try{
-                        findChannel.delete()
-                    } catch (error) {
-                        console.log(error);
-                        
-                    }   
-                },5000)
-            }
-
+            setTimeout(async () => {
+                try{
+                    findChannel.delete()
+                } catch (error) {}   
+            },5000)
         } else {
             refound()
         }
