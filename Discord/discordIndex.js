@@ -2142,15 +2142,16 @@ module.exports.sendProductPayment = async (params, id, type) => {
         let carrinho = carrinhos[params.userID]
         delete carrinhos[params.userID]
         let result = await new Promise(async (resolve, reject) => {
+            let arrayEstoque = []
             for (let [chave, element] of Object.entries(carrinho)) {
                 const produto = serverData.products.find(product => product.productID == element.product);
                 let typeProduct = 'typeProduct' in produto ? produto.typeProduct : 'normal'
                 switch (typeProduct) {
                     case 'single':
                         if (produto.estoque <= 0) {
-                            resolve(false)
+                            arrayEstoque.push(false)
                         } else {
-                            resolve(true)
+                            arrayEstoque.push(true)
                         }
                         break;
                     case 'subscription':
@@ -2161,14 +2162,18 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         break;
                     case 'normal':
                         if (produto.estoque.length <= 0) {
-                            resolve(false)
+                            arrayEstoque.push(false)
                         } else {
-                            resolve(true)
+                            arrayEstoque.push(true)
                         }
                         break;
                 }
             }
-
+            if (arrayEstoque.includes(false)) {
+                resolve(false)
+            } else {
+                resolve(true)
+            }
 
         });
         async function refound() {
@@ -2249,7 +2254,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
                 if (typeProduct == 'single') {
                     try {
-                        numberProdsSingle += 1
                         let productSingleChannel = DiscordServer.channels.cache.find(c => c.topic === element.product)
                         let thread = await productSingleChannel.threads.create({
                             name: `Recebimento manual, ${user.username}`,
@@ -2306,7 +2310,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
                 if (typeProduct == 'normal') {
                     try {
-                        numberProdsNormal += 1
                         let itensCortados = await product.estoque.splice(0, requestedQuantity)
                         let itens = itensCortados.map(item => item.conteudo)
                         itens.forEach(item => {
@@ -2556,6 +2559,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                 } catch (error) {}   
             },5000)
         } else {
+            console.log("ResultPaymentMessageError", result);
             refound()
         }
     }
