@@ -2142,19 +2142,10 @@ app.use((req, res, next) => {
 });
 
 //TODO------------Listen--------------
-tem()
-async function tem(params) {
 
-    client.on('ready', async () => {
-       
-    
-    })
-}
 
 cron.schedule('0 * * * *',async () => {
     let hora = new Date().getHours()
-    console.log(hora);
-    
     try {
         let firebaseDB = require("./Firebase/db.js")
         let snapshot;
@@ -2173,7 +2164,6 @@ cron.schedule('0 * * * *',async () => {
             snapshot = await query.get();
 
             if (snapshot.empty) {
-                console.log('Nenhum documento encontrado com esse valor.');
                 break;
             }
 
@@ -2204,9 +2194,8 @@ cron.schedule('0 * * * *',async () => {
                 })
             });
 
-            // Atualiza o último documento para a próxima iteração
             ultimoDocumento = snapshot.docs[snapshot.docs.length - 1];
-        } while (snapshot.size === 500); // Continua até não retornar mais 500 documentos
+        } while (snapshot.size === 500); 
 
     } catch (error) {
         console.error('Erro ao buscar documentos:', error);
