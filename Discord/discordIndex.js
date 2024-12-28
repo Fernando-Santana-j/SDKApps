@@ -2169,8 +2169,6 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         break;
                 }
             }
-            console.log(arrayEstoque);
-            
             if (arrayEstoque.includes(false)) {
                 resolve(false)
             } else {
