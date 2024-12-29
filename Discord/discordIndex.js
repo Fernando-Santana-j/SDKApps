@@ -2348,12 +2348,11 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
             try {
+                let productText = await productsName.join('\n');
+                const concatenatedString = await arrayItensTxt.join('\n');
+                const buffer = Buffer.from(concatenatedString, 'utf-8');
+                const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                 if (arrayItensTxt.length > 0) {
-                    let productText = await productsName.join('\n');
-
-                    const concatenatedString = await arrayItensTxt.join('\n');
-                    const buffer = Buffer.from(concatenatedString, 'utf-8');
-                    const attachment = new Discord.AttachmentBuilder(buffer, { name: 'compras.txt' });
                     function sendTxtMensage(target) {
                         try {
                             target.send({
@@ -2458,8 +2457,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         findChannelPrivate.send({ files: [attachment] }).catch(() => { });
                     } catch (error) {
-
-                        console.log('Produtos:', arrayItensTxt);
+                        console.log("SendPrivateLogError", error);
+                        
                     }
                 } else {
                     try {
@@ -2483,8 +2482,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         })
                         sendTxtMensage(dono)
                     } catch (error) {
-                        console.log('Produtos:', arrayItensTxt);
-
+                        console.log("SendPrivateLogErrorDM", error);
+                        
                     }
                 }
 
