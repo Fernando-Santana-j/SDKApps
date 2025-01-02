@@ -365,7 +365,7 @@ module.exports = (Discord2, client) => {
                                         userD.send(`O seu ultimo carrinho no servidor ${DiscordServer.name} foi expirado!`)
                                     }
                                 }
-        
+
                             } catch (error) { }
                         }, 600000)
 
@@ -383,9 +383,9 @@ module.exports = (Discord2, client) => {
                                     }
                                 } catch (error) { }
                             }, 400000)
-                            
+
                         }
-                        
+
                     } else {
                         return interaction.editReply({ content: '⚠ | Não foi possivel criar o carrinho tente novamente!', ephemeral: true })
                     }
@@ -1233,25 +1233,32 @@ module.exports = (Discord2, client) => {
                         //     })
                         // } else {
                         require('./newTicketFunction')(client, interaction, { motivo: interaction.values[0] })
-                        if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
-                            var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
-                            let dataAtual = new Date();
-                            let meses = [
-                                "Janeiro", "Fevereiro", "Março", "Abril",
-                                "Maio", "Junho", "Julho", "Agosto",
-                                "Setembro", "Outubro", "Novembro", "Dezembro"
-                            ];
-                            let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
-                            let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
+                        console.log(serverData.ticketOptions.privateLog);
 
-                            DiscordChannelPublicLog.send({
-                                embeds: [
-                                    new Discord.EmbedBuilder()
-                                        .setColor('#6E58C7')
-                                        .setTitle(`🎫・Novo ticket!`)
-                                        .setFields({ name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "Motivo:", value: findMotivo.name, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
-                                ],
-                            })
+                        if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
+                            try {
+                                var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
+                                let dataAtual = new Date();
+                                let meses = [
+                                    "Janeiro", "Fevereiro", "Março", "Abril",
+                                    "Maio", "Junho", "Julho", "Agosto",
+                                    "Setembro", "Outubro", "Novembro", "Dezembro"
+                                ];
+                                let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+                                let findMotivo = await serverData.ticketOptions.motivos.find(element => element.id == interaction.values[0])
+
+                                DiscordChannelPublicLog.send({
+                                    embeds: [
+                                        new Discord.EmbedBuilder()
+                                            .setColor('#6E58C7')
+                                            .setTitle(`🎫・Novo ticket!`)
+                                            .setFields({ name: "🛍 | Nome do cliente:", value: "**" + interaction.user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + interaction.user.id + "``", inline: true }, { name: "Motivo:", value: findMotivo.name, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
+                                    ],
+                                })
+                            } catch (error) {
+                                console.log(error);
+
+                            }
                         }
                         // }
 
@@ -1366,7 +1373,6 @@ module.exports = (Discord2, client) => {
 
                 if (interaction.customId && interaction.customId.includes('closeSingleProdTopic')) {
                     let userId = interaction.customId.replace('closeSingleProdTopic-', '')
-                    console.log(interaction.guild.ownerId);
 
                     if (userId == interaction.user.id && interaction.guild.ownerId != interaction.user.id) {
                         return interaction.reply({ content: 'Você não tem permissão para fechar o tópico', ephemeral: true })
@@ -1404,34 +1410,40 @@ module.exports = (Discord2, client) => {
                                                 )
                                         ]
                                     })
-                                    if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
-                                        var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
-                                        const attachment = await discordTranscripts.createTranscript(DiscordChannel, {
-                                            limit: -1, // Max amount of messages to fetch. `-1` recursively fetches.
-                                            returnType: 'attachment', // Valid options: 'buffer' | 'string' | 'attachment' Default: 'attachment' OR use the enum ExportReturnType
-                                            filename: `${DiscordServer.name} | ${protocolo}.html`, // Only valid with returnType is 'attachment'. Name of attachment.
-                                            saveImages: false, // Download all images and include the image data in the HTML (allows viewing the image even after it has been deleted) (! WILL INCREASE FILE SIZE !)
-                                            footerText: "Exported {number} message{s}", // Change text at footer, don't forget to put {number} to show how much messages got exported, and {s} for plural
-                                            poweredBy: false, // Whether to include the "Powered by discord-html-transcripts" footer
-                                            ssr: true // Whether to hydrate the html server-side
-                                        });
-                                        let dataAtual = new Date();
-                                        let meses = [
-                                            "Janeiro", "Fevereiro", "Março", "Abril",
-                                            "Maio", "Junho", "Julho", "Agosto",
-                                            "Setembro", "Outubro", "Novembro", "Dezembro"
-                                        ];
-                                        let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+                                    console.log(serverData.ticketOptions);
 
-                                        DiscordChannelPublicLog.send({
-                                            embeds: [
-                                                new Discord.EmbedBuilder()
-                                                    .setColor('#6E58C7')
-                                                    .setTitle(`🎫・Ticket Fechado!`)
-                                                    .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userResp.username + "**", inline: false }, { name: "🆔 | ID do responsavel:", value: "``" + userResp.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + user.id + "``", inline: true }, { name: "Protocolo:", value: protocolo, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
-                                            ],
-                                            files: [attachment]
-                                        })
+                                    if ('ticketOptions' in serverData && serverData.ticketOptions.privateLog) {
+                                        try {
+                                            var DiscordChannelPublicLog = await DiscordServer.channels.cache.get(serverData.ticketOptions.privateLog)
+                                            const attachment = await discordTranscripts.createTranscript(DiscordChannel, {
+                                                limit: -1, // Max amount of messages to fetch. `-1` recursively fetches.
+                                                returnType: 'attachment', // Valid options: 'buffer' | 'string' | 'attachment' Default: 'attachment' OR use the enum ExportReturnType
+                                                filename: `${DiscordServer.name} | ${protocolo}.html`, // Only valid with returnType is 'attachment'. Name of attachment.
+                                                saveImages: false, // Download all images and include the image data in the HTML (allows viewing the image even after it has been deleted) (! WILL INCREASE FILE SIZE !)
+                                                footerText: "Exported {number} message{s}", // Change text at footer, don't forget to put {number} to show how much messages got exported, and {s} for plural
+                                                poweredBy: false, // Whether to include the "Powered by discord-html-transcripts" footer
+                                                ssr: true // Whether to hydrate the html server-side
+                                            });
+                                            let dataAtual = new Date();
+                                            let meses = [
+                                                "Janeiro", "Fevereiro", "Março", "Abril",
+                                                "Maio", "Junho", "Julho", "Agosto",
+                                                "Setembro", "Outubro", "Novembro", "Dezembro"
+                                            ];
+                                            let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
+
+                                            DiscordChannelPublicLog.send({
+                                                embeds: [
+                                                    new Discord.EmbedBuilder()
+                                                        .setColor('#6E58C7')
+                                                        .setTitle(`🎫・Ticket Fechado!`)
+                                                        .setFields({ name: "💼 | Responsavel pelo ticket:", value: "**" + userResp.username + "**", inline: false }, { name: "🆔 | ID do responsavel:", value: "``" + userResp.id + "``", inline: true }, { name: "🛍 | Nome do cliente:", value: "**" + user.username + "**", inline: false }, { name: "🆔 | ID do cliente:", value: "``" + user.id + "``", inline: true }, { name: "Protocolo:", value: protocolo, inline: false }, { name: "📅 | Data:", value: "**" + dataFormatada + '**', inline: false })
+                                                ],
+                                                files: [attachment]
+                                            })
+                                        } catch (error) {
+                                            console.log(error);
+                                        }
                                     }
                                 } catch (error) {
                                     console.log(error);
@@ -2304,8 +2316,8 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         console.log('SendProductSingleERROR', error);
                         return refound();
                     }
-                    
-                    
+
+
                 }
 
                 if (typeProduct == 'normal') {
@@ -2458,7 +2470,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         findChannelPrivate.send({ files: [attachment] }).catch(() => { });
                     } catch (error) {
                         console.log("SendPrivateLogError", error);
-                        
+
                     }
                 } else {
                     try {
@@ -2483,7 +2495,7 @@ module.exports.sendProductPayment = async (params, id, type) => {
                         sendTxtMensage(dono)
                     } catch (error) {
                         console.log("SendPrivateLogErrorDM", error);
-                        
+
                     }
                 }
 
@@ -2553,10 +2565,10 @@ module.exports.sendProductPayment = async (params, id, type) => {
             } catch (error) { }
 
             setTimeout(async () => {
-                try{
+                try {
                     findChannel.delete()
-                } catch (error) {}   
-            },5000)
+                } catch (error) { }
+            }, 5000)
         } else {
             console.log("ResultPaymentMessageError", result);
             refound()
