@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Pass</title>
     <%- include('./reusable/head.ejs') %>
-    <style>
-        body{
-            background-color: var(--opacity-color-purple);
-        }
-    </style>
+        <style>
+            body {
+                background-color: var(--opacity-color-purple);
+            }
+        </style>
 </head>
+
 <body>
-    
+
     <div>
         <div id="containner"></div>
         <%- include('./reusable/script.ejs') %>
-       
-        <script>
-            let first = '<%= firstSend %>'
-            let mensage = '<%= mensage %>'
-            if (mensage.length > 0 ) {
-                mensageNotify(mensage)
-            }
-            passVerify(null,'geral',"/dashboard",first == 'true' ? 'first' : null)
-        </script>
+
+            <script>
+                document.addEventListener('keypress', async (event) => {
+                    if (event.key === 'Enter') {
+                        document.getElementById('pass-verify-button').click()
+                    }
+                })
+                const params = new URLSearchParams(window.location.search);
+                let refParams = params.get('ref');
+                
+                let finalUrl = refParams ? refParams : "/dashboard"
+                
+                passVerify(null, 'geral', finalUrl, null)
+            </script>
     </div>
 </body>
+
 </html>

@@ -1,23 +1,18 @@
 <style>
     #top-header-containner{
-    position: fixed;
     width: 100%;
-    height: 5em;
+    max-height: 100%;
     background-color: var(--menu-color);
     padding: 1em;
     display: flex;
     gap: 2em;
     justify-content: space-between;
     z-index: 99;
+    box-shadow: 0 0 20px var(--menu-color);
     #top-header-left-content{
-        height: 100%;
         display: flex;
         align-items: center;
-        gap: 3em;
-        #top-header-logo img{
-            width: 6em;
-            
-        }
+        justify-content: center;
         
     }
     #top-header-other-links{
@@ -195,12 +190,11 @@
     cursor: pointer;
 }
 </style>
-<div id="top-header-containner">
+<div id="top-header-containner" class="top-header">
     <div id="top-header-left-content">
-        <div id="top-header-logo" class="flex-center">
-            <img src="/public/img/logo-color-1.png" alt="">
+        <div id="top-header-logo" class="logo">
+            SDKApps
         </div>
-        
     </div>
     <div id="mini-menu">
         <div id="top-header-mid">
@@ -235,9 +229,6 @@
                     </datalist>
                 </div>
             </div>
-            <div id="top-header-plan-button">
-                <a href="#">Planos</a>
-            </div>
             
         </div>
     </div>
@@ -246,7 +237,7 @@
     </div>
     <div id="top-header-profile-content">
         <div id="profile-pic" class="flex-center">
-            <img src="<%= user.profile_pic %>">
+            <img src="<%= user.profile_pic ? user.profile_pic : '/public/img/Logos/LOGO-PIXEL.gif' %>">
         </div>
         <p id="profile-display-name"><%= user.displayName %></p>
     </div>

@@ -1,0 +1,139 @@
+<style>
+    #code-confirm-popup-top {
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    #code-confirm-popup-main-content-texts-desc {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #code-confirm-popup-main-content-texts-desc-text {
+        width: 60%;
+        text-align: center;
+    }
+
+    #code-confirm-popup-main-content-texts {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-self: center;
+        text-align: center;
+    }
+
+    #code-confirm-popup-content {
+        width: 40em !important;
+    }
+
+    #code-confirm-popup-main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4em;
+    }
+
+    #code-confirm-popup-main-content-inputs-row {
+        display: flex;
+        justify-content: center;
+        gap: 1.5em;
+
+
+    }
+
+    .code-confirm-popup-main-content-inputs-col {
+        font-size: 1.6em;
+        padding: 0.1em;
+        width: 3em;
+        height: 3.5em;
+        /* border: 3px solid var(--main-color-purple) !important; */
+        color: var(--primary-color);
+        background-color: var(--color-text-primary);
+        border: none;
+        border-radius: var(--border-radius-min);
+        font-family: 'poppins';
+        text-align: center;
+        transition: border-color 0.5s ease;
+    }
+</style>
+
+<div id="code-confirm-popup-containner" class="popup-containner noClose">
+    <div id="code-confirm-popup-content" class="popup-content">
+        <div id="code-confirm-popup-main-content">
+            <div id="code-confirm-popup-main-content-texts">
+                <div id="code-confirm-popup-main-content-texts-title">
+                    <div id="code-confirm-popup-main-content-texts-title-text" class="title-col">
+                        Confirme sua autenticidade!
+                    </div>
+                </div>
+                <div id="code-confirm-popup-main-content-texts-desc" class="desc-col">
+                    <div id="code-confirm-popup-main-content-texts-desc-text">
+                        Foi enviado um código de confirmação para o email informado, preencha o campo abaixo!
+                    </div>
+                </div>
+            </div>
+            <div id="code-confirm-popup-main-content-inputs-row">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            </div>
+
+            <div id="code-confirm-popup-main-content-button">
+                <button class="button-padrao" id="code-confirm-button">Verificar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+
+    document.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            if (document.getElementById('code-confirm-popup-containner').classList.contains('active')) {
+                document.getElementById('code-confirm-button').click()
+            }
+        }
+    })
+
+    const inputs = document.querySelectorAll('.code-confirm-popup-main-content-inputs-col');
+    inputs.forEach(async (input, index) => {
+        input.addEventListener('paste', (event) => {
+            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+            const cleanedData = pasteData.replace(/\s+/g, '');
+            if (cleanedData.length === inputs.length) {
+                inputs.forEach((input, i) => {
+                    input.value = cleanedData[i] || '';
+                });
+                inputs[inputs.length - 1].focus();
+
+            }
+
+            event.preventDefault();
+        });
+        input.addEventListener('input', async () => {
+            if (input.value.length > 1) {
+                input.value = input.value.slice(0, 1);
+            }
+
+            if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+
+
+        });
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+    // openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
+</script>

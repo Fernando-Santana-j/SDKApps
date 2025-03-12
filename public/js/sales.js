@@ -526,28 +526,7 @@ document.getElementById('product-config-new-price').addEventListener('input', ()
 
 
 
-function previewImage(input, preview) {
-    if (input.files && input.files[0]) {
-        let file = input.files[0]
-        var fileType = file.type;
-        var validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-        if (validImageTypes.includes(fileType)) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                preview.setAttribute('src', e.target.result);
-            }
-            reader.readAsDataURL(file);
-        } else {
-            input.value = ''
-            errorNotify('O arquivo que você selecinou não e uma imagem!')
-        }
-    } else {
-        input.value = ''
-        errorNotify('O arquivo não pode ser carregado tente novamente ou insira outro arquivo!')
-    }
-
-}
 
 document.getElementById('logo-input').addEventListener('change', function () {
     previewImage(this, document.getElementById('logo-preview'));

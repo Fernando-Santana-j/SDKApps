@@ -1,0 +1,91 @@
+<style>
+    #store-cart-float-icon-containner{
+        position: fixed;
+        top: 2em;
+        right: 2em;
+        z-index: 999999;
+    }
+    #store-cart-float-icon-content {
+        position: relative;
+        padding: 1em;
+        background: linear-gradient(135deg, var(--cor-principal), var(--cor-principal-escura));
+        ;
+        border-radius: var(--border-radius-max);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        
+    }
+
+    #store-cart-float-icon-itens {
+
+        position: absolute;
+        top: 10px;
+        left: -25px;
+        width: 1.8em;
+        height: 1.8em;
+        font-weight: bold;
+        font-size: 1em;
+        z-index: 9999999999;
+        font-family: 'poppins';
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--red-opacity-color);
+        color: var(--cor-texto-principal);
+        border-radius: var(--border-radius-max);
+        transform: translate(50%, -50%);
+    }
+
+    #store-cart-float-icon {
+        width: 2.5em;
+        z-index: 9999999;
+        height: 2.5em;
+        color: var(--cor-texto-principal);
+
+    }
+    
+    #store-cart-float-icon-content:hover {
+        box-shadow: 0 10px 25px rgba(138, 43, 226, 0.4);
+    }
+
+    #store-cart-float-icon-content::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: all 0.6s ease;
+    }
+
+    #store-cart-float-icon-content:hover::after {
+        left: 100%;
+
+    }
+</style>
+
+<div id="store-cart-float-icon-containner" data-itens="2">
+    <label for="store-cart-float-icon" id="store-cart-float-icon-itens">2</label>
+    <div id="store-cart-float-icon-content">
+        <div id="store-cart-float-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart">
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+<div id="store-popup-cart-containner" style="display: none;">
+    <div id="store-popup-cart-content">
+        <div id="store-cart-content-icon">
+            <img src="/public/img/icons/shopping_cart.png">
+        </div>
+
+    </div>
+</div>

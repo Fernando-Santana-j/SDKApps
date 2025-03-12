@@ -1,0 +1,189 @@
+<style>
+    #register-popup-content {
+        width: 40em;
+        height: 50em;
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    #register-popup-top {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+
+    }
+
+    #register-popup-top-title {
+        display: flex;
+        gap: 1em;
+        margin-right: 1.2em;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #register-popup-top-title-logo img {
+        width: 5em;
+        height: 5em;
+    }
+
+    #register-popup-top-title-text {
+        margin-bottom: 0.3em !important;
+    }
+
+    #register-popup-main-content {
+        margin-top: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 3em;
+        padding: 1.5em;
+    }
+
+    #register-popup-main-content-inputs-email,
+    #register-popup-main-content-inputs-password {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2em;
+    }
+
+    #register-popup-main-content-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 1.3em;
+    }
+
+    #register-popup-main-content-register {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #register-popup-main-content-register a {
+        font-size: 1em;
+    }
+
+
+    #register-popup-others {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+    }
+
+    #register-popup-other-row {
+        display: flex;
+        gap: 5em;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+    }
+
+    .register-popup-other-col {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        padding: 0.8em;
+        background-color: var(--secundary-color);
+        border-radius: var(--border-radius-max);
+        transition: 0.7s;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.8;
+            transition: 0.7s;
+        }
+    }
+
+    .register-popup-other-col img {
+        width: 3em;
+        height: 3em;
+        object-fit: contain;
+
+    }
+</style>
+
+<div id="register-popup-containner" class="popup-containner">
+    <div id="register-popup-content" class="popup-content">
+        <div id="register-popup-top">
+            <div style="width: 3em;"></div>
+            <div id="register-popup-top-title">
+                <div id="register-popup-top-title-logo">
+                    <img src="/public/img/Logos/logo-color-1.png">
+                </div>
+                <div id="register-popup-top-title-text" class="title-col">
+                    Juntar-se a SDK
+                </div>
+            </div>
+            <div class="popup-close-button" id="register-popup-close">
+                <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#fff"
+                        d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
+                    </path>
+                </svg>
+            </div>
+        </div>
+
+        <div id="register-popup-main-content">
+            <div id="register-popup-main-content-inputs">
+                <div id="register-popup-main-content-inputs-email">
+                    <label class="lable-padrao">Email</label>
+                    <input type="email" class="input-padrao" placeholder="Digite o seu email" id="register-email-input">
+                </div>
+                
+                <div id="register-popup-main-content-inputs-password">
+                    <label class="lable-padrao">Senha</label>
+                    <input-password id="register-password-input" placeholder="Digite sua senha" required></input-password>
+                </div>
+                <div id="register-popup-main-content-inputs-password">
+                    <label class="lable-padrao">Repita a Senha</label>
+                    <input-password id="register-confirm-password-input" placeholder="Digite sua senha novamente" required></input-password>
+                </div>
+
+            </div>
+            <div id="register-popup-main-content-button">
+                <button class="button-padrao" id="register-button">Cadastrar-se</button>
+            </div>
+            <div id="register-popup-main-content-register">
+                <a href="#" id="change-login-button" class="redirect-form-link">Já possui uma conta? Faça login</a>
+            </div>
+        </div>
+
+
+        <div id="split-line-containner">
+            <div class="split-line"></div>
+            <div style="font-size: 1em; font-family: poppins; font-weight: 300; color: var(--text-gray-color-primary);">
+                Ou</div>
+            <div class="split-line"></div>
+        </div>
+
+
+        <div id="register-popup-others">
+            <div id="register-popup-other-row">
+                <div class="register-popup-other-col googleLoginClass" id="google-register">
+                    <img src="/public/img/assets/google_logo.png">
+                </div>
+                <div class="register-popup-other-col" id="discord-register" onclick="openDiscordLogin()">
+                    <img src="/public/img/assets/discord_logo.png">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            if (document.getElementById('register-popup-containner').classList.contains('active')) {
+                document.getElementById('register-button').click()
+            }
+        }
+    })
+
+    document.getElementById('change-login-button').addEventListener('click', () => {
+        closePopup(document.getElementById('register-popup-containner'), document.getElementById('register-popup-content'))
+        openPopup(document.getElementById('login-popup-containner'), document.getElementById('login-popup-content'))
+    })
+</script>

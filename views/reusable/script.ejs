@@ -1,22 +1,20 @@
-<script src="/public/js/verifyPass.js"></script>
+<script src="/public/src/util/notification.js"></script>
 
+<script src="/public/js/verifyPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="/public/src/util/Format.js"></script>
 <script src="/public/src/util/selectMenu.js"></script>
+<script src="/public/src/util/confetti.js"></script>
 <script src="/public/src/util/selectRadio.js"></script>
+<script src="/public/src/util/feedbackAction.js"></script>
+<script src="/public/src/util/ErrorToolTip.js"></script>
+<script src="/public/src/util/inputValueCheck.js"></script>
 <script src="/public/src/controller/AppController.js"></script>
 <script src="/public/src/app.js"></script>
-<script src="/public/js/notify.js"></script>
 <script src="/public/js/theme.js"></script>
 
+<script src="/public/js/reusable/rootScript.js"></script>
+
 <script>
-    const urlObj = new URL(window.location.href);
-    const queryParams = new URLSearchParams(urlObj.search);
-    const queryObject = {};
-    queryParams.forEach((value, key) => {
-        queryObject[key] = value;
-    });
-    if ('error' in queryObject && queryObject.error.length > 0) {
-        errorNotify(queryObject.error)
-    }
+    const errorToolTip = new ErrorTooltip();
 </script>

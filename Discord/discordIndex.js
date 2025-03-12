@@ -2129,19 +2129,8 @@ module.exports = (Discord2, client) => {
     }
 }
 
-
-module.exports.carrinhos = carrinhos
-
-
 module.exports.sendPaymentStatus = async (serverID, tentativas, dias) => {
-    try {
-        let server = await db.findOne({ colecao: "servers", doc: serverID })
-        var DiscordServer = await client.guilds.cache.get(serverID);
-        let dono = DiscordServer.members.cache.get(DiscordServer.ownerId);
-        dono.send(`Faltam ${tentativas ? tentativas + " tentativas" : dias + " dias"} para expirar sua assinatura`)
-    } catch (error) {
-        console.log(error);
-    }
+    require('./others/sendPaymentStatus')(serverID, tentativas, dias, client)
 }
 
 
@@ -2579,86 +2568,15 @@ module.exports.sendProductPayment = async (params, id, type) => {
 
 
 module.exports.sendDiscordMensageChannel = async (server, channel, title, mensage, user, deleteChannel = false, tumbnail = '', banner = '', serverName = true, buttonRef, buttonLabel) => {
-    try {
-        let serverData = await db.findOne({ colecao: 'servers', doc: server })
-        var DiscordServer = await client.guilds.cache.get(server);
-        var DiscordChannel
-        if (user) {
-            DiscordChannel = DiscordServer.channels.cache.find(c => c.topic === user)
-        } else {
-            DiscordChannel = await DiscordServer.channels.cache.get(channel)
-        }
-        let comp = null
-        if (buttonRef) {
-            comp = {
-                components: [
-                    new Discord.ActionRowBuilder().addComponents(
-                        new Discord.ButtonBuilder()
-                            .setLabel(buttonLabel)
-                            .setURL(buttonRef)
-                            .setStyle(Discord.ButtonStyle.Link),
-                    )
-                ]
-            }
-        }
-        let embend = new Discord.EmbedBuilder()
-            .setTitle(serverName == true ? `${DiscordServer.name} | ${title}` : title)
-            .setDescription(mensage)
-            .setColor('personalize' in serverData && 'colorDest' in serverData.personalize ? serverData.personalize.colorDest : '#6E58C7')
-        if (tumbnail) {
-            embend.setThumbnail(tumbnail)
-        }
-        if (banner) {
-            embend.setImage(banner)
-        }
-        await DiscordChannel.send({
-            embeds: [embend],
-            ...comp
-        }).catch(() => { })
-
-        if (deleteChannel == true) {
-            setTimeout(() => {
-                DiscordChannel.delete()
-            }, 5000)
-        }
-    } catch (error) {
-        console.log('sendDiscordMensageChannelERROR: ', error);
-    }
+    require('./messages/sendDiscordMensageChannel')(server, channel, title, mensage, user, deleteChannel, tumbnail, banner, serverName, buttonRef, buttonLabel, Discord, client, db)
 }
 
-module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel,) => {
-    try {
-        const userF = await client.users.fetch(user);
-        let comp = null
-        if (buttonRef) {
-            comp = {
-                components: [
-                    new Discord.ActionRowBuilder().addComponents(
-                        new Discord.ButtonBuilder()
-                            .setLabel(buttonLabel)
-                            .setURL(buttonRef)
-                            .setStyle(Discord.ButtonStyle.Link),
-                    )
-                ]
-            }
-        }
-        await userF.send({
-            embeds: [
-                new Discord.EmbedBuilder()
-                    .setTitle(title)
-                    .setDescription(mensage)
-                    .setColor('#6E58C7')
-            ],
-            ...comp
-        }).catch((err) => {
-            console.log(err);
-        })
-    } catch (error) {
-        console.log('sendDiscordMensageUserERROR: ', error);
-    }
+module.exports.sendDiscordMensageUser = async (user, title, mensage, buttonRef, buttonLabel) => {
+    require('./messages/sendDiscordMensageUser')(user, title, mensage, buttonRef, buttonLabel, Discord, client)
 }
 
 
+module.exports.carrinhos = carrinhos
 
 module.exports.client = client
 

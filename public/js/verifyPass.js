@@ -1,10 +1,8 @@
 async function passVerify(functions, type, redirect = null, others = null) {
 
-    let response = await fetch('/security/pass/get')
-        .then(response => {
+    let response = await fetch('/security/pass/get').then(response => {
             return response.text()
         })
-
     if (response) {
         if (response == 'null') {
             errorNotify('Erro ao processar sua solicitação logue novamente, você será redirecionado!')
@@ -17,30 +15,6 @@ async function passVerify(functions, type, redirect = null, others = null) {
         document.getElementById('containner').innerHTML += response
 
         document.getElementById('full-pass-containner').style.display = 'block'
-
-        if (others == 'first') {
-            document.getElementById('resend-pass').innerHTML = `<a id="resend-pass-button"  class="desc-col" style="cursor: pointer;">Clique aqui para reenviar a senha.</a>`
-            document.getElementById('resend-pass-button').addEventListener('click', async () => {
-                let toogle2fa = await fetch('/security/pass/resend', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({}),
-                }).then(response => { return response.json() })
-                if (toogle2fa.success == true) {
-                    document.getElementById('resend-pass').style.display = 'none'
-                    successNotify(toogle2fa.data)
-                    
-                } else {
-                    if (toogle2fa.data == 'redirect') {
-                        location.href = '/security/pass'
-                    }
-                    errorNotify(toogle2fa.data)
-                }
-            })
-            
-        }
 
         await document.getElementById('pass-verify-button').addEventListener('click', async () => {
             if (type) {

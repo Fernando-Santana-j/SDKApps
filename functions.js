@@ -31,6 +31,8 @@ async function gerarToken(res, req, session, email, code, tokenName) {
         await res.cookie(tokenName, token, configsCookie)
         return token;
     } catch (error) {
+        console.log(error);
+        
         return null
     }
 }
@@ -164,70 +166,113 @@ module.exports = {
             return { error: true, err: error }
         }
     },
-    authGetState: async (req, res, next) => {
+    auth: async (req,res,userID) => {
         try {
 
-            if (!req.session.uid) return res.redirect('/?error=Faca login novamente!');
+            if (!userID) return { error: true, err: 'userID not found' }
+            let user = await db.findOne({ colecao: 'users', doc: userID })
+            if (!user) return { error: true, err: 'user not found' }
 
-            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-
-
-
+            req.session.uid = userID
+            await gerarToken(res,req,userID,user.email,process.env.TOKENCODE,'authToken')            
+            return { error: false }
+        } catch (error) {  
+            console.log(error);
+            
+            return { error: true, err: error }
+        }
+    },
+    authGetState: async (req, res, next) => {
+        try {
+            // Captura a URL original ou usa a que já está nos parâmetros
+            const ref = req.query.ref ? req.query.ref : req.originalUrl;
+            const encodedRef = encodeURIComponent(ref);
+            
+            // Se não existe sessão, redireciona para login com o parâmetro ref
+            if (!req.session.uid) {
+                return res.redirect(`/?error=Faca login novamente!&ref=${encodedRef}`);
+            }
+            
+            let user = await db.findOne({ colecao: 'users', doc: req.session.uid });
+            
+            // Verificação do token
             if (req.cookies && 'token' in req.cookies) {
-                let verify = await verificarToken(req, res, await req.cookies.token, process.env.TOKENCODE)
+                let verify = await verificarToken(req, res, await req.cookies.token, process.env.TOKENCODE);
                 if (verify == 'invalid') {
-                    await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token')
+                    await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token');
                 }
             } else {
-                await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token')
+                await gerarToken(res, req, await req.session.uid, await req.session.email, process.env.TOKENCODE, 'token');
             }
+            
+            // Se já está na página de senha, continua
             if (req.url.includes('/security/pass')) {
-                next()
-                return
+                next();
+                return;
             }
+            
+            // Verifica se precisa senha
             if (!req.session.pass && !req.url.includes('/security/pass')) {
-                return res.redirect(`/security/pass`);
+                return res.redirect(`/security/pass?ref=${encodedRef}`);
             }
-
-
-
+            
             if (!req.url.includes('/security/code')) {
-                let securityExist = 'security' in user
-                let emailVerifyExist = securityExist ? 'emailVerify' in user.security : false
-
+                let securityExist = 'security' in user;
+                let emailVerifyExist = securityExist ? 'emailVerify' in user.security : false;
+                
+                // Verificação de email
                 if ((emailVerifyExist == true && user.security.emailVerify == false) || emailVerifyExist == false) {
-                    return res.redirect('/security/code/email')
+                    return res.redirect(`/security/code/email?ref=${encodedRef}`);
                 }
-
-                let securityExist2FA = securityExist ? 'data2fa' in user.security : false
-
+                
+                // Verificação 2FA
+                let securityExist2FA = securityExist ? 'data2fa' in user.security : false;
                 if (securityExist2FA == false || (securityExist2FA == true && user.security.data2fa.active == false)) {
                     if (req.url.includes('/security/code/2fa')) {
-                        return res.redirect('/dashboard')
+                        // Redireciona para a URL original se disponível
+                        if (req.query.ref && req.query.ref !== '/security/code/2fa') {
+                            return res.redirect(req.query.ref);
+                        } else {
+                            return res.redirect('/dashboard');
+                        }
                     } else {
-                        return next()
+                        return next();
                     }
                 } else {
                     if (securityExist == true && (req.cookies && req.cookies.verify2fa)) {
-                        let verify = await verificarToken(req, res, await req.cookies.verify2fa, process.env.TOKENCODE2FA)
+                        let verify = await verificarToken(req, res, await req.cookies.verify2fa, process.env.TOKENCODE2FA);
                         if (verify == 'invalid') {
                             if (!req.url.includes('/security/code/2fa')) {
                                 await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
-                                return res.redirect('/security/code/2fa')
+                                return res.redirect(`/security/code/2fa?ref=${encodedRef}`);
                             } else {
-                                return next()
+                                return next();
+                            }
+                        } else {
+                            // Verificação completa, redireciona para URL original
+                            if (req.query.ref && !req.url.includes(req.query.ref)) {
+                                return res.redirect(req.query.ref);
                             }
                         }
                     } else {
                         await res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
-                        return res.redirect('/security/code/2fa')
+                        return res.redirect(`/security/code/2fa?ref=${encodedRef}`);
                     }
                 }
+            } else {
+                // Em páginas de verificação, apenas continua
+                return next();
             }
-            next()
+            
+            // Todas as verificações passaram
+            // Verifica se tem parâmetro de redirecionamento
+            if (req.query.ref && req.url !== req.query.ref) {
+                return res.redirect(req.query.ref);
+            }
+            
+            next();
         } catch (error) {
             console.log(error);
-
         }
     },
     authPostState: async (req, res, next) => {
@@ -236,7 +281,9 @@ module.exports = {
             let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
             if (user && 'status' in user && user.status && user.status.type != 'active') {
                 if (user.status.type == 'banned') {
-                    return res.redirect('/logout?error=Sua conta foi banida!')
+                    res.status(200).json({ success: false, data: 'Sua conta foi banida!' })
+                    
+                    return
                 }
             };
 
@@ -272,74 +319,6 @@ module.exports = {
         } catch (error) {
             return null
         }
-    },
-    subscriptionStatus: async (req, res, next) => {
-        let server = await db.findOne({ colecao: "servers", doc: req.params.id })
-        if ("vitalicio" in server && server.vitalicio == true) {
-            next()
-            return
-        }
-        if (server) {
-            try {
-                if ('bankData' in server && server.bankData.bankID) {
-                    let account = await stripe.accounts.retrieve(server.bankData.accountID);
-                    if (account.payouts_enabled == false || account.requirements.disabled_reason != null) {
-                        let accountLink = await stripe.accountLinks.create({
-                            account: account.id,
-                            return_url: `${webConfig.host}/server/sales/${server.id}`,
-                            refresh_url: `${webConfig.host}/accountLink/${account.id}/${server.id}`,
-                            type: 'account_onboarding',
-                        });
-                        res.redirect(accountLink.url)
-                        return
-                    }
-                }
-
-                const hoje = Date.now();
-                if ('type' in server && server.type == 'pix') {
-                    const expires_at = new Date(server.subscriptionData.expires_at * 1000);
-                    if (expires_at < hoje) {
-                        await db.update('servers', req.params.id, {
-                            payment_status: "paused",
-                            isPaymented: false
-                        })
-                        return res.redirect('/payment/' + server.id)
-                    }else{
-                        next()
-                    }
-                } else {
-                    const assinatura = await stripe.subscriptions.retrieve(server.subscription);
-                    if (assinatura) {
-                        const tempoUnixConvert = new Date(assinatura.current_period_end * 1000);
-                        const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-                        const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24));
-                        if (server.payment_status == "paused" || assinatura.status == "canceled") {
-                            await db.update('servers', req.params.id, {
-                                    
-                                payment_status: "cancel",
-                                isPaymented: false
-                            })
-                            res.redirect('/payment/' + server.id)
-                            return
-                        }
-                        if (diasRestantes <= 3) {
-                            req.query.lastdays = diasRestantes
-                        }
-                        next()
-                    } else {
-                        res.redirect('/?error=nao foi possivel localizar a assinatura')
-                    }
-                }
-            } catch (error) {
-                console.log(error);
-
-                res.redirect('/?error=Erro ao verificar os dados da assinatura!')
-            }
-        } else {
-            res.redirect('/?error=Servidor nao encontrado!')
-            return
-        }
-
     },
     findServers: async (user) => {
         const headers = {
@@ -430,10 +409,12 @@ module.exports = {
                 [format]({ quality: 70 })
                 .toFile(novoCaminho);
     
-            await fs.unlink(arquivoOrigem);
-            return { success: true };
+            try {
+                await fs.unlink(arquivoOrigem);
+            } catch (error) {}
+            return { success: true,path:novoCaminho };
         } catch (err) {
-            return { error: true, err };
+            return { success: false,error: true, err };
         }
     },
     formatarMoeda: (numeroCentavos) => {
@@ -552,7 +533,7 @@ module.exports = {
                     pass: 'rbio wgsd reox fsap'
                 }
             });
-            await transporter.sendMail({
+            let t = await transporter.sendMail({
                 from: 'SDKApps <sdkapps2023@gmail.com>',
                 to: email,
                 subject: subject,
@@ -562,6 +543,7 @@ module.exports = {
                     'List-Unsubscribe': '<mailto:unsubscribe@skapps.com.br>',
                 },
             });
+            
         } catch (error) {
             console.log(error);
         }
@@ -585,5 +567,22 @@ module.exports = {
     readTemplate: async (relativePath, data) => {
         let caminho = await path.join(__dirname, '/templates', relativePath)
         return await ejs.renderFile(caminho, data);
+    },
+    createUser: async (userData) => {
+        try {
+            let docRef = await dataBase.collection('users').doc()
+            docRef.set({
+                id: docRef.id,
+                ...userData
+            })
+        } catch (error) {
+            console.log(error);
+            
+        }
     }
 }
+
+
+
+
+

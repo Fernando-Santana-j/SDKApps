@@ -11,33 +11,11 @@ const qrcode = require('qrcode');
 router.get('/security/pass', functions.authGetState, async (req, res) => {
     try {
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-        let mensage = ''
-        let firstSend = false
-
-        if ('security' in user == false || ('security' in user == true && 'pass' in user.security == false)) {
-            firstSend = true
-            mensage = 'Foi enviada suas novas senhas no seu email, recomendamos apagar o email após salvar a senha!'
-            let adminPass = await require('crypto').randomBytes(14).toString('hex') + '-ADM'
-            let geralPass = await require('crypto').randomBytes(14).toString('hex') + '-GRL'
-
-            let cryptoAdmin = await functions.criptografar(adminPass, process.env.CRIPTOKEYADMIN)
-            let cryptoGeral = await functions.criptografar(geralPass, process.env.CRIPTOKEYPUBLIC)
-
-            let htmlEmail = await functions.readTemplate('passMail.ejs', { adminPass: adminPass, geralPass: geralPass, name: user.displayName })
-            await functions.sendEmail(user.email, '⚠️ | Senhas, cuidado ao exibir, apagar após salvar.', htmlEmail)
-            let security = 'security' in user ? user.security : {}
-            security.pass = {
-                admin: cryptoAdmin,
-                geral: cryptoGeral,
-
-            }
-            await db.update('users', user.id, {
-                security: security
-            })
+        if ('senha' in user == false) {
+            res.render('createPass.ejs')
+        }else{
+            res.render('passPage.ejs')
         }
-
-
-        return res.render('passPage.ejs', { host: `${webConfig.host}` ,mensage: mensage,firstSend: firstSend })
     } catch (error) {
         console.log(error);
         return res.redirect('/logout?error=Aconteceu algum erro na validação do seu usuário!')
@@ -57,11 +35,12 @@ router.post('/security/pass/verify', functions.authPostState, async (req, res) =
     try {
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
 
-        if ('security' in user == false || ('security' in user == true && 'pass' in user.security == false)) {
+        if (!user || user.error == true || 'senha' in user == false) {
             if (!res.headersSent) {
-                res.status(200).json({ success: false, data: 'Você não tem senhas cadastradas, atualize a página!!' })
+                res.status(200).json({ success: false, data: 'Nao foi possivel localizar o seu usuario!' })
             }
         }
+
         const now = Date.now();
         let attempts = req.cookies.loginAttempts ? JSON.parse(req.cookies.loginAttempts) : { count: 0, timestamp: now };
 
@@ -77,12 +56,7 @@ router.post('/security/pass/verify', functions.authPostState, async (req, res) =
         }
 
 
-        let pass = null
-        if (req.body.passType == true || req.body.type == 'admin') {
-            pass = await functions.descriptografar(user.security.pass.admin, process.env.CRIPTOKEYADMIN)
-        } else {
-            pass = await functions.descriptografar(user.security.pass.geral, process.env.CRIPTOKEYPUBLIC)
-        }
+        let pass = await functions.descriptografar(user.senha, process.env.CRIPTOKEYADMIN)
 
         if (!pass || pass != req.body.pass) {
             attempts.count++;
@@ -116,10 +90,9 @@ router.get('/security/code/:type', functions.authGetState, async (req, res) => {
     }
     if (!req.session.code) {
         if (req.params.type == 'email') {
-            let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
+            
             req.session.code = newCode
-            let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.displayName })
-            await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
+            
         }
     }
     res.render('codeVerify.ejs', { host: `${webConfig.host}`, type: req.params.type })
@@ -168,22 +141,30 @@ router.post('/security/2fa/create', functions.authPostState, async (req, res) =>
 
 
 
-router.post('/security/code/verify', async (req, res) => {
+router.post('/security/code/verify', async (req, res,) => {
     try {
         if (req.body.code && req.body.code.length == 6) {
-            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-
-            if ('pass' in user == true) delete user.security;
+            let userID = req.body.user ? req.body.user : req.session.uid
+            if (!userID) {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao verificar o codigo!' })
+                }
+                return
+            }
+            let user = await db.findOne({ colecao: 'users', doc: userID })
 
             if (req.body.type == 'email') {
                 if (req.body.code == req.session.code) {
                     let security = 'security' in user ? user.security : {}
                     security.emailVerify = true
-                    db.update('users', req.session.uid, {
+                    db.update('users', userID, {
                         security: security
                     })
+                    await functions.gerarToken(res, req, userID, user.email, process.env.EMAILTOKENCODE, 'emailVerify')
+                    await functions.auth(req,res,userID)
+
                     if (!res.headersSent) {
-                        res.status(200).json({ success: true, data: '' })
+                        res.status(200).json({ success: true, data: 'Codigo verificado' })
                     }
                 } else {
                     if (!res.headersSent) {
@@ -201,12 +182,12 @@ router.post('/security/code/verify', async (req, res) => {
                         window: 1
                     });
                     if (verified == true) {
-                        await functions.gerarToken(res, req, req.session.uid, user.email, process.env.TOKENCODE2FA, 'verify2fa')
+                        await functions.gerarToken(res, req, userID, user.email, process.env.TOKENCODE2FA, 'verify2fa')
                         if ('first' in req.body && req.body.first == true) {
                             let security = user.security
                             security.data2fa.verify = true
                             security.data2fa.active = true
-                            db.update('users', req.session.uid, {
+                            db.update('users', userID, {
                                 security: security
                             })
                         }
@@ -299,7 +280,33 @@ router.post('/security/pass/resend', async (req, res) => {
         }
     }
 
-})
+
+
+    router.post('/security/email/send', async (req, res) => {
+        try {
+            let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
+            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+            
+            if (newCode && newCode.length == 6) {
+                let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.displayName })
+                await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
+                if (!res.headersSent) {
+                    res.status(200).json({ success: true, data: 'Codigo enviado!' })
+                }
+            } else {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
+                }
+            }
+        } catch (error) {
+            console.log(error);
+    
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
+            }
+        }
+    
+    })})
 router.post('/security/email/resend', async (req, res) => {
     try {
         let newCode = null
@@ -396,7 +403,43 @@ router.post('/control/login/response', functions.authPostState, async (req, res)
 })
 
 
+router.post('/security/pass/create', functions.authPostState, async (req, res) => {
+    try {
+        let pass = req.body.pass
 
+        if (!pass || pass.length <= 7) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'A senha precisa ter pelo menos 8 caracteres!' })
+            }
+            return
+        }
+
+        let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+        if (!user || user.error == true) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Nao foi possivel localizar o seu usuario!' })
+            }
+            return
+        }
+
+        let criptoPass = await functions.criptografar(pass, process.env.CRIPTOKEYADMIN)
+
+        await db.update('users', req.session.uid, {
+            senha: criptoPass
+        })
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: true, data: 'Senha criada com sucesso!' })
+        }
+
+    } catch (error) {
+        console.log("CreatePassError", error);
+        
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao criar a senha!' })
+        }
+    }
+})
 
 
 

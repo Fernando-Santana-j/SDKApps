@@ -1,94 +1,190 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <%- include('./reusable/head.ejs') %>
-    <title>SDK - <%= server.name %></title>
-    <link rel="stylesheet" href="/public/css/painel.css">
+        <title>SDK - <%= server.name %>
+        </title>
+        <link rel="stylesheet" href="/public/css/painel.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <div id="body-containner">
+    <div class="console-containner">
+        <%- include('./reusable/body.ejs',{index:1}) %>
+            <div class="console-content">
+                <main class="main-content">
+                    <header class="dashboard-header">
+                        <h1>Painel de Controle</h1>
+                        <div class="quick-actions">
+                            <h5 class="quick-actions-title">Estatísticas em : </h5>
+                            <div class="chart-controls">
+                                <button class="chart-period-btn active" title="Ultimos 7 dias">7 Dias</button>
+                                <button class="chart-period-btn " title="Ultimos 30 dias">30 Dias</button>
+                                <button class="chart-period-btn" title="Estatísticas de todo o tempo">Total</button>
+                            </div>
+                        </div>
+                    </header>
 
-        <div id="containner">
-            <%- include('./reusable/body.ejs',{index:1}) %>
-            <main id="main-containner">
-                <div id="main-content">
-                    <div id="vendas-chart-containner">
-                        <h1 class="title-col">Numero de vendas na semana:</h1>
-                        <div id="charts-content">
-                            <div id="vendas-completas-chart"></div>
-                            <div id="vendas-canceladas-chart"></div>
+                    <!-- Stats Grid -->
+                    <div class="index-stats-grid">
+                        <div class="stat-card vendas-totais-containner">
+                            <h3>Valor Total Vendido</h3>
+                            <div class="stat-value">R$ 24.560,00</div>
+                        </div>
+                        <div class="stat-card produtos-vendidos-containner ">
+                            <h3>Produtos Vendidos</h3>
+                            <div class="stat-value">342</div>
+                        </div>
+                        <div class="stat-card produtos-mais-vendidos-containner">
+                            <h3>Produto Mais Vendido</h3>
+                            <div class="stat-value">156</div>
+                        </div>
+                        <div class="stat-card integracoes-containner">
+                            <h3>Integrações</h3>
+                        </div>
+                        <div class="stat-card funcionamento-containner">
+                            <h3>Funcionamento</h3>
                         </div>
                     </div>
-                    <div id="others-col-containner">
-                        <div id="bot-situation-containner">
-                            <h1 class="title-col">Situação atual do bot:</h1>
-                            <div id="bot-situation-content">
-                                <div class="bot-contents" id="vendas-situation-content">
-                                    <% if (server.vendasActive == true) { %>
-                                        <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Vendas ativada</p>
-                                        <button class="bot-contents-button" id="vendas-desactive-button" style="background-color: var(--red-color);" >Desativar Vendas</button>
-                                    <% } else { %>
-                                        <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Vendas desativadas</p>
-                                        <button class="bot-contents-button" id="vendas-active-button" style="background-color: var(--green-color);" >Ativar Vendas</button>
-                                    <% } %>
-                                </div>
-                                <div class="bot-contents" id="bot-act-content">
-                                    <% if (server.botActive == true) { %>
-                                        <p class="bot-contents-text" style="background-color: var(--green-opacity-color);">Bot ativado</p>
-                                        <button class="bot-contents-button" id="bot-desactive-button" style="background-color: var(--red-color);" >Desativar Bot</button>
-                                    <% } else { %>
-                                        <p class="bot-contents-text" style="background-color: var(--red-opacity-color);">Bot desativado</p>
-                                        <button class="bot-contents-button" id="bot-active-button" style="background-color: var(--green-color);" >Ativar Bot</button>
-                                    <% } %>
-                                </div>
-                                
-                            </div>
-                            <p id="mensage-sup-bot">Caso esteja tendo problemas com o bot contate o &nbsp;<a href="/support" style="text-decoration: underline;"> suporte</a>!</p>
+
+                    <!-- Sales Chart -->
+                    <div class="chart-container ">
+                        <h2 id="salesChartTitle">Grafico de vendas</h2>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                    <!-- Pending Tasks -->
+                    <div class="pending-tasks ">
+                        <h2>Tarefas Pendentes</h2>
+                        <div class="task-item">
+                            <span>Atualizar descrição de produtos</span>
+                            <span class="badge">Urgente</span>
                         </div>
-                        <div id="signature-situation-containner">
-                            <h1 class="title-col">Seu plano expira em:</h1>
-                            <div id="signature-situation">
-                                <div id="signature-situation-dates">
-                                    <p id="signature-situation-days">
-
-                                    </p>
-                                    <p id="signature-situation-date">
-
-                                    </p>
-                                </div>
-                                <button id="signature-situation-button">Renovar Agora</button>
-                            </div>
-                            <p id="notify-signature">
-                                Notificar pelo discord 3 dias antes!
-                            </p>
+                        <div class="task-item">
+                            <span>Configurar nova integração de pagamento</span>
+                            <span class="badge">Novo</span>
+                        </div>
+                        <div class="task-item">
+                            <span>Responder 3 avaliações de clientes</span>
+                            <span class="badge">Pendente</span>
                         </div>
                     </div>
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
     </div>
-    
+
+
     <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
-    <%- include('./reusable/script.ejs') %>
-    <div>
-        <script>
-            converterExpiracao(parseInt('<%= server.subscriptionData.expires_at %>'))
+        <%- include('./reusable/script.ejs') %>
+            <script>
+
+                let mainData = {
+                    LastSales: [{
+                        
+                    }],
                     
-            function converterExpiracao(tempoUnix) {
-                const tempoUnixConvert = new Date(tempoUnix * 1000);
-                let dataExp = tempoUnixConvert.toLocaleDateString(); 
-                const hoje = new Date();
-                const diferencaEmMilissegundos = tempoUnixConvert - hoje;
-                const diasRestantes = Math.ceil(diferencaEmMilissegundos / (1000 * 60 * 60 * 24)); // Convertendo milissegundos para dias
-                document.getElementById('signature-situation-days').innerText = diasRestantes + ' Dias restantes'
-                document.getElementById('signature-situation-date').innerText = dataExp
-            }
-        </script>
-        <script>
-            let comprasConcluidas = JSON.parse(("<%= comprasConcluidas %>").replace(/&#34;/g, '"'))
-            let comprasCanceladas = JSON.parse(("<%= comprasCanceladas %>").replace(/&#34;/g, '"'))
-        </script>
-    </div>
-    <script src="/public/js/painel.js"></script>
+                }
+
+                // Sales Chart
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                const salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['01/03', '02/03', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
+                            '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+                        datasets: [{
+                            label: 'Vendas',
+                            data: [],
+                            borderColor: 'rgba(138, 43, 226, 0.6)',
+                            backgroundColor: 'rgba(138, 43, 226, 1)',
+                            tension: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: 'white',
+                                    callback: function (value) {
+                                        return 'R$ ' + value;
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(255,255,255,0.1)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: 'white'
+                                },
+                                grid: {
+                                    display: false,
+                                    color: 'rgba(255,255,255,0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+                // Chart Period Controls
+                const chartPeriodButtons = document.querySelectorAll('.chart-period-btn');
+                const salesChartData = {
+                    '7days': {
+                        labels: ['1', '2', '3', '4', '5', '6', '7'],
+                        data: [1200, 1900, 3000, 5060, 4200, 3500, 2800]
+                    },
+                    '30days': {
+                        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
+                            '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+                        data: [1200, 1900, 3000, 5060, 4200, 3500, 2800, 3300, 4100, 5500,
+                            4800, 5200, 6100, 5700, 4900, 5300, 6200, 5800, 4600, 5100,
+                            6300, 5600, 4700, 5900, 6500, 5400, 4500, 5200, 6000, 5300]
+                    },
+                    '90days': {
+                        labels: Array.from({ length: 90 }, (_, i) => `${i + 1}`),
+                        data: Array.from({ length: 90 }, () => Math.floor(Math.random() * 7000) + 1000)
+                    }
+                };
+
+                chartPeriodButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        // Remove active class from all buttons
+                        chartPeriodButtons.forEach(btn => btn.classList.remove('active'));
+
+                        // Add active class to clicked button
+                        this.classList.add('active');
+
+                        // Determine period
+                        const period = this.textContent.replace(' Dias', '').toLowerCase() + 'days';
+
+                        // Update chart data
+                        salesChart.data.labels = salesChartData[period].labels;
+                        salesChart.data.datasets[0].data = salesChartData[period].data;
+                        salesChart.update();
+                    });
+                });
+
+
+                setTimeout(() => {
+                    salesChart.update();
+                }, 100);
+            </script>
+            <div>
+
+                <script>
+                    // let comprasConcluidas = JSON.parse(("<%#= comprasConcluidas %>").replace(/&#34;/g, '"'))
+                    // let comprasCanceladas = JSON.parse(("<%#= comprasCanceladas %>").replace(/&#34;/g, '"'))
+                </script>
+            </div>
+            <!-- <script src="/public/js/painel.js"></script> -->
 </body>
+
 </html>

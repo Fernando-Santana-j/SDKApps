@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <title>Crie sua senha - SDK</title>
+    <link rel="stylesheet" href="/public/css/createPass.css">
+    <style>
+        #create-pass-btn{
+            margin-top: 2em;
+        }
+        #create-pass-content-inputs{
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div id="body-containner">
+        <div id="containner">
+            <main id="main-containner" class="popup-containner">
+                <div id="create-pass-content" class="popup-content">
+                    <h1 class="title-col">Crie sua senha</h1>
+                    <p class="desc-col">Para garantir sua segurança, os métodos de login, como Google e Discord, exigirão o uso de uma senha. Portanto, preencha os campos abaixo com a senha desejada.</p>
+                    <div id="create-pass-content-inputs">
+                        <div class="input-col">
+                            <label for="password" class="lable-padrao">Senha</label>
+                            <input-password id="password" placeholder="Digite sua senha"><input-password>
+                        </div>
+                        <div class="input-col">
+                            <label for="confirm-password" class="lable-padrao">Confirme sua senha</label>
+                            <input-password id="confirm-password" placeholder="Digite sua senha novamente"><input-password>
+                        </div>
+                        
+                        <button id="create-pass-btn" class="button-padrao">Criar senha</button>
+                        
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        openPopup(document.getElementById('main-containner'), document.getElementById('create-pass-content'));
+    </script>
+    <%- include('./reusable/script.ejs') %>
+    <!-- <script src="/public/js/createPass.js"></script> -->
+
+    <script>
+        document.getElementById('create-pass-btn').addEventListener('click', async () => {
+            let password = document.getElementById('password').value.trim()
+            let confirmPassword = document.getElementById('confirm-password').value.trim()
+
+            if (!password || !confirmPassword || password.legth < 8 || confirmPassword.legth < 8) {
+                errorNotify('A senha deve ter pelo menos 8 caracteres')
+                return
+                
+            }
+
+            if (password != confirmPassword) {
+                errorNotify('As senhas não coincidem')
+                return
+            }
+
+            let session = await fetch('/security/pass/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    pass: password
+                })
+            }).then(res => res.json())
+            if (session.success == true) {
+                successNotify('Senha criada com sucesso')
+                setTimeout(() => {
+                    window.location.href = '/dashboard'
+                }, 2000)
+            }else{
+                errorNotify(session.data)
+            }
+
+        })
+
+    </script>
+</body>
+</html>

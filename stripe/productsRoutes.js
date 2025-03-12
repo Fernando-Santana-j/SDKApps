@@ -29,8 +29,6 @@ const upload = multer({ storage });
 
 let Discord = require('discord.js')
 const botConfig = require('../config/bot-config.js');
-const { error, log } = require('console');
-const { rejects } = require('assert');
 const client = new Discord.Client({ intents: botConfig.intents })
 client.login(botConfig.discordToken)
 

@@ -41,7 +41,11 @@ module.exports = {
         return await firebaseData.get().then(async (res) => {
             let data 
             if (props.hasOwnProperty('where')) {
-                data = res.docs[0].data()
+                if (res.docs.length > 0) {
+                    data = res.docs[0].data()
+                }else{
+                    return {error:true,err:'Nenhum dado encontrado'}
+                }
             }else{
                 data = res.data()
             }

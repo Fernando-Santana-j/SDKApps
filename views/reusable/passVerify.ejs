@@ -29,6 +29,7 @@
             z-index: 999999999999999999999999999999999999999999999999999;
             background-color: var(--tertiary-color);
             border-radius: var(--border-radius-mid);
+            box-shadow: var(--purple-box-shadow-medium);
             display: flex;
             gap: 1em;
             flex-direction: column;
@@ -57,10 +58,8 @@
                     senhas são vitais, no email enviado com o conteúdo da senha tem uma explicação básica sobre ela.</p>
             </div>
             <div id="inputs-pass-verify">
-                <input type="password" name="" class="input-padrao" id="pass-verify-input">
-                <div id="resend-pass">
-                    
-                </div>
+                <input-password id="pass-verify-input" placeholder="Digite sua senha de acesso..."></input-password>
+                
                 <button class="button-padrao" id="pass-verify-button">Entrar</button>
             </div>
         </div>

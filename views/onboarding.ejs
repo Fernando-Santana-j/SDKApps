@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title></title>
+        <link rel="stylesheet" href="/public/css/onboarding.css">
+</head>
+
+<body>
+    <div id="body-containner">
+        <div id="containner">
+            <div id="onboarding-row">
+
+                <div id="progress-onboarding-containner">
+                    <div class="progress-bar-line active" id="progress-bar-line-1"></div>
+                    <div class="progress-bar-line" id="progress-bar-line-2"></div>
+                    <div class="progress-bar-line" id="progress-bar-line-3"></div>
+                    <div class="progress-bar-line" id="progress-bar-line-4"></div>
+                    <div class="progress-bar-line" id="progress-bar-line-5"></div>
+                    <div class="progress-bar-line" id="progress-bar-line-6"></div>
+                </div>
+
+                <canvas id="confetti"></canvas>
+
+
+                <div class="onboarding-containner" id="step-1">
+                    <div class="onboarding-title-containner">
+                        <div class="title-col">
+                            Bem vindo a SDKApps 🥳
+                        </div>
+                    </div>
+                    <div class="onboarding-content" style="justify-content: space-around !important;">
+                        <p id="introduce-oboarding" class="onboarding-text-large">
+                            <b style="font-weight: 500;">Esse e seu onboarding</b> aqui você vai tanto receber
+                            informações da plataforma e suas
+                            funcionalidades quanto configurar as funções básicas da sua loja. <br><br>Fique atento em
+                            todas as etapas, por mais que todas as opções possam ser alteradas futuramente após a
+                            conclusão do onboarding você não vera mais essa tela e não recebera as informações e dicas.
+                        </p>
+                        <p class="onboarding-text-destaque">
+                            Dito isso vamos começar a sua jornada 🚀
+                        </p>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <a href="/dashboard" class="button-padrao onboarding-button-prev">Sair</a>
+                        <button class="button-padrao onboarding-button-next" id="next-step-2">Proxima etapa</button>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="onboarding-containner" id="step-2">
+                    <div class="onboarding-title-containner">
+                        <div class="onboarding-title">
+                            Primeiro vamos dar um nome a sua loja 📝
+                        </div>
+                    </div>
+                    <div class="onboarding-content">
+                        <p id="introduce-oboarding" class="onboarding-text">
+                            Essa etapa e de extrema importância o nome da sua loja e oque faz seus clientes chegarem até
+                            ela.
+                            <br><br>Temos 2 tipos de nomes, o primeiro e o nome de exibição, esse será o nome que ira
+                            aparecer na página da sua loja. Já o segundo será o de identificação, esse será o nome que
+                            ira aparecer na URL da sua loja, por exemplo, por exemplo.
+                        </p>
+                        <div id="inputs-names-containner">
+                            <div class="error-onboarding-containner" style="display: none;">
+                                <p class="desc-col" id="error-onboarding-text" style="color: var(--red-color);"></p>
+                            </div>
+                            <div id="display-name-containnner">
+                                <label class="lable-padrao" for="display-name">Nome de exibição</label>
+                                <input type="text" id="display-name" class="input-padrao"
+                                    placeholder="Nome que ira aparecer nas paginas">
+                            </div>
+                            <div id="id-name-containnner">
+                                <label class="lable-padrao" for="id-name">Nome de identificação</label>
+                                <input type="text" id="id-name" class="input-padrao"
+                                    placeholder="Nome que ira aparecer na URL">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button class="button-padrao onboarding-button-prev" id="prev-step-1">Voltar</button>
+                        <button class="button-padrao onboarding-button-next" id="next-step-3">Proxima etapa</button>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+                <div class="onboarding-containner" id="step-3">
+                    <div class="onboarding-title-containner">
+                        <div class="onboarding-title">
+                            Sua loja, sua identidade 🎨
+                        </div>
+                    </div>
+                    <div class="onboarding-content">
+                        <p id="introduce-oboarding" class="onboarding-text">
+                            Nessa etapa vamos dar vida a sua loja com uma logo e um plano de fundo.
+                            <br><br>Clique na imagem de preview abaixo para selecionar sua identidade
+                        </p>
+                        <div id="store-images-containner">
+                            <div id="image-background-containnner">
+                                <label for="image-background-input" style="font-weight: 500; font-size: 0.8em;"
+                                    class="lable-padrao">Anexe o plano de fundo</label>
+                                <label for="image-background-input" id="image-background-preview-containner">
+                                    <img id="image-background-preview"
+                                        src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg">
+                                </label>
+                                <input type="file" id="image-background-input" hidden accept="image/*">
+                            </div>
+                            <div id="image-logo-containnner">
+                                <label for="image-logo-input" style="font-weight: 500; font-size: 0.8em;"
+                                    class="lable-padrao">Anexe a logo</label>
+                                <label for="image-logo-input" id="image-logo-preview-containner">
+                                    <img id="image-logo-preview"
+                                        src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg">
+                                </label>
+                                <input type="file" id="image-logo-input" hidden accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button class="button-padrao onboarding-button-prev" id="prev-step-2">Voltar</button>
+                        <button class="button-padrao onboarding-button-next" id="next-step-4">Proxima etapa</button>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+                <div class="onboarding-containner" id="step-4">
+                    <div class="onboarding-title-containner">
+                        <div class="onboarding-title">
+                            Mais sobre você 🪪
+                        </div>
+                    </div>
+                    <div class="onboarding-content">
+                        <p id="introduce-oboarding" class="onboarding-text">
+                            Antes de tudo precisamos saber mais informações sobre você ou sua empresa.
+                            <br><br><b style="color: var(--red-color);">*</b> Dados falsos ou se passar por outra
+                            pessoa, ira acarretar punições como banimento.
+                        </p>
+                        <div id="user-data-containner">
+                            <div id="name-containnner">
+                                <label class="lable-padrao" for="Rname">Seu nome ou da sua empresa</label>
+                                <input type="text" id="Rname" class="input-padrao"
+                                    title="Digite seu nome completo ou o nome oficial da sua empresa"
+                                    placeholder="Digite seu nome completo ou o nome oficial da sua empresa">
+                            </div>
+                            <div id="identify-user-containnner">
+                                <label class="lable-padrao" for="identify-user">CPF ou CNPJ</label>
+                                <input type="text" id="identify-user" class="input-padrao"
+                                    title="Digite seu CPF ou o CNPJ oficial da sua empresa"
+                                    placeholder="Digite seu CPF ou o CNPJ oficial da sua empresa">
+                            </div>
+                            <div id="address-containnner">
+                                <div id="adress-street-containner">
+                                    <label class="lable-padrao" for="adress-street">Endereço</label>
+                                    <input type="text" id="adress-street" class="input-padrao"
+                                        title="Digite o seu endereço ou aonde sua empresa está localizada"
+                                        placeholder="Digite o seu endereço ou aonde sua empresa está localizada">
+                                </div>
+                                <div id="address-number-containnner">
+                                    <label class="lable-padrao" for="address-number">Números</label>
+                                    <input type="number" id="address-number" class="input-padrao"
+                                        title="Numero do endereço" placeholder="Numero do endereço">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button class="button-padrao onboarding-button-prev" id="prev-step-3">Voltar</button>
+                        <button class="button-padrao onboarding-button-next" id="next-step-5">Proxima etapa</button>
+
+                    </div>
+                </div>
+
+
+                <div class="onboarding-containner" id="step-5">
+                    <div class="onboarding-title-containner">
+                        <div class="onboarding-title">
+                            Seu faturamento 💵
+                        </div>
+                    </div>
+                    <div class="onboarding-content">
+                        <p id="introduce-oboarding" class="onboarding-text">
+                            Seu onboarding está quase pronto, agora precisamos dos dados para você receber os pagamentos
+                            das compras na plataforma.
+                            <br><br><b style="color: var(--red-color);">*</b> Cuidado dados errados podem acarretar não
+                            recebimento do pagamento, em caso de dúvida veja o tutorial de pagamento ou inicie o chat
+                            com o suporte.
+                        </p>
+                        <div id="invoicing-data-containner">
+
+                        </div>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button class="button-padrao onboarding-button-prev" id="prev-step-4">Voltar</button>
+                        <button class="button-padrao onboarding-button-next" id="next-step-6">Proxima etapa</button>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+                <div class="onboarding-containner" id="step-6">
+                    <div class="onboarding-title-containner">
+                        <div class="onboarding-title">
+                            Configurações concluídas 🎉
+                        </div>
+                    </div>
+                    <div class="onboarding-content">
+                        <p id="introduce-oboarding" class="onboarding-text-large">
+                            Agora que terminamos o processo de configurações iniciais você já pode usar a plataforma
+                            como desejar.
+                            <br><br>Nossa plataforma adotou o novo modelo de cobrança, agora todas as compras na sua
+                            loja eram descontados 2% de taxa de serviço e apenas isso.
+                            <br><br>Com todas as informações necessárias você pode compartilhar o link abaixo para os
+                            seus clientes acessarem a sua loja.
+                        </p>
+                        <div id="store-link-containner">
+                            <label class="lable-padrao" style="font-size: 1.1em; font-weight: 500" for="store-link">Link
+                                da sua loja: </label>
+                            <button id="link-copy-button" class="button-padrao">
+                                https://sdkapps.com.br/loja/loja-exemplo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button class="button-padrao onboarding-button-prev" id="prev-step-5">Voltar</button>
+                        <button class="button-padrao onboarding-button-next" id="finish-onboarding">Finalizar
+                            onboarding</button>
+                    </div>
+                </div>
+
+
+
+                <div class="onboarding-containner" style="display: none;" id="feedbackCreateStore">
+
+                </div>
+
+
+            </div>
+            <div class="onboarding-containner" id="feedback-onboarding-containner"></div>
+        </div>
+    </div>
+
+    <%- include('./reusable/script.ejs') %>
+        <script src="/public/js/onboarding.js"></script>
+
+        <script>
+
+
+            document.getElementById('finish-onboarding').addEventListener('click', async (event) => {
+                let formData = new FormData();
+                formData.append('DisplayName', document.getElementById('display-name').value.trim());
+                formData.append('IDName', document.getElementById('id-name').value.trim());
+                formData.append('onboarding', JSON.stringify({
+                    RName: document.getElementById('Rname').value.trim(),
+                    IDCode: document.getElementById('identify-user').value.trim(),
+                    adress: document.getElementById('adress-street').value.trim(),
+                    adressNumber: document.getElementById('address-number').value.trim()
+                }));
+                formData.append('StoreBackGround', document.getElementById('image-background-input').files[0]);
+                formData.append('StoreLogo', document.getElementById('image-logo-input').files[0]);
+                
+                let session = await fetch('/store/create', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData,
+                }).then(response => { return response.json() })
+                
+                document.getElementById("feedbackCreateStore").style.display = 'flex'
+                const feedbackAnimation = new feedbackAction('#feedbackCreateStore')
+                if (session.success == true) {
+                    feedbackAnimation.show('success', 'Sucesso!', session.data, () => {
+                        localStorage.removeItem('OnboardingData')
+                        localStorage.removeItem('OnboardingStep')
+                        setTimeout(() => {
+                            window.location.href = '/store/' + session.storeID
+                        },1000)
+                    });
+                } else {
+                    feedbackAnimation.show('error', 'Erro ao criar loja', session.data, () => {
+                        setTimeout(() => {
+                            document.getElementById("feedbackCreateStore").style.display = 'none'
+                        }, 1000)
+                    });
+                    
+                }
+            })
+
+            function updateOnboardingData(key, value) {
+                let onboardingData = localStorage.getItem('OnboardingData')
+                if (onboardingData) {
+                    onboardingData = JSON.parse(onboardingData)
+                    onboardingData[key] = value
+                    localStorage.setItem('OnboardingData', JSON.stringify(onboardingData))
+                } else {
+                    localStorage.setItem('OnboardingData', JSON.stringify({ [key]: value }))
+                }
+            }
+
+
+            document.getElementById('Rname').addEventListener('input', () => {
+                updateOnboardingData('RName', document.getElementById('Rname').value)
+            })
+            document.getElementById('identify-user').addEventListener('input', () => {
+                updateOnboardingData('identify-user', document.getElementById('identify-user').value)
+            })
+
+            document.getElementById('adress-street').addEventListener('input', () => {
+                updateOnboardingData('adress-street', document.getElementById('adress-street').value)
+            })
+
+            document.getElementById('address-number').addEventListener('input', () => {
+                updateOnboardingData('address-number', document.getElementById('address-number').value)
+            })
+
+            document.addEventListener('DOMContentLoaded', (event) => {
+                let onboardingData = localStorage.getItem('OnboardingData')
+                if (onboardingData) {
+                    onboardingData = JSON.parse(onboardingData)
+                    if ('RName' in onboardingData) {
+                        document.getElementById('Rname').value = onboardingData.RName
+                    }
+                    if ('identify-user' in onboardingData) {
+                        document.getElementById('identify-user').value = onboardingData["identify-user"]
+                    }
+                    if ('adress-street' in onboardingData) {
+                        document.getElementById('adress-street').value = onboardingData["adress-street"]
+                    }
+                    if ('address-number' in onboardingData) {
+                        document.getElementById('address-number').value = onboardingData["address-number"]
+                    }
+
+                }
+            })
+
+
+
+            document.getElementById('identify-user').addEventListener('input', () => {
+                document.getElementById('identify-user').value = document.getElementById('identify-user').value.replace(/[^0-9]/g, "")
+                document.getElementById('identify-user').value = document.getElementById('identify-user').value.replace(/\s+/g, '')
+            })
+
+            document.getElementById('image-background-input').addEventListener('change', function () {
+                previewImage(this, document.getElementById('image-background-preview'));
+                setTimeout(() => {
+                    updateOnboardingData('background', document.getElementById('image-logo-preview').src)
+                }, 100)
+            });
+            document.getElementById('image-logo-input').addEventListener('change', async function () {
+                previewImage(this, document.getElementById('image-logo-preview'));
+                setTimeout(() => {
+                    updateOnboardingData('logo', document.getElementById('image-logo-preview').src)
+                }, 100)
+            });
+
+            let OnboardingData = JSON.parse(localStorage.getItem("OnboardingData"))
+            const savedLogoFile = 'logo' in OnboardingData ? OnboardingData.logo : null;
+            const savedBackgroundFile = 'background' in OnboardingData ? OnboardingData.background : null;
+
+            if (savedLogoFile) {
+                fetch(savedLogoFile)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10) +'.jpg', { type: blob.type });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('image-logo-input').files = dataTransfer.files;
+
+                        document.getElementById('image-logo-preview').src = savedLogoFile;
+                    });
+            }
+            if (savedBackgroundFile) {
+                fetch(savedBackgroundFile)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10), { type: blob.type });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        document.getElementById('image-background-input').files = dataTransfer.files;
+
+                        document.getElementById('image-background-preview').src = savedBackgroundFile;
+                    });
+            }
+        </script>
+</body>
+
+</html>

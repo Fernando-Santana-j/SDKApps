@@ -6,10 +6,12 @@ require('dotenv').config()
 
 let serviceAccout = require('../config/web-config').serviceAccount
 
-initializeApp({
+let app = initializeApp({
   credential: admin.credential.cert(serviceAccout),
 });
 
 const db = getFirestore();
 
 module.exports = db
+
+module.exports.app = app

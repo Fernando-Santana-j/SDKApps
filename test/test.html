@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Premium</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --bg-color: #0e0e12;
+            --card-bg: #16161e;
+            --card-bg-hover: #1a1a24;
+            --primary: #8a42ff;
+            --primary-dark: #7433e0;
+            --primary-light: #a47dff;
+            --primary-transparent: rgba(138, 66, 255, 0.15);
+            --text: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-tertiary: #7a7a8c;
+            --success: #1db954;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --border-radius: 16px;
+            --input-radius: 12px;
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            --hover-shadow: 0 14px 28px rgba(138, 66, 255, 0.25);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+        }
+
+        .shape-1 {
+            top: -150px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+        }
+
+        .shape-2 {
+            bottom: -150px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+        }
+
+        .shape-3 {
+            top: 40%;
+            left: 30%;
+            width: 300px;
+            height: 300px;
+            opacity: 0.1;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            width: 95%;
+            max-width: 1400px;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-height: 90vh;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background-color: var(--card-bg-hover);
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--primary-light));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            gap: 12px;
+            position: relative;
+        }
+
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .icon {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .products-card {
+            flex: 1;
+            max-height: calc(90vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 8px;
+            flex: 1;
+            mask-image: linear-gradient(to bottom, transparent, black 10px, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10px, black 90%, transparent);
+        }
+
+        .product-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .product-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .product-list::-webkit-scrollbar-thumb {
+            background: var(--primary-transparent);
+            border-radius: 10px;
+        }
+
+        .product-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 16px;
+            position: relative;
+            padding: 16px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .product-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(0) scale(1.01);
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(138, 66, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0) 80%
+            );
+            transform: rotate(30deg);
+            opacity: 0.3;
+        }
+
+        .product-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .product-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .product-variant {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .quantity-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            background-color: var(--primary-transparent);
+            border-radius: var(--input-radius);
+            padding: 4px;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            border-radius: 50%;
+        }
+
+        .qty-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .qty-value {
+            min-width: 24px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .product-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-item:hover .product-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .action-btn:hover {
+            color: var(--danger);
+        }
+
+        .coupon-card {
+            padding: 20px;
+        }
+
+        .coupon-form {
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--input-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(138, 66, 255, 0.15);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+        }
+
+        .input-icon + input {
+            padding-left: 40px;
+        }
+
+        .button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--input-radius);
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0) 80%
+            );
+            transform: rotate(30deg);
+            transition: transform 0.5s ease;
+            opacity: 0;
+        }
+
+        .button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .button:hover::after {
+            opacity: 0.3;
+        }
+
+        .button.apply-btn {
+            white-space: nowrap;
+        }
+
+        .button.checkout-btn {
+            width: 100%;
+            margin-top: 16px;
+            background-color: var(--success);
+            height: 50px;
+        }
+
+        .button.checkout-btn:hover {
+            background-color: #19a649;
+        }
+
+        .summary-card {
+            margin-bottom: 24px;
+        }
+
+        .summary-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+        }
+
+        .summary-value.discount {
+            color: var(--success);
+        }
+
+        .total {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .payment-option {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--input-radius);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .payment-option:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-transparent);
+        }
+
+        .payment-option.selected {
+            border-color: var(--primary);
+            background-color: var(--primary-transparent);
+        }
+
+        .payment-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--primary);
+        }
+
+        .payment-option.selected .payment-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .payment-details {
+            flex: 1;
+        }
+
+        .payment-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+        }
+
+        .payment-description {
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+        }
+
+        .payment-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option.selected .payment-check {
+            border-color: var(--primary);
+            background-color: var(--primary);
+        }
+
+        .payment-check::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .payment-option.selected .payment-check::after {
+            opacity: 1;
+        }
+
+        .checkout-details {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+        }
+
+        .detail-item {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: var(--input-radius);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .detail-icon {
+            color: var(--primary);
+        }
+
+        .detail-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+
+        .detail-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .pulse {
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .pulse::before, .pulse::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        .pulse::before {
+            animation: pulse 2s ease-out infinite;
+        }
+
+        .pulse::after {
+            animation: pulse 2s 1s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* Loading animation */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-dark), var(--primary-light));
+            z-index: 1000;
+        }
+
+        /* Media queries for responsiveness */
+        @media screen and (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-height: none;
+                height: 100vh;
+                overflow-y: auto;
+                padding: 20px;
+            }
+
+            .content-wrapper {
+                max-height: none;
+            }
+
+            .products-card {
+                max-height: none;
+            }
+        }
+
+        /* Used by JS for animations */
+        .animated-value {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="loading-bar"></div>
+    
+    <div class="container">
+        <div class="content-wrapper left-column">
+            <div class="card products-card">
+                <div class="card-title">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    Meu Carrinho
+                    <div class="badge">3</div>
+                </div>
+                <div class="product-list">
+                    <div class="product-item">
+                        <div class="product-image">P1</div>
+                        <div class="product-details">
+                            <div class="product-title">Produto 1</div>
+                            <div class="product-variant">Versão Premium</div>
+                            <div class="quantity-selector">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn decrease">-</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-price">R$ 19,99</div>
+                        <div class="product-actions">
+                            <button class="action-btn" aria-label="Remover item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-item">
+                        <div class="product-image">P2</div>
+                        <div class="product-details">
+                            <div class="product-title">Produto 2</div>
+                            <div class="product-variant">Edição Limitada</div>
+                            <div class="quantity-selector">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn decrease">-</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-price">R$ 19,99</div>
+                        <div class="product-actions">
+                            <button class="action-btn" aria-label="Remover item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-item">
+                        <div class="product-image">P3</div>
+                        <div class="product-details">
+                            <div class="product-title">Produto 3</div>
+                            <div class="product-variant">Edição Standard</div>
+                            <div class="quantity-selector">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn decrease">-</button>
+                                    <span class="qty-value">1</span>
+                                    <button class="qty-btn increase">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-price">R$ 19,99</div>
+                        <div class="product-actions">
+                            <button class="action-btn" aria-label="Remover item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card coupon-card">
+                <div class="card-title">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 7h20m-2 1L10 19l-6-6"></path>
+                    </svg>
+                    Cupom de Desconto
+                </div>
+                <div class="coupon-form">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="8" width="18" height="8" rx="1"></rect>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="7" y1="8" x2="7" y2="16"></line>
+                            <line x1="17" y1="8" x2="17" y2="16"></line>
+                        </svg>
+                        <input type="text" placeholder="Digite seu cupom" id="coupon-input">
+                    </div>
+                    <button class="button apply-btn" id="apply-coupon">
+                        <span>Aplicar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="content-wrapper right-column">
+            <div class="card summary-card">
+                <div class="card-title">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                    </svg>
+                    Resumo da Compra
+                </div>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Valor dos produtos:</span>
+                        <span class="summary-value" id="products-value">R$ 59,97</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Frete:</span>
+                        <span class="summary-value" id="shipping-value">R$ 0,00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Descontos:</span>
+                        <span class="summary-value discount" id="discount-value">R$ -10,00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Cupom:</span>
+                        <span class="summary-value" id="coupon-value">R$ 0,00</span>
+                    </div>
+                    <div class="total">
+                        <span>Valor Total:</span>
+                        <span id="total-value">R$ 49,97</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card payment-card">
+                <div class="card-title">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    Formas de Pagamento
+                </div>
+                <div class="payment-methods">
+                    <div class="payment-option selected">
+                        <div class="payment-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line><line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="payment-details">
+                            <div class="payment-name">Cartão de Crédito</div>
+                            <div class="payment-description">Visa, Mastercard, Elo, entre outros</div>
+                        </div>
+                        <div class="payment-check"></div>
+                    </div>
+                    <div class="payment-option">
+                        <div class="payment-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 9l5 5 5-5H8z"></path>
+                                <path d="M3 5h18v14H3z"></path>
+                            </svg>
+                        </div>
+                        <div class="payment-details">
+                            <div class="payment-name">Boleto Bancário</div>
+                            <div class="payment-description">Vencimento em 3 dias úteis</div>
+                        </div>
+                        <div class="payment-check"></div>
+                    </div>
+                    <div class="payment-option">
+                        <div class="payment-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M2 12h20"></path>
+                            </svg>
+                        </div>
+                        <div class="payment-details">
+                            <div class="payment-name">Pix</div>
+                            <div class="payment-description">Aprovação imediata</div>
+                        </div>
+                        <div class="payment-check"></div>
+                    </div>
+                </div>
+                <div class="checkout-details">
+                    <div class="detail-item">
+                        <svg class="detail-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8v4"></path>
+                            <path d="M12 16h.01"></path>
+                        </svg>
+                        <div class="detail-content">
+                            <div class="detail-label">Entrega estimada</div>
+                            <div class="detail-value">2-3 dias úteis</div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <svg class="detail-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <div class="detail-content">
+                            <div class="detail-label">Garantia</div>
+                            <div class="detail-value">12 meses</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="button checkout-btn">
+                    <span>Finalizar Compra</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation timeline
+            const tl = gsap.timeline();
+            
+            // Initial loading animation
+            tl.to('.loading-bar', {
+                width: '100%', 
+                duration: 1, 
+                ease: 'power3.inOut',
+                onComplete: () => {
+                    gsap.to('.loading-bar', {autoAlpha: 0, duration: 0.5});
+                }
+            });
+            
+            // Animate cards
+            tl.to('.card', {
+                opacity: 1, 
+                y: 0, 
+                stagger: 0.15, 
+                duration: 0.8, 
+                ease: 'power3.out'
+            }, '-=0.5');
+            
+            // Animate product items
+            tl.to('.product-item', {
+                opacity: 1, 
+                x: 0, 
+                stagger: 0.1, 
+                duration: 0.6, 
+                ease: 'back.out(1.4)'
+            }, '-=0.4');
+            
+            // Animate summary items
+            tl.to('.summary-item', {
+                opacity: 1, 
+                y: 0, 
+                stagger: 0.1, 
+                duration: 0.6, 
+                ease: 'power2.out'
+            }, '-=0.5');
+            
+            // Animate payment methods
+            tl.to('.payment-methods', {
+                opacity: 1, 
+                y: 0, 
+                duration: 0.6, 
+                ease: 'power2.out'
+            }, '-=0.4');
+            
+            // Animate coupon form
+            tl.to('.coupon-form', {
+                opacity: 1, 
+                y: 0, 
+                duration: 0.6, 
+                ease: 'power2.out'
+            }, '-=0.4');
+            
+            // Animate checkout details
+            tl.to('.checkout-details', {
+                opacity: 1, 
+                duration: 0.6, 
+                ease: 'power2.out'
+            }, '-=0.4');
+            
+            // Add hover effects for cards
+            gsap.utils.toArray('.card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, {
+                        y: -5,
+                        duration: 0.3,
+                        boxShadow: '0 14px 28px rgba(138, 66, 255, 0.25)'
+                    });
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        y: 0,
+                        duration: 0.3,
+                        boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)'
+                    });
+                });
+            });
+            
+            // Add click handler for payment options
+            const paymentOptions = document.querySelectorAll('.payment-option');
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove selected class from all options
+                    paymentOptions.forEach(o => o.classList.remove('selected'));
+                    // Add selected class to clicked option
+                    option.classList.add('selected');
+                    
+                    // Animation for selection
+                    gsap.fromTo(option, 
+                        { scale: 0.95 },
+                        { scale: 1, duration: 0.3, ease: 'elastic.out(1, 0.3)' }
+                    );
+                });
+            });
+            
+            // Quantity selectors
+            const decreaseBtns = document.querySelectorAll('.qty-btn.decrease');
+            const increaseBtns = document.querySelectorAll('.qty-btn.increase');
+            
+            decreaseBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const qtyValueElement = btn.nextElementSibling;
+                    let currentQty = parseInt(qtyValueElement.textContent);
+                    if (currentQty > 1) {
+                        currentQty--;
+                        qtyValueElement.textContent = currentQty;
+                        updateTotals();
+                        
+                        // Animation
+                        gsap.fromTo(qtyValueElement, 
+                            { scale: 0.8, opacity: 0.5 },
+                            { scale: 1, opacity: 1, duration: 0.3 }
+                        );
+                    }
+                });
+            });
+            
+            increaseBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const qtyValueElement = btn.previousElementSibling;
+                    let currentQty = parseInt(qtyValueElement.textContent);
+                    currentQty++;
+                    qtyValueElement.textContent = currentQty;
+                    updateTotals();
+                    
+                    // Animation
+                    gsap.fromTo(qtyValueElement, 
+                        { scale: 1.2, opacity: 0.5 },
+                        { scale: 1, opacity: 1, duration: 0.3 }
+                    );
+                });
+            });
+            
+            // Remove item
+            const removeButtons = document.querySelectorAll('.action-btn');
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productItem = btn.closest('.product-item');
+                    
+                    gsap.to(productItem, {
+                        x: 50,
+                        opacity: 0,
+                        height: 0,
+                        padding: 0,
+                        margin: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            productItem.remove();
+                            updateTotals();
+                            updateCartBadge();
+                        }
+                    });
+                });
+            });
+            
+            // Apply coupon
+            const couponInput = document.getElementById('coupon-input');
+            const applyCouponBtn = document.getElementById('apply-coupon');
+            
+            applyCouponBtn.addEventListener('click', () => {
+                const couponCode = couponInput.value.trim();
+                if (couponCode !== '') {
+                    // Simulate coupon application
+                    const couponValue = document.getElementById('coupon-value');
+                    const discountAmount = 'R$ -5,00';
+                    
+                    gsap.fromTo(couponValue, 
+                        { color: 'var(--success)', scale: 1.2 },
+                        { color: 'var(--success)', scale: 1, duration: 0.5 }
+                    );
+                    
+                    couponValue.textContent = discountAmount;
+                    couponInput.value = '';
+                    
+                    // Success indicator
+                    const successFeedback = document.createElement('div');
+                    successFeedback.classList.add('pulse');
+                    applyCouponBtn.appendChild(successFeedback);
+                    
+                    gsap.to(successFeedback, {
+                        opacity: 0,
+                        duration: 2,
+                        onComplete: () => {
+                            successFeedback.remove();
+                        }
+                    });
+                    
+                    updateTotals();
+                    
+                    // Button animation
+                    gsap.fromTo(applyCouponBtn, 
+                        { backgroundColor: 'var(--success)' },
+                        { 
+                            backgroundColor: 'var(--primary)', 
+                            duration: 1.5,
+                            ease: 'power2.out'
+                        }
+                    );
+                }
+            });
+            
+            // Checkout button effect
+            const checkoutBtn = document.querySelector('.checkout-btn');
+            checkoutBtn.addEventListener('mouseenter', () => {
+                gsap.to(checkoutBtn, {
+                    scale: 1.03,
+                    duration: 0.3
+                });
+            });
+            
+            checkoutBtn.addEventListener('mouseleave', () => {
+                gsap.to(checkoutBtn, {
+                    scale: 1,
+                    duration: 0.3
+                });
+            });
+            
+            checkoutBtn.addEventListener('click', () => {
+                gsap.fromTo(checkoutBtn, 
+                    { scale: 0.95 },
+                    { 
+                        scale: 1, 
+                        duration: 0.5,
+                        ease: 'elastic.out(1, 0.3)',
+                        onComplete: () => {
+                            // Add any checkout logic here
+                            showCheckoutSuccess();
+                        }
+                    }
+                );
+            });
+            
+            // Function to show checkout success
+            function showCheckoutSuccess() {
+                // Create success overlay
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                overlay.style.display = 'flex';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.zIndex = '1000';
+                overlay.style.opacity = '0';
+                
+                const successCard = document.createElement('div');
+                successCard.style.backgroundColor = 'var(--card-bg)';
+                successCard.style.borderRadius = 'var(--border-radius)';
+                successCard.style.padding = '32px';
+                successCard.style.textAlign = 'center';
+                successCard.style.maxWidth = '400px';
+                successCard.style.boxShadow = 'var(--card-shadow)';
+                successCard.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+                successCard.style.transform = 'scale(0.8)';
+                
+                const checkIcon = document.createElement('div');
+                checkIcon.style.width = '80px';
+                checkIcon.style.height = '80px';
+                checkIcon.style.borderRadius = '50%';
+                checkIcon.style.backgroundColor = 'var(--success)';
+                checkIcon.style.margin = '0 auto 20px';
+                checkIcon.style.display = 'flex';
+                checkIcon.style.justifyContent = 'center';
+                checkIcon.style.alignItems = 'center';
+                checkIcon.style.fontSize = '40px';
+                checkIcon.style.color = 'white';
+                checkIcon.innerHTML = '✓';
+                
+                const successTitle = document.createElement('h2');
+                successTitle.textContent = 'Pedido Confirmado!';
+                successTitle.style.marginBottom = '16px';
+                successTitle.style.color = 'var(--text)';
+                
+                const successMessage = document.createElement('p');
+                successMessage.textContent = 'Seu pagamento foi processado com sucesso. Você receberá um email com os detalhes do seu pedido em breve.';
+                successMessage.style.marginBottom = '24px';
+                successMessage.style.color = 'var(--text-secondary)';
+                
+                const closeButton = document.createElement('button');
+                closeButton.textContent = 'Continuar';
+                closeButton.style.backgroundColor = 'var(--success)';
+                closeButton.style.color = 'white';
+                closeButton.style.border = 'none';
+                closeButton.style.borderRadius = 'var(--input-radius)';
+                closeButton.style.padding = '12px 24px';
+                closeButton.style.fontWeight = '600';
+                closeButton.style.cursor = 'pointer';
+                closeButton.style.transition = 'all 0.3s ease';
+                
+                closeButton.addEventListener('mouseenter', () => {
+                    closeButton.style.backgroundColor = '#19a649';
+                    closeButton.style.transform = 'translateY(-2px)';
+                });
+                
+                closeButton.addEventListener('mouseleave', () => {
+                    closeButton.style.backgroundColor = 'var(--success)';
+                    closeButton.style.transform = 'translateY(0)';
+                });
+                
+                closeButton.addEventListener('click', () => {
+                    gsap.to(overlay, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            document.body.removeChild(overlay);
+                        }
+                    });
+                });
+                
+                successCard.appendChild(checkIcon);
+                successCard.appendChild(successTitle);
+                successCard.appendChild(successMessage);
+                successCard.appendChild(closeButton);
+                overlay.appendChild(successCard);
+                document.body.appendChild(overlay);
+                
+                gsap.to(overlay, {
+                    opacity: 1,
+                    duration: 0.5
+                });
+                
+                gsap.to(successCard, {
+                    scale: 1,
+                    duration: 0.6,
+                    ease: 'back.out(1.7)'
+                });
+            }
+            
+            // Update cart badge
+            function updateCartBadge() {
+                const badge = document.querySelector('.badge');
+                const productItems = document.querySelectorAll('.product-item');
+                badge.textContent = productItems.length;
+                
+                if (productItems.length === 0) {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            // Function to update totals
+            function updateTotals() {
+                // Get all prices and quantities
+                const productItems = document.querySelectorAll('.product-item');
+                let subtotal = 0;
+                
+                productItems.forEach(item => {
+                    const priceText = item.querySelector('.product-price').textContent;
+                    const price = parseFloat(priceText.replace('R$ ', '').replace(',', '.'));
+                    const quantity = parseInt(item.querySelector('.qty-value').textContent);
+                    subtotal += price * quantity;
+                });
+                
+                // Format subtotal
+                const formattedSubtotal = subtotal.toFixed(2).replace('.', ',');
+                
+                // Get discount and coupon values
+                const discountText = document.getElementById('discount-value').textContent;
+                const discount = parseFloat(discountText.replace('R$ -', '').replace(',', '.')) || 0;
+                
+                const couponText = document.getElementById('coupon-value').textContent;
+                const coupon = parseFloat(couponText.replace('R$ -', '').replace(',', '.')) || 0;
+                
+                // Calculate total
+                const total = subtotal - discount - coupon;
+                const formattedTotal = total.toFixed(2).replace('.', ',');
+                
+                // Update DOM
+                const productsValue = document.getElementById('products-value');
+                const totalValue = document.getElementById('total-value');
+                
+                // Animate value changes
+                animateValue(productsValue, `R$ ${formattedSubtotal}`);
+                animateValue(totalValue, `R$ ${formattedTotal}`);
+            }
+            
+            // Animate value changes
+            function animateValue(element, newValue) {
+                gsap.fromTo(element, 
+                    { scale: 1.1, color: 'var(--primary-light)' },
+                    { 
+                        scale: 1, 
+                        color: element.classList.contains('discount') ? 'var(--success)' : 'var(--text)',
+                        duration: 0.5,
+                        onComplete: () => {
+                            element.textContent = newValue;
+                        }
+                    }
+                );
+            }
+            
+            // Floating animation for background shapes
+            gsap.to('.shape-1', {
+                y: -30,
+                x: 20,
+                rotation: 10,
+                duration: 14,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+            
+            gsap.to('.shape-2', {
+                y: 40,
+                x: -30,
+                rotation: -5,
+                duration: 18,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+            
+            gsap.to('.shape-3', {
+                y: -40,
+                x: -20,
+                rotation: 15,
+                duration: 16,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+            
+            // Add responsive handling for container height
+            function adjustContainerHeight() {
+                const container = document.querySelector('.container');
+                const windowHeight = window.innerHeight;
+                
+                if (window.innerWidth <= 1200) {
+                    container.style.height = 'auto';
+                    container.style.maxHeight = 'none';
+                    container.style.overflowY = 'visible';
+                } else {
+                    container.style.maxHeight = (windowHeight * 0.9) + 'px';
+                    container.style.height = 'auto';
+                    container.style.overflowY = 'auto';
+                }
+            }
+            
+            // Call on load and resize
+            adjustContainerHeight();
+            window.addEventListener('resize', adjustContainerHeight);
+            
+            // Add scrollbar styling for webkit browsers
+            const style = document.createElement('style');
+            style.innerHTML = `
+                ::-webkit-scrollbar {
+                    width: 6px;
+                    height: 6px;
+                }
+                ::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 10px;
+                }
+                ::-webkit-scrollbar-thumb {
+                    background: var(--primary-transparent);
+                    border-radius: 10px;
+                }
+                ::-webkit-scrollbar-thumb:hover {
+                    background: var(--primary);
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

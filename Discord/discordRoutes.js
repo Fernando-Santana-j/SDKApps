@@ -331,7 +331,7 @@ router.get('/auth/callback', async (req, res) => {
                     })
                 }
 
-                res.redirect('/dashboard')
+                res.redirect(`/close/${userResponse.id}`)
             }
         }
     } catch (error) {

@@ -1,0 +1,101 @@
+#main-containner{
+    width: 100%;
+    overflow: auto;
+}
+#store-menu-containner {
+    width: 100%;
+    padding: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 99;
+}
+
+#store-menu-content {
+    min-width: 25em;
+    width: 35em;
+    padding: 1.5em;
+    border: 3px solid var(--color-text-primary);
+    border-radius: var(--border-radius-max-forl);
+    backdrop-filter: blur(10px);
+    background-color: rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+#store-menu-nav-list {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#store-menu-nav-list li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 7em;
+}
+
+#store-menu-line {
+    position: absolute;
+    margin-top: 2em;
+    height: 3px;
+    background-color: var(--color-text-primary);
+    transition: all 0.3s ease;
+    border-radius: var(--border-radius-max-forl);
+    opacity: 0;
+}
+
+#store-menu-nav-list li a {
+    display: block;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    font-family: 'poppins', sans-serif;
+    text-decoration: none;
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+    letter-spacing: 0;
+}
+
+#store-menu-nav-list li a:hover {
+    transform: scale(1.10);
+    letter-spacing: 0.01em;
+}
+
+#store-menu-nav-list li a.active {
+    font-weight: 500; 
+}
+
+
+
+.store-background-type1{
+    background-color: var(--primary-color);
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    height: calc(100vh - 10em);
+    webkit-box-shadow: 0px 10px 40px 10px var(--primary-color);
+    -moz-box-shadow: 0px 10px 40px 10px var(--primary-color);
+    box-shadow: 0px 10px 40px 10px var(--primary-color);
+}
+.store-background-type2{
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    height: calc(100vh - 10em);
+    background-color: var(--secundary-color);
+    webkit-box-shadow: 0px 10px 40px 10px var(--secundary-color);
+    -moz-box-shadow: 0px 10px 40px 10px var(--secundary-color);
+    box-shadow: 0px 10px 40px 10px var(--secundary-color);
+}

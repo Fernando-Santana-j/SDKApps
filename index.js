@@ -3,6 +3,7 @@ const Discord = require("discord.js");
 const { Events, GatewayIntentBits } = require('discord.js');
 const db = require('./Firebase/models.js')
 const dataBase = require('./Firebase/db.js')
+const secDb = require('./DataBase/db.js')
 const express = require('express')
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -12,7 +13,6 @@ const multer = require('multer')
 const cron = require('node-cron');
 const cookieParser = require("cookie-parser");
 const webConfig = require('./config/web-config.js')
-
 const botConfig = require('./config/bot-config.js');
 const { default: axios } = require("axios");
 
@@ -83,16 +83,15 @@ const upload = multer({ storage });
 
 
 
-async function copyAccount() {
-    let s = await db.findOne({ colecao: 'servers', doc: '1315776941671841792' })
-    db.create('servers', '1316103661113577495', s)
-}
-
-
-
-
 
 //TODO------------WEB PAGE--------------
+
+
+
+const auth = require('./routes/post/auth.js')
+app.use('/', auth);
+
+
 
 
 //TODO Discord Routes
@@ -122,64 +121,138 @@ app.use('/', produtoRoutes);
 
 
 const securityRoutes = require('./routes/security.js');
-const { error } = require("console");
 
 app.use('/', securityRoutes);
 
 
-app.get('/', async (req, res) => {
-    res.render('index', { host: `${webConfig.host}`, isloged: req.session.uid && req.session.email ? true : false, user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
+
+//TODO POST ROUTES
+
+app.use('/', require('./routes/post/store.js'));
+
+
+function storeVerify(store) {
+    if (!store || store.error == true) {
+        return {
+            error: true,
+            message: 'Loja nao encontrada!'
+        }
+        return
+    }
+
+    if (store.status == 'inativo' || store.status == 'pendente') {
+        return {
+            error: true,
+            message: 'Loja indisponivel!'
+        }
+        return
+    }
+    
+
+    if ('functions' in store && 'onView' in store && store.functions.onView == false) {
+        return {
+            error: true,
+            message: 'Loja indisponivel!'
+        }
+    }
+
+    return {
+        error: false,
+        message: ''
+    }
+}
+
+app.get('/store/:idn', async (req, res) => { 
+    
+    let store = await db.findOne({ colecao: 'stores', where: ['IDName', '==', req.params.idn] })
+    
+    if (!store || store.error == true) {
+        store = await db.findOne({ colecao: 'stores', doc: req.params.idn })
+    }
+
+    let result = await storeVerify(store)
+
+    if (result && result.error == true) {
+        res.redirect(`/?error=${result.message}`)
+        return
+    }
+
+    delete store.storeData
+    delete store.integrations
+    delete store.functions
+    
+    res.render('./store/products', { store: store })
+
 })
+
+
+
+
+app.get('/', async (req, res) => {
+    res.render('index', { host: `${webConfig.host}`, sessionUser: JSON.stringify({ uid: req.session.uid ? req.session.uid : null, emaiVerify: req.cookies && 'emailVerify' in req.cookies ? true : false }), user: { id: req.session.uid ? req.session.uid : null }, error: req.query.error ? req.query.error : '' })
+})
+
 
 
 app.get('/dashboard', functions.authGetState, async (req, res) => {
-
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    if ('pass' in user == true) {
-        delete user.security
-    }
-    let server = await functions.reqServerByTime(user, functions.findServers)
-
-    let servidoresEnd = []
-    if (server.error) {
-        if (user.lastServers) {
-            for (let index = 0; index < user.lastServers.length; index++) {
-                const element = user.lastServers[index];
-                let Findserver = await db.findOne({ colecao: 'servers', doc: element })
-                if (Findserver.error == false) {
-                    servidoresEnd.push(Findserver)
-                }
-            }
-        } else {
-            res.redirect('/redirect/discord')
+    let stores = []
+    if ('stores' in user && user.stores.length > 0) {
+        for (let index = 0; index < user.stores.length; index++) {
+            const store = user.stores[index];
+            let storeDoc = await store.get()
+            let storeData = storeDoc.data()
+            await stores.push({
+                id: storeData.id,
+                name: storeData.displayName,
+                logo: storeData.style.logo,
+                status: storeData.status,
+                isServer: false,
+                rating:null,
+                salesRending: "0",
+                productsCount: storeData.products.length,
+                functions: storeData.functions,
+                redirectURL: `/console/${storeData.id}`
+            })
         }
-    } else {
-        let lastServers = []
-        for (let i = 0; i < server.length; i++) {
-            let element = server[i]
+    }
 
-            let Findserver = await db.findOne({ colecao: 'servers', doc: element.id })
-            if (Findserver.error == false) {
-                servidoresEnd.push(Findserver)
-                lastServers.push(Findserver.id)
-            } else {
-                servidoresEnd.push(element)
-            }
-
+    if ('lastServers' in user && user.lastServers.length > 0) {
+        for (let index = 0; index < user.lastServers.length; index++) {
+            const serverID = user.lastServers[index];
+            let server = await db.findOne({ colecao: 'servers', doc: serverID })
+            await stores.push({
+                id: server.id,
+                displayName: server.name,
+                logo: server.server_pic,
+                status: 'inactive',
+                isServer: true,
+                redirectURL: `/convert/${server.id}`
+            })
         }
-        db.update('users', user.id, {
-            lastServers: lastServers
-        })
     }
-    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
-    let chatItens = []
-    if ('ticketOptions' in adminServer) {
-        chatItens = adminServer.ticketOptions.motivos
-    }
-    res.render('dashboard', { host: `${webConfig.host}`, chatItens: chatItens, user: user, servers: servidoresEnd })
+
+    res.render('dashboard', {
+        user: {
+            id: user.id,
+            displayName: user.displayName,
+            profile_pic: user.profile_pic,
+            stores: JSON.stringify(user.stores)
+        },
+        stores: JSON.stringify(stores),
+    })
 
 })
 
+
+app.get('/onboarding', functions.authGetState, async (req, res) => {
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if ('stores' in user && user.stores.length > 0) {
+        res.redirect('/dashboard?error=Voce ja possui uma loja!')
+    } else {
+        res.render('onboarding')
+    }
+})
 
 app.get('/user/config', functions.authGetState, async (req, res) => {
 
@@ -206,15 +279,15 @@ app.get('/logout', async (req, res) => {
                 if (err) {
                     return console.error(err)
                 } else {
-                    res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
+                    res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}&logout=true`)
                 }
             })
 
         } else {
-            res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
+            res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}&logout=true`)
         }
     } catch (error) {
-        res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}`)
+        res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}&logout=true`)
     }
 })
 
@@ -231,54 +304,60 @@ app.get('/payment/:id', async (req, res) => {
     res.render('payment', { host: `${webConfig.host}`, user: user })
 })
 
-app.get('/server/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/console/:id', functions.authGetState, async (req, res) => {
     let serverID = req.params.id
-    const guilds = client.guilds.cache;
-    const isBotInServer = guilds.has(serverID);
-    if (!isBotInServer) {
-        res.redirect(`/addbot/${serverID}`)
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+
+    if (!user.stores.find(docRef => docRef.id === serverID)) {
+        res.redirect('/dashboard?error=Voce não tem permissão para acessar essa loja!')
         return
     }
-    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    if ('pass' in user == true) {
-        delete user.security
-    }
-    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
 
     if (!server || !user) {
         res.redirect('/?error=Erro ao recuperar o servidor ou o seu usuario!')
         return
     }
-    if (server.hasOwnProperty('bankData')) {
-        delete server.bankData
-    }
 
-    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
-    if (verifyPerms.error == true) {
-        console.log(verifyPerms);
-        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
-        return
-    }
-    if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botEdit == false) {
-        res.redirect('/dashboard?error=Você não tem permissão para editar esse bot')
-        return
-    }
+    
+    let lastSells = await secDb.getRecentFiles('analytics', serverID)
 
-    let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
+    // let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
 
-    let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
-    let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
+    // let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
+    // let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
 
-    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
-    let chatItens = []
-    if (adminServer && 'ticketOptions' in adminServer) {
-        chatItens = adminServer.ticketOptions.motivos
-    }
-    res.render('painel', { host: `${webConfig.host}`, chatItens: chatItens, user: user, server: server, serverString: JSON.stringify(server), comprasCanceladas: comprasCanceladas, comprasConcluidas: comprasConcluidas })
+    
+    res.render('painel', { host: `${webConfig.host}`, user: user, server: server, serverString: JSON.stringify(server), chatItens: [] })
 })
+const processPurchases = (purchases) => {
+    return purchases
+        .sort((a, b) => a.created_at - b.created_at)
+        .reduce((acc, { created_at, products }) => {
+            const date = new Date(created_at).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: '2-digit'
+            }) // Formata a data para DD/MM
+            acc.dailyPurchases[date] = (acc.dailyPurchases[date] || 0) + 1;
+            products.forEach(({ name, qnt }) => {
+                acc.productCounts[name] = (acc.productCounts[name] || 0) + qnt;
+            });
+            return acc;
+        }, { dailyPurchases: {}, productCounts: {} });
+};
+
+const result = processPurchases([
+    { "id": "51895t21985t", "products": [{"name": "prod1", "qnt": 34}, {"name": "prod2", "qnt": 2}], "created_at": 1741631941926 },
+    { "id": "23895t21985t", "products": [{"name": "prod1", "qnt": 2}], "created_at": 1741631942926 },
+    { "id": "11985t21985t", "products": [{"name": "prod2", "qnt": 4}, {"name": "prod3", "qnt": 1}], "created_at": 1741631940926 }
+]);
+
+const mostPurchasedProduct = Object.entries(result.productCounts).reduce((max, [product, count]) => count > max[1] ? [product, count] : max, ['', 0])[0];
+
+console.log('Compras por dia:', result.dailyPurchases);
+console.log('Produto mais comprado:', mostPurchasedProduct);
 
 
-app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/sales/:id', functions.authGetState, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     if ('pass' in user == true) {
@@ -355,7 +434,7 @@ app.get('/server/sales/:id', functions.authGetState, functions.subscriptionStatu
 })
 
 
-app.get('/server/personalize/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/personalize/:id', functions.authGetState, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     if ('pass' in user == true) {
@@ -404,7 +483,7 @@ app.get('/server/personalize/:id', functions.authGetState, functions.subscriptio
     res.render('personalize', { host: `${webConfig.host}`, channels: textChannels, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
 })
 
-app.get('/server/backups/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/backups/:id', functions.authGetState, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     if ('pass' in user == true) {
@@ -466,7 +545,7 @@ app.get('/server/backups/:id', functions.authGetState, functions.subscriptionSta
 })
 
 
-app.get('/server/analytics/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/analytics/:id', functions.authGetState, async (req, res) => {
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     if ('pass' in user == true) {
@@ -503,7 +582,7 @@ app.get('/server/analytics/:id', functions.authGetState, functions.subscriptionS
 })
 
 
-app.get('/server/permissions/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/permissions/:id', functions.authGetState, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -541,7 +620,7 @@ app.get('/server/permissions/:id', functions.authGetState, functions.subscriptio
 })
 
 
-app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/ticket/:id', functions.authGetState, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -578,7 +657,7 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
     let roles = guild.roles.cache
     let rolesFilter = roles.filter(role => role.managed == false && role.name != "@everyone")
 
-    
+
     let ticketOptions = {
         motivos: [],
         permissions: [],
@@ -604,7 +683,7 @@ app.get('/server/ticket/:id', functions.authGetState, functions.subscriptionStat
     res.render('ticket', { host: `${webConfig.host}`, chatItens: chatItens, ticketOptions: ticketOptions, roles: JSON.stringify(rolesFilter), user: user, server: server, channels: textChannels, })
 })
 
-app.get('/server/cupom/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/cupom/:id', functions.authGetState, async (req, res) => {
 
     let serverID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -648,7 +727,7 @@ app.get('/server/cupom/:id', functions.authGetState, functions.subscriptionStatu
 
 
 
-app.get('/server/config/:id', functions.authGetState, functions.subscriptionStatus, async (req, res) => {
+app.get('/server/config/:id', functions.authGetState, async (req, res) => {
     try {
         let serverID = req.params.id
         let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
@@ -699,6 +778,9 @@ app.get('/redirect/discord', (req, res) => {
     res.redirect(webConfig.loginURL)
 })
 
+app.get('/close/:id', (req, res) => {
+    res.render('pageClose', { uid: req.params.id })
+})
 
 app.get('/adm', (req, res) => {
     res.render('admin', { host: `${webConfig.host}` })
@@ -708,6 +790,19 @@ app.get('/copyText/:copy', async (req, res) => {
     res.render('copyText', { host: `${webConfig.host}`, copyText: req.params.copy })
 })
 
+
+
+
+
+
+
+
+app.get('/security/create/pass', functions.authGetState, async (req, res) => {
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    if (!user) return res.redirect('/logout?error=Faca login novamente!');
+    if ('pass' in user == true) return res.redirect('/security/pass')
+    res.render('createPass', { host: `${webConfig.host}`, user: user })
+})
 
 //-----POST-------
 
@@ -2137,6 +2232,84 @@ app.post('/sales/rankConfig', functions.authPostState, async (req, res) => {
 
 
 
+
+
+
+
+
+app.post('/verifyUID', functions.authPostState, async (req, res) => {
+    try {
+        
+
+    } catch (error) {
+        console.log(error);
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao resgatar a coleção!' })
+        }
+    }
+
+})
+
+
+
+
+
+app.post('/get/verifyItem', functions.authPostState, async (req, res) => {
+    try {
+        let { colecao, itemID, ItemValue } = req.body
+        if (!colecao || !itemID || !ItemValue) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Erro ao resgatar a coleção, dados faltando!' })
+            }
+        }
+        let server = await db.findOne({ colecao: colecao, where: [itemID, '==', ItemValue] })
+        if (server.error == false) {
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, exist: true })
+            }
+        } else {
+            if (!res.headersSent) {
+                res.status(200).json({ success: true, exist: false })
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+
+        if (!res.headersSent) {
+            res.status(200).json({ success: false, data: 'Erro ao resgatar a coleção!' })
+        }
+    }
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.use((req, res, next) => {
     res.status(404).render('NotFoundPage.ejs', { host: `${webConfig.host}` })
 });
@@ -2144,7 +2317,7 @@ app.use((req, res, next) => {
 //TODO------------Listen--------------
 
 
-cron.schedule('0 * * * *',async () => {
+cron.schedule('0 * * * *', async () => {
     let hora = new Date().getHours()
     try {
         let firebaseDB = require("./Firebase/db.js")
@@ -2154,8 +2327,8 @@ cron.schedule('0 * * * *',async () => {
         do {
             let query = firebaseDB.collection('servers')
                 .where('repostProduct', '==', hora.toString())
-                .orderBy('__name__') 
-                .limit(500); 
+                .orderBy('__name__')
+                .limit(500);
 
             if (ultimoDocumento) {
                 query = query.startAfter(ultimoDocumento);
@@ -2177,25 +2350,25 @@ cron.schedule('0 * * * *',async () => {
                                 channelID: product.channel,
                                 serverID: data.id,
                                 productID: product.productID,
-                                edit:true
+                                edit: true
                             })
                         } else {
                             require('./Discord/createProductMessage.js')(Discord, client, {
                                 channelID: product.channel,
                                 serverID: data.id,
                                 productID: product.productID,
-                                edit:true
+                                edit: true
                             })
                         }
                     } catch (error) {
-                        
+
                     }
-                    
+
                 })
             });
 
             ultimoDocumento = snapshot.docs[snapshot.docs.length - 1];
-        } while (snapshot.size === 500); 
+        } while (snapshot.size === 500);
 
     } catch (error) {
         console.error('Erro ao buscar documentos:', error);

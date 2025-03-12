@@ -9,3 +9,7 @@ config/mercadoPagoData.json
 /uploads
 /cart.list
 backups
+
+# Added by cargo
+
+/target

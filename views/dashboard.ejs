@@ -4,62 +4,128 @@
     <%- include('./reusable/head.ejs') %>
     <title>SDK - Dashboard</title>
     <link rel="stylesheet" href="/public/css/dashboard.css">
-    
+</head>
 <body>
-    <div  id="body-containner">
-
-        <div id="containner">
-            <%- include('./reusable/topHeader.ejs',{user:user}) %>
-            <main id="main-containner">
-                <div id="mid-content">
-                    <div id="mid-content-title">
-                        Selecione um Servidor
-                    </div>
-                    <div id="mid-content-legends">
-                        <div id="legends-title">
-                            Estados do servidores:
-                        </div>
-                        <div id="legends-itens-containner">
-                            <div class="legends-itens">
-                                <div class="legends-itens-color" style="background-color: var(--red-color)"></div>
-                                <div class="legends-itens-text">Inativo</div>
-                            </div>
-                            <div class="legends-itens">
-                                <div class="legends-itens-color" style="background-color: var(--attention-color)"></div>
-                                <div class="legends-itens-text">Pendente</div>
-                            </div>
-                            <div class="legends-itens">
-                                <div class="legends-itens-color" style="background-color: var(--green-color)"></div>
-                                <div class="legends-itens-text">Ativo</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="servers-containner">
-                    <div id="servers-row">
-                        <% servers.forEach(element => { %>
-                            <a href="/<%= element.isPaymented == true ? 'server' : "payment"%>/<%= element.id %>" class="server-col">
-                                <div class="server-col-status <%= element.isPaymented == true ? 'greenColor' : element.assinante == true ? 'attentionColor' :"redColor"%>"></div>
-                                <div class="server-col-content">
-                                    <img class="server-col-pic" src="<%= element.server_pic %>">
-                                    <p class="server-col-name"><%= element.name %></p>
-                                    <p class="server-col-situation"><%= element.tipo %></p>
-                                </div>
-                            </a>
-                        <% }) %>
-                    </div>
+    <div id="body-containner">
+        <div id="popup-create-new-store-containner" class="popup-containner">
+            <div id="popup-create-new-store-content" class="popup-content">
+                <div id="animation-check-containner" style="display: none;">
+                    
                 </div>
                 
-            </main>
+
+                <div id="popup-create-new-store-form">
+                    <div id="popup-create-new-store-title">
+                        <div style="width: 3em;"></div>
+                        <div id="popup-create-new-store-title-text" class="title-col">
+                            Criar nova loja
+                        </div>
+                        <div class="popup-close-button" id="popup-create-new-store-close">
+                            <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#fff"
+                                    d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="linha"></div>
+                    <h1 class="desc-col"  id="popup-create-new-store-error"></h1>
+                    <div id="popup-create-new-store-inputs">
+                       
+                        <div id="popup-create-new-store-images">
+                            <div id="popup-create-new-store-images-logo">
+                                <label for="popup-create-new-store-images-logo-input"
+                                    id="popup-create-new-store-images-logo-title">
+                                    Logo
+                                </label>
+                                <div id="popup-create-new-store-images-logo-content">
+                                    <label for="popup-create-new-store-images-logo-input"
+                                        id="popup-create-new-store-images-logo-content-pic">
+                                        <img id="popup-create-new-store-images-logo-content-pic-img" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg"
+                                            alt="logo">
+                                    </label>
+                                    <input type="file" id="popup-create-new-store-images-logo-input"  accept="image/*" hidden>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="popup-create-new-store-names-inputs">
+                            <div class="inputs-col-content">
+                                <label for="popup-create-new-store-input-name" class="lable-padrao">Nome de
+                                    exibição</label>
+                                <input type="text" id="popup-create-new-store-input-name" class="input-padrao"
+                                    placeholder="Insira o nome que ira aparecer nas paginas">
+                            </div>
+                            <div class="inputs-col-content">
+                                <label for="popup-create-new-store-input-url" class="lable-padrao">Nome de
+                                    identificação</label>
+                                <input type="text" id="popup-create-new-store-input-url" class="input-padrao"
+                                    placeholder="Insira o nome que ira aparecer nas URLS">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="button-padrao" id="create-store-button">Criar loja</button>
+                </div>
+            </div>
         </div>
+        <%- include('./reusable/topHeader.ejs',{user:user}) %>
+        <div class="container">
+            <header>
+                <div>
+                    <h1>Suas Lojas</h1>
+                    <!-- <p class="subtitle">Gerencie todas as suas lojas em um só lugar</p> -->
+                </div>
+                <button class="button-padrao" id="new-store-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Nova Loja
+                </button>
+            </header>
+    
+            <div class="stores-grid" id="storesGrid"></div>
+                
+    
+            <!-- Estado vazio -->
+            <div class="empty-state" id="emptyState">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="floating">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <h2 class="empty-title">Sem lojas ainda</h2>
+                <p class="empty-text">Você ainda não tem nenhuma loja cadastrada. Crie sua primeira loja para começar a vender.</p>
+                <a class="button-padrao" href="/onboarding" id="btnAddStoreEmpty">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Criar Minha Primeira Loja
+                </a>
+            </div>
+        </div>
+    
+    
+        <!-- Tooltip -->
+        <div class="tooltip" id="tooltip"></div>
     </div>
+    
     <script>
-        localStorage.setItem('access_token','<%= user.access_token %>')
-        let serverList = document.querySelectorAll('#serversID-list .serverID-col')
+        let userID = '<%= user.id %>'
+        localStorage.setItem('userID',userID)
+
+        let userStores = JSON.parse(("<%= user.stores ? user.stores : '[]' %>").replace(/&#34;/g, '"'))
+        let storeData = JSON.parse(("<%= stores %>").replace(/&#34;/g, '"'))
+        
     </script>
-    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
+    <%#- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
     <%- include('./reusable/script.ejs') %>
     <script src="/public/js/dashboard.js"></script>
-    
+
 </body>
+
 </html>

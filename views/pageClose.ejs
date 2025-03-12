@@ -1,0 +1,8 @@
+<script>
+   
+    document.addEventListener('DOMContentLoaded', function() {
+        let uid = '<%= uid %>'
+        window.opener.postMessage(`uid=${uid}`,window.origin)
+        window.close();
+    });
+</script>
