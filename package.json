@@ -15,7 +15,7 @@
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
-    "canvas": "^2.11.2",
+    "canvas": "^3.0.0",
     "cookie-parser": "^1.4.6",
     "copy-paste": "^1.5.3",
     "cors": "^2.8.5",
