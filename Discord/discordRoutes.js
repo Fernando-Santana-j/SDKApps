@@ -79,22 +79,22 @@ router.get('/discord/verify', async (req, res) => {
             }).then((res) => { return res.data }).catch((err) => {
                 console.error(err)
             });
-            
-            
-            
-            const ip =  req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+
+
+            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             let backups = 'backups' in server ? server.backups : {}
             let userVerified = 'verified' in backups ? backups.verified : []
-            await userVerified.push({ 
+            await userVerified.push({
                 id: await userResponse.id,
                 username: await userResponse.username,
                 avatar: await userResponse.avatar,
                 ip: await ip,
-                access_token:await response.data.access_token,
+                access_token: await response.data.access_token,
                 refresh_token: await response.data.refresh_token,
                 email: await userResponse.email,
             })
-            
+
             backups.verified = userVerified
             db.update('servers', req.query.state, {
                 backups: backups
@@ -108,8 +108,49 @@ router.get('/discord/verify', async (req, res) => {
     }
 })
 
-router.get('/auth/callback', async (req, res) => {
+
+
+router.get('/discord/addbot/:storeID', functions.authGetState, async (req, res) => {
+    if (!req.params.storeID) {
+        res.redirect(`/`)
+        return
+    }
+    let store = await db.findOne({ colecao: 'stores', doc: req.params.storeID })
+    if (store.error == true) {
+        res.redirect(`/`)
+        return
+    }
+    const guilds = client.guilds.cache;
+
+    if ("integrations" in store && "serverID" in store.integrations) {
+        const isBotInServer = guilds.has(store.integrations.serverID);
+        if (isBotInServer) {
+            // Verificar se estamos numa popup ou não
+            if (req.query.popup === 'true') {
+                // Se estamos numa popup, redirecionar para página de verificação com status de sucesso
+                return res.render('discord-callback', {
+                    status: 'success',
+                    guildName: guilds.get(store.integrations.serverID).name,
+                    storeID: req.params.storeID
+                });
+            } else {
+                // Caso contrário, redirecionar para a página de integrações
+                return res.redirect(`/console/integrations/${req.params.storeID}`);
+            }
+        }
+    }
+
+    // Redirecionar para a autorização do Discord, especificando nossa callback como redirect_uri
+    res.redirect(`https://discord.com/oauth2/authorize?client_id=${webConfig.clientId}&permissions=8&response_type=code&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&redirect_uri=${process.env.REDIRECTURI}&state=${req.params.storeID}`);
+})
+
+
+
+
+router.get('/test/auth/callback', async (req, res) => {
     try {
+        console.log(req.query);
+
         if (req.session.uid) {
             res.redirect('/dashboard')
         } else {
@@ -142,194 +183,6 @@ router.get('/auth/callback', async (req, res) => {
                 }).then((res) => { return res.data }).catch((err) => {
                     console.error(err)
                 });
-                req.session.uid = userResponse.id;
-
-                let user = await db.findOne({ colecao: 'users', doc: userResponse.id })
-                if ('pass' in user == true) {
-                    delete user.security
-                }
-                let loginsOpen = 'loginsOpen' in user ? user.loginsOpen : {}
-                const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-                let userLoginAccept = 'usersLoginAccept' in user ? true : false
-                let findLogin = Object.values(loginsOpen).find(element => element.ip == ip)
-                if ('usersLoginAccept' in user && user.usersLoginBlock.includes(ip)) {
-                    res.redirect('/logout?error=Seu acesso a essa conta foi bloqueado!')
-                    return
-                }
-                if (user && user.error == false) {
-                    if (userLoginAccept == false && !findLogin || userLoginAccept == true && !user.usersLoginAccept.includes(ip) && !findLogin) {
-                        let loginID = await require('crypto').randomBytes(16).toString('hex')
-                        const userAgent = req.headers['user-agent'];
-                        const os = /Windows|Mac|Linux|Android|iPhone|iPad/.exec(userAgent)?.[0] || 'Desconhecido';
-                        const browser = /Vivaldi|Edge|Chrome|Firefox|Safari|Opera/.exec(userAgent)?.[0] || 'Desconhecido';
-                        let dataAtual = new Date();
-                        let meses = [
-                            "Janeiro", "Fevereiro", "Março", "Abril",
-                            "Maio", "Junho", "Julho", "Agosto",
-                            "Setembro", "Outubro", "Novembro", "Dezembro"
-                        ];
-                        let dataFormatada = `${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()} às ${dataAtual.getHours()}:${dataAtual.getMinutes()}`;
-
-                        try {
-                            const response = await axios.get(`https://ipinfo.io/${ip}?token=38a482893a93f0`);
-                            let data = await response.data;
-                            await functions.sendEmail(user.email, 'Novo acesso a SDK!', `
-                                <html>
-                                    <head>
-                                        <style>
-                                            body {
-                                                font-family: 'Poppins', sans-serif;
-                                                margin: 0;
-                                                padding: 0;
-                                                color: #fff;
-                                            }
-                                            .container {
-                                                width: 100%;
-                                                display: table;
-    
-                                                padding: 1em;
-                                            }
-                                            .content {
-                                                display: table-cell;
-                                                vertical-align: middle;
-                                                text-align: center;
-                                            }
-                                            .email-content {
-                                                width: 100%;
-                                                max-width: 600px;
-                                                background-color: #1E1E1E;
-                                                padding: 1em;
-                                                border-radius: 10px;
-                                                margin: 0 auto;
-                                                box-sizing: border-box;
-                                            }
-                                            .email-content img {
-                                                width: 100%;
-                                                border-radius: 10px;
-                                            }
-                                            h1 {
-                                                font-weight: bold;
-                                                color: #fff;
-                                                font-size: 1.5em;
-                                                margin-top: 1.5em;
-                                            }
-                                            p {
-                                                font-weight: normal;
-                                                color: #fff;
-                                                text-align: start;
-                                                font-size: 1em;
-                                                margin: 1em 0;
-                                            }
-                                            .button {
-                                                display: inline-block;
-                                                font-size: 1.2em;
-                                                font-weight: 400;
-                                                color: #fff !important;
-                                                text-decoration: none;
-                                                background-color: #654BCB;
-                                                border-radius: 20px;
-                                                padding: 1em 2em;
-                                                cursor: pointer;
-                                                margin: 1em;
-                                                            
-                                                background-color: #4c3ba7;
-                                            }
-                                            .details{
-                                                margin-top: 1.5em;
-                                                margin-bottom: 1em;
-                                            }
-                                            .details ul {
-                                                list-style: none;
-                                                padding: 0;
-                                                margin: 1.5em 0;
-                                                text-align: left;
-                                            }
-                                            .details li {
-                                                margin-top: 0.5em;
-                                                font-size: 1em;
-                                            }
-                                            .footer {
-                                                margin-top: 1em;
-                                            }
-                                            .footer p {
-                                                font-size: 1em;
-                                                color: #d6d6d6;
-                                                margin: 0;
-                                            }
-                                            .footer .signature {
-                                                font-size: 1.2em;
-                                                font-family: 'Great Vibes', cursive;
-                                                color: #fff;
-                                                margin: 0;
-                                            }
-                                        </style>
-                                    </head>
-                                    <body>
-                                        <div class="container">
-                                            <div class="content">
-                                                <div class="email-content">
-                                                    <img src="https://res.cloudinary.com/dmfgy0ccd/image/upload/v1726657603/CAPA-PIXEL_ftgohk.gif" alt="Banner">
-                                                    <h1>Novo acesso à sua conta SDK!</h1>
-                                                    <p style="margin-top: 1.5em;">Olá, Fernando</p>
-                                                    <p>Detectamos um novo acesso à sua conta na plataforma da SDK. Caso não reconheça ou não tenha certeza do acesso, peço que aperte o botão abaixo para ser redirecionado para a plataforma.<br><br>Lá você irá receber mais informações sobre o acesso e poderá recusar o acesso e trocar sua senha root!</p>
-                                                    <div class="details">
-                                                        <ul>
-                                                            <li><b>IP:</b> ${data.ip}</li>
-                                                            <li><b>Pais:</b> ${data.country}</li>
-                                                            <li><b>Estado:</b> ${data.region}</li>
-                                                            <li><b>Cidade:</b> ${data.city}</li>
-                                                        </ul>
-                                                    </div>
-                                                    <a href='${webConfig.host}/control/login/${loginID}/${req.session.id}/${data.ip}/${userResponse.id}?os=${os}&postal=${data.postal}&city=${data.city}&estado=${data.region}&pais=${data.country}&loc=${data.loc}&navegador=${browser}&date=${dataFormatada}&token=${req.cookies.token}' class="button" title="Clique para ver mais detalhes sobre o acesso!">Acessar a plataforma</a>
-                                                    <div class="footer">
-                                                        <p>Cumprimentos,</p>
-                                                        <p class="signature">SDKApps</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </body>
-                                    </html>
-                            `)
-                            loginsOpen[loginID] = {
-                                id: loginID,
-                                ip: ip ? ip : null,
-                                sessao: req.session.id ? req.session.id : null,
-                                pais: data.country ? data.country : null,
-                                estado: data.region ? data.region : null,
-                                cidade: data.city ? data.city : null,
-                                os: os,
-                                postal: data.postal ? data.postal : null,
-                                navegador: browser,
-                                date: dataFormatada,
-                                token: req.cookies.token ? req.cookies.token : null,
-                                user: userResponse.id
-                            }
-                        } catch (error) {
-                            console.error('Erro ao obter localização:', error);
-                        }
-                    }
-                    await db.update('users', userResponse.id, {
-                        username: userResponse.username,
-                        profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
-                        displayName: userResponse.global_name,
-                        access_token: response.data.access_token,
-                        loginsOpen: loginsOpen
-                    })
-                } else {
-                    let customer = await functions.createCustomer(userResponse.username, userResponse.email)
-                    await db.create('users', userResponse.id, {
-                        id: userResponse.id,
-                        customer: customer,
-                        username: userResponse.username,
-                        profile_pic: userResponse.avatar ? `https://cdn.discordapp.com/avatars/${userResponse.id}/${userResponse.avatar}.png` : 'https://res.cloudinary.com/dgcnfudya/image/upload/v1709143898/gs7ylxx370phif3usyuf.png',
-                        displayName: userResponse.global_name,
-                        email: userResponse.email,
-                        access_token: response.data.access_token,
-                        usersLoginAccept: [ip],
-                        usersLoginBlock: []
-                    })
-                }
 
                 res.redirect(`/close/${userResponse.id}`)
             }
@@ -341,26 +194,227 @@ router.get('/auth/callback', async (req, res) => {
     }
 })
 
-
-
-
-router.get('/addbot/:serverID', functions.authGetState, (req, res) => {
-    if (!req.params.serverID) {
-        res.redirect(`/`)
-        return
+// Rota para verificar o status do bot no servidor
+router.get('/check-bot-status/:storeID', functions.authGetState, async (req, res) => {
+    if (!req.params.storeID) {
+        return res.json({ success: false, botAdded: false, error: 'ID da loja não fornecido' });
     }
-    const guilds = client.guilds.cache;
-    const isBotInServer = guilds.has(req.params.serverID);
-    if (isBotInServer) {
-        res.redirect(`/server/${req.body.serverID}`)
-    } else {
-        res.redirect(`https://discord.com/oauth2/authorize?client_id=${webConfig.clientId}&permissions=8&response_type=code&scope=bot+applications.commands+guilds.members.read+applications.commands.permissions.update&redirect_uri=${process.env.DISCORDURI}&guild_id=${req.params.serverID}&disable_guild_select=true`)
+
+    try {
+        // Buscar informações da loja
+        let store = await db.findOne({ colecao: 'stores', doc: req.params.storeID });
+
+        if (store.error === true) {
+            return res.json({ success: false, botAdded: false, error: 'Loja não encontrada' });
+        }
+
+        // Verificar se há integração configurada
+        if (!("integrations" in store) || !("serverID" in store.integrations)) {
+            return res.json({ success: false, botAdded: false, error: 'Integração não configurada' });
+        }
+
+        // Verificar se o bot está no servidor
+        const serverID = store.integrations.serverID;
+        const guilds = client.guilds.cache;
+        const isBotInServer = guilds.has(serverID);
+
+        return res.json({
+            success: true,
+            botAdded: isBotInServer,
+            serverID: serverID,
+            serverName: isBotInServer ? guilds.get(serverID).name : null
+        });
+    } catch (error) {
+        console.error("Erro ao verificar status do bot:", error);
+        return res.json({ success: false, botAdded: false, error: 'Erro ao verificar status' });
+    }
+});
+
+// Rota para redirecionamento após autenticação do Discord
+router.get('/auth/callback', async (req, res) => {
+    const { code, state, error } = req.query;
+    console.log(req.query);
+
+    // Se houver erro ou não houver código, redirecionar com erro
+    if (error || !code) {
+        return res.render('discord-callback', {
+            status: 'error',
+            errorMsg: error || 'Autorização negada ou cancelada',
+            storeID: state
+        });
+    }
+
+    if (!state) {
+        return res.render('discord-callback', {
+            status: 'error',
+            errorMsg: 'ID da loja não fornecido',
+            storeID: ''
+        });
+    }
+
+    try {
+        // Buscar a loja
+        const store = await db.findOne({ colecao: 'stores', doc: state });
+
+        if (store.error === true) {
+            return res.render('discord-callback', {
+                status: 'error',
+                errorMsg: 'Loja não encontrada',
+                storeID: state
+            });
+        }
+
+        // Aqui normalmente você trocaria o código de autorização por um token de acesso
+        // Mas como já temos a rota /addbot que redireciona para o Discord OAuth,
+        // e depois o Discord redireciona para esta rota, vamos apenas verificar se o bot está no servidor
+
+        // Simular um pequeno atraso para dar tempo ao Discord de processar a adição do bot
+        setTimeout(async () => {
+            try {
+                // Verificar os servidores onde o bot está presente
+                const guilds = client.guilds.cache;
+
+                // Se houver integrations.serverID, usar esse valor, senão definir como null
+                const serverID = store.integrations && store.integrations.serverID
+                    ? store.integrations.serverID
+                    : null;
+
+                // Verificar se o bot está no servidor especificado
+                const isBotInServer = serverID ? guilds.has(serverID) : false;
+
+                if (isBotInServer) {
+                    // Bot está no servidor
+                    const guild = guilds.get(serverID);
+
+                    return res.render('discord-callback', {
+                        status: 'success',
+                        guildName: guild.name,
+                        storeID: state
+                    });
+                } else {
+                    // Verificar se o bot foi adicionado a um novo servidor
+                    // Se sim, atualizar a configuração da loja
+                    let newServerID = null;
+                    let newGuildName = null;
+
+                    // Se o bot for adicionado a apenas um servidor ou a um servidor novo, usar esse
+                    if (guilds.size === 1) {
+                        const guild = guilds.first();
+                        newServerID = guild.id;
+                        newGuildName = guild.name;
+                    } else if (guilds.size > 1) {
+                        // Se o bot estiver em múltiplos servidores, verificar apenas os mais recentes
+                        // Normalmente o servidor recém-adicionado seria o último
+                        guilds.forEach(guild => {
+                            // Verificar se este servidor não é o atual na configuração
+                            if (guild.id !== serverID) {
+                                newServerID = guild.id;
+                                newGuildName = guild.name;
+                            }
+                        });
+                    }
+
+                    if (newServerID) {
+                        // Atualizar a configuração da loja com o novo servidor
+                        let store = await db.findOne({ colecao: 'stores', doc: state })
+                        let integrations = "integrations" in store ? store.integrations : {}
+                        let discordIntegration = "discord" in integrations ? integrations.discord : {}
+                        let discordServers = "servers" in discordIntegration ? discordIntegration.servers : {}
+                        discordIntegration.enabled = true
+                        discordIntegration.lastServerID = newServerID
+
+                        if (!(newServerID in discordServers)) {
+                            discordServers[newServerID] = {
+                                id: newServerID,
+                                name: newGuildName,
+                                createdAt: new Date(),
+                                products: []
+                            }
+                        }
+                        discordIntegration.servers = discordServers
+                        await db.update('stores', state, {
+                            integrations: integrations
+                        }
+                        );
+
+                        return res.render('discord-callback', {
+                            status: 'success',
+                            guildName: newGuildName,
+                            storeID: state
+                        });
+                    } else {
+                        // Bot não está em nenhum servidor
+                        return res.render('discord-callback', {
+                            status: 'error',
+                            errorMsg: 'O bot não foi adicionado a nenhum servidor',
+                            storeID: state
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao verificar servidores:", error);
+                return res.render('discord-callback', {
+                    status: 'error',
+                    errorMsg: 'Erro ao verificar servidores',
+                    storeID: state
+                });
+            }
+        }, 2000); // Esperar 2 segundos para o Discord processar
+    } catch (error) {
+        console.error("Erro na verificação da loja:", error);
+        return res.render('discord-callback', {
+            status: 'error',
+            errorMsg: 'Erro interno do servidor',
+            storeID: state
+        });
+    }
+});
+
+
+
+router.post("/sendMessage/product", async (req, res) => {
+    try {
+        const { productID, discordRef, storeID } = req.body;
+
+        let store = await db.findOne({ colecao: 'stores', doc: storeID })
+
+        if (!("integrations" in store && "discord" in store.integrations && "servers" in store.integrations.discord)) {
+            return res.status(200).json({ success: false, data: 'Integração Discord nao configurada' })
+        }
+
+        let serverID = store.integrations.discord.lastServerID
+        let server = store.integrations.discord.servers[serverID]
+
+        if (!server) {
+            return res.status(200).json({ success: false, data: 'Integração Discord nao configurada' })
+        }
+        let product = store.products.find(product => product.id == productID)
+        let productRef = server.products.find(product => product.id == discordRef)
+
+        
+        if (!product || !productRef) {
+            return res.status(200).json({ success: false, data: 'Produto nao encontrado' })
+        }
+
+
+        require("./createProductMessageEmbend.js")(client, {
+            clean: true,
+            serverID: serverID,
+            channelID: productRef.channelID,
+            product: product,
+            discordProd: productRef
+        }).then(() => {
+            return res.status(200).json({ success: true, data: 'Mensagem enviada com sucesso' })
+        }).catch(() => {
+            return res.status(200).json({ success: false, data: 'Erro ao enviar mensagem' })
+        })
+
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({ success: false, data: 'Erro ao enviar mensagem' })
     }
 
 })
-
-
-
-
 
 module.exports = router;

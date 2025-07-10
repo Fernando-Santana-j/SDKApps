@@ -11,5 +11,7 @@ config/mercadoPagoData.json
 backups
 
 # Added by cargo
-
+/DataBase
 /target
+/DataBase/analytics/*
+DataBase

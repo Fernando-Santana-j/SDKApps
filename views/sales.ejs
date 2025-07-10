@@ -1,554 +1,3072 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <%- include('./reusable/head.ejs') %>
-    <title>SDK - Vendas</title>
-    <link rel="stylesheet" href="/public/css/sales.css">
-</head>
-<body>
+        <title>SDK - Vendas</title>
+        <link rel="stylesheet" href="/public/css/sales.css">
+        <script type="application/json" id="store-data">
+            <%- JSON.stringify(store) %>
+        </script>
+        <script defer>
+            let storeID = location.pathname.split('/')[3]
+            let store = JSON.parse(document.getElementById('store-data').textContent);
     
-    <div id="body-containner">
-        <div id="add-pix-popup-cotainner" style="display: none;">
-            <div id="add-pix-popup-close"></div>
-            <div id="add-pix-popup-content">
-                <div id="add-pix-popup-top">
-                    <div id="add-pix-popup-close-button">
-                        <svg class="SvgFill" enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg>
-                    </div>
-                    <div id="add-pix-popup-tutorial" title="Tutorial de como pegar o token do mercado pago!">
-                        <svg  class="SvgFill" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 512 513" style="enable-background:new 0 0 512 512" xml:space="preserve" fill-rule="evenodd" class=""><g><path d="M256 .5C114.71.5 0 115.21 0 256.5s114.71 256 256 256 256-114.71 256-256S397.29.5 256 .5zm0 18c131.356 0 238 106.644 238 238s-106.644 238-238 238-238-106.644-238-238 106.644-238 238-238zm47 241.454c0-25.957-21.042-46.998-46.998-46.998H256a46.997 46.997 0 0 0-47 47v100.059a47 47 0 0 0 47 47h.002c25.956 0 46.998-21.042 46.998-46.998zm-18 0c0-16.016-12.983-28.998-28.998-28.998H256a28.998 28.998 0 0 0-29 29v100.059a29 29 0 0 0 29 29h.002c16.015 0 28.998-12.983 28.998-28.998zm-29-153.969c-25.94 0-47 21.06-47 47s21.06 47 47 47 47-21.06 47-47-21.06-47-47-47zm0 18c16.006 0 29 12.995 29 29 0 16.006-12.994 29-29 29s-29-12.994-29-29c0-16.005 12.994-29 29-29z" fill="#000000" opacity="1" data-original="#000000" class=""></path></g></svg>
-                    </div>
-                </div>
-                <div id="add-pix-popup-input-containner">
-                    <label class="lable-padrao" for="add-pix-popup-input">Adicione seu token do mercado pago abaixo:</label>
-                    <input class="input-padrao" type="text" name="" id="add-pix-popup-input">
-                </div>
-                <div id="add-pix-popup-buttons">
-                    <button class="button-padrao greenColor" id="add-pix-button">Salvar</button>
-                    <button class="button-padrao redColor" id="desativar-pix-button">Desativar</button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="produtos-config-containner" style="display: none;">
-            <div style="width: 100%; height: 100%; position: fixed; top: 0; left: 0;" class="close-config-popup"></div>
-            <div id="produtos-config-content">
-                <div id="produtos-config-title">
-                    <div style="width: 4em;"></div>
-                    <h1 class="title-col">Configuracoes de produtos</h1>
-                    <div id="close-config-popup" class="close-config-popup"><svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z"></path></svg></div>
-                </div>
-                <div class="linha"></div>
-                <div id="produtos-config-row">
-                    <div id="produtos-config-left">
-                        <div id="produtos-config-new-channel-content">
-                            <h1 class="mini-title-col">Selecione o canal de anuncio do produto:</h1>
-                            <div id="produtos-config-new-channel"></div>
-                        </div>
-                        <div id="produtos-config-new-imagens-containnner">
-                            <div id="produtos-config-new-background">
-                                <h1 class="backGround-title">Imagem de fundo: </h1>
-                                <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
-                                <div class="backGround-image-preview">
-                                    <label for="new-background-input">
-                                        <img id="new-background-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                    </label>
-                                </div>
-                                <div class="backGround-image-input-content">
-                                    <label id="button-new-background-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-background-input">Anexar Fundo</label>
-                                    <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="new-background-input">
-                                </div>
-                                
-                            </div>
-                            <div id="produtos-config-new-logo">
-                                <h1 class="backGround-title">Imagem da logo:</h1>
-                                <div id="active-logo-product-containner-edit">
-                                    Exibir logo? 
-                                    <input type="checkbox" id="input-active-logo-product-edit" >
-                                </div>
-                                <label for="new-logo-input">
-                                    <img id="new-logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                </label>
-                                <label id="button-new-logo-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="new-logo-input">Anexar Logo</label>
-                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="new-logo-input">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="produtos-config-rigth">
-                        <div id="produtos-config-dados-containnner">
-                            <div class="inputs-containner">
-                                <label for="product-config-new-name" class="lable-padrao">Nome do produto: </label>
-                                <input type="text" class="input-padrao" id="product-config-new-name" placeholder="Nome do produto">
-                            </div>
-                            <div class="inputs-containner">
-                                <label for="new-product-config-desc" class="lable-padrao">Descrição do produto: </label>
-                                <textarea name="productConfigDesc" class="input-padrao" id="new-product-config-desc" placeholder="Descrição"></textarea>
-                            </div>
-                            <div class="inputs-containner">
-                                <label for="product-config-new-price" class="lable-padrao">Preço do produto: </label>
-                                <input type="text" class="input-padrao" id="product-config-new-price" placeholder="Preço">
-                            </div>
-                        </div>
-                        <div id="produtos-config-new-style">
-                            <h1 class="mini-title-col">Selecione o estilo: </h1>
-                            <div id="produtos-config-new-style-content"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="linha"></div>
-                <div id="produtos-config-estoque">
-                    <h1 class="title-col">Configure o estoque : </h1>
+            let products = store.products
+        </script>
+        <style>
+            .console-content {
+                position: relative;
+                transition: var(--transition-standard);
+                padding: 2em;
+            }
 
-                    <div id="produtos-config-estoque-content">
-                        <div id="produtos-estoque-edit-normal" style="display: none;">
-                            <div id="produtos-estoque-edit-normal-txt" >
-                                <h1 class="mini-title-col">Adicionar estoque por txt</h1>
-                                <div id="produtos-estoque-edit-normal-txt-content">
-                                    
-                                    <div style="display: flex; flex-direction: column; justify-content: end; width: 40%;">
-                                        <label for="produtos-estoque-edit-normal-txt-title" class="lable-padrao">Titulo dos itens do txt</label>
-                                        <input type="text"  id="produtos-estoque-edit-normal-txt-title" class="input-padrao" placeholder="Padrão: Itens">
-                                    </div>
+            .section-title {
+                font-size: 1.6rem;
+                color: var(--white-color);
+                margin-bottom: 1.8rem;
+                position: relative;
+                display: inline-block;
+                padding-bottom: 0.5rem;
+            }
 
-                                    <div id="estoque-config-txt-file-content">
-                                        <p class="desc-col" id="estoque-config-txt-file-selected-edit">Nenhum arquivo selecionado :(</p>
-                                        <label type="button" class="main-button-product" for="produtos-estoque-edit-normal-txt-file">Adiconar arquivo txt!</label>
-                                        <input type="file" hidden accept=".txt" id="produtos-estoque-edit-normal-txt-file">
-                                    </div>
-                                    
-                                </div>
-                            </div>
-                            <!-- <div id="produtos-estoque-edit-normal-individual-content">
-                                <h1 class="mini-title-col">Adicionar estoque individual</h1>
-                                <div id="produtos-estoque-edit-normal-individual">
-                                    
-                                    <div class="inputs-containner">
-                                        <label for="product-config-new-individual-title" class="lable-padrao">Titulo do item: </label>
-                                        <input type="text" class="input-padrao" id="product-config-new-individual-title" placeholder="Titulo do item">
-                                    </div>
-                                    <div class="inputs-containner">
-                                        <label for="product-config-new-individual-conteudo" class="lable-padrao">Conteudo do item: </label>
-                                        <input type="number" class="input-padrao" id="product-config-new-individual-conteudo" placeholder="Conteudo do item">
-                                    </div>
-                                </div>
-                            </div> -->
-                        </div>
-                        <div id="produtos-estoque-edit-single" style="display: none;">
-                            <div class="inputs-containner">
-                                <label for="product-config-new-single-content" class="lable-padrao">Conteudo do item: </label>
-                                <input type="text" class="input-padrao" id="product-config-new-single-content" placeholder="Conteudo do item">
-                            </div>
-                            <div class="inputs-containner">
-                                <label for="product-config-new-single-number" class="lable-padrao">Quantidade de estoque: </label>
-                                <input type="number" class="input-padrao" id="product-config-new-single-number" placeholder="Quantidade de estoque">
-                            </div>
-                        </div>
-                    </div>
-                
-                </div>
-                <div class="linha"></div>
-                <div id="produtos-config-buttons">
-                    <button class="button-padrao redColor" id="delete-product">Deletar produto</button>
-                    <button class="button-padrao" id="send-new-mensage">Reenviar Mensagem</button>
-                    <button class="button-padrao greenColor" id="save-new-product">Salvar</button>
-                </div>
-            </div>
-        </div>
-        <div id="containner">
-            <%- include('./reusable/body.ejs',{index:2}) %>
-            <main id="main-containner">
-                <div id="main-content">
-                    <div id="logs-sales-containner">
-                        <div id="public-log-content">
-                            <div class="title-logs">
-                                <h1 class="title-col">Log publico</h1>
-                                <p class="desc-col">Selecione o canal que deseja que apareca um log para o publico de vendas!</p>
-                                
-                            </div>
-                            <div class="linha"></div>
-                            <div class="logs-channel-content">
-                                <input required type="text" class="input-padrao" list="public-log-list" placeholder="Pesquise o canal..." id="public-log-input">
-                                <datalist id="public-log-list">
-                                    <% channels.forEach(element => { %>
-                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                    <% }) %>
-                                </datalist>
-                                <button class="button-padrao" id="save-button-public-log">Salvar</button>
-                            </div>
-                        </div>
-                        <div id="private-log-content">
-                            <div class="title-logs">
-                                <h1 class="title-col">Log privado</h1>
-                                <p class="desc-col">Selecione o canal que deseja que apareca um log privado de vendas!</p>
-                            </div>
-                            <div class="linha"></div>
-                            <div class="logs-channel-content">
-                                <input required type="text" class="input-padrao" list="private-log-list" placeholder="Pesquise o canal..." id="private-log-input">
-                                <datalist id="private-log-list">
-                                    <% channels.forEach(element => { %>
-                                        <option data-channel="<%= element.id %>" value="<%= element.name %>"></option>
-                                    <% }) %>
-                                </datalist>
-                                <button class="button-padrao" id="save-button-private-log">Salvar</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="pagamentos-produtos-containner">
-                        <div id="pagamentos-containner">
-                            <% if (perms.owner == true || perms.paymentEdit && perms.paymentEdit == true) { %>
-                                <h1 class="title-col">Pagamentos</h1>
-                                <p class="desc-col">
-                                    Adicione os seus dados bancarios abaixo.
-                                </p>
-                                <div class="linha"></div>
-                                <div id="pagamentos-content">
-                                    <div class="inputs-containner" id="complete-name-content">
-                                        <label class="lable-padrao" for="complete-name">Nome completo</label>
-                                        <input type="text" value="<%= bankData && bankData.bankID ? bankData.nome : '' %>" class="input-padrao" placeholder="Nome completo" id="complete-name" >
-                                    </div>
-                                    <div class="inputs-containner" id="cpf-content">
-                                        <label class="lable-padrao" for="cpf-input">CPF</label>
-                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.cpf : '' %>" placeholder="EX: 000.000.000-00" minlength="14" class="input-padrao" maxlength="14" id="cpf-input" >
-                                    </div>
-                                    <div class="inputs-containner" id="bank-name-content">
-                                        <label class="lable-padrao" for="bank-name-input">Nome do banco</label>
-                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.banco : '' %>"  class="input-padrao"  list="bank-input-list" placeholder="Pesquise o banco..." id="bank-name-input">
-                                        <datalist id="bank-input-list"></datalist>
-                                    </div>
-                                    <div class="inputs-containner" id="account-number-content">
-                                        <label class="lable-padrao" for="account-number">Número da conta</label>
-                                        <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.numero : '' %>"  class="input-padrao" placeholder="EX: 00000000-0" maxlength="10" minlength="10" id="account-number" >
-                                    </div>
-                                    <div id="last-input-containner">
-                                        <div class="inputs-containner" style="width: 50% !important;" id="account-number-content">
-                                            <label class="lable-padrao" for="account-number">Número da agencia</label>
-                                            <input type="<%= bankData && bankData.bankID ? 'password' : 'text' %>" value="<%= bankData && bankData.bankID ? bankData.agencia : '' %>"  class="input-padrao"  placeholder="EX: 0000" maxlength="4" minlength="4" id="bank-agenc" >
-                                        </div>
-                                        <div id="terms-check-content">
-                                            <label for="terms-check">Concorda com os termos de uso?</label>
-                                            <label id="terms-check" class="switch">
-                                                <input id="checkbox" <%= bankData ? 'checked' : '' %> type="checkbox">
-                                                <span class="slider round"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div id="buttons-payment-content">
-                                        <div id="save-button-content">
-                                            <input type="button" id="save-button" class="save-alt-button <%= bankData && bankData.bankID ? 'hide' : '' %>" value="Salvar">
-                                            <input type="button" id="alt-button" class="save-alt-button <%= bankData && bankData.bankID ? '' : 'hide' %>" value="Alterar">
-                                        </div>
-                                        <button id="pix-add-button" title="Adicione o seu token mercado pago para receber PIX!">Adicionar PIX</button>
-                                    </div>
-                                </div>
-                            <% }%>
-                        </div>
-                        <div id="produtos-containner">
-                            <h1 class="title-col">Produtos</h1>
-                            <p class="desc-col">Clique no botao de configurar para mudar dados sobre o produto.</p>
-                            <div class="linha"></div>
-                            <div id="produtos-content">
-                                <div id="produtos-row">
-                                   <% if (server.products) { %>
-                                    <% server.products.forEach(element => { %>
-                                        <div class="produtos-col">
-                                            <div class="produtos-left">
-                                                <img src="<%= element.productLogo %>">
-                                                <div class="produtos-name-price-content">
-                                                    <p class="produtos-name" title="<%= element.productName %>"><%= element.productName %></p>
-                                                    <p class="produtos-price" title="<%= formatarMoeda(element.price) %>"><%= formatarMoeda(element.price) %></p>
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 60%;
+                height: 3px;
+                background: var(--gradient-primary);
+                border-radius: var(--border-radius-max);
+            }
+
+            .section {
+                margin-bottom: 2.5rem;
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-min);
+                padding: 1.8rem;
+                box-shadow: var(--simple-box-shadow);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            #products-section {
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+            }
+
+            .products-list {
+                gap: 1em;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                overflow: auto;
+                justify-content: space-between;
+            }
+
+            #products-top-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 3em;
+            }
+
+            .product-card {
+                display: grid;
+                grid-template-columns: 15em 1fr;
+                min-height: 8em;
+                max-width: 50em;
+                min-width: 32em;
+                width: 40em;
+                gap: 1em;
+                padding: 1em;
+                border-radius: var(--border-radius-min);
+                background-color: var(--bg-card);
+                transition: var(--transition-standard);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                position: relative;
+            }
+
+            .product-card:hover {
+                transform: translateY(-0.4em) scale(1.02);
+                box-shadow: var(--purple-box-shadow-small);
+                border-color: var(--accent-hover);
+            }
+
+            /* Badge de produto em destaque */
+            .featured-badge {
+                position: absolute;
+                top: 0.8em;
+                right: 0.8em;
+                background-color: var(--accent);
+                color: #fff;
+                width: 1.8em;
+                height: 1.8em;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85em;
+                z-index: 2;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.7);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 5px rgba(var(--accent-rgb), 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+                }
+            }
+
+            .product-img {
+                height: 100%;
+                width: 10em;
+                background-color: var(--tertiary-color);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-size: cover;
+                background-position: center;
+                transition: var(--transition-mid);
+                border-radius: var(--border-radius-min);
+            }
+
+            .product-content {
+                padding: 0.5em 0.7em;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .product-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5em;
+            }
+
+            .product-title {
+                font-size: 1.1rem;
+                color: var(--white-color);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+                margin: 0;
+                line-height: 1.3;
+            }
+
+            .product-price {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: var(--accent);
+                white-space: nowrap;
+                margin-left: 0.8em;
+            }
+
+            .product-desc {
+                color: var(--text-gray-color-secundary);
+                font-size: 0.85rem;
+                line-height: 1.4;
+                height: 2.8em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                margin-bottom: 0.8em;
+            }
+
+            .product-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: auto;
+                padding-top: 0.8em;
+                border-top: 0.063em solid var(--tertiary-color);
+            }
+
+            .stock-info {
+                display: flex;
+                align-items: center;
+                gap: 0.8em;
+                font-size: 0.75rem;
+                position: relative;
+                color: var(--text-gray-color-secundary);
+            }
+
+            .stock-badge {
+                width: 0.5em;
+                height: 0.5em;
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+            .stock-badge.in-stock {
+                background-color: var(--green-color);
+                box-shadow: 0 0 0.313em var(--green-color);
+            }
+
+            .stock-badge.low-stock {
+                background-color: var(--attention-color);
+                box-shadow: 0 0 0.313em var(--attention-color);
+            }
+
+            .stock-badge.out-stock {
+                background-color: var(--red-color);
+                box-shadow: 0 0 0.313em var(--red-color);
+            }
+
+            .product-actions {
+                display: flex;
+                gap: 0.35em;
+                transform: translateX(0);
+                transition: var(--transition-standard);
+            }
+
+            .action-btn {
+                width: 3em;
+                height: 3em;
+                border-radius: 50%;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: var(--white-color);
+                transition: var(--transition-fast);
+                font-size: 0.7rem;
+                opacity: 0.8;
+            }
+
+            .action-btn:hover {
+                opacity: 1;
+                transform: translateY(-0.125em);
+            }
+
+            .action-btn.view {
+                background-color: var(--green-color);
+            }
+
+            .action-btn.edit {
+                background-color: var(--attention-color);
+            }
+
+            .action-btn.delete {
+                background-color: var(--red-color);
+            }
+
+
+
+            .form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1.2em;
+                margin-top: 2em;
+                padding-top: 1.5em;
+                border-top: 1px solid rgba(255, 255, 255, 0.15);
+            }
+
+            .checkbox-group {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 1em;
+                margin-bottom: 1.5em;
+                padding: 1em;
+                background-color: rgba(174, 0, 255, 0.15);
+                border-radius: var(--border-radius-min);
+                border: 1px solid rgba(174, 0, 255, 0.3);
+            }
+
+            .checkbox-group input[type="checkbox"] {
+                margin-right: 0.8em;
+                width: 1.4em;
+                height: 1.4em;
+                accent-color: var(--accent);
+            }
+
+            .checkbox-group label {
+                cursor: pointer;
+                user-select: none;
+                margin-bottom: 0;
+                color: var(--white-color);
+                font-weight: 500;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 0.8em;
+                font-size: 0.9rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.4em;
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--white-color);
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 2px var(--accent-hover);
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+
+            /* Image Preview */
+            .image-preview-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .preview-card-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .preview-label {
+                font-weight: 600;
+                color: var(--secundary-color-purple);
+                margin: 0;
+            }
+
+            .preview-description {
+                font-size: 0.8rem;
+                color: var(--text-gray-color-secundary);
+                margin: 0 0 0.5rem 0;
+            }
+
+            .preview-card {
+                position: relative;
+                border-radius: var(--border-radius-min);
+                overflow: hidden;
+                aspect-ratio: 1;
+                cursor: pointer;
+                transition: var(--transition-standard);
+                background-color: var(--tertiary-color);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .preview-card:hover {
+                transform: translateY(-5px) scale(1.02);
+                box-shadow: var(--purple-box-shadow-small);
+                border-color: var(--accent);
+            }
+
+            .preview-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: var(--transition-mid);
+            }
+
+            .preview-card:hover img {
+                transform: scale(1.1);
+            }
+
+            .preview-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: var(--transition-standard);
+                backdrop-filter: blur(2px);
+            }
+
+            .preview-card:hover .preview-overlay {
+                opacity: 1;
+            }
+
+            .preview-overlay i {
+                color: var(--white-color);
+                font-size: 1.5rem;
+                transform: scale(0.8);
+                transition: var(--transition-standard);
+            }
+
+            .preview-card:hover .preview-overlay i {
+                transform: scale(1);
+            }
+
+
+            /* Toast Notifications */
+            .toast-container {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                max-width: 350px;
+            }
+
+            .toast {
+                padding: 1rem 1.5rem;
+                border-radius: var(--border-radius-min);
+                background-color: var(--secundary-color);
+                color: var(--color-text-primary);
+                box-shadow: var(--simple-box-shadow);
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                transform: translateX(120%);
+                opacity: 0;
+                transition: var(--transition-mid);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .toast.active {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            .toast.success {
+                border-left: 4px solid var(--green-color);
+            }
+
+            .toast.success i {
+                color: var(--green-color);
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--red-color);
+            }
+
+            .toast.error i {
+                color: var(--red-color);
+            }
+
+            .toast.warning {
+                border-left: 4px solid var(--attention-color);
+            }
+
+            .toast.warning i {
+                color: var(--attention-color);
+            }
+
+            /* Empty State */
+            .empty-state {
+                padding: 2.5em;
+                text-align: center;
+                width: 100%;
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-min);
+                margin: 1.5em auto;
+                max-width: 28em;
+                box-shadow: var(--shadow-card);
+            }
+
+            .empty-state i {
+                font-size: 3em;
+                color: var(--accent);
+                margin-bottom: 0.6em;
+            }
+
+            .empty-state h3 {
+                font-size: 1.4rem;
+                margin-bottom: 0.6em;
+                color: var(--white-color);
+            }
+
+            .empty-state p {
+                font-size: 1rem;
+                margin-bottom: 2em;
+                color: var(--text-gray-color-secundary);
+                line-height: 1.5;
+            }
+
+            .empty-add-btn {
+                padding: 0.8em 1.5em;
+                background-color: var(--accent);
+                border: none;
+                border-radius: var(--border-radius-min);
+                color: white;
+                font-weight: 500;
+                cursor: pointer;
+                transition: var(--transition-standard);
+                box-shadow: var(--purple-box-shadow-small);
+                font-size: 1rem;
+            }
+
+            .empty-add-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Media Queries */
+            @media (max-width: 768px) {
+
+                .main-content {
+                    grid-column: 1;
+                    padding: 1.5rem;
+                    padding-top: 4rem;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+
+
+
+
+
+            /* Stock item styles */
+            .stock-management {
+                background-color: var(--tertiary-color);
+                border-radius: var(--border-radius-min);
+                padding: 1.5rem;
+                margin-top: 1rem;
+                transition: var(--transition-standard);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .stock-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .stock-header h4 {
+                color: var(--secundary-color-purple);
+                font-size: 1.1rem;
+                margin: 0;
+                position: relative;
+            }
+
+            .stock-header h4::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 40px;
+                height: 2px;
+                background: var(--gradient-primary);
+            }
+
+            .stock-actions {
+                display: flex;
+                gap: 0.8rem;
+            }
+
+            .stock-container {
+                transition: var(--transition-mid);
+                transform-origin: top;
+            }
+
+            .stock-item {
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-min);
+                padding: 1rem;
+                margin-bottom: 0.8rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: var(--transition-standard);
+                transform: translateX(0);
+                border-left: 3px solid transparent;
+            }
+
+            .stock-item:hover {
+                transform: translateX(5px);
+                box-shadow: var(--purple-box-shadow-small);
+                border-left-color: var(--accent);
+            }
+
+            .stock-item-info {
+                flex-grow: 1;
+            }
+
+            .stock-item-title {
+                font-weight: 600;
+                color: var(--white-color);
+                margin-bottom: 0.3rem;
+            }
+
+            .stock-item-content {
+                color: var(--text-gray-color-secundary);
+                font-size: 0.9rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 250px;
+            }
+
+            .stock-item-actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .stock-import-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition-standard);
+                backdrop-filter: blur(8px);
+            }
+
+            .stock-import-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .stock-import-container {
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-mid);
+                width: 90%;
+                max-width: 500px;
+                padding: 2rem;
+                position: relative;
+                transform: translateY(30px);
+                transition: var(--transition-mid);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .stock-import-overlay.active .stock-import-container {
+                transform: translateY(0);
+            }
+
+            .stock-list-container {
+                max-height: 400px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent) var(--tertiary-color);
+            }
+
+            .stock-list-container::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .stock-list-container::-webkit-scrollbar-track {
+                background: var(--tertiary-color);
+            }
+
+            .stock-list-container::-webkit-scrollbar-thumb {
+                background-color: var(--accent);
+                border-radius: 20px;
+            }
+
+            .stock-view-modal-content {
+                max-height: 400px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: var(--accent) var(--tertiary-color);
+            }
+
+            .stock-view-modal-content::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .stock-view-modal-content::-webkit-scrollbar-track {
+                background: var(--tertiary-color);
+            }
+
+            .stock-view-modal-content::-webkit-scrollbar-thumb {
+                background-color: var(--accent);
+                border-radius: 20px;
+            }
+
+            .stock-item-expanded {
+                animation: highlight 2s ease;
+            }
+
+            @keyframes highlight {
+                0% {
+                    background-color: var(--secundary-color);
+                }
+
+                50% {
+                    background-color: rgba(174, 0, 255, 0.2);
+                }
+
+                100% {
+                    background-color: var(--secundary-color);
+                }
+            }
+
+            .stock-badge {
+                display: inline-block;
+                width: 6px;
+                height: 6px;
+                border-radius: var(--border-radius-max);
+                position: relative;
+            }
+
+            .stock-badge.in-stock {
+                background-color: var(--green-color);
+            }
+
+            .stock-badge.in-stock::after {
+                background-color: var(--green-color);
+            }
+
+            .stock-badge.low-stock {
+                background-color: var(--attention-color);
+            }
+
+            .stock-badge.low-stock::after {
+                background-color: var(--attention-color);
+            }
+
+            .stock-badge.out-stock {
+                background-color: var(--red-color);
+            }
+
+            .stock-badge.out-stock::after {
+                background-color: var(--red-color);
+            }
+
+            .stock-badge::after {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                border-radius: var(--border-radius-max);
+                animation: pulse 1.5s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+
+                50% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+
+                100% {
+                    transform: scale(1);
+                    opacity: 0;
+                }
+            }
+
+            .stock-badge-text {
+                display: inline-block;
+                padding: 0.2rem 0.5rem;
+                border-radius: var(--border-radius-max-forl);
+                font-size: 0.75rem;
+                margin-left: 0.5rem;
+                background-color: var(--tertiary-color);
+            }
+
+            .stock-badge-text.single {
+                background-color: var(--green-opacity-color);
+                color: var(--white-color);
+            }
+
+            .stock-badge-text.normal {
+                background-color: var(--accent-hover);
+                color: var(--white-color);
+            }
+
+            .stock-badge-text.subscription {
+                background-color: var(--attention-color);
+                color: var(--white-color);
+            }
+
+            .info-box {
+                background-color: rgba(174, 0, 255, 0.1);
+                border-left: 4px solid var(--accent);
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: var(--border-radius-min);
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .info-box i {
+                color: var(--accent);
+                font-size: 1.2rem;
+                margin-top: 0.2rem;
+            }
+
+            .info-box p {
+                margin: 0;
+                color: var(--text-gray-color-secundary);
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            /* Forms and inputs */
+            .form-text {
+                color: var(--text-gray-color-secundary);
+                font-size: 0.8rem;
+                margin-top: 0.3rem;
+                display: block;
+            }
+
+            /* Radio buttons */
+            .radio-group {
+                display: flex;
+                gap: 1.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .radio-option {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            .radio-option input {
+                display: none;
+            }
+
+            .radio-checkmark {
+                width: 20px;
+                height: 20px;
+                border-radius: var(--border-radius-max);
+                border: 2px solid var(--tertiary-color);
+                margin-right: 0.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: var(--transition-standard);
+            }
+
+            .radio-option input:checked+.radio-checkmark {
+                border-color: var(--accent);
+                background-color: var(--accent);
+            }
+
+            .radio-option input:checked+.radio-checkmark::after {
+                content: '';
+                width: 8px;
+                height: 8px;
+                border-radius: var(--border-radius-max);
+                background-color: var(--white-color);
+            }
+
+            /* Checkbox */
+            .checkbox-container {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                cursor: pointer;
+                color: var(--text-gray-color-secundary);
+                font-size: 0.9rem;
+            }
+
+            .checkbox-container input[type="checkbox"] {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--tertiary-color);
+                border-radius: var(--border-radius-min);
+                background-color: transparent;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: var(--transition-standard);
+                position: relative;
+            }
+
+            .checkbox-container input[type="checkbox"]:checked {
+                background-color: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .checkbox-container input[type="checkbox"]:checked::after {
+                content: '\f00c';
+                font-family: 'Font Awesome 5 Free';
+                font-weight: 900;
+                color: var(--white-color);
+                font-size: 0.8rem;
+            }
+
+            .product-card:hover .product-logo {
+                transform: translateY(0px);
+                opacity: 1;
+            }
+
+            .product-logo img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                border: 2px solid var(--tertiary-color);
+                border-radius: var(--border-radius-max);
+            }
+
+            .product-card:hover .product-img {
+                filter: brightness(1.15);
+            }
+
+            .product-card:hover .product-actions .action-btn {
+                opacity: 1;
+            }
+
+            .product-actions {
+                display: flex;
+                gap: 1em;
+                transform: translateX(0);
+                transition: var(--transition-standard);
+            }
+
+            .product-card:hover .product-actions {
+                transform: translateX(-0.188em);
+            }
+
+
+
+            .action-btn.edit {
+                background-color: var(--attention-color);
+            }
+
+            .action-btn.delete {
+                background-color: var(--red-color);
+            }
+
+            .action-btn:hover {
+                transform: translateY(-2px) scale(1.05);
+            }
+
+            /* Section styling improvements */
+            .section {
+                margin-bottom: 2rem;
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-min);
+                padding: 1.5rem;
+                box-shadow: var(--simple-box-shadow);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                max-height: 40em;
+            }
+
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                padding-bottom: 0.8rem;
+                border-bottom: 1px solid var(--tertiary-color);
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                color: var(--white-color);
+                margin-bottom: 0;
+                position: relative;
+                display: inline-block;
+                padding-bottom: 0.3rem;
+            }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50%;
+                height: 2px;
+                background: var(--gradient-primary);
+                border-radius: var(--border-radius-max);
+            }
+
+            /* Search and Filter Styles */
+            .search-filter-container {
+                display: flex;
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .search-container {
+                position: relative;
+                flex-grow: 1;
+            }
+
+            .search-input {
+                width: 100%;
+                height: 100%;
+                padding: 0.8rem 1rem 0.8rem 2.5rem;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: var(--border-radius-min);
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--white-color);
+                font-size: 1rem;
+                transition: var(--transition-standard);
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: var(--accent);
+                background-color: rgba(0, 0, 0, 0.3);
+                box-shadow: 0 0 0 3px rgba(174, 0, 255, 0.15);
+            }
+
+            .search-icon {
+                position: absolute;
+                left: 0.8rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-gray-color-secundary);
+                pointer-events: none;
+            }
+
+            .clear-search {
+                position: absolute;
+                right: 0.8rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-gray-color-secundary);
+                background: none;
+                border: none;
+                cursor: pointer;
+                opacity: 0;
+                transition: var(--transition-standard);
+                font-size: 0.8rem;
+            }
+
+            .clear-search.visible {
+                opacity: 1;
+            }
+
+            .clear-search:hover {
+                color: var(--white-color);
+            }
+
+            #filterButton {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.8rem 1.2rem;
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: var(--border-radius-min);
+                color: var(--white-color);
+                font-size: 0.95rem;
+                cursor: pointer;
+                transition: var(--transition-standard);
+            }
+
+            #filterButton:hover {
+                background-color: rgba(0, 0, 0, 0.3);
+                border-color: var(--accent-hover);
+            }
+
+            #filterButton.active {
+                background-color: rgba(174, 0, 255, 0.15);
+                border-color: var(--accent);
+            }
+
+            #filterButton svg {
+                width: 1.2em;
+                height: 1.2em;
+            }
+
+            .filter-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 1.2rem;
+                height: 1.2rem;
+                background-color: var(--accent);
+                color: white;
+                border-radius: 50%;
+                font-size: 0.7rem;
+                margin-left: 0.3rem;
+            }
+
+            .filter-dropdown {
+                position: absolute;
+                top: 22.5em;
+                left: 6em;
+                width: 280px;
+                background-color: var(--secundary-color);
+                border-radius: var(--border-radius-min);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 1rem;
+                z-index: 10;
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-10px);
+                transition: all 0.3s ease;
+            }
+
+            .filter-dropdown.active {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+
+            .filter-dropdown h4 {
+                color: var(--white-color);
+                margin-top: 0;
+                margin-bottom: 1rem;
+                font-size: 1rem;
+                font-weight: 600;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 0.5rem;
+            }
+
+            .filter-group {
+                margin-bottom: 1rem;
+            }
+
+            .filter-group-title {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: var(--text-gray-color-secundary);
+                margin-bottom: 0.5rem;
+            }
+
+            .filter-options {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .filter-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.9rem;
+                color: var(--text-gray-color-primary);
+                cursor: pointer;
+            }
+
+            .filter-checkbox input {
+                accent-color: var(--accent);
+                width: 1rem;
+                height: 1rem;
+            }
+
+            .filter-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .filter-count {
+                display: inline-block;
+                padding: 0.2rem 0.5rem;
+                border-radius: var(--border-radius-max-forl);
+                background-color: rgba(174, 0, 255, 0.15);
+                color: var(--accent);
+                font-size: 0.75rem;
+                margin-left: 0.5rem;
+            }
+
+            @media (max-width: 768px) {
+                .search-filter-container {
+                    flex-direction: column;
+                    gap: 0.8rem;
+                }
+
+                .filter-dropdown {
+                    width: 100%;
+                    left: 0;
+                    right: auto;
+                }
+            }
+
+            /* Sub-section styling */
+            .subsection {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+                padding: 0.75rem;
+                background-color: var(--primary-color);
+                border-radius: var(--border-radius-min);
+                border-left: 3px solid var(--accent-hover);
+            }
+
+            .subsection-title {
+                font-size: 1rem;
+                color: var(--secundary-color-purple);
+                margin-bottom: 0.5rem;
+            }
+
+            /* Stock Overview */
+            .stock-overview-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+
+            .stock-stat-card {
+                background-color: var(--primary-color);
+                border-radius: var(--border-radius-min);
+                padding: 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: var(--transition-standard);
+            }
+
+            .stock-stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--purple-box-shadow-small);
+                border-color: var(--accent-hover);
+            }
+
+            .stock-stat-card-icon {
+                width: 2.5em;
+                height: 2.5em;
+                color: var(--accent);
+                opacity: 0.8;
+            }
+
+            .stat-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--white-color);
+                margin-bottom: 0.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+                color: var(--text-gray-color-secundary);
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .stock-overview-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .section {
+                    padding: 1rem;
+                }
+
+                .subsection {
+                    padding: 0.7rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .stock-overview-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .section-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.8rem;
+                }
+            }
+
+            .stock-badge-text {
+                display: inline-block;
+                padding: 0.2rem 0.5rem;
+                border-radius: var(--border-radius-max-forl);
+                font-size: 0.75rem;
+                margin-left: 0.5rem;
+                background-color: var(--tertiary-color);
+            }
+
+            .stock-badge-text.single {
+                background-color: var(--green-opacity-color);
+                color: var(--white-color);
+            }
+
+            .stock-badge-text.normal {
+                background-color: var(--accent-hover);
+                color: var(--white-color);
+            }
+
+            .stock-badge-text.subscription {
+                background-color: var(--attention-color);
+                color: var(--white-color);
+            }
+
+            /* Header Bar */
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.2rem 0;
+                margin-bottom: 2rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+                color: var(--white-color);
+                font-weight: 600;
+                position: relative;
+                padding-bottom: 0.5rem;
+            }
+
+            .header h1:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 40%;
+                height: 3px;
+                background: var(--gradient-primary);
+                border-radius: var(--border-radius-max);
+            }
+
+            .header-actions {
+                display: flex;
+                gap: 1em;
+            }
+
+            .btn-danger {
+                background-color: var(--red-color);
+                color: white;
+            }
+
+            .btn-danger:hover {
+                background-color: #e53935;
+            }
+
+
+
+            .form-group {
+                margin-bottom: 1.5em;
+                display: flex;
+                flex-direction: column;
+                gap: 0.2em;
+            }
+
+            .form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 1.2em;
+                margin-top: 2em;
+                padding-top: 1.5em;
+                border-top: 1px solid rgba(255, 255, 255, 0.15);
+            }
+
+
+            .product-logo {
+                position: absolute;
+                top: 1.5em;
+                left: 1.5em;
+                width: 3em;
+                height: 3em;
+                border-radius: 50%;
+                background-color: var(--secundary-color);
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transform: translateY(-1em);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                box-shadow: var(--simple-box-shadow);
+                z-index: 2;
+            }
+
+            .product-background {
+                border-radius: var(--border-radius-min);
+                width: 100%;
+                height: 100%;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .product-type {
+                position: absolute;
+                bottom: 1em;
+                left: 1em;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: var(--white-color);
+                font-size: 0.8rem;
+                padding: 0.3em 0.6em;
+                border-radius: 0.5em;
+                backdrop-filter: blur(0.313em);
+                z-index: 2;
+                opacity: 0;
+                transform: translateY(0.313em);
+                transition: all 0.2s ease;
+            }
+
+            .product-card:hover .product-type {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .product-img:hover {
+                filter: brightness(1.15);
+            }
+
+            .product-top {
+                margin-bottom: 0.8em;
+            }
+
+            @media (max-width: 768px) {
+                .main-content {
+                    padding: 0.5rem;
+                }
+
+                .section,
+                .featured-section {
+                    padding: 1.2rem;
+                    margin-bottom: 1.8rem;
+                }
+
+                .header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 1.5rem;
+                }
+
+                .header-actions {
+                    width: 100%;
+                    justify-content: space-between;
+                }
+
+                .empty-state {
+                    padding: 1.8em;
+                    max-width: 100%;
+                }
+
+            }
+
+            @media (max-width: 480px) {
+
+                .section,
+                .featured-section {
+                    padding: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .product-card {
+                    grid-template-columns: 80px 1fr;
+                    gap: 0.8em;
+                    padding: 0.8em;
+                }
+
+                .product-img {
+                    width: 80px;
+                }
+
+                .product-title,
+                .product-price {
+                    font-size: 1rem;
+                }
+
+                .form-actions {
+                    flex-direction: column;
+                    gap: 0.8em;
+                }
+
+            }
+
+            /* Stock item styles */
+            .stock-section {
+                margin-bottom: 1.5em;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 1em;
+                border-radius: 0.5em;
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            .stock-items-container {
+                max-height: 200px;
+                overflow-y: auto;
+                margin-bottom: 1em;
+                padding-right: 0.5em;
+            }
+
+            .stock-items-container::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .stock-items-container::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+            }
+
+            .stock-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5em;
+                animation: fadeIn 0.3s ease;
+            }
+
+            .stock-item .form-control {
+                flex: 1;
+                margin-right: 0.5em;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--white-color);
+                padding: 0.5em;
+                border-radius: 0.3em;
+            }
+
+            .stock-item .btn-danger {
+                background-color: var(--red-color);
+                color: white;
+                border: none;
+                width: 2.5em;
+                height: 2.5em;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .stock-item .btn-danger:hover {
+                background-color: #ff3c3c;
+                transform: scale(1.05);
+            }
+
+            .stock-actions {
+                display: flex;
+                gap: 0.5em;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(5px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Form control styles to match the design */
+            .form-control {
+                width: 100%;
+                padding: 0.8em;
+                font-size: 0.9rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.4em;
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--white-color);
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .form-control:focus {
+                border-color: var(--accent);
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(174, 0, 255, 0.2);
+            }
+
+            .form-control::placeholder {
+                color: rgba(255, 255, 255, 0.4);
+            }
+
+
+
+            .stock-type-title {
+                font-size: 1em;
+                font-weight: 600;
+                margin-bottom: 0.8em;
+                padding: 0.5em;
+                background-color: rgba(255, 255, 255, 0.05);
+                border-radius: 0.3em;
+                text-align: center;
+            }
+
+            .stock-items-list {
+                max-height: 300px;
+                overflow-y: auto;
+                padding-right: 0.5em;
+            }
+
+            .stock-items-list::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .stock-items-list::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+            }
+
+            .stock-items {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+
+            .stock-item-number {
+                width: 2.5em;
+                color: var(--accent);
+                font-weight: 600;
+                font-size: 0.8em;
+            }
+
+            .stock-item-value {
+                flex: 1;
+                word-break: break-all;
+            }
+
+            .no-stock-message {
+                text-align: center;
+                padding: 2em;
+                color: rgba(255, 255, 255, 0.5);
+                font-style: italic;
+            }
+
+            .single-product-detail {
+                padding: 1em;
+                background-color: rgba(255, 255, 255, 0.05);
+                border-radius: 0.5em;
+            }
+
+            .single-product-detail h5 {
+                margin-bottom: 0.8em;
+                font-size: 1em;
+                color: var(--accent);
+            }
+
+            .single-content {
+                padding: 1em;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 0.3em;
+                white-space: pre-wrap;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .subscription-details {
+                padding: 1em;
+                background-color: rgba(255, 255, 255, 0.05);
+                border-radius: 0.5em;
+            }
+
+            .modal-footer {
+                display: flex;
+                justify-content: flex-end;
+                padding: 1em 1.5em;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            #createProductButton {
+                display: flex;
+                align-items: center;
+                min-width: 1;
+                gap: 0.5em;
+                justify-content: center;
+            }
+
+            #popup-create-product-content {
+                padding: 1.5em;
+            }
+
+            /* Image Upload Styles */
+            .image-upload-container {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1rem;
+                align-items: stretch;
+            }
+
+            .image-upload-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .background-upload {
+                flex: 1;
+            }
+
+            .logo-upload {
+                width: 15em;
+            }
+
+            .image-preview-container {
+                position: relative;
+                width: 100%;
+                height: 15em;
+                border-radius: var(--border-radius-min);
+                overflow: hidden;
+                background-color: var(--tertiary-color);
+                border: 2px dashed rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .preview-card {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                cursor: pointer;
+                transition: var(--transition-standard);
+            }
+
+            .preview-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: var(--transition-standard);
+            }
+
+            .preview-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.7);
+                opacity: 0;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(4px);
+            }
+
+            .preview-overlay .upload-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+                color: var(--white-color);
+                text-align: center;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+                padding: 1rem;
+            }
+
+            .upload-icon-container {
+                position: relative;
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .upload-icon-container i {
+                font-size: 2rem;
+                color: var(--accent);
+                z-index: 2;
+                transition: all 0.3s ease;
+            }
+
+            .upload-icon-circle {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border: 2px dashed var(--accent);
+                border-radius: 50%;
+                animation: rotate 10s linear infinite;
+            }
+
+            .preview-overlay .upload-content span {
+                font-size: 1rem;
+                font-weight: 500;
+                color: var(--white-color);
+            }
+
+            .preview-overlay .upload-content p {
+                font-size: 0.8rem;
+                opacity: 0.8;
+                color: var(--text-gray-color-secundary);
+            }
+
+            .image-preview-container:hover .preview-overlay,
+            .image-preview-container.drag-over .preview-overlay {
+                opacity: 1;
+            }
+
+            .image-preview-container:hover .preview-overlay .upload-content,
+            .image-preview-container.drag-over .preview-overlay .upload-content {
+                transform: translateY(0);
+            }
+
+            .image-preview-container:hover,
+            .image-preview-container.drag-over {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(174, 0, 255, 0.15);
+                background-color: rgba(174, 0, 255, 0.05);
+            }
+
+            .image-preview-container.drag-over .upload-icon-container i {
+                transform: scale(1.1);
+                color: var(--accent-hover);
+            }
+
+            .file-input {
+                display: none;
+            }
+
+
+
+            @keyframes rotate {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes previewAppear {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .preview-card img.preview-active {
+                animation: previewAppear 0.3s ease forwards;
+            }
+
+            @media (max-width: 768px) {
+                .image-upload-container {
+                    flex-direction: column;
+                }
+
+                .background-upload,
+                .logo-upload {
+                    flex: 1;
+                }
+
+                .upload-features {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+            }
+
+
+        </style>
+</head>
+
+<body>
+    <div class="console-containner">
+        <%- include('./reusable/body.ejs',{index:2}) %>
+            <custom-popup id="popup-create-product-containner" width="100%" height="100%" max-width="45em"
+                max-height="50em" title="Criar Produto">
+                <div id="popup-create-product-content">
+
+                    <div class="form-group">
+                        <label class="lable-padrao">Imagens do Produto</label>
+                        <div class="image-upload-container">
+                            <div class="image-upload-wrapper background-upload">
+                                <div class="image-preview-container"
+                                    onclick="document.getElementById('backgroundUpload').click()"
+                                    ondrop="handleDrop(event, 'backgroundUpload')" ondragover="handleDragOver(event)"
+                                    ondragenter="handleDragEnter(event)">
+                                    <div class="preview-card" id="backgroundPreview">
+                                        <div class="preview-overlay">
+                                            <div class="upload-content">
+                                                <div class="upload-icon-container">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <div class="upload-icon-circle"></div>
                                                 </div>
+                                                <span>Clique ou arraste uma imagem</span>
+                                                <p>Suporta PNG, JPG e GIF</p>
                                             </div>
-                                            
-                                            <div class="produtos-estoque-content">
-                                                <p class="produtos-estoque-value"><%= 'typeProduct' in element ? element.typeProduct == 'normal' ? element.estoque.length + ' em estoque' : element.typeProduct == 'multiple' ? element.estoque : element.estoque + ' em estoque' : element.estoque.length + ' em estoque'  %></p>
-                                            </div>
-                                            <button data-id="<%= element.productID %>" class="produtos-configure-button">Configure</button>
                                         </div>
-                                        <div class="linha"></div>
-                                    <% }) %>
-                                   <% } %>
+                                        <img src="" alt="Background Preview" style="display: none;">
+                                    </div>
                                 </div>
+                                <input type="file" id="backgroundUpload" accept="image/*" class="file-input"
+                                    onchange="handleImageUpload(this, 'backgroundPreview')">
+                            </div>
+
+                            <div class="image-upload-wrapper logo-upload">
+                                <div class="image-preview-container"
+                                    onclick="document.getElementById('logoUpload').click()"
+                                    ondrop="handleDrop(event, 'logoUpload')" ondragover="handleDragOver(event)"
+                                    ondragenter="handleDragEnter(event)">
+                                    <div class="preview-card" id="logoPreview">
+                                        <div class="preview-overlay">
+                                            <div class="upload-content">
+                                                <div class="upload-icon-container">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <div class="upload-icon-circle"></div>
+                                                </div>
+                                                <span>Clique ou arraste uma imagem</span>
+                                                <p>Suporta PNG, JPG e GIF</p>
+                                            </div>
+                                        </div>
+                                        <img src="" alt="Logo Preview" style="display: none;">
+                                    </div>
+                                </div>
+                                <input type="file" id="logoUpload" accept="image/*" class="file-input"
+                                    onchange="handleImageUpload(this, 'logoPreview')">
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="product-cadastro-containner">
-                        <div class="product-cadastro-content" id="form-prodc">
-                            <h1 class="title-col">Cadastrar Produto</h1>
-                            <div class="linha"></div>
-                            <div class="cadastro-content">
-                                <div class="cadastro-rigth-content">
-                                    <h1 class="rigth-content-title">Dados do produto:</h1>
-                                    <div class="rigth-content">
-                                        <div class="inputs-containner" id="product-name-content">
-                                            <label class="lable-padrao" for="product-name"><span class="obrigatorio">* </span>Nome do produto</label>
-                                            <input required class="input-padrao" placeholder="Nome do produto" type="text" id="product-name">
-                                        </div>
-                                        <div class="inputs-containner" id="product-desc-content">
-                                            <label class="lable-padrao" for="product-desc"><span class="obrigatorio">* </span>Descrição do produto</label>
-                                            <textarea required placeholder="Descrição do produto" class="input-padrao" id="product-desc"></textarea>
-                                        </div>
-                                        <div class="inputs-containner" id="product-price-content">
-                                            <label class="lable-padrao" for="product-price"><span class="obrigatorio">* </span>Preço do produto</label>
-                                            <input required placeholder="Preço do produto" class="input-padrao" id="product-price"></input>
-                                        </div>
-                                        <div class="unic-containner">
-                                            <div class="doble-containner">
-                                                
-                                                <h1 class="backGround-title">Imagem de fundo: </h1>
-                                                <div id="svg-premium"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
-                                                <div class="backGround-image-preview">
-                                                    <label for="image-input">
-                                                        <img id="image-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                                    </label>
-                                                </div>
-                                                <div class="backGround-image-input-content">
-                                                    <label id="button-image-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="image-input">Anexar Fundo</label>
-                                                    <input name="backGround" accept="image/*" <%= server.plan == 'inicial' ? 'disabled' : '' %> hidden type="file" name="" id="image-input">
-                                                </div>
-                                                
-                                            </div>
-                                            <div class="product-logo-content">
-                                                <h1 class="logo-title"><span class="obrigatorio">* </span> Imagem da logo:</h1>
-                                                <div id="active-logo-product-containner">
-                                                    Exibir logo? 
-                                                    <input type="checkbox" id="input-active-logo-product" >
-                                                </div>
-                                                <label for="logo-input">
-                                                    <img id="logo-preview" src="https://res.cloudinary.com/dgcnfudya/image/upload/v1704981573/gxorbaldn7fw5ojcv1s0.jpg" alt="">
-                                                </label>
-                                                <label id="button-logo-input" class="image-lable buttons-background-select" data-plan="<%= server.plan %>" for="logo-input">Anexar Logo</label>
-                                                <input name="productLogo" accept=".png, .jpg, .jpeg" hidden type="file" id="logo-input">
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                </div>
-                                <div class="cadastro-left-content">
-                                    <div class="channels-containner">
-                                        <h1 class="cannels-title"><span class="obrigatorio">* </span>Selecione o canal de anuncio do produto:</h1>
-                                        
-                                        <div id="select-menu-channel-create-product"></div>
-                                        
-                                    </div>
-                                    <div class="linha"></div>
-                                    <div id="infos-select-popup" >
-                                        <p id="info-select-popup-text" class="mini-title-col"></p>
 
-                                        <img src="" id="info-select-popup-img">
-                                    </div>
-                                    <div id="type-product-select">
-                                        <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o tipo de produto:</h2>
-                                        <div id="type-product-select-content"></div>
-                                    </div>
-                                    <div class="linha"></div>
-                                    <div id="select-type-embend-content">
-                                        <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione o estilo:</h2>
-                                        <div id="type-embend-select-content">
-                                           
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                
-                                
-                                
+                    <div class="form-group">
+                        <label class="lable-padrao" for="productName">Nome do Produto <span
+                                class="obrigatorio">*</span></label>
+                        <input type="text" id="productName" class="input-padrao" placeholder="Nome do produto" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label class="lable-padrao" for="productDescription">Descrição <span
+                                class="obrigatorio">*</span></label>
+                        <textarea id="productDescription" class="input-padrao" placeholder="Descrição do produto"
+                            style="height: 6em;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="lable-padrao" for="productPrice">Preço (R$) <span
+                                class="obrigatorio">*</span></label>
+                        <input-price id="productPrice"></input-price>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productType">Tipo do Produto <span class="obrigatorio">*</span></label>
+                        <custom-dropdown id="productType" options-json='[{"value":"normal","name":"Normal"}, {"value":"single","name":"Single"}, {"value":"subscription","name":"Assinatura"}]' placeholder="Selecione um item...">
+                            
+                        </custom-dropdown>
+                    </div>
+
+                    <!-- Estoque para produtos do tipo Normal -->
+                    <div id="normalStockSection" class="stock-section">
+                        <div class="form-group">
+                            <label for="normalStockTitle">Título dos Itens do Estoque</label>
+                            <input type="text" id="normalStockTitle" placeholder="Ex: Serial, Licença, etc."
+                                class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Itens em Estoque</label>
+                            <div id="normalStockItems" class="stock-items-container">
+
                             </div>
-                            <div class="linha" style="margin-top: 1em;"></div>
-                            <div id="others-configs-product-containner">
-                                <div id="cadastro-estoque-multi-product" style="display: none;">
-                                    <h1 class="title-col">Configure seu multi produto</h1>
-                                    <div style="width: 60%; min-width: 20em;">
-                                        <label for="select-menu-multi-product" class="lable-padrao">Selecione os produtos</label>
-                                        <div id="select-menu-multi-product"></div>
-                                    </div>
-                                   
-                                </div>
-                                <div id="cadastro-assinatura-estoque-config-containner" style="display: none;">
-                                    <h1 class="title-col">Configure a assinatura:</h1>
-                                    <div id="cadastro-assinatura-estoque-config">
-                                        <div id="select-type-time-content">
-                                            <h2 class="mini-title-col"><span class="obrigatorio">* </span>Selecione a unidades de tempo:</h2>
-                                            <div id="subscription-time-select-content"></div>
-                                        </div>
-                                        <div id="other-configs-assintura">
-                                            <div id="cargo-configs-assintura">
-                                                <h2 class="mini-title-col"><span class="obrigatorio">*</span> Coloque o tempo da assinatura abaixo:</h2>
-                                                <input type="number" id="time-number-input-assinatura" placeholder="Coloque o numero de horas, dias ou meses da assinatura" class="input-padrao">
-                                            </div>
-                                            <div class="linha"></div>
-                                            <div id="cargo-configs-assintura">
-                                                <h2 class="mini-title-col">Caso deseje que o usuário receba um cargo ao assinar o produto, coloque abaixo:</h2>
-                                                <div id="select-cargo-assinatura"></div>
-                                            </div>
-                                            
+                            <div class="stock-actions">
+                                <button type="button" class="secondary-button" onclick="addNormalStockItem()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" style="margin-right: 4px;">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg> Adicionar Item
+                                </button>
+                                <button type="button" class="secondary-button" onclick="openFileUploadDialog()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" style="margin-right: 4px;">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                                    </svg> Importar TXT
+                                </button>
+                                <input type="file" id="stockFileUpload" accept=".txt" style="display: none;"
+                                    onchange="handleFileUpload(this)">
+                            </div>
+                        </div>
+                    </div>
 
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Estoque para produtos do tipo Single -->
+                    <div id="singleStockSection" class="stock-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="singleTitle">Título</label>
+                            <input type="text" id="singleTitle" placeholder="Título do produto" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="singleContent">Conteúdo</label>
+                            <textarea id="singleContent" placeholder="Conteúdo do produto" rows="3"
+                                class="form-control"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="singleStockAmount">Quantidade em Estoque</label>
+                            <input type="number" id="singleStockAmount" placeholder="0" min="0" class="form-control">
+                        </div>
+                    </div>
 
-                                <div id="cadastro-number-estoque-config-containner" style="display: none;">
-                                    <h1 class="title-col">Quantidade de estoque:</h1>
-                                    <div id="cadastro-number-estoque-config">
-                                        <div>
-                                            <label for="content-number-estoque-input" class="lable-padrao" title="Aqui você vai colocar o conteudo que sera enviado para o usuario"><span class="obrigatorio">*</span>Conteudo do estoque</label>
-                                            <input type="text" id="content-number-estoque-input" class="input-padrao" placeholder="EX: Abra um ticket para ativacao">
-                                        </div>
-                                        <div>
-                                            <label for="number-estoque-input" class="lable-padrao"><span class="obrigatorio">*</span>Quantidade de estoque</label>
-                                            <input type="number" id="number-estoque-input" class="input-padrao" placeholder="Numero de itens no estoque">
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- Estoque para produtos do tipo Assinatura -->
+                    <div id="subscriptionStockSection" class="stock-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="subscriptionStockMensage">Mensagem de assinatura</label>
+                            <input type="text" id="subscriptionStockMensage" placeholder="Mensagem de assinatura"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="subscriptionStockAmount">Quantidade em Estoque</label>
+                            <input type="number" id="subscriptionStockAmount" placeholder="0" min="0"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="subscriptionPeriod">Período de Assinatura</label>
+                            <select id="subscriptionPeriod" class="form-control">
+                                <option value="hourly">Horas</option>
+                                <option value="daily">Dias</option>
+                                <option value="weekly">Semanas</option>
+                                <option value="monthly">Meses</option>
+                                <option value="yearly">Anos</option>
+                                <option value="lifetime">Vitalício</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subscriptionDuration">Tempo de assinatura </label>
+                            <input type="number" id="subscriptionDuration" placeholder="0" min="0" class="form-control">
+                        </div>
+                    </div>
 
-                                <div id="cadastro-estoque-config-containner">
-                                    <h1 class="title-col">Configure o seu estoque!</h1>
-                                    <div id="cadastro-estoque-config-selectType">
-                                        <h1 style="text-align: start; width: fit-content;" class="mini-title-col">Marque essa opção caso não queira adicionar o estoque por agora: </h1>
-                                        <label id="select-null-stock-label" for="select-null-stock-checkbox" class="switch">
-                                            <input id="select-null-stock-checkbox" class="checkbox" type="checkbox">
-                                            <span class="slider round"></span>
+                    <div class="form-group" id="productStockContainer" style="display: none;">
+                        <label for="productStock">Estoque</label>
+                        <input type="number" id="productStock" placeholder="0" min="0" required>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="productFeatured">
+                        <label for="productFeatured">Destacar este produto</label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancelProductButton" class="secondary-button">Cancelar</button>
+                        <button type="submit" id="createProductButton" class="cta-button">Criar Produto</button>
+                    </div>
+                </div>
+            </custom-popup>
+            <div class="console-content">
+
+                <div class="section">
+                    <h2 class="section-title">Estoque</h2>
+                    <div class="stock-overview-grid" id="stockOverview"></div>
+                </div>
+
+                <div class="section" id="products-section">
+                    <div id="products-top-section">
+                        <h2 class="section-title">Produtos</h2>
+                        <div class="search-filter-container">
+
+                            <div id="filterButton" data-tooltip="Clique para abrir os filtros"
+                                data-tooltip-position="top" data-tooltip-title="Filtrar e Ordenar">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>
+                            </div>
+
+                            <div id="filterDropdown" class="filter-dropdown">
+                                <h4>Filtrar e Ordenar</h4>
+
+                                <div class="filter-group">
+                                    <div class="filter-group-title">Tipo de Produto</div>
+                                    <div class="filter-options">
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="type" value="normal"> Normal
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="type" value="single"> Single
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="type" value="subscription"> Assinatura
                                         </label>
                                     </div>
-                                    
-                                    <div id="estoque-config-content">
-                                        <h1 class="title-col">Adicionar estoque por txt!</h1>
-                                        <div id="estoque-config-txt">
-                                            <div id="estoque-config-txt-content">
-                                                <div style="display: flex; flex-direction: column; justify-content: end; width: 40%;">
-                                                    <label for="estoque-config-input-title-txt" class="lable-padrao">Titulo dos itens do txt</label>
-                                                    <input type="text"  id="estoque-config-input-title-txt" class="input-padrao" placeholder="Padrão: Itens">
-                                                </div>
+                                </div>
 
-                                                <div id="estoque-config-txt-file-content">
-                                                    <p class="desc-col" id="estoque-config-txt-file-selected">Nenhum arquivo selecionado :(</p>
-                                                    <label type="button" class="main-button-product" for="estoque-config-input-file" id="estoque-config-text-file">Adiconar arquivo txt!</label>
-                                                    <input type="file" hidden accept=".txt" id="estoque-config-input-file">
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="filter-group">
+                                    <div class="filter-group-title">Estado do Estoque</div>
+                                    <div class="filter-options">
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="stock" value="in-stock"> Em estoque
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="stock" value="low-stock"> Pouco estoque
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="stock" value="out-stock"> Sem estoque
+                                        </label>
                                     </div>
                                 </div>
+
+                                <div class="filter-group">
+                                    <div class="filter-group-title">Ordenar por</div>
+                                    <div class="filter-options">
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="name-asc"> Nome (A-Z)
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="name-desc"> Nome (Z-A)
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="price-asc"> Preço (menor)
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="price-desc"> Preço (maior)
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="stock-asc"> Estoque (menor)
+                                        </label>
+                                        <label class="filter-checkbox">
+                                            <input type="radio" name="sort" value="stock-desc"> Estoque (maior)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="filter-actions">
+                                    <button class="secondary-button"
+                                        onclick="clearFilters(); event.stopPropagation();">Limpar</button>
+                                    <button class="cta-button"
+                                        onclick="applyFilters(); event.stopPropagation();">Aplicar</button>
+                                </div>
                             </div>
-                            <div style="margin-top: 2em; margin-bottom: 2em;" class="linha"></div>
-                            <div id="buttons-cadastro-clear-product">
-                                <button type="button" class="main-button-product redColor" id="clear-product-cadastro">Limpar</button>
-                                <button type="button" class="main-button-product greenColor" id="save-product-cadastro">Cadastrar</button>
+
+                            <div class="search-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="search-icon">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" class="search-input" id="productSearch"
+                                    placeholder="Pesquisar produtos..." oninput="searchProducts()">
+                                <button class="clear-search" id="clearSearch" onclick="clearSearch()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <button class="button-padrao" id="createProductButtonPopup">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="margin-right: 4px;">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg> Novo Produto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="linha"></div>
+                    <div class="products-list" id="productsList"></div>
+                </div>
+
+
+            </div>
+    </div>
+
+
+    
+    <script>
+        
+
+
+        function getNewProducts(replace = false) {
+            return new Promise(async (resolve, reject) => {
+                let getNewProductsFetch = await fetch("/product/get-all", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ storeID: storeID })
+                }).then(response => response.json())
+                console.log(getNewProductsFetch);
+                
+                if (getNewProductsFetch.success) {
+                    if (replace) {
+                        products = getNewProductsFetch.data
+                    }
+                    resolve(getNewProductsFetch.data)
+                } else {
+                    reject(getNewProductsFetch.data)
+                }
+            })
+        }
+
+        document.getElementById("cancelProductButton").addEventListener("click", function () {
+            document.getElementById("popup-create-product-containner").close()
+            clearProductModal()
+        })
+
+        document.getElementById("createProductButton").addEventListener("click", async function () {
+            let productName = document.getElementById("productName").value;
+            let productDescription = document.getElementById("productDescription").value;
+            let productPrice = document.getElementById("productPrice").value;
+            let productPriceValue = parseInt(productPrice.replace(/[^\d,]/g, '').replace(',', ''));
+
+            let productType = document.getElementById('productType').getValue()
+            let destaque = document.getElementById("productFeatured").checked;
+            let productLogo = document.getElementById("logoUpload").files[0]
+            let productBackground = document.getElementById("backgroundUpload").files[0]
+
+            if (productName.trim().length < 5 || !productName) {
+                errorNotify("O nome do produto deve conter pelo menos 5 caracteres")
+                return;
+            }
+
+            if (productDescription.trim().length < 10 || !productDescription) {
+                errorNotify("A descrição do produto deve conter pelo menos 10 caracteres")
+                return;
+            }
+
+            if (productPriceValue < 1 || !productPriceValue) {
+                errorNotify("O preço do produto deve ser maior que 0")
+                return;
+            }
+
+            if (!productType) {
+                errorNotify("Selecione o tipo de produto")
+                return;
+            }
+
+            let estoqueObject = {}
+
+            switch (productType) {
+                case "normal":
+                    let normalStockTitle = document.getElementById("normalStockTitle").value
+                    if (!normalStockTitle) {
+                        errorNotify("O título do estoque é obrigatório")
+                        return;
+                    }
+                    let stockItems = getNormalStockItems()
+
+                    estoqueObject = {
+                        stockTitle: normalStockTitle,
+                        stockItems: stockItems
+                    }
+                    break;
+                case "single":
+                    let singleStockTitle = document.getElementById("singleTitle").value
+                    if (!singleStockTitle) {
+                        errorNotify("O título do estoque é obrigatório")
+                        return;
+                    }
+                    let singleStockAmount = document.getElementById("singleStockAmount").value
+                    if (!singleStockAmount.trim()) {
+                        singleStockAmount = 0
+                    }
+                    let singleStockContent = document.getElementById("singleContent").value
+                    if (!singleStockContent) {
+                        errorNotify("O conteúdo do estoque é obrigatório")
+                        return;
+                    }
+
+                    estoqueObject = {
+                        stockTitle: singleStockTitle,
+                        stockItems: singleStockContent,
+                        stockAmount: singleStockAmount
+                    }
+                    break;
+                case "subscription":
+                    let subscriptionStockTitle = document.getElementById("subscriptionStockTitle").value
+                    if (!subscriptionStockTitle) {
+                        errorNotify("O título do estoque é obrigatório")
+                        return;
+                    }
+                    let subscriptionTime = document.getElementById("subscriptionDuration").value
+                    if (!subscriptionTime.trim()) {
+                        subscriptionTime = 0
+                    }
+                    let subscriptionStockPeriod = document.getElementById("subscriptionPeriod").value
+                    if (!subscriptionStockPeriod) {
+                        errorNotify("O período da assinatura é obrigatório")
+                        return;
+                    }
+                    let subscriptionStockMensage = document.getElementById("subscriptionStockMensage").value
+                    if (!subscriptionStockMensage) {
+                        errorNotify("A mensagem de assinatura é obrigatória")
+                        return;
+                    }
+                    estoqueObject = {
+                        stockTitle: subscriptionStockTitle,
+                        stockItems: subscriptionStockMensage,
+                        stockAmount: subscriptionTime,
+                        stockPeriod: subscriptionStockPeriod
+                    }
+                    break;
+            }
+
+            let formData = new FormData();
+            formData.append("storeID", storeID);
+            formData.append("name", productName);
+            formData.append("description", productDescription);
+            formData.append("price", productPriceValue);
+            formData.append("type", productType);
+            formData.append("featured", destaque);
+            formData.append("stockObject", JSON.stringify(estoqueObject));
+            if (productLogo) {
+                formData.append("productLogo", productLogo);
+            }
+            if (productBackground) {
+                formData.append("productBackGround", productBackground);
+            }
+
+            const popupContent = document.getElementById('popup-create-product-content');
+            const loader = new Loader({
+                text: 'Criando produto...',
+                target: '#popup-create-product-content',
+                appendToBody: false,
+                showProgress: false,
+                showStatus: false
+            });
+            if (document.getElementById('createProductButton').getAttribute("data-type") == "create") {
+
+                try {
+                    loader.show();
+
+                    let createProductFetch = await fetch("/product/create", {
+                        method: "POST",
+                        body: formData
+                    }).then(response => response.json())
+
+                    if (createProductFetch.success) {
+                        await loader.hide();
+                        document.getElementById("popup-create-product-containner").close()
+                        
+                        successNotify(createProductFetch.data)
+
+                        await getNewProducts(true)
+                        renderProducts()
+                    } else {
+                        await loader.hide();
+                        errorNotify(createProductFetch.data)
+                    }
+                } catch (error) {
+                    await loader.hide();
+                    console.log(error);
+
+                    errorNotify("Erro ao criar produto")
+                }
+            } else {
+                try {
+
+                    let productID = document.getElementById('createProductButton').getAttribute("data-product-id")
+                    if (!productID) {
+                        errorNotify("Não foi possivel identificar o produto")
+                        return;
+                    }
+
+                    formData.append("productID", productID)
+
+                    loader.setText("Editando produto...")
+                    loader.show()
+
+                    let editProductFetch = await fetch("/product/edit", {
+                        method: "POST",
+                        body: formData
+                    }).then(response => response.json())
+
+                    if (editProductFetch.success) {
+                        await loader.hide();
+                        document.getElementById("popup-create-product-containner").close()
+                        
+                        successNotify(editProductFetch.data)
+                        
+                        await getNewProducts(true)
+                        renderProducts()
+                    } else {
+                        await loader.hide();
+                        errorNotify(editProductFetch.data)
+                    }
+                } catch (error) {
+                    await loader.hide();
+                    console.log(error);
+
+                    errorNotify("Erro ao editar produto")
+                }
+            }
+        });
+
+        document.getElementById('createProductButtonPopup').addEventListener('click', function () {
+            document.getElementById('popup-create-product-containner').shadowRoot.querySelector('.popup-title').textContent = 'Criar Produto';
+            clearProductModal()
+            showStockSection('normal');
+            document.getElementById('popup-create-product-containner').open()
+            document.getElementById('createProductButton').setAttribute("data-type", "create")
+            document.getElementById('createProductButton').setAttribute("data-product-id", "")
+        })
+
+        function clearProductModal() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById("productType").setValue("normal")
+            document.getElementById('productFeatured').checked = false;
+            document.getElementById('productStock').value = '';
+            document.getElementById('normalStockTitle').value = '';
+            document.getElementById('normalStockItems').innerHTML = '';
+            document.getElementById('singleTitle').value = '';
+            document.getElementById('singleContent').value = '';
+            document.getElementById('singleStockAmount').value = '0';
+            document.getElementById('subscriptionStockAmount').value = '0';
+            document.getElementById('subscriptionPeriod').value = 'monthly';
+            document.getElementById('subscriptionDuration').value = '0';
+            document.getElementById('normalStockItems').innerHTML = '';
+            document.getElementById('backgroundUpload').value = '';
+            document.getElementById('logoUpload').value = '';
+            document.getElementById('backgroundPreview').querySelector('img').src = '';
+            document.getElementById('backgroundPreview').querySelector('img').style.display = 'none';
+            document.getElementById('backgroundPreview').querySelector('.preview-overlay').style.opacity = '1';
+            document.getElementById('logoPreview').querySelector('img').src = '';
+            document.getElementById('logoPreview').querySelector('img').style.display = 'none';
+            document.getElementById('logoPreview').querySelector('.preview-overlay').style.opacity = '1';
+            document.getElementById('createProductButton').setAttribute("data-type", "create")
+            document.getElementById('createProductButton').setAttribute("data-product-id", "")
+        }
+
+        function openEditProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            clearProductModal()
+            document.getElementById('popup-create-product-containner').shadowRoot.querySelector('.popup-title').textContent = 'Editar Produto';
+
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productType').setValue(product.type);
+            document.getElementById('productFeatured').checked = product.featured || false;
+
+            // Set background image preview
+            if (product.background) {
+                const backgroundPreview = document.getElementById('backgroundPreview');
+                const backgroundImg = backgroundPreview.querySelector('img');
+                const backgroundOverlay = backgroundPreview.querySelector('.preview-overlay');
+
+                backgroundImg.src = product.background;
+                backgroundImg.style.display = 'block';
+                backgroundOverlay.style.opacity = '0';
+
+                // Animate the preview appearance
+                gsap.fromTo(backgroundImg,
+                    { scale: 0.95, opacity: 0 },
+                    { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
+                );
+            }
+
+            // Set logo image preview
+            if (product.logo) {
+                const logoPreview = document.getElementById('logoPreview');
+                const logoImg = logoPreview.querySelector('img');
+                const logoOverlay = logoPreview.querySelector('.preview-overlay');
+
+                logoImg.src = product.logo;
+                logoImg.style.display = 'block';
+                logoOverlay.style.opacity = '0';
+
+                // Animate the preview appearance
+                gsap.fromTo(logoImg,
+                    { scale: 0.95, opacity: 0 },
+                    { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
+                );
+            }
+
+            showStockSection(product.type);
+
+            switch (product.type) {
+                case 'normal':
+                    document.getElementById('normalStockTitle').value = product.stock.stockTitle || '';
+                    loadNormalStockItems(product.stock.stockItems || []);
+                    break;
+
+                case 'single':
+                    document.getElementById('singleTitle').value = product.stock.stockTitle || '';
+                    document.getElementById('singleContent').value = product.stock.stockItems || '';
+                    document.getElementById('singleStockAmount').value = product.stock.stockAmount || 0;
+                    break;
+
+                case 'subscription':
+                    document.getElementById('subscriptionStockAmount').value = product.stock.stockAmount || 0;
+                    document.getElementById('subscriptionPeriod').value = product.stock.stockPeriod || 'monthly';
+                    document.getElementById('subscriptionStockTitle').value = product.stock.stockTitle || '';
+                    document.getElementById('subscriptionStockMensage').value = product.stock.stockItems || '';
+                    break;
+            }
+            document.getElementById('popup-create-product-containner').open()
+            document.getElementById('createProductButton').setAttribute("data-type", "edit")
+            document.getElementById('createProductButton').setAttribute("data-product-id", productId)
+            document.getElementById('createProductButton').textContent = "Salvar"
+        }
+
+        document.getElementById('productType').addEventListener('change', (e) => {
+            if (e.detail != null) {
+                showStockSection(e.detail.value);
+            }
+        });
+
+        function showStockSection(category) {
+            document.querySelectorAll('.stock-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById('productStockContainer').style.display = 'none';
+
+            switch (category) {
+                case 'normal':
+                    document.getElementById('normalStockSection').style.display = 'block';
+                    break;
+                case 'single':
+                    document.getElementById('singleStockSection').style.display = 'block';
+                    break;
+                case 'subscription':
+                    document.getElementById('subscriptionStockSection').style.display = 'block';
+                    break;
+            }
+        }
+
+        function addNormalStockItem() {
+            const itemsContainer = document.getElementById('normalStockItems');
+            const itemIndex = itemsContainer.children.length;
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'stock-item';
+            itemDiv.innerHTML = `
+                <input type="text" class="form-control stock-item-content" placeholder="Item ${itemIndex + 1}" data-item-id="${itemIndex}">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeNormalStockItem(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            `;
+
+            itemsContainer.appendChild(itemDiv);
+        }
+
+        function removeNormalStockItem(button) {
+            const itemDiv = button.closest('.stock-item');
+            itemDiv.remove();
+        }
+
+        function getNormalStockItems() {
+            const items = [];
+            document.querySelectorAll('.stock-item-content').forEach(input => {
+                if (input.value.trim()) {
+                    items.push(input.value.trim());
+                }
+            });
+            return items;
+        }
+
+        function loadNormalStockItems(items) {
+            const itemsContainer = document.getElementById('normalStockItems');
+            itemsContainer.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'stock-item';
+                itemDiv.innerHTML = `
+                    <input type="text" class="form-control stock-item-content" placeholder="Item ${index + 1}" value="${item}" data-item-id="${index}">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeNormalStockItem(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                `;
+
+                itemsContainer.appendChild(itemDiv);
+            });
+        }
+
+        function openFileUploadDialog() {
+            document.getElementById('stockFileUpload').click();
+        }
+
+        function handleFileUpload(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const content = e.target.result;
+                const items = content.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0);
+
+                loadNormalStockItems(items);
+            };
+
+            reader.readAsText(file);
+        }
+
+        function getProductTypeName(type) {
+            switch (type) {
+                case 'single': return 'Single';
+                case 'normal': return 'Normal';
+                case 'subscription': return 'Assinatura';
+                default: return 'Produto';
+            }
+        }
+
+        function getCategoryName(category) {
+            switch (category) {
+                case 'normal': return 'Normal';
+                case 'single': return 'Single';
+                case 'subscription': return 'Assinatura';
+                default: return 'Produto';
+            }
+        }
+
+        function initializeApp() {
+            applyFilters();
+            updateStockOverview();
+            document.body.classList.add('loaded');
+        }
+
+        function renderProducts(filteredProducts) {
+            const container = document.getElementById('productsList');
+            const productsToRender = filteredProducts || products;
+
+            if (!productsToRender || productsToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="no-products">
+                        <p>Nenhum produto encontrado com os filtros selecionados.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            productsToRender.forEach(product => {
+                let stockBadgeClass = 'in-stock';
+                let stockText = 'Em estoque';
+
+                if (product.type === 'normal') {
+                    if (product.stock.stockItems.length <= 0) {
+                        stockBadgeClass = 'out-stock';
+                        stockText = 'Sem estoque';
+                    } else if (product.stock.stockItems.length < 10) {
+                        stockBadgeClass = 'low-stock';
+                        stockText = `${product.stock.stockItems.length} itens em estoque`;
+                    } else {
+                        stockText = `${product.stock.stockItems.length} itens em estoque`;
+                    }
+                } else if (product.type === 'single') {
+                    if (product.stock.stockAmount <= 0) {
+                        stockBadgeClass = 'out-stock';
+                        stockText = 'Sem estoque';
+                    } else if (product.stock.stockAmount < 5) {
+                        stockBadgeClass = 'low-stock';
+                        stockText = `${product.stock.stockAmount} itens em estoque`;
+                    } else {
+                        stockText = `${product.stock.stockAmount} itens em estoque`;
+                    }
+                }
+
+                const typeName = getProductTypeName(product.type);
+
+                html += `
+                <div class="product-card ${product.featured == true ? 'featured' : ''}">
+                    <div class="product-background" style="background-image: url('${product.background || 'https://images.unsplash.com/photo-1661956602926-db6b25f75947'}');">
+                        <div class="product-overlay"></div>
+                        <div class="product-type">${typeName}</div>
+                        ${product.featured == true ? '<div class="featured-badge"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>' : ''}
+                    </div>
+                    <div class="product-logo">
+                        <img src="${product.logo}" alt="${product.name} logo">
+                    </div>
+                    <div class="product-content">
+                        <div class="product-top">
+                            <div class="product-header">
+                                <h3 class="product-title">${product.name}</h3>
+                                <div class="product-price">R$ ${(parseInt(product.price, 10) / 100).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })
+                    }</div>
+                            </div>
+                            <p class="product-desc">${product.description}</p>
+                        </div>
+                        <div class="product-footer">
+                            <div class="stock-info" style="cursor:pointer">
+                                <span class="stock-badge ${stockBadgeClass}"></span>
+                                ${stockText}
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-btn view" title="Ver Estoque">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn edit" onclick="openEditProductModal('${product.id}')" title="Editar Produto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteProduct('${product.id}')" title="Excluir Produto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
-
-
-                    <!-- <div id="rank-buy-containner">
-                        <div id="rank-buy-content">
-                            <h1 class="title-col">Rank de compra</h1>
-                            <p class="desc-col">Configure o rank de compra!</p>
-                            <div class="linha"></div>
-                            <div id="config-rank-buy-content">
-                                <div id="config-rank-buy-left-containner">
-                                    <div id="config-rank-buy-channel-announcement">
-                                        <label for="select-config-rank-buy-channel-announcement" class="lable-padrao">Canal de anuncio:</label>
-                                        <div id="select-config-rank-buy-channel-announcement"></div>
-                                    </div>
-                                    <div id="config-rank-buy-mensage-announcement">
-                                        <label for="input-config-rank-buy-mensage-announcement" class="lable-padrao">Mensagem de anuncio: <br> (Use @@username para substituir pelo username do usuario)</label>
-                                        <textarea type="text" id="input-config-rank-buy-mensage-announcement" class="input-padrao" placeholder="Mensagem de anuncio"></textarea>
-                                    </div>
-                                    <div id="config-rank-buy-products">
-                                        <label for="select-config-rank-buy-products" class="lable-padrao">Produtos compativeis:</label>
-                                        <div id="select-config-rank-buy-products"></div>
-                                    </div>
-                                </div>
-                                <div id="config-rank-buy-right-containner">
-                                    <div id="config-rank-buy-top-containner">
-                                        <label for="input-config-rank-buy-number-ranks" class="lable-padrao">Quantidade de ranks:</label>
-                                        <input type="number" id="input-config-rank-buy-number-ranks" class="input-padrao" placeholder="Quantidade de ranks">
-                                    </div>
-                                    <div id="config-rank-buy-bottom-containner">
-
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="linha"></div>
-                            <div id="buttons-rank-buy">
-                                <button type="button" class="main-button-product redColor" id="clear-rank-buy-config">Limpar</button>
-                                <button type="button" class="main-button-product greenColor" id="save-rank-buy-config">Salvar</button>
-                            </div>
-                        </div>
-                    </div> -->
-
                 </div>
-            </main>
-        </div>
-    </div>
-    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
-    <%- include('./reusable/script.ejs') %>
-    
-    <div>
-        <script>
-            function formatarMoeda (numeroCentavos){
-                const valorReal = numeroCentavos / 100;
-                return valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                `;
+            });
+
+            container.innerHTML = html;
+
+            const productCards = container.querySelectorAll('.product-card');
+            gsap.fromTo(productCards,
+                { y: 30, opacity: 0 },
+                { y: 0, opacity: 1, stagger: 0.1, duration: 0.5, ease: "power2.out" }
+            );
+        }
+
+        function updateStockOverview() {
+            const stockOverview = document.getElementById('stockOverview');
+            if (!stockOverview) return;
+
+            const totalProducts = products.length;
+            const totalStock = products.reduce((sum, product) => sum + (product.type === 'normal' ? product.stock.stockItems.length : product.stock.stockAmount), 0);
+            const lowStockProducts = products.filter(p => p.stock > 0 && p.stock < 10).length;
+            const outOfStockProducts = products.filter(p => p.stock === 0).length;
+
+            stockOverview.innerHTML = `
+                <div class="stock-stat-card" >
+                    <svg class="stock-stat-card-icon" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    <div class="stat-content">
+                        <div class="stat-value">${totalProducts}</div>
+                        <div class="stat-label">Total de Produtos</div>
+                    </div>
+                </div>
+                <div class="stock-stat-card">
+                    <svg class="stock-stat-card-icon" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 9v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"></path>
+                        <path d="M8 4h8a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+                        <path d="M8 14h.01"></path>
+                        <path d="M16 14h.01"></path>
+                        <path d="M12 14h.01"></path>
+                    </svg>
+                    <div class="stat-content">
+                        <div class="stat-value">${totalStock}</div>
+                        <div class="stat-label">Itens em Estoque</div>
+                    </div>
+                </div>
+                <div class="stock-stat-card">
+                    <svg class="stock-stat-card-icon" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <div class="stat-content">
+                        <div class="stat-value">${lowStockProducts}</div>
+                        <div class="stat-label">Estoque Baixo</div>
+                    </div>
+                </div>
+                <div class="stock-stat-card">
+                    <svg class="stock-stat-card-icon" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <div class="stat-content">
+                        <div class="stat-value">${outOfStockProducts}</div>
+                        <div class="stat-label">Esgotados</div>
+                    </div>
+                </div>
+            `;
+
+            const statCards = stockOverview.querySelectorAll('.stock-stat-card');
+            gsap.fromTo(statCards,
+                { opacity: 0, y: 20 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.5,
+                    stagger: 0.1,
+                    ease: 'back.out(1.7)'
+                }
+            );
+        }
+
+        function searchProducts() {
+            const searchInput = document.getElementById('productSearch');
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            const clearSearchButton = document.getElementById('clearSearch');
+
+            if (searchTerm.length > 0) {
+                clearSearchButton.classList.add('visible');
+            } else {
+                clearSearchButton.classList.remove('visible');
             }
-            let channels =  JSON.parse(("<%= channelsString %>").replace(/&#34;/g, '"')) 
-            let channelItensSelectMenu = channels.map(element => {
-                return {
-                    name: element.name,
-                    value: element.id
-                }
-            })
-            let cargo =  JSON.parse(("<%= cargosString %>").replace(/&#34;/g, '"')) 
-            let cargoItensSelectMenu = cargo.map(element => {
-                return {
-                    name: element.name,
-                    value: element.id
-                }
-            })
-            let productsString =  JSON.parse(("<%= productString %>").replace(/&#34;/g, '"')) 
 
-            let rankBuyChannelAnnouncement = new DropdownSingle('select-config-rank-buy-channel-announcement', channelItensSelectMenu)
-            let rankBuyProducts = new DropdownMulti('select-config-rank-buy-products', productsString)
-            document.getElementById("save-rank-buy-config").addEventListener('click', () => {
-                let numberRanks = document.getElementById("input-config-rank-buy-number-ranks").value
-                let channelAnnouncement = rankBuyChannelAnnouncement.getValue()
-                let mensage = document.getElementById("input-config-rank-buy-mensage-announcement").value
-                let products = rankBuyProducts.getValue()
-                if (!numberRanks) {
-                    return errorNotify('Digite a quantidade de ranks!')
-                }
-                if (!channelAnnouncement) {
-                    return errorNotify('Selecione um canal de anuncio!')
-                }
-                if (!mensage) {
-                    return errorNotify('Digite uma mensagem de anuncio!')
-                }
-                if (products.length === 0) {
-                    return errorNotify('Selecione pelo menos um produto!')
-                }
-                fetch('/sales/rankConfig', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        numberRanks: numberRanks,
-                        channelAnnouncement: channelAnnouncement,
-                        mensage: mensage,
-                        products: products
-                    })
-                }).then(response => {
-                    return response.json()
-                }).then(response => {
-                    if (response.success == true) {
-                        successNotify('Configurações salvas!')
-                    }else{
-                        errorNotify(response.data)
-                    }
-                })
-            })
-        </script>
-    </div>
+            applyFilters();
+        }
 
-   <script src="/public/js/sales.js"></script>
+        function clearSearch() {
+            const searchInput = document.getElementById('productSearch');
+            searchInput.value = '';
+            document.getElementById('clearSearch').classList.remove('visible');
+            applyFilters();
+        }
+
+        function toggleFilters(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const filterDropdown = document.getElementById('filterDropdown');
+            filterDropdown.classList.toggle('active');
+            if (filterDropdown.classList.contains('active')) {
+                document.removeEventListener('click', closeFilterOnClickOutside);
+                setTimeout(() => {
+                    document.addEventListener('click', closeFilterOnClickOutside);
+                }, 10);
+            }
+        }
+
+        function closeFilterOnClickOutside(event) {
+            const filterDropdown = document.getElementById('filterDropdown');
+            const filterButton = document.getElementById('filterButton');
+
+            if (filterDropdown &&
+                !filterDropdown.contains(event.target) &&
+                !filterButton.contains(event.target)) {
+                filterDropdown.classList.remove('active');
+                document.removeEventListener('click', closeFilterOnClickOutside);
+            }
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('productSearch')?.value.trim().toLowerCase() || '';
+            const typeFilters = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
+            const stockFilters = Array.from(document.querySelectorAll('input[name="stock"]:checked')).map(cb => cb.value);
+            const sortOption = document.querySelector('input[name="sort"]:checked')?.value;
+
+            if (!products || !Array.isArray(products) || products.length === 0) {
+                return;
+            }
+
+            let filteredProducts = [...products];
+
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (typeFilters.length > 0) {
+                filteredProducts = filteredProducts.filter(product => typeFilters.includes(product.type));
+            }
+
+            if (stockFilters.length > 0) {
+                filteredProducts = filteredProducts.filter(product => {
+                    if (stockFilters.includes('in-stock') && product.stock > 10) return true;
+                    if (stockFilters.includes('low-stock') && product.stock > 0 && product.stock <= 10) return true;
+                    if (stockFilters.includes('out-stock') && product.stock === 0) return true;
+                    return false;
+                });
+            }
+
+            if (sortOption) {
+                switch (sortOption) {
+                    case 'name-asc':
+                        filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+                        break;
+                    case 'name-desc':
+                        filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+                        break;
+                    case 'price-asc':
+                        filteredProducts.sort((a, b) => parseInt(a.price) - parseInt(b.price));
+                        break;
+                    case 'price-desc':
+                        filteredProducts.sort((a, b) => parseInt(b.price) - parseInt(a.price));
+                        break;
+                    case 'stock-asc':
+                        filteredProducts.sort((a, b) => parseInt(a.stock) - parseInt(b.stock));
+                        break;
+                    case 'stock-desc':
+                        filteredProducts.sort((a, b) => parseInt(b.stock) - parseInt(a.stock));
+                        break;
+                }
+            }
+
+            updateFilterBadge();
+            renderProducts(filteredProducts);
+            document.getElementById('filterDropdown').classList.remove('active');
+        }
+
+        function clearFilters() {
+            document.querySelectorAll('input[name="type"]:checked, input[name="stock"]:checked').forEach(cb => {
+                cb.checked = false;
+            });
+
+            document.querySelectorAll('input[name="sort"]:checked').forEach(rb => {
+                rb.checked = false;
+            });
+
+            updateFilterBadge();
+            applyFilters();
+            document.getElementById('filterDropdown').classList.remove('active');
+        }
+
+        function updateFilterBadge() {
+            const typeCount = document.querySelectorAll('input[name="type"]:checked').length;
+            const stockCount = document.querySelectorAll('input[name="stock"]:checked').length;
+            const hasSort = document.querySelector('input[name="sort"]:checked') !== null;
+
+            const totalFilters = typeCount + stockCount + (hasSort ? 1 : 0);
+            const filterButton = document.getElementById('filterButton');
+
+            if (totalFilters > 0) {
+                filterButton.classList.add('active');
+            } else {
+                filterButton.classList.remove('active');
+            }
+        }
+
+        document.getElementById('filterButton').addEventListener('click', toggleFilters);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeApp();
+            updateStockOverview();
+
+            document.querySelectorAll('#filterDropdown input[type="checkbox"], #filterDropdown input[type="radio"]').forEach(input => {
+                input.addEventListener('change', function () {
+                    updateFilterBadge();
+                });
+            });
+
+            const applyFiltersBtn = document.querySelector('#filterDropdown .filter-actions .btn-primary');
+            if (applyFiltersBtn) {
+                applyFiltersBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    applyFilters();
+                });
+            }
+
+            const clearFiltersBtn = document.querySelector('#filterDropdown .filter-actions .btn-secundary');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearFilters();
+                });
+            }
+
+            updateFilterBadge();
+            window.openEditProductModal = openEditProductModal;
+            window.getProductTypeName = getProductTypeName;
+            window.renderProducts = renderProducts;
+            window.searchProducts = searchProducts;
+            window.clearSearch = clearSearch;
+            window.toggleFilters = toggleFilters;
+            window.applyFilters = applyFilters;
+            window.clearFilters = clearFilters;
+        });
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragEnter(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event, inputId) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('drag-over');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const input = document.getElementById(inputId);
+                input.files = files;
+                handleImageUpload(input, inputId === 'backgroundUpload' ? 'backgroundPreview' : 'logoPreview');
+            }
+        }
+
+        function handleImageUpload(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const previewImg = preview.querySelector('img');
+            const overlay = preview.querySelector('.preview-overlay');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    previewImg.classList.add('preview-active');
+                    overlay.style.opacity = '0';
+
+                    // Animate the preview appearance
+                    gsap.fromTo(previewImg,
+                        { scale: 0.95, opacity: 0 },
+                        { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
+                    );
+
+                    // Animate the overlay fade out
+                    gsap.to(overlay,
+                        { opacity: 0, duration: 0.2, ease: "power2.out" }
+                    );
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    <%- include('./reusable/script.ejs') %>
+        <!-- <script src="/public/js/sales.js"></script> -->
 </body>
+
 </html>

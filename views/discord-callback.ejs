@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificando Integração do Discord</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #1e1e1e;
+            color: #e4e4e4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #2a2a2a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .icon {
+            margin-bottom: 20px;
+            width: 64px;
+            height: 64px;
+        }
+        h1 {
+            margin: 0 0 15px 0;
+            font-size: 1.8rem;
+        }
+        p {
+            margin: 0 0 20px 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #b0b0b0;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin: 20px 0;
+        }
+        .status.success {
+            background-color: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+        }
+        .status.error {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .status.loading {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .btn {
+            background-color: #5865f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover {
+            background-color: #4752c4;
+        }
+        .btn.retry {
+            background-color: #2a2a2a;
+            border: 1px solid #5865f2;
+            color: #5865f2;
+        }
+        .btn.retry:hover {
+            background-color: #353535;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <% if (status === 'success') { %>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <h1>Integração Concluída!</h1>
+            <p>O bot foi adicionado com sucesso ao seu servidor do Discord.</p>
+            <div class="status success">
+                Servidor conectado: <%= guildName %>
+            </div>
+            <p>Esta janela será fechada automaticamente...</p>
+        <% } else if (status === 'error') { %>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            <h1>Ocorreu um Problema</h1>
+            <p><%= errorMsg %></p>
+            <div class="status error">
+                O bot não foi adicionado ao servidor Discord
+            </div>
+            <a href="/discord/addbot/<%= storeID %>" class="btn retry">Tentar Novamente</a>
+        <% } else { %>
+            <div class="loader"></div>
+            <h1>Verificando Integração</h1>
+            <p>Estamos verificando se o bot foi adicionado com sucesso ao seu servidor Discord...</p>
+            <div class="status loading">
+                <span class="loader"></span> Aguarde um momento
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        let status = '<%= status %>';
+        if (status === 'success') {
+            window.close();
+        } else if (status !== 'error') {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html> 

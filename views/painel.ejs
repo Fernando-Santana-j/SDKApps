@@ -3,10 +3,9 @@
 
 <head>
     <%- include('./reusable/head.ejs') %>
-        <title>SDK - <%= server.name %>
-        </title>
-        <link rel="stylesheet" href="/public/css/painel.css">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SDK - <%= store.IDName %></title>
+    <link rel="stylesheet" href="/public/css/painel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -19,42 +18,93 @@
                         <div class="quick-actions">
                             <h5 class="quick-actions-title">Estatísticas em : </h5>
                             <div class="chart-controls">
-                                <button class="chart-period-btn active" title="Ultimos 7 dias">7 Dias</button>
-                                <button class="chart-period-btn " title="Ultimos 30 dias">30 Dias</button>
-                                <button class="chart-period-btn" title="Estatísticas de todo o tempo">Total</button>
+                                <button id="chart-period-btn-7days" class="chart-period-btn active"
+                                    title="Ultimos 7 dias">7 Dias</button>
+                                <button id="chart-period-btn-30days" class="chart-period-btn "
+                                    title="Ultimos 30 dias">30 Dias</button>
+                                <button id="chart-period-btn-total" class="chart-period-btn"
+                                    title="Estatísticas de todo o tempo">Total</button>
                             </div>
                         </div>
                     </header>
 
-                    <!-- Stats Grid -->
                     <div class="index-stats-grid">
-                        <div class="stat-card vendas-totais-containner">
+                        <div id="amout-sales-containner" class="stat-card vendas-totais-containner"
+                            data-tooltip="R$ 00,00" data-tooltip-position="top"
+                            data-tooltip-title="Valor Total Vendido">
                             <h3>Valor Total Vendido</h3>
-                            <div class="stat-value">R$ 24.560,00</div>
+                            <div id="amout-sales-value" class="stat-value"></div>
                         </div>
-                        <div class="stat-card produtos-vendidos-containner ">
+                        <div class="stat-card produtos-vendidos-containner " id="products-sales-containner"
+                            data-tooltip="0" data-tooltip-position="right" data-tooltip-title="Produtos Vendidos">
                             <h3>Produtos Vendidos</h3>
-                            <div class="stat-value">342</div>
+                            <div id="products-sales-value" class="stat-value"></div>
                         </div>
-                        <div class="stat-card produtos-mais-vendidos-containner">
+                        <div class="stat-card produtos-mais-vendidos-containner" id="best-product-containner"
+                            data-tooltip="Sem dados" data-tooltip-position="bottom"
+                            data-tooltip-title="Produto Mais Vendido">
                             <h3>Produto Mais Vendido</h3>
-                            <div class="stat-value">156</div>
+                            <div id="best-product-value" class="stat-value"></div>
                         </div>
                         <div class="stat-card integracoes-containner">
                             <h3>Integrações</h3>
+                            <div class="linha"></div>
+                            <div id="integration-content">
+                                <div id="integration-row">
+                                    <div class="integration-col" data-tooltip="Clique para ir para configurações"
+                                        data-tooltip-position="right" data-tooltip-title="Discord">
+                                        <div class="integration-col-item">
+                                            <div class="integration-col-item-logo-containner">
+                                                <img class="integration-col-item-logo"
+                                                    src="/public/img/assets/discord_logo.png" alt="">
+                                            </div>
+                                            <h3 class="integration-col-item-name">Discord</h3>
+                                        </div>
+                                        <div class="integration-col-status-containner">
+                                            <div class="integration-col-status status-active status-badge">
+                                                <div class="status-indicator"></div>
+                                                <div class="integration-col-status-text">Ativado</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="stat-card funcionamento-containner">
                             <h3>Funcionamento</h3>
+                            <div class="linha"></div>
+                            <div id="funcionamento-content">
+                                <p class="desc-col">Ative ou desative as vendas ou site da sua loja</p>
+                                <div id="funcionamento-controlls">
+                                    <div id="funcionamento-controll-store">
+                                        <label for="funcionamento-controll-store-switch"
+                                            class="funcionamento-controll-label">Status das vendas: </label>
+                                        <toggle-switch <%=store.functions.onSale==true ? 'checked' : '' %>
+                                            id="funcionamento-controll-store-switch"></toggle-switch>
+                                    </div>
+                                    <div id="funcionamento-controll-site">
+                                        <label for="funcionamento-controll-site-switch"
+                                            class="funcionamento-controll-label">Status do site: </label>
+                                        <toggle-switch <%=store.functions.onView==true ? 'checked' : '' %>
+                                            id="funcionamento-controll-site-switch"></toggle-switch>
+                                    </div>
+                                </div>
+                                <div id="funcionament-mensage">
+                                    <p class="funcionamento-mensage-text" id="funcionamento-mensage-text-pending">Sua
+                                        loja ainda tem tarefas pendentes, role até o final da página para ver oque você
+                                        deve fazer!</p>
+                                    <p class="funcionamento-mensage-text" id="funcionamento-mensage-text"
+                                        style="display: none;">Você já concluiu todas as tarefas!</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Sales Chart -->
                     <div class="chart-container ">
                         <h2 id="salesChartTitle">Grafico de vendas</h2>
                         <canvas id="salesChart"></canvas>
                     </div>
 
-                    <!-- Pending Tasks -->
                     <div class="pending-tasks ">
                         <h2>Tarefas Pendentes</h2>
                         <div class="task-item">
@@ -75,27 +125,50 @@
     </div>
 
 
-    <%- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
+    <%#- include('./reusable/chatLive.ejs',{user:user,chatItens:chatItens}) %>
         <%- include('./reusable/script.ejs') %>
-            <script>
 
-                let mainData = {
-                    LastSales: [{
+
+            <script>
+                verifySize(window.innerWidth)
+                window.addEventListener('resize', function () {
+                    verifySize(window.innerWidth)
+                });
+                function verifySize(width) {
+                    if (width <= 1250 ) {
+                        document.getElementById('amout-sales-containner').setAttribute("data-tooltip-position", "top")
+                        document.getElementById('products-sales-containner').setAttribute("data-tooltip-position", "top")
+                        document.getElementById('best-product-containner').setAttribute("data-tooltip-position", "top")
+                        document.querySelectorAll('.integration-col').forEach((element) => {
+                            element.setAttribute("data-tooltip-position", "top")
+                            window.ModernTooltip.updateTooltip(element)
+                        })
                         
-                    }],
-                    
+                    } else {
+                        document.getElementById('amout-sales-containner').setAttribute("data-tooltip-position", "top")
+                        document.getElementById('products-sales-containner').setAttribute("data-tooltip-position", "right")
+                        document.getElementById('best-product-containner').setAttribute("data-tooltip-position", "bottom")
+                        document.querySelectorAll('.integration-col').forEach((element) => {
+                            element.setAttribute("data-tooltip-position", "top")
+                            window.ModernTooltip.updateTooltip(element)
+                        })
+                    }
                 }
+                let storeID = location.pathname.replace('/console/', "")
+
+                let analyticsData = JSON.parse(("<%= analyticsData %>").replace(/&#34;/g, '"'))
+                let indexTime = "7days"
+
 
                 // Sales Chart
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 const salesChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: ['01/03', '02/03', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
-                            '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+                        labels: analyticsData["7days"].chart.labels,
                         datasets: [{
                             label: 'Vendas',
-                            data: [],
+                            data: analyticsData["7days"].chart.data,
                             borderColor: 'rgba(138, 43, 226, 0.6)',
                             backgroundColor: 'rgba(138, 43, 226, 1)',
                             tension: 0
@@ -134,56 +207,115 @@
                         }
                     }
                 });
-                // Chart Period Controls
-                const chartPeriodButtons = document.querySelectorAll('.chart-period-btn');
-                const salesChartData = {
-                    '7days': {
-                        labels: ['1', '2', '3', '4', '5', '6', '7'],
-                        data: [1200, 1900, 3000, 5060, 4200, 3500, 2800]
-                    },
-                    '30days': {
-                        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
-                            '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
-                        data: [1200, 1900, 3000, 5060, 4200, 3500, 2800, 3300, 4100, 5500,
-                            4800, 5200, 6100, 5700, 4900, 5300, 6200, 5800, 4600, 5100,
-                            6300, 5600, 4700, 5900, 6500, 5400, 4500, 5200, 6000, 5300]
-                    },
-                    '90days': {
-                        labels: Array.from({ length: 90 }, (_, i) => `${i + 1}`),
-                        data: Array.from({ length: 90 }, () => Math.floor(Math.random() * 7000) + 1000)
+
+
+
+
+
+                document.getElementById("funcionamento-controll-store-switch").addEventListener("change", async (e) => {
+                    let status = e.detail.checked
+                    const changeStatus = await fetch('/statusBotVendas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ active: status, storeID: storeID, type: "Vendas" })
+                    }).then(response => { return response.json() })
+
+                    if (changeStatus.success == true) {
+                        successNotify(changeStatus.data)
+                    } else {
+                        errorNotify(changeStatus.data)
                     }
-                };
+                })
 
-                chartPeriodButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        // Remove active class from all buttons
-                        chartPeriodButtons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById("funcionamento-controll-site-switch").addEventListener("change", async (e) => {
+                    let status = e.detail.checked
+                    const changeStatus = await fetch('/statusBotVendas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: status, storeID: storeID, type: "Site" })
+                    }).then(response => { return response.json() })
+                    if (changeStatus.success == true) {
+                        successNotify(changeStatus.data)
+                    } else {
+                        errorNotify(changeStatus.data)
+                    }
+                })
 
-                        // Add active class to clicked button
-                        this.classList.add('active');
 
-                        // Determine period
-                        const period = this.textContent.replace(' Dias', '').toLowerCase() + 'days';
 
-                        // Update chart data
-                        salesChart.data.labels = salesChartData[period].labels;
-                        salesChart.data.datasets[0].data = salesChartData[period].data;
-                        salesChart.update();
+                let bestProdValue = document.getElementById("best-product-value")
+                let amountSalesValue = document.getElementById("amout-sales-value")
+                let prodSalesValue = document.getElementById("products-sales-value")
+                let bestProdContainner = document.getElementById("best-product-containner")
+                let amountSalesContainner = document.getElementById("amout-sales-containner")
+                let prodSalesContainner = document.getElementById("products-sales-containner")
+
+
+                window.ModernTooltip.setObserve(bestProdContainner, true);
+                window.ModernTooltip.setObserve(amountSalesContainner, true);
+                window.ModernTooltip.setObserve(prodSalesContainner, true);
+
+                function animateTextChange(elementId, newText) {
+                    const element = document.getElementById(elementId);
+                    if (element.textContent === newText) return;
+                    const currentText = element.textContent;
+                    gsap.to(element, {
+                        duration: 0.3,
+                        y: -30,
+                        opacity: 0,
+                        ease: "power2.out",
+                        onComplete: () => {
+                            element.textContent = newText;
+                            gsap.set(element, { y: 30 });
+                            gsap.to(element, {
+                                duration: 0.3,
+                                y: 0,
+                                opacity: 1,
+                                ease: "power2.out",
+                                onComplete: () => {
+                                    isAnimating = false;
+                                }
+                            });
+                        }
                     });
-                });
+                }
+                updateData("7days")
+
+                function updateData(period) {
+                    const data = analyticsData[period];
+
+                    animateTextChange("best-product-value", data.bestProd);
+                    animateTextChange("amout-sales-value", formatarMoeda(data.amoutSales));
+                    animateTextChange("products-sales-value", data.prodSeles);
+                    // bestProdValue.innerText = data.bestProd;
+                    // amountSalesValue.innerText = formatarMoeda(data.amoutSales);
+                    // prodSalesValue.innerText = data.prodSeles;
+
+                    bestProdContainner.setAttribute("data-tooltip", data.bestProd);
+                    amountSalesContainner.setAttribute("data-tooltip", formatarMoeda(data.amoutSales));
+                    prodSalesContainner.setAttribute("data-tooltip", data.prodSeles);
+
+                    salesChart.data.labels = data.chart.labels;
+                    salesChart.data.datasets[0].data = data.chart.data;
+                    salesChart.update();
+
+                    document.querySelectorAll('.chart-period-btn').forEach(btn => btn.classList.remove('active'));
+                    document.getElementById(`chart-period-btn-${period}`).classList.add('active');
+                }
+
+                document.getElementById("chart-period-btn-7days").addEventListener('click', () => updateData("7days"));
+                document.getElementById("chart-period-btn-30days").addEventListener('click', () => updateData("30days"));
+                document.getElementById("chart-period-btn-total").addEventListener('click', () => updateData("total"));
 
 
                 setTimeout(() => {
                     salesChart.update();
                 }, 100);
             </script>
-            <div>
-
-                <script>
-                    // let comprasConcluidas = JSON.parse(("<%#= comprasConcluidas %>").replace(/&#34;/g, '"'))
-                    // let comprasCanceladas = JSON.parse(("<%#= comprasCanceladas %>").replace(/&#34;/g, '"'))
-                </script>
-            </div>
             <!-- <script src="/public/js/painel.js"></script> -->
 </body>
 

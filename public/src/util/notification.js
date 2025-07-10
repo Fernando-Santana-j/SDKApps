@@ -118,10 +118,11 @@ class NotificationSystem {
     }
 }
 
-// Funções helper permanecem as mesmas
 const notifications = new NotificationSystem();
 
 function successNotify(message, options = {}) {
+    if (!message || message.trim().length <= 0 ) return;
+
     notifications.createNotification({
         message,
         type: 'success',
@@ -131,6 +132,8 @@ function successNotify(message, options = {}) {
 }
 
 function mensageNotify(message, options = {}) {
+    if (!message || message.trim().length <= 0 ) return;
+
     notifications.createNotification({
         message,
         type: 'warning',
@@ -140,6 +143,8 @@ function mensageNotify(message, options = {}) {
 }
 
 function errorNotify(message, options = {}) {
+    if (!message || message.trim().length <= 0 ) return;
+    
     notifications.createNotification({
         message,
         type: 'error',

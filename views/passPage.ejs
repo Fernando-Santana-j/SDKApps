@@ -6,7 +6,7 @@
     <%- include('./reusable/head.ejs') %>
         <style>
             body {
-                background-color: var(--opacity-color-purple);
+                background-color: var(--secundary-color-purple);
             }
         </style>
 </head>
@@ -16,20 +16,24 @@
     <div>
         <div id="containner"></div>
         <%- include('./reusable/script.ejs') %>
+        
 
-            <script>
-                document.addEventListener('keypress', async (event) => {
-                    if (event.key === 'Enter') {
-                        document.getElementById('pass-verify-button').click()
-                    }
-                })
-                const params = new URLSearchParams(window.location.search);
-                let refParams = params.get('ref');
-                
-                let finalUrl = refParams ? refParams : "/dashboard"
-                
-                passVerify(null, 'geral', finalUrl, null)
-            </script>
+        <script defer>
+            const params = new URLSearchParams(window.location.search);
+            let refParams = params.get('ref');
+            PasswordVerifier.verify({
+                onSuccess: () => { 
+                    successNotify('Senha verificada com sucesso')
+                },
+                onError: (msg) => { 
+                    errorNotify(msg)
+                },
+                force: true, 
+                type: 'geral',
+                redirect: refParams ? refParams : "/dashboard",
+                others: null
+            })
+        </script>
     </div>
 </body>
 

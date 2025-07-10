@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title><%= store.displayName %> - Customizar</title>
+        <link rel="stylesheet" href="/public/css/customize.css">
+        <style>
+            :root{
+                --cor-principal: <%= 'mainColor' in store.style ? store.style.mainColor : '#8a2be2' %>;
+                --cor-principal-clara: <%= 'mainLightColor' in store.style ? store.style.mainLightColor : '#bb86fc' %>;
+                --cor-principal-escura: <%= 'mainStrongColor' in store.style ? store.style.mainStrongColor : '#4a148c' %>;
+                --cor-destaque: <%= 'accentColor' in store.style ? store.style.accentColor : '#03dac6' %>;
+                --cor-fundo: <%= 'mainBG' in store.style ? store.style.mainBG : '#121212' %>;
+                --cor-superficie: <%= 'surfaceColorBG' in store.style ? store.style.surfaceColorBG : '#1e1e1e' %>;
+                --cor-superficie-2: <%= 'secundarySurfaceColorBG' in store.style ? store.style.secundarySurfaceColorBG : '#2d2d2d' %>;
+                --cor-erro: <%= 'errorColor' in store.style ? store.style.errorColor : '#cf6679' %>;
+                --cor-texto-principal: <%= 'mainTextColor' in store.style ? store.style.mainTextColor : '#ffffff' %>;
+                --cor-texto-secundaria: <%= 'secundaryTextColor' in store.style ? store.style.secundaryTextColor : '#e1e1e1' %>;
+                --cor-texto-terciaria: <%= 'grayTextColor' in store.style ? store.style.grayTextColor : 'rgba(255, 255, 255, 0.7)' %>;
+                --espacamento-padrao: <%= 'mainPadding' in store.style ? store.style.mainPadding : '1rem' %>;
+                --borda-arredondada: <%= 'mainRadius' in store.style ? store.style.mainRadius : '12px' %>;
+                --transicao-padrao: all 0.3s ease;
+            }
+        </style>
+</head>
+
+<body>
+    <div class="console-containner">
+        <%- include('./reusable/body.ejs',{index:3}) %>
+            <div class="console-content">
+                <main class="main-content">
+                    <!-- Editor Section -->
+                    <div class="editor-section" id="editor-section-1">
+                        <h2 class="section-title">Editar Aparência</h2>
+
+                        <!-- Color Picker Container -->
+                        <div class="color-picker-container" id="colorPickerModal" style="display: none;">
+                            <div class="color-picker-header">
+                                <div class="color-preview" id="colorPreview"></div>
+                                <div class="color-info">
+                                    <div class="color-name" id="colorName">Cor Principal</div>
+                                    <div class="color-value" id="colorValue">
+                                        #8a2be2
+                                        <button class="color-value-copy" id="copyColorBtn">Copiar</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="color-picker-grid" id="colorPickerGrid">
+                                <div class="color-grid-white"></div>
+                                <div class="color-grid-cursor" id="colorGridCursor"></div>
+                            </div>
+
+                            <div class="color-picker-hue" id="colorPickerHue">
+                                <div class="hue-slider-thumb" id="hueSliderThumb"></div>
+                            </div>
+
+                            <div class="color-picker-alpha" id="colorPickerAlpha">
+                                <div class="alpha-gradient" id="alphaGradient"></div>
+                                <div class="alpha-slider-thumb" id="alphaSliderThumb"></div>
+                            </div>
+
+                            <div class="color-controls">
+                                <div class="color-control">
+                                    <label>R</label>
+                                    <input type="range" min="0" max="255" value="138" class="color-slider color-slider-r"
+                                        id="redSlider">
+                                </div>
+                                <div class="color-control">
+                                    <label>G</label>
+                                    <input type="range" min="0" max="255" value="43" class="color-slider color-slider-g"
+                                        id="greenSlider">
+                                </div>
+                                <div class="color-control">
+                                    <label>B</label>
+                                    <input type="range" min="0" max="255" value="226" class="color-slider color-slider-b"
+                                        id="blueSlider">
+                                </div>
+                                <div class="color-control">
+                                    <label>A</label>
+                                    <input type="range" min="0" max="1" step="0.01" value="1"
+                                        class="color-slider color-slider-a" id="alphaSlider">
+                                </div>
+                            </div>
+
+                            <div class="color-presets">
+                                <div class="color-preset" style="background-color: #f44336;" data-color="#f44336"></div>
+                                <div class="color-preset" style="background-color: #e91e63;" data-color="#e91e63"></div>
+                                <div class="color-preset" style="background-color: #9c27b0;" data-color="#9c27b0"></div>
+                                <div class="color-preset" style="background-color: #673ab7;" data-color="#673ab7"></div>
+                                <div class="color-preset" style="background-color: #3f51b5;" data-color="#3f51b5"></div>
+                                <div class="color-preset" style="background-color: #2196f3;" data-color="#2196f3"></div>
+                                <div class="color-preset" style="background-color: #03a9f4;" data-color="#03a9f4"></div>
+                                <div class="color-preset" style="background-color: #00bcd4;" data-color="#00bcd4"></div>
+                                <div class="color-preset" style="background-color: #009688;" data-color="#009688"></div>
+                                <div class="color-preset" style="background-color: #4caf50;" data-color="#4caf50"></div>
+                                <div class="color-preset" style="background-color: #8bc34a;" data-color="#8bc34a"></div>
+                                <div class="color-preset" style="background-color: #cddc39;" data-color="#cddc39"></div>
+                                <div class="color-preset" style="background-color: #ffeb3b;" data-color="#ffeb3b"></div>
+                                <div class="color-preset" style="background-color: #ffc107;" data-color="#ffc107"></div>
+                                <div class="color-preset" style="background-color: #ff9800;" data-color="#ff9800"></div>
+                                <div class="color-preset" style="background-color: #ff5722;" data-color="#ff5722"></div>
+                            </div>
+
+                            <div class="color-picker-footer">
+                                <button class="secondary-button" id="cancelColorBtn">Cancelar</button>
+                                <button class="cta-button" id="confirmColorBtn">Aplicar Cor</button>
+                            </div>
+                        </div>
+
+                        <h3 class="subsection-title">Basico</h3>
+
+                        <div class="image-upload-container">
+                            <div class="image-upload-item" style="width: 100%;">
+                                <label for="banner-store-input" class="image-upload-label">Background</label>
+                                <image-upload preview-url="<%= 'backgroundImage' in store.style ? store.style.backgroundImage : '' %>" width="100%" height="13em" id="banner-store-input"></image-upload>
+                            </div>
+                            <div class="image-upload-item">
+                                <label for="logo-store-input" class="image-upload-label">Logo</label>
+                                <image-upload preview-url="<%= 'logo' in store.style ? store.style.logo : '' %>" width="13em" height="13em" id="logo-store-input"></image-upload>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="displayName" class="label-padrao">Nome da Loja</label>
+                            <input class="input-padrao" type="text" id="displayName-store-input" value="<%= store.displayName %>"
+                                placeholder="Digite o nome da sua loja">
+                        </div>
+                        <div class="input-group">
+                            <label for="description-store-input" class="label-padrao">Descrição da Loja</label>
+                            <textarea value="<%= 'description' in store.style ? store.style.description : '' %>" class="input-padrao" id="description-store-input"
+                                placeholder="Digite a descrição da sua loja"></textarea>
+                        </div>
+                        <div class="divider"></div>
+                        <h3 class="subsection-title">Cores</h3>
+                        <div class="context-section">
+                            <h4 class="context-title">Cores Principais</h4>
+                            <div class="color-options">
+                                <div class="color-option" data-color-var="--cor-principal">
+                                    <div class="color-preview" style="background-color: var(--cor-principal);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor Principal</div>
+                                        <div class="color-option-description">Utilizada em elementos de destaque</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-principal-clara">
+                                    <div class="color-preview" style="background-color: var(--cor-principal-clara);">
+                                    </div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor Principal Clara</div>
+                                        <div class="color-option-description">Versão clara da cor principal</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-principal-escura">
+                                    <div class="color-preview" style="background-color: var(--cor-principal-escura);">
+                                    </div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor Principal Escura</div>
+                                        <div class="color-option-description">Versão escura da cor principal</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-destaque">
+                                    <div class="color-preview" style="background-color: var(--cor-destaque);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor de Destaque</div>
+                                        <div class="color-option-description">Para elementos que precisam chamar atenção
+                                        </div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="context-section">
+                            <h4 class="context-title">Cores de Fundo</h4>
+                            <div class="color-options">
+                                <div class="color-option" data-color-var="--cor-fundo">
+                                    <div class="color-preview" style="background-color: var(--cor-fundo);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor de Fundo</div>
+                                        <div class="color-option-description">Fundo principal da loja</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-superficie">
+                                    <div class="color-preview" style="background-color: var(--cor-superficie);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor de Superfície</div>
+                                        <div class="color-option-description">Para cartões e elementos elevados</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-superficie-2">
+                                    <div class="color-preview" style="background-color: var(--cor-superficie-2);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor de Superfície 2</div>
+                                        <div class="color-option-description">Para elementos secundários</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="context-section">
+                            <h4 class="context-title">Cores de Texto</h4>
+                            <div class="color-options">
+                                <div class="color-option" data-color-var="--cor-texto-principal">
+                                    <div class="color-preview" style="background-color: var(--cor-texto-principal);">
+                                    </div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Texto Principal</div>
+                                        <div class="color-option-description">Para títulos e textos importantes</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-texto-secundaria">
+                                    <div class="color-preview" style="background-color: var(--cor-texto-secundaria);">
+                                    </div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Texto Secundário</div>
+                                        <div class="color-option-description">Para textos de suporte</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+
+                                <div class="color-option" data-color-var="--cor-texto-terciaria">
+                                    <div class="color-preview" style="background-color: var(--cor-texto-terciaria);">
+                                    </div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Texto Terciário</div>
+                                        <div class="color-option-description">Para informações menos relevantes</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="context-section">
+                            <h4 class="context-title">Cores de Estado</h4>
+                            <div class="color-options">
+                                <div class="color-option" data-color-var="--cor-erro">
+                                    <div class="color-preview" style="background-color: var(--cor-erro);"></div>
+                                    <div class="color-option-content">
+                                        <div class="color-option-name">Cor de Erro</div>
+                                        <div class="color-option-description">Para mensagens de erro e alertas</div>
+                                    </div>
+                                    <div class="color-option-action">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="preview-editor-section-container">
+                        <div class="preview-section" id="preview-section">
+                            <h2 class="section-title">Visualização</h2>
+
+                            <div class="store-preview" id="storePreview">
+                                <!-- Banner da Loja -->
+                                <section class="store-banner-section">
+                                    <div class="store-banner-content">
+                                        <img class="store-banner-img" id="previewBanner"
+                                            src="https://placehold.co/800x400?text=BANNER" alt="Banner da Loja">
+                                        <div class="store-banner-overlay"></div>
+                                    </div>
+                                    <div class="store-banner-title-container">
+                                        <h1 class="store-banner-title" id="previewStoreName">Minha Loja</h1>
+                                    </div>
+                                </section>
+
+                                <!-- Produtos Exemplo -->
+                                <div class="store-demo-container">
+                                    <!-- Cabeçalho da Loja -->
+                                    <header class="store-demo-header">
+                                        <h2 class="store-demo-title">Elementos da Loja</h2>
+                                    </header>
+
+                                    <!-- Componentes de Exemplo -->
+                                    <div class="store-demo-components">
+                                        <div class="demo-component">
+                                            <h3>Botões</h3>
+                                            <button class="demo-button primary">Botão Principal</button>
+                                            <button class="demo-button secondary">Botão Secundário</button>
+                                        </div>
+
+                                        <div class="demo-component">
+                                            <h3>Cards</h3>
+                                            <div class="demo-card">
+                                                <div class="demo-card-img"></div>
+                                                <div class="demo-card-content">
+                                                    <h4>Título do Card</h4>
+                                                    <p>Descrição do produto com mais informações sobre o item.</p>
+                                                    <div class="demo-card-price">R$ 99,90</div>
+                                                    <div class="demo-card-stock">
+                                                        <div class="demo-stock-bar">
+                                                            <div class="demo-stock-level"></div>
+                                                        </div>
+                                                        <span>10 unidades</span>
+                                                    </div>
+                                                    <button class="demo-button small">Comprar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="demo-component">
+                                            <h3>Elementos de Texto</h3>
+                                            <h4 class="demo-text-title">Título de Seção</h4>
+                                            <p class="demo-text-primary">Texto principal com informações importantes
+                                                para o usuário.</p>
+                                            <p class="demo-text-secondary">Texto secundário com detalhes adicionais
+                                                sobre o produto ou serviço.</p>
+                                            <p class="demo-text-tertiary">Texto terciário com informações menos
+                                                relevantes, como notas ou dicas.</p>
+                                        </div>
+
+                                        <div class="demo-component">
+                                            <h3>Tags e Badges</h3>
+                                            <div class="demo-tags">
+                                                <span class="demo-tag">Promoção</span>
+                                                <span class="demo-tag">Novo</span>
+                                                <span class="demo-tag">Destaque</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editor-section" id="editor-section-2">
+                            <h2 class="section-title">Ultimos detalhes</h2>
+                            <h3 class="subsection-title">Espaçamento e Arredondamento</h3>
+                            <div class="spacing-inputs">
+                                <div class="range-slider-container">
+                                    <label for="espacamentoPadrao">Espaçamento Padrão</label>
+                                    <input type="range" id="espacamentoPadrao" class="modern-range-slider" min="4"
+                                        max="32" value="16" data-var="--espacamento-padrao" data-unit="px">
+                                    <div class="range-value-bubble" id="espacamentoPadraoBubble">16px</div>
+                                    <div class="range-ticks">
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                    </div>
+                                    <div class="range-min-max">
+                                        <span>4px</span>
+                                        <span>32px</span>
+                                    </div>
+
+                                </div>
+
+                                <div class="range-slider-container">
+                                    <label for="bordaArredondada">Borda Arredondada</label>
+                                    <input type="range" id="bordaArredondada" class="modern-range-slider" min="0"
+                                        max="50" value="12" data-var="--borda-arredondada" data-unit="px">
+                                    <div class="range-value-bubble" id="bordaArredondadaBubble">12px</div>
+                                    <div class="range-ticks">
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                        <div class="range-tick"></div>
+                                    </div>
+                                    <div class="range-min-max">
+                                        <span>0px</span>
+                                        <span>50px</span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="divider"></div>
+
+
+                            <div class="action-buttons">
+
+                                <button class="secondary-button" id="resetButton">Restaurar Padrões</button>
+                                <button class="cta-button" id="saveButton">Salvar Alterações</button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+    </div>
+    <script>
+        let storeID = location.pathname.split('/').pop()
+
+        document.getElementById('saveButton').addEventListener("click",async () => {
+
+            let formData = new FormData();
+            let displayName = document.getElementById('displayName-store-input').value.trim();
+            let description = document.getElementById('description-store-input').value.trim();
+            let mainPadding = document.getElementById('espacamentoPadrao').value.trim();
+            let mainRadius = document.getElementById('bordaArredondada').value.trim();
+
+
+            const rootStyles = getComputedStyle(document.documentElement);
+            const mainColor = rootStyles.getPropertyValue('--cor-principal').trim();
+            const mainLightColor = rootStyles.getPropertyValue('--cor-principal-clara').trim();
+            const mainStrongColor = rootStyles.getPropertyValue('--cor-principal-escura').trim();
+            const accentColor = rootStyles.getPropertyValue('--cor-destaque').trim();
+            const mainBG = rootStyles.getPropertyValue('--cor-fundo').trim();
+            const surfaceColorBG = rootStyles.getPropertyValue('--cor-superficie').trim();
+            const secundarySurfaceColorBG = rootStyles.getPropertyValue('--cor-superficie-2').trim();
+            const mainTextColor = rootStyles.getPropertyValue('--cor-texto-principal').trim();
+            const secundaryTextColor = rootStyles.getPropertyValue('--cor-texto-secundaria').trim();
+            const grayTextColor = rootStyles.getPropertyValue('--cor-texto-terciaria').trim();
+            const errorColor = rootStyles.getPropertyValue('--cor-erro').trim();
+            const logo = document.getElementById('logo-store-input').files[0];
+            const backgroundImage = document.getElementById('banner-store-input').files[0];
+
+            formData.append('storeID', storeID);
+            formData.append('displayName', displayName);
+            formData.append('description', description);
+            formData.append('mainColor', mainColor);
+            formData.append('mainLightColor', mainLightColor);
+            formData.append('mainStrongColor', mainStrongColor);
+            formData.append('accentColor', accentColor);
+            formData.append('mainBG', mainBG);
+            formData.append('surfaceColorBG', surfaceColorBG);
+            formData.append('secundarySurfaceColorBG', secundarySurfaceColorBG);
+            formData.append('mainTextColor', mainTextColor);
+            formData.append('secundaryTextColor', secundaryTextColor);
+            formData.append('grayTextColor', grayTextColor);
+            formData.append('errorColor', errorColor);
+            formData.append('mainPadding', mainPadding);
+            formData.append('mainRadius', mainRadius);
+            formData.append('logo', logo);
+            formData.append('background', backgroundImage);
+            
+
+
+
+            let updateCust = await fetch('/customize/update', {
+                method: 'POST',
+                body: formData
+            }).then(response => { return response.json() })
+            console.log(updateCust);
+            
+            if (updateCust.success == false) {
+                errorNotify(updateCust.message)
+            }else{
+                successNotify('Alterações salvas com sucesso!')
+            }
+            
+        })
+    </script>
+
+    <%- include('./reusable/script.ejs') %>
+        <script src="/public/js/customize.js"></script>
+</body>
+
+</html>

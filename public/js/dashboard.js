@@ -195,17 +195,18 @@ if (botedit == 'false') {
 
 document.getElementById('new-store-button').addEventListener('click', () => {
     if (userStores.length <= 0) {
-        location.href = location.origin + '/onboarding?step=1'
+        location.href = location.origin + '/onboarding'
     } else {
-        openPopup(document.getElementById('popup-create-new-store-containner'), document.getElementById('popup-create-new-store-content'))
+        document.getElementById('popup-create-new-store-containner').open()
+
     }
 })
 
 if ('createStore' in urlParams && urlParams.createStore == 'true') {
     if (userStores.length <= 0) {
-        location.href = location.origin + '/onboarding?step=1'
+        location.href = location.origin + '/onboarding'
     } else {
-        openPopup(document.getElementById('popup-create-new-store-containner'), document.getElementById('popup-create-new-store-content'))
+        document.getElementById('popup-create-new-store-containner').open()
     }
 }
 

@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+    <base href="/">
+        <title>
+            <%= store.displayName %> - Logs
+        </title>
+        <link rel="stylesheet" href="/public/css/logs.css">
+        <style>
+            .empty-state {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 3rem 2rem;
+                text-align: center;
+                background: var(--surface-card);
+                border-radius: 1rem;
+                margin: 1rem 0;
+            }
+
+            .empty-state-animation {
+                position: relative;
+                margin-bottom: 1.5rem;
+            }
+
+            .empty-state-icon {
+                width: 64px;
+                height: 64px;
+                stroke: var(--main-color-purple);
+                opacity: 0.9;
+                z-index: 1;
+                position: relative;
+            }
+
+            .pulse-ring {
+                position: absolute;
+                top: 34%;
+                left: 50%;
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                background: var(--primary-color);
+                opacity: 0.1;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.8);
+                    opacity: 0.1;
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 0.2;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(0.8);
+                    opacity: 0.1;
+                }
+            }
+
+            .empty-state-title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--text-color);
+                margin-bottom: 1rem;
+            }
+
+            .empty-state-description {
+                color: var(--text-color-secondary);
+                font-size: 1rem;
+                line-height: 1.6;
+                max-width: 600px;
+                margin-bottom: 2rem;
+            }
+
+
+
+            .webhook-empty-state {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                background: var(--surface-card);
+                border-radius: 1rem;
+                margin: 1rem 0;
+                grid-column: 1 / -1; 
+                grid-row: 1 / -1;
+            }
+
+            .webhook-empty-state .add-first-webhook {
+                margin: 1rem 0 2rem;
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            #info-webhook-section{
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: none !important; 
+            }
+
+            #info-webhook-section svg{
+                width: 1em;
+                height: 1em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: 0.5rem;
+            }
+            
+            .header-actions {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+            }
+
+            .action-btn {
+                border-radius: 0.5rem;
+                padding: 0.5rem;
+                cursor: pointer;
+                margin-right: 1em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-color);
+                transition: all 0.3s ease;
+            }
+
+            .action-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .action-btn:hover:not(:disabled) {
+                transform: scale(1.05);
+                transition: all 0.3s ease;  
+            }
+            .action-btn svg:hover{
+                opacity: 0.8;
+            }
+            .action-btn svg {
+                transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                width: 3em !important;
+                height: 3em !important;
+            }
+
+            @keyframes rotate {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .action-btn.rotating svg {
+                animation: rotate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+
+            #reload-logs-btn {
+                height: 38px;
+                width: 38px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            #reload-logs-btn::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 100%;
+                height: 100%;
+                background: var(--primary-color);
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+                border-radius: inherit;
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            #reload-logs-btn:active:not(:disabled)::after {
+                opacity: 0.1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        </style>
+</head>
+
+<body>
+    <div class="console-containner">
+        <%- include('./reusable/body.ejs', { index: 5 }) %>
+
+    <div class="console-content">
+        <div class="page-container">
+        
+            <header class="page-header">
+                <h1 class="page-title">Webhook Logs</h1>
+                <div class="header-right">
+                    <div class="stats-card">
+                        <div class="stats-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stats-content">
+                            <span class="stats-label">Total de requisições</span>
+                            <span class="stats-value" id="total-requests">0</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+    
+            <section class="section" id="logs-section">
+                <div class="section-header">
+                    <h2 class="section-title">Registros de Ações</h2>
+                    <div class="header-actions">
+                        <button class="action-btn" id="reload-logs-btn" title="Recarregar logs">
+                            <svg class="action-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                            </svg>
+                        </button>
+                        <button class="cta-button" id="clear-logs-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Limpar Logs
+                        </button>
+                    </div>
+                </div>
+                <div class="logs-container" id="logs-container">
+                    <!-- Logs will be inserted here -->
+                </div>
+            </section>
+    
+            <section class="section" id="webhooks-section">
+                <div class="section-header">
+                    <h2 class="section-title">Webhooks <span id="info-webhook-section" data-tooltip="Webhooks são uma forma de se comunicar com o seu sistema enviando dados para outras aplicações" data-tooltip-position="top"
+                        data-tooltip-title="Webhooks"><svg class="SvgFillStroke" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span></h2>
+                    <button class="cta-button" id="add-webhook-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Adicionar Webhook
+                    </button>
+                </div>
+                <div class="webhooks-container" id="webhooks-container">
+                    <!-- Webhooks will be inserted here -->
+                </div>
+    
+                <div class="form-container" id="webhook-form">
+                    <h3 class="form-title">Adicionar Novo Webhook</h3>
+                    <form id="add-webhook-form">
+                        <div class="form-row">
+                            <div class="form-control">
+                                <label class="form-label" for="webhook-name">Nome</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="webhook-name" class="form-input" placeholder="Nome do webhook" required>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label class="form-label" for="webhook-url">URL do Endpoint</label>
+                                <div class="input-wrapper">
+                                    <input type="url" id="webhook-url" class="form-input" placeholder="https://exemplo.com/webhook" required>
+                                    <div class="error-message" id="url-error">URL inválida. Formato correto: https://exemplo.com</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Eventos a serem enviados</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-product-created" name="events" value="product-created">
+                                    <label for="event-product-created">Produto Criado</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-product-updated" name="events" value="product-updated">
+                                    <label for="event-product-updated">Produto Atualizado</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-product-deleted" name="events" value="product-deleted">
+                                    <label for="event-product-deleted">Produto Excluído</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-order-created" name="events" value="order-created">
+                                    <label for="event-order-created">Compra Feita</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-order-updated" name="events" value="order-updated">
+                                    <label for="event-order-updated">Pedido Atualizado</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="event-order-deleted" name="events" value="order-deleted">
+                                    <label for="event-order-deleted">Compra Reembolsada</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="webhook-description">Descrição (Opcional)</label>
+                            <div class="input-wrapper">
+                                <textarea id="webhook-description" class="form-input" rows="3" placeholder="Descreva o propósito deste webhook"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="secondary-button" id="cancel-webhook-btn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="cta-button">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                </svg>
+                                Salvar Webhook
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    
+        <!-- Modal para detalhes do JSON -->
+        <div class="modal" id="json-modal">
+            <div class="modal-content">
+                <div class="section-header">
+                    <h3 class="section-title">Detalhes do Webhook</h3>
+                    <button class="action-btn" id="close-modal-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="json-viewer" id="json-content"></div>
+            </div>
+        </div>
+    
+    
+        <!-- Modal de confirmação para limpar logs -->
+        <div class="modal" id="confirm-modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="section-header">
+                    <h3 class="section-title">Confirmação</h3>
+                    <button class="action-btn" id="close-confirm-modal-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <p style="margin-bottom: 2rem; font-size: 1rem; line-height: 1.5;">
+                    Você tem certeza que deseja limpar todos os logs? Esta ação não pode ser desfeita.
+                </p>
+                <div class="form-actions">
+                    <button type="button" class="secondary-button" id="cancel-clear-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Cancelar
+                    </button>
+                    <button type="button" class="cta-button" id="confirm-clear-btn" style="background: linear-gradient(45deg, #dc2626, #ef4444);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Confirmar Limpeza
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+    <%- include('./reusable/script.ejs') %>
+
+    <script defer>
+        const webhookRef = "<%= webhookRefString %>" == null ? null : JSON.parse(JSON.stringify("<%= webhookRefString %>")).replace(/&#34;/g, '"')
+        const webhook = JSON.parse("<%= webhookString %>".replace(/&#34;/g, '"'))
+    </script>
+
+    <script>
+        // Dados de exemplo
+        const generateMockLogs = () => {
+            const logs = [];
+            
+            // logs.push({
+            //     id: 2,
+            //     action: "Produto Atualizado",
+            //     date: "2023-05-15T15:10:22",
+            //     status: "success",
+            //     target: "Estoque API",
+            //     json: {
+            //         event: "product-updated",
+            //         product: {
+            //             id: "prod_123456",
+            //             name: "link nitro",
+            //             price: 1199.99,
+            //             stock: 45,
+            //             updated_at: "2023-05-15T15:10:22"
+            //         }
+            //     }
+            // });
+
+            if (webhook && "logs" in webhook && webhook.logs.length > 0) {
+                logs
+            }
+            
+            
+            
+            // Gerar 15 logs adicionais para demonstrar o scroll
+            const actions = ["Produto Criado", "Produto Atualizado", "Produto Excluído", "Compra Feita", "Pedido Atualizado", "Compra Reenbolsada"];
+            const targets = ["Loja API", "Estoque API", "Sistema Financeiro", "Integração ERP", "Marketplace", "App Mobile"];
+            const statuses = ["success", "error"];
+            
+            for (let i = 4; i <= 20; i++) {
+                const action = actions[Math.floor(Math.random() * actions.length)];
+                const target = targets[Math.floor(Math.random() * targets.length)];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                const date = new Date(2023, 4, Math.floor(Math.random() * 30) + 1, 
+                                    Math.floor(Math.random() * 23), 
+                                    Math.floor(Math.random() * 59))
+                                .toISOString();
+                
+                let jsonData = {};
+                if (action.includes("Produto")) {
+                    jsonData = {
+                        event: action.toLowerCase().replace(" ", "-"),
+                        product: {
+                            id: `prod_${100000 + i}`,
+                            name: `Produto Exemplo ${i}`,
+                            price: Math.floor(Math.random() * 1000) + 99.99,
+                            stock: Math.floor(Math.random() * 100),
+                            updated_at: date
+                        }
+                    };
+                } else {
+                    jsonData = {
+                        event: action.toLowerCase().replace(" ", "-"),
+                        order: {
+                            id: `ord_${200000 + i}`,
+                            customer_id: `cus_${300000 + i}`,
+                            items: [
+                                {
+                                    product_id: `prod_${100000 + Math.floor(Math.random() * 10)}`,
+                                    quantity: Math.floor(Math.random() * 5) + 1,
+                                    price: Math.floor(Math.random() * 500) + 99.99
+                                }
+                            ],
+                            updated_at: date
+                        }
+                    };
+                }
+                
+                logs.push({
+                    id: i,
+                    action: action,
+                    date: date,
+                    status: status,
+                    target: target,
+                    json: jsonData
+                });
+            }
+            
+            return logs;
+        };
+        
+        let mockLogs = generateMockLogs();
+        
+        const mockWebhooks = [];
+
+        // Funções de utilidade
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function formatJSON(json) {
+            return JSON.stringify(json, null, 2);
+        }
+
+        function updateStats() {
+            document.getElementById('total-requests').textContent = mockLogs.length;
+        }
+
+
+        // Renderizar logs
+        function renderLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            logsContainer.innerHTML = '';
+
+            // Verificar se há logs para mostrar
+            if (!mockLogs || mockLogs.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <div class="empty-state-animation">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                            <line x1="9" y1="14" x2="15" y2="14"></line>
+                            <line x1="9" y1="18" x2="15" y2="18"></line>
+                        </svg>
+                        <div class="pulse-ring"></div>
+                    </div>
+                    <h3 class="empty-state-title">Nenhum registro encontrado</h3>
+                    <p class="empty-state-description">
+                        Aqui você verá um histórico detalhado de todas as ações importantes do seu sistema.
+                        <br><br>Cada evento será registrado automaticamente quando ocorrer.
+                    </p>
+                `;
+                logsContainer.appendChild(emptyState);
+                
+                // Animar entrada do estado vazio
+                gsap.fromTo(emptyState, 
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5, delay: 0.2, ease: "power2.out" }
+                );
+                
+                updateStats();
+                return;
+            }
+
+            // Criar um fragmento para melhorar performance
+            const fragment = document.createDocumentFragment();
+
+            mockLogs.forEach((log, index) => {
+                const logItem = document.createElement('div');
+                logItem.className = 'log-item';
+                logItem.dataset.id = log.id;
+                
+                const dateFormatted = formatDate(log.date);
+                
+                logItem.innerHTML = `
+                    <div class="log-header">
+                        <div class="log-info">
+                            <span class="log-action">${log.action}</span>
+                            <span class="log-status status-${log.status}">${log.status === 'success' ? 'Enviado' : 'Falha'}</span>
+                        </div>
+                        <span class="log-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            ${dateFormatted}
+                        </span>
+                    </div>
+                    <div class="log-target">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                        </svg>
+                        Enviado para: ${log.target}
+                    </div>
+                    <div class="log-details">
+                        <div class="log-json">${formatJSON(log.json)}</div>
+                    </div>
+                `;
+                
+                fragment.appendChild(logItem);
+                
+                // Expandir/recolher detalhes ao clicar
+                logItem.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                    const details = this.querySelector('.log-details');
+                    
+                    if (this.classList.contains('expanded')) {
+                        details.classList.add('expanded');
+                        
+                        // Garantir que o JSON tenha destaque de sintaxe
+                        const jsonElement = details.querySelector('.log-json');
+                        if (jsonElement) {
+                            setTimeout(() => {
+                                highlightJSON(jsonElement);
+                            }, 100);
+                        }
+                        
+                    } else {
+                        details.classList.remove('expanded');
+                    }
+                });
+            });
+            
+            // Adicionar todos os itens de uma vez
+            logsContainer.appendChild(fragment);
+            
+            // Animar entrada dos logs após adicioná-los ao DOM
+            const logItems = logsContainer.querySelectorAll('.log-item');
+            logItems.forEach((logItem, index) => {
+                gsap.fromTo(logItem, 
+                    { x: -20, opacity: 0 },
+                    { 
+                        x: 0, 
+                        opacity: 1, 
+                        duration: 0.5, 
+                        delay: Math.min(index * 0.05, 1), // Limitar o atraso máximo
+                        ease: "power2.out" 
+                    }
+                );
+            });
+            
+            updateStats();
+        }
+
+        // Renderizar webhooks
+        function renderWebhooks() {
+            const webhooksContainer = document.getElementById('webhooks-container');
+            webhooksContainer.innerHTML = '';
+
+            if (!mockWebhooks || mockWebhooks.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state webhook-empty-state';
+                emptyState.innerHTML = `
+                    <div class="empty-state-animation">
+                        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        <div class="pulse-ring"></div>
+                    </div>
+                    <h3 class="empty-state-title">Nenhum webhook configurado</h3>
+                    <p class="empty-state-description">
+                        Webhooks permitem que seu sistema se comunique automaticamente com outras aplicações.
+                        <br>Mesmo sem webhooks, você ainda poderá ver todos os logs do sistema aqui.
+                    </p>
+                    <button class="cta-button add-first-webhook" id="add-first-webhook-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Configurar Primeiro Webhook
+                    </button>
+                `;
+                webhooksContainer.appendChild(emptyState);
+
+                // Adicionar evento ao botão de adicionar primeiro webhook
+                const addFirstWebhookBtn = emptyState.querySelector('#add-first-webhook-btn');
+                addFirstWebhookBtn.addEventListener('click', () => {
+                    const form = document.getElementById('webhook-form');
+                    document.getElementById('add-webhook-form').reset();
+                    
+                    gsap.fromTo(form, 
+                        { y: 20, opacity: 0 },
+                        { 
+                            y: 0, 
+                            opacity: 1, 
+                            duration: 0.5, 
+                            ease: "power2.out", 
+                            onStart: () => {
+                                form.classList.add('visible');
+                            }
+                        }
+                    );
+                    
+                    form.dataset.editId = '';
+                    document.querySelector('.form-title').textContent = 'Adicionar Novo Webhook';
+                    setTimeout(() => {
+                        form.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                });
+
+                // Animar entrada do estado vazio
+                gsap.fromTo(emptyState, 
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 0.5, delay: 0.2, ease: "power2.out" }
+                );
+                
+                return;
+            }
+
+            mockWebhooks.forEach((webhook, index) => {
+                const webhookCard = document.createElement('div');
+                webhookCard.className = 'webhook-card';
+                webhookCard.dataset.id = webhook.id;
+                
+                const getEventIcon = (event) => {
+                    let icon = '';
+                    if (event.includes('product')) {
+                        icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>';
+                    } else if (event.includes('order')) {
+                        icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
+                    }
+                    return icon;
+                };
+                
+                const eventBadges = webhook.events.map(event => {
+                    let eventName = '';
+                    switch(event) {
+                        case 'product-created': eventName = 'Produto Criado'; break;
+                        case 'product-updated': eventName = 'Produto Atualizado'; break;
+                        case 'product-deleted': eventName = 'Produto Excluído'; break;
+                        case 'order-created': eventName = 'Compra Feita'; break;
+                        case 'order-updated': eventName = 'Pedido Atualizado'; break;
+                        case 'order-deleted': eventName = 'Compra Reenbolsada'; break;
+                        default: eventName = event;
+                    }
+                    return `<span class="event-badge">${getEventIcon(event)}${eventName}</span>`;
+                }).join('');
+                
+                // Formatação mais bonita para a data
+                const createdDate = new Date().toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                webhookCard.innerHTML = `
+                    <div class="webhook-header">
+                        <h3 class="webhook-name">${webhook.name}</h3>
+                        <div class="webhook-actions">
+                            <button class="action-btn test-webhook" title="Testar webhook">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                            <button class="action-btn edit-webhook" title="Editar webhook">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="action-btn delete-webhook" title="Excluir webhook">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="webhook-url" title="${webhook.url}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        ${webhook.url}
+                    </div>
+                    <div class="webhook-description">${webhook.description || 'Sem descrição'}</div>
+                    <div class="webhook-events">${eventBadges}</div>
+                `;
+                
+                webhooksContainer.appendChild(webhookCard);
+                
+                // Ações dos botões
+                const testBtn = webhookCard.querySelector('.test-webhook');
+                const editBtn = webhookCard.querySelector('.edit-webhook');
+                const deleteBtn = webhookCard.querySelector('.delete-webhook');
+                
+                testBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    testWebhook(webhook);
+                });
+                
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editWebhook(webhook);
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDeleteWebhookConfirmation(webhook.id, webhook.name);
+                });
+                
+                // Animar entrada dos cards
+                gsap.fromTo(webhookCard, 
+                    { y: 30, opacity: 0, scale: 0.95 },
+                    { 
+                        y: 0, 
+                        opacity: 1, 
+                        scale: 1, 
+                        duration: 0.6, 
+                        delay: index * 0.15, 
+                        ease: "back.out(1.4)" 
+                    }
+                );
+            });
+        }
+
+        // Funções de ação
+        function testWebhook(webhook) {
+            const modal = document.getElementById('json-modal');
+            const jsonContent = document.getElementById('json-content');
+            
+            const testPayload = {
+                event: webhook.events[0] || 'test-event',
+                timestamp: new Date().toISOString(),
+                webhook_id: webhook.id,
+                test: true,
+                data: {
+                    message: "Este é um teste de webhook",
+                    url: webhook.url
+                }
+            };
+            
+            jsonContent.textContent = formatJSON(testPayload);
+            modal.classList.add('visible');
+            
+            // Destacar a sintaxe do JSON com a nova função
+            highlightJSON(jsonContent);
+            
+            // Simular envio
+            setTimeout(() => {
+                successNotify(`Teste enviado para ${webhook.name}`);
+                // Adicionar ao log
+                const newLog = {
+                    id: mockLogs.length + 1,
+                    action: "Teste de Webhook",
+                    date: new Date().toISOString(),
+                    status: "success",
+                    target: webhook.name,
+                    json: testPayload
+                };
+                
+                mockLogs.unshift(newLog);
+                renderLogs();
+            }, 800);
+        }
+        
+        function highlightJSON(element) {
+            if (!element) return;
+            
+            let content = element.textContent;
+            
+            // Destacar strings
+            content = content.replace(/"([^"]+)":/g, '<span style="color: #bb86fc;">"$1"</span>:');
+            content = content.replace(/: "([^"]+)"/g, ': <span style="color: #bb86fc;">"$1"</span>');
+            
+            // Destacar números
+            content = content.replace(/: (\d+)(,?)/g, ': <span style="color: #4ade80;">$1</span>$2');
+            content = content.replace(/: (\d+\.\d+)(,?)/g, ': <span style="color: #4ade80;">$1</span>$2');
+            
+            // Destacar booleanos
+            content = content.replace(/: (true|false)(,?)/g, ': <span style="color: #f59e0b;">$1</span>$2');
+            
+            // Destacar null
+            content = content.replace(/: (null)(,?)/g, ': <span style="color: #ef4444;">$1</span>$2');
+            
+            element.innerHTML = content;
+        }
+
+        function editWebhook(webhook) {
+            const form = document.getElementById('webhook-form');
+            const nameInput = document.getElementById('webhook-name');
+            const urlInput = document.getElementById('webhook-url');
+            const descInput = document.getElementById('webhook-description');
+            
+            // Animar a transição para o formulário
+            gsap.fromTo(form, 
+                { y: 20, opacity: 0 },
+                { 
+                    y: 0, 
+                    opacity: 1, 
+                    duration: 0.5, 
+                    ease: "power2.out", 
+                    onStart: () => {
+                        form.classList.add('visible');
+                    } 
+                }
+            );
+            
+            // Preencher o formulário
+            nameInput.value = webhook.name;
+            urlInput.value = webhook.url;
+            descInput.value = webhook.description || '';
+            
+            // Marcar os eventos
+            document.querySelectorAll('input[name="events"]').forEach(checkbox => {
+                checkbox.checked = webhook.events.includes(checkbox.value);
+            });
+            
+            // Mostrar o formulário
+            form.dataset.editId = webhook.id;
+            document.querySelector('.form-title').textContent = 'Editar Webhook';
+            
+            setTimeout(()=>{
+                form.scrollIntoView({ behavior: 'smooth' });
+            },100)
+        }
+
+        function deleteWebhook(id) {
+            // Filtrar o webhook para remoção
+            const index = mockWebhooks.findIndex(webhook => webhook.id === id);
+            if (index !== -1) {
+                const webhookCard = document.querySelector(`.webhook-card[data-id="${id}"]`);
+                const webhookName = mockWebhooks[index].name;
+                
+                // Animar a remoção do card
+                gsap.to(webhookCard, {
+                    scale: 0.9,
+                    opacity: 0,
+                    y: -20,
+                    duration: 0.5,
+                    ease: "power3.out",
+                    onComplete: () => {
+                        mockWebhooks.splice(index, 1);
+                        renderWebhooks();
+                        successNotify(`Webhook ${webhookName} excluído com sucesso`);
+                    }
+                });
+            }
+        }
+
+        function showDeleteWebhookConfirmation(webhookId, webhookName) {
+            const confirmModal = document.getElementById('confirm-modal');
+            const modalTitle = confirmModal.querySelector('.section-title');
+            const modalText = confirmModal.querySelector('p');
+            const confirmButton = document.getElementById('confirm-clear-btn');
+            
+            // Update modal content for webhook deletion
+            modalTitle.textContent = 'Excluir Webhook';
+            modalText.textContent = `Você tem certeza que deseja excluir o webhook "${webhookName}"? Esta ação não pode ser desfeita.`;
+            
+            // Update confirm button text
+            confirmButton.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Confirmar Exclusão
+            `;
+            
+            // Store the webhook ID in the button's data attribute
+            confirmButton.dataset.webhookId = webhookId;
+            
+            // Override the click handler for the confirm button
+            confirmButton.onclick = function() {
+                const webhookId = parseInt(this.dataset.webhookId);
+                deleteWebhook(webhookId);
+                
+                // Hide the modal with animation
+                gsap.to(confirmModal.querySelector('.modal-content'), {
+                    y: -20, 
+                    opacity: 0, 
+                    scale: 0.9,
+                    duration: 0.3, 
+                    ease: "power2.in",
+                    onComplete: () => {
+                        confirmModal.classList.remove('visible');
+                        
+                        // Reset the onclick to avoid memory leaks
+                        confirmButton.onclick = null;
+                    }
+                });
+            };
+            
+            // Show the modal with animation
+            confirmModal.classList.add('visible');
+            gsap.fromTo(confirmModal.querySelector('.modal-content'),
+                { y: -30, opacity: 0.5, scale: 0.9 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+            );
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar GSAP ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animar título - mais suave
+            gsap.fromTo('.page-title', 
+                { y: -30, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
+            );
+            
+            gsap.to('.page-title::after', { 
+                scaleX: 1, 
+                duration: 1.2, 
+                delay: 0.4, 
+                ease: "power3.out" 
+            });
+            
+            // Animar cards de estatísticas - mais suave
+            gsap.fromTo('.stats-card', 
+                { y: -15, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1, delay: 0.3, ease: "power3.out" }
+            );
+            
+            // Animar as seções - mais suave
+            gsap.utils.toArray('.section').forEach((section, index) => {
+                gsap.fromTo(section, 
+                    { y: 60, opacity: 0 },
+                    { 
+                        y: 0, 
+                        opacity: 1, 
+                        duration: 1.2,
+                        delay: 0.3 + (index * 0.15),
+                        ease: "power3.out",
+                        onComplete: () => {
+                            setTimeout(() => {
+                                section.classList.add('reveal');
+                            }, 200);
+                        },
+                    }
+                );
+            });
+            
+            
+            
+            // Renderizar dados iniciais
+            renderLogs();
+            renderWebhooks();
+            
+            // Botão de adicionar webhook
+            const addWebhookBtn = document.getElementById('add-webhook-btn');
+            addWebhookBtn.addEventListener('click', () => {
+                const form = document.getElementById('webhook-form');
+                document.getElementById('add-webhook-form').reset();
+                
+                // Animar a transição para o formulário
+                gsap.fromTo(form, 
+                    { y: 20, opacity: 0 },
+                    { 
+                        y: 0, 
+                        opacity: 1, 
+                        duration: 0.5, 
+                        ease: "power2.out", 
+                        onStart: () => {
+                            form.classList.add('visible');
+                        }
+                    }
+                );
+                
+                form.dataset.editId = '';
+                document.querySelector('.form-title').textContent = 'Adicionar Novo Webhook';
+                setTimeout(()=>{
+                    form.scrollIntoView({ behavior: 'smooth' });
+                },100)
+            });
+            
+            // Botão de cancelar formulário
+            const cancelBtn = document.getElementById('cancel-webhook-btn');
+            cancelBtn.addEventListener('click', () => {
+                const form = document.getElementById('webhook-form');
+                
+                // Animar a saída do formulário
+                gsap.to(form, {
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        form.classList.remove('visible');
+                    }
+                });
+            });
+            
+            // Submissão do formulário
+            const webhookForm = document.getElementById('add-webhook-form');
+            webhookForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const formContainer = document.getElementById('webhook-form');
+                const nameInput = document.getElementById('webhook-name');
+                const urlInput = document.getElementById('webhook-url');
+                const descInput = document.getElementById('webhook-description');
+                const urlError = document.getElementById('url-error');
+                
+                // Validar URL
+                if (!isValidUrl(urlInput.value)) {
+                    urlInput.classList.add('error');
+                    urlError.classList.add('visible');
+                    
+                    // Animar o shake no erro
+                    gsap.to(urlInput, {
+                        x: [-5, 5, -5, 5, 0],
+                        duration: 0.4,
+                        ease: "power2.inOut"
+                    });
+                    
+                    setTimeout(() => {
+                        urlError.classList.remove('visible');
+                    }, 3000);
+                    
+                    return;
+                } else {
+                    urlInput.classList.remove('error');
+                    urlError.classList.remove('visible');
+                }
+                
+                // Coletar eventos selecionados
+                const selectedEvents = [];
+                document.querySelectorAll('input[name="events"]:checked').forEach(checkbox => {
+                    selectedEvents.push(checkbox.value);
+                });
+                
+                if (selectedEvents.length === 0) {
+                    errorNotify('Selecione pelo menos um evento');
+                    return;
+                }
+                
+                const webhookData = {
+                    name: nameInput.value,
+                    url: urlInput.value,
+                    events: selectedEvents,
+                    description: descInput.value
+                };
+                
+                // Verificar se é edição ou criação
+                const editId = formContainer.dataset.editId;
+                if (editId) {
+                    // Atualizar webhook existente
+                    const index = mockWebhooks.findIndex(webhook => webhook.id === parseInt(editId));
+                    if (index !== -1) {
+                        webhookData.id = parseInt(editId);
+                        mockWebhooks[index] = webhookData;
+                        successNotify(`Webhook ${webhookData.name} atualizado com sucesso`);
+                    }
+                } else {
+                    // Criar novo webhook
+                    webhookData.id = mockWebhooks.length + 1;
+                    mockWebhooks.push(webhookData);
+                    successNotify(`Webhook ${webhookData.name} criado com sucesso`);
+                }
+                
+                // Resetar e esconder o formulário
+                webhookForm.reset();
+                
+                // Animar a saída do formulário
+                gsap.to(formContainer, {
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: "power2.in",
+                    onComplete: () => {
+                        formContainer.classList.remove('visible');
+                        formContainer.dataset.editId = '';
+                        
+                        // Atualizar a lista de webhooks
+                        renderWebhooks();
+                    }
+                });
+            });
+            
+            // Fechar modal
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            closeModalBtn.addEventListener('click', () => {
+                document.getElementById('json-modal').classList.remove('visible');
+            });
+            
+            // Botão de limpar logs com confirmação
+            const clearLogsBtn = document.getElementById('clear-logs-btn');
+            const confirmModal = document.getElementById('confirm-modal');
+            const cancelClearBtn = document.getElementById('cancel-clear-btn');
+            const confirmClearBtn = document.getElementById('confirm-clear-btn');
+            const closeConfirmModalBtn = document.getElementById('close-confirm-modal-btn');
+            
+            clearLogsBtn.addEventListener('click', () => {
+                const logItems = document.querySelectorAll('.log-item');
+                
+                if (logItems.length === 0) {
+                    mensageNotify('Não há logs para limpar');
+                    return;
+                }
+                
+                // Mostrar o modal de confirmação
+                confirmModal.classList.add('visible');
+                gsap.fromTo(confirmModal.querySelector('.modal-content'),
+                    { y: -30, opacity: 0.5, scale: 0.9 },
+                    { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+                );
+            });
+            
+            // Botão cancelar limpeza
+            cancelClearBtn.addEventListener('click', () => {
+                gsap.to(confirmModal.querySelector('.modal-content'), {
+                    y: -20, 
+                    opacity: 0, 
+                    scale: 0.9,
+                    duration: 0.3, 
+                    ease: "power2.in",
+                    onComplete: () => {
+                        confirmModal.classList.remove('visible');
+                    }
+                });
+            });
+            
+            // Botão de fechar modal
+            closeConfirmModalBtn.addEventListener('click', () => {
+                gsap.to(confirmModal.querySelector('.modal-content'), {
+                    y: -20, 
+                    opacity: 0, 
+                    scale: 0.9,
+                    duration: 0.3, 
+                    ease: "power2.in",
+                    onComplete: () => {
+                        confirmModal.classList.remove('visible');
+                    }
+                });
+            });
+            
+            // Confirmar limpeza
+            confirmClearBtn.addEventListener('click', () => {
+                // If this is for clearing logs (not for webhook deletion)
+                if (!confirmClearBtn.dataset.webhookId) {
+                    const logItems = document.querySelectorAll('.log-item');
+                    
+                    // Primeiro fechar o modal
+                    gsap.to(confirmModal.querySelector('.modal-content'), {
+                        y: -20, 
+                        opacity: 0, 
+                        scale: 0.9,
+                        duration: 0.3, 
+                        ease: "power2.in",
+                        onComplete: () => {
+                            confirmModal.classList.remove('visible');
+                            
+                            // Então animar a remoção dos logs
+                            gsap.to(logItems, {
+                                x: -30,
+                                opacity: 0,
+                                stagger: 0.03,
+                                duration: 0.4,
+                                ease: "power2.in",
+                                onComplete: () => {
+                                    mockLogs = [];
+                                    renderLogs();
+                                    successNotify('Logs limpos com sucesso');
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // Fechar modal ao clicar fora dele
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) {
+                    gsap.to(confirmModal.querySelector('.modal-content'), {
+                        y: -20, 
+                        opacity: 0, 
+                        scale: 0.9,
+                        duration: 0.3, 
+                        ease: "power2.in",
+                        onComplete: () => {
+                            confirmModal.classList.remove('visible');
+                        }
+                    });
+                }
+            });
+
+            // Validação de URL em tempo real
+            const urlInput = document.getElementById('webhook-url');
+            const urlError = document.getElementById('url-error');
+            
+            urlInput.addEventListener('input', function() {
+                if (this.value.trim() !== '' && !isValidUrl(this.value)) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                    urlError.classList.remove('visible');
+                }
+            });
+            
+            urlInput.addEventListener('blur', function() {
+                if (this.value.trim() !== '' && !isValidUrl(this.value)) {
+                    urlError.classList.add('visible');
+                }
+            });
+
+            // Adicionar funcionalidade ao botão de reload
+            const reloadBtn = document.getElementById('reload-logs-btn');
+            reloadBtn.addEventListener('click', () => {
+                // Desabilitar o botão
+                reloadBtn.disabled = true;
+                
+                // Adicionar classe para animar
+                reloadBtn.classList.add('rotating');
+                
+                // Simular recarregamento
+                setTimeout(() => {
+                    // Recarregar os logs
+                    mockLogs = generateMockLogs();
+                    renderLogs();
+                    
+                    // Remover classe e habilitar botão
+                    reloadBtn.classList.remove('rotating');
+                    reloadBtn.disabled = false;
+                    
+                    // Mostrar notificação
+                    successNotify('Logs recarregados com sucesso');
+                }, 800);
+            });
+        });
+
+        // Adicionar função de validação de URL no JavaScript
+        function isValidUrl(url) {
+            try {
+                const newUrl = new URL(url);
+                return newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
+            } catch (e) {
+                return false;
+            }
+        }
+    </script>
+    <script src="/public/js/logs.js"></script>
+</body>
+
+</html>

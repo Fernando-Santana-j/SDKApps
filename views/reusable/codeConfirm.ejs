@@ -1,10 +1,14 @@
 <style>
-    #code-confirm-popup-top {
-        display: flex;
-        width: 100%;
-        justify-content: flex-end;
-    }
 
+    #code-confirm-popup-main-content{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 1em;
+        width: 100%;
+        height: 100%;
+        padding: 1em;
+    }
     #code-confirm-popup-main-content-texts-desc {
         width: 100%;
         display: flex;
@@ -26,14 +30,14 @@
     }
 
     #code-confirm-popup-content {
-        width: 40em !important;
-    }
-
-    #code-confirm-popup-main-content {
         display: flex;
         flex-direction: column;
-        gap: 4em;
+        justify-content: space-between;
+        gap: 1em;
+        width: 100%;
+        height: 100%;
     }
+
 
     #code-confirm-popup-main-content-inputs-row {
         display: flex;
@@ -59,36 +63,26 @@
     }
 </style>
 
-<div id="code-confirm-popup-containner" class="popup-containner noClose">
-    <div id="code-confirm-popup-content" class="popup-content">
-        <div id="code-confirm-popup-main-content">
-            <div id="code-confirm-popup-main-content-texts">
-                <div id="code-confirm-popup-main-content-texts-title">
-                    <div id="code-confirm-popup-main-content-texts-title-text" class="title-col">
-                        Confirme sua autenticidade!
-                    </div>
-                </div>
-                <div id="code-confirm-popup-main-content-texts-desc" class="desc-col">
-                    <div id="code-confirm-popup-main-content-texts-desc-text">
-                        Foi enviado um código de confirmação para o email informado, preencha o campo abaixo!
-                    </div>
-                </div>
-            </div>
-            <div id="code-confirm-popup-main-content-inputs-row">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-                <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
-            </div>
+<custom-popup id="code-confirm-popup-containner" width="40em" height="25em" title="Confirme sua autenticidade!" closable="false">
 
-            <div id="code-confirm-popup-main-content-button">
-                <button class="button-padrao" id="code-confirm-button">Verificar</button>
+    <div id="code-confirm-popup-main-content">
+        <div id="code-confirm-popup-main-content-texts-desc" class="desc-col">
+            <div id="code-confirm-popup-main-content-texts-desc-text">
+                Foi enviado um código de confirmação para o email informado, preencha o campo abaixo!
             </div>
         </div>
+        <div id="code-confirm-popup-main-content-inputs-row">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+            <input type="number" maxlength="1" min="1" class="code-confirm-popup-main-content-inputs-col">
+        </div>
+
+        <button class="button-padrao" id="code-confirm-button">Verificar</button>
     </div>
-</div>
+</custom-popup>
 
 
 
@@ -97,7 +91,7 @@
 
     document.addEventListener('keypress', async (event) => {
         if (event.key === 'Enter') {
-            if (document.getElementById('code-confirm-popup-containner').classList.contains('active')) {
+            if (document.getElementById('code-confirm-popup-containner').PopupIsOpen() == true) {
                 document.getElementById('code-confirm-button').click()
             }
         }

@@ -80,11 +80,11 @@ router.post('/security/pass/verify', functions.authPostState, async (req, res) =
 })
 
 router.get('/security/code/:type', functions.authGetState, async (req, res) => {
-
-    if (req.params.type == '2fa' && req.cookies.verify2fa && req.cookies.verify2fa != '') {
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let v2faQ = `req.cookies.verify2fa_${req.session.uid}`
+    if (req.params.type == '2fa' && req.cookies[v2faQ] && req.cookies[v2faQ] != '') {
         return res.redirect('/dashboard?error=Você já verificou esse dispositivo!')
     }
-    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     if (req.params.type == 'email' && ('security' in user && 'emailVerify' in user.security && user.security.emailVerify == true)) {
         return res.redirect('/dashboard?error=Você já verificou esse dispositivo!')
     }

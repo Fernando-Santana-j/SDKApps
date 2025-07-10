@@ -5,146 +5,181 @@ popupStyles.replaceSync(`
     border-radius: 100%;
     border-bottom: 1px solid var(--secundary-color-purple);
 }
-              .popup-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 9999;
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.3s ease, visibility 0.3s ease;
-              }
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
               
-              .popup-overlay.open {
-                opacity: 1;
-                visibility: visible;
-              }
+.popup-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
               
-              .popup-container {
-                position: relative;
-                background: var(--tertiary-color);
-                border-radius: 8px;
-                width: 90%;
-                max-width: 500px;
-                max-height: 90vh;
-                display: flex;
-                flex-direction: column;
-                box-shadow: 0 5px 15px var(--opacity-color-purple);
-                transform: translateY(20px);
-                opacity: 0;
-                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-              }
+.popup-container {
+    position: relative;
+    background: var(--tertiary-color);
+    border-radius: var(--border-radius-mid);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 5px 15px var(--opacity-color-purple);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    /* Default size constraints */
+    width: auto;
+    max-width: 90vw;
+    min-width: 300px;
+    height: auto;
+    max-height: 90vh;
+    min-height: 200px;
+    /* Ensure that overflow works properly */
+    overflow: hidden;
+}
               
-              .popup-container.open {
-                opacity: 1;
-                transform: translateY(0);
-              }
+.popup-container.open {
+    opacity: 1;
+    transform: translateY(0);
+}
               
-              .popup-header {
-                padding: 16px 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              }
+.popup-header {
+    padding: 25px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
               
-              .popup-title {
-                margin: 0;
-                font-size: 1.2rem;
-                color: var(--color-text-primary);
-                font-weight: 600;
-              }
+.popup-title {
+    margin: 0 0 0 1em;
+    margin-right: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--color-text-primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
               
-              .popup-close {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                cursor: pointer;
-                color: var(--color-text-primary);
-                transition: 0.5s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 5px 10px 6px 10px;
-                border-radius: 4px;
-              }
+.popup-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    transition: 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px 6px 10px;
+    border-radius: 4px;
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
               
-              .popup-close:hover {
-                opacity: 0.8;
-                transition: 0.5s ease;
-                background: var(--primary-color-opacity);
-              }
+.popup-close:hover {
+    opacity: 0.8;
+    transition: 0.5s ease;
+    background: var(--primary-color-opacity);
+}
+
+.linha {
+    flex-shrink: 0; 
+}
               
-              .popup-content {
-                flex: 1;
-                overflow-y: auto;
-                max-height: calc(90vh - 120px);
-              }
+.popup-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
               
-              .popup-content-body {
-                padding: 20px;
-              }
               
-              /* Barra de rolagem personalizada */
-              .popup-content::-webkit-scrollbar {
-                width: 6px;
-              }
-              
-              .popup-content::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 10px;
-              }
-              
-              .popup-content::-webkit-scrollbar-thumb {
-                background: #c1c1c1;
-                border-radius: 10px;
-              }
-              
-              .popup-content::-webkit-scrollbar-thumb:hover {
-                background: #a8a8a8;
-              }
-    `);
+`);
 
 class CustomPopup extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.adoptedStyleSheets = [popupStyles];
-        // Definindo as propriedades iniciais
         this.popupTitle = 'Popup';
         this.isClosable = true;
         this.isOpen = false;
-
-        // Criando a estrutura base do popup
+        this.popupWidth = 'auto';
+        this.popupHeight = 'auto';
+        this.maxPopupWidth = 'auto';
+        this.maxPopupHeight = 'auto';
+        this.minPopupWidth = 'auto';
+        this.minPopupHeight = 'auto';
         this.render();
     }
 
     // Observando os atributos para refletir mudanças
     static get observedAttributes() {
-        return ['title', 'closable', 'open'];
+        return ['title', 'closable', 'open', 'width', 'height', 'max-width', 'max-height', 'min-width', 'min-height'];
     }
 
     // Quando os atributos mudam, atualizamos os valores
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'title') {
-            this.popupTitle = newValue;
-            const titleElement = this.shadowRoot.querySelector('.popup-header h2');
-            if (titleElement) titleElement.textContent = this.popupTitle;
+    attributeChangedCallback(name, oldValue, newValue) {       
+        if (oldValue === newValue) return; // Prevent infinite loops
+        
+        switch (name) {
+            case 'closable':
+                this.isClosable = newValue !== 'false';
+                this.updateClosableState();
+                if (newValue === 'false') {
+                    this.shadowRoot.querySelector('.popup-header-space').style.display = 'none'
+                    this.shadowRoot.querySelector('.popup-header').style.justifyContent = "center"
+                }
+                break;
+            case 'open':
+                this.isOpen = newValue === 'true';
+                this.updateOpenState();
+                break;
+            case 'title':
+                this.popupTitle = newValue;
+                const titleElement = this.shadowRoot.querySelector('.popup-title');
+                if (titleElement) titleElement.textContent = this.popupTitle;
+                break;
+            case 'width':
+                this.updateStyle('width', newValue);
+                break;
+            case "height":
+                this.updateStyle('height', newValue);
+                break;
+            case "max-width":
+                this.updateStyle('maxWidth', newValue);
+                break;
+            case "max-height":
+                this.updateStyle('maxHeight', newValue);
+                break;
+            case "min-width":
+                this.updateStyle('minWidth', newValue);
+                break;
+            case "min-height":
+                this.updateStyle('minHeight', newValue);
+                break;
         }
+    }
 
-        if (name === 'closable') {
-            this.isClosable = newValue !== 'false';
-            this.updateClosableState();
-        }
-
-        if (name === 'open') {
-            this.isOpen = newValue === 'true';
-            this.updateOpenState();
+    // Helper method to update styles with proper validation
+    updateStyle(property, value) {
+        if (!value) return;
+        
+        const container = this.shadowRoot.querySelector('.popup-container');
+        if (container) {
+            // Ensure value has proper CSS units
+            if (!isNaN(value) && !value.toString().match(/[a-z%]/i)) {
+                value = `${value}px`;
+            }
+            container.style[property] = value;
         }
     }
 
@@ -157,11 +192,26 @@ class CustomPopup extends HTMLElement {
             popupOverlay.classList.add('open');
             popupContainer.classList.add('open');
             document.body.style.overflow = 'hidden';
+            
+            // Apply any size attributes that were set before opening
+            this.applyAllSizeAttributes();
         } else {
             popupOverlay.classList.remove('open');
             popupContainer.classList.remove('open');
             document.body.style.overflow = '';
         }
+    }
+
+    // Apply all size-related attributes
+    applyAllSizeAttributes() {
+        const sizeAttributes = ['width', 'height', 'max-width', 'max-height', 'min-width', 'min-height'];
+        sizeAttributes.forEach(attr => {
+            const value = this.getAttribute(attr);
+            if (value) {
+                const camelCase = attr.replace(/-([a-z])/g, g => g[1].toUpperCase());
+                this.updateStyle(camelCase, value);
+            }
+        });
     }
 
     // Atualiza o estado dos elementos de fechamento
@@ -194,6 +244,7 @@ class CustomPopup extends HTMLElement {
     // Método para abrir o popup
     open() {
         this.setAttribute('open', 'true');
+        this.shadowRoot.querySelector
     }
 
     // Método para fechar o popup
@@ -203,20 +254,23 @@ class CustomPopup extends HTMLElement {
         }
     }
 
+    PopupIsOpen() {
+        return this.isOpen;
+    }
+
     // Renderiza a estrutura do popup
     render() {
         this.shadowRoot.innerHTML = `
             <div class="popup-overlay">
               <div class="popup-container">
                 <div class="popup-header">
+                  <div class="popup-header-space" style="width:32px;"></div>
                   <h2 class="popup-title">${this.popupTitle}</h2>
                   <button class="popup-close" aria-label="Fechar popup">✕</button>
                 </div>
                 <div class="linha"></div>
                 <div class="popup-content">
-                  <div class="popup-content-body">
                     <slot></slot>
-                  </div>
                 </div>
               </div>
             </div>
@@ -239,7 +293,7 @@ class CustomPopup extends HTMLElement {
     connectedCallback() {
         if (this.hasAttribute('title')) {
             this.popupTitle = this.getAttribute('title');
-            const titleElement = this.shadowRoot.querySelector('.popup-header h2');
+            const titleElement = this.shadowRoot.querySelector('.popup-title');
             if (titleElement) titleElement.textContent = this.popupTitle;
         }
 
@@ -247,6 +301,9 @@ class CustomPopup extends HTMLElement {
             this.isClosable = this.getAttribute('closable') !== 'false';
             this.updateClosableState();
         }
+
+        // Apply all size attributes when component is connected
+        this.applyAllSizeAttributes();
 
         if (this.hasAttribute('open')) {
             this.isOpen = this.getAttribute('open') === 'true';

@@ -116,3 +116,4 @@ class ErrorTooltip {
         await Promise.all(errorIds.map(id => this.hide(id)));
     }
 }
+const errorTooltip = new ErrorTooltip();

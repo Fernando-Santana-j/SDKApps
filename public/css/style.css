@@ -79,6 +79,8 @@ header.scrolled {
     max-width: 100%;
     display: flex;
     gap: 1rem;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
 }
 

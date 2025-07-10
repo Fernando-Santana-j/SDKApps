@@ -52,13 +52,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 
 app.use(express.static('views'));
-app.use(express.static('public'));
+// app.use(express.static('public'));
 app.use(express.static('uploads'));
-app.use(express.static('src'));
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads', express.static(path.join(__dirname, 'src')));
+// app.use(express.static('templates'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/config', express.static(path.join(__dirname, 'config')));
+// app.use('/templates', express.static(path.join(__dirname, 'templates')));
+
 
 app.set('views', path.join(__dirname, '/views'))
 app.set('view engine', 'ejs');
@@ -88,9 +89,17 @@ const upload = multer({ storage });
 
 
 
-const auth = require('./routes/post/auth.js')
-app.use('/', auth);
+const authRouter = require('./routes/post/auth.js')
+app.use('/', authRouter);
 
+const salesRouter = require('./routes/post/sales.js')
+app.use('/', salesRouter);
+
+const customizeRouter = require('./routes/post/customize.js')
+app.use('/', customizeRouter);
+
+const integrationsRouter = require('./routes/post/integrations.js')
+app.use('/', integrationsRouter);
 
 
 
@@ -130,37 +139,17 @@ app.use('/', securityRoutes);
 
 app.use('/', require('./routes/post/store.js'));
 
+// transfer()
+// async function transfer() {
+//     let server = await db.findOne({ colecao: 'servers', doc: '1316103661113577495' })
 
-function storeVerify(store) {
-    if (!store || store.error == true) {
-        return {
-            error: true,
-            message: 'Loja nao encontrada!'
-        }
-        return
-    }
+//     server.name = "Finx"
+//     server.id = "1390552765662625812"
 
-    if (store.status == 'inativo' || store.status == 'pendente') {
-        return {
-            error: true,
-            message: 'Loja indisponivel!'
-        }
-        return
-    }
-    
+//     db.create('servers', server.id, server)
+// }
 
-    if ('functions' in store && 'onView' in store && store.functions.onView == false) {
-        return {
-            error: true,
-            message: 'Loja indisponivel!'
-        }
-    }
 
-    return {
-        error: false,
-        message: ''
-    }
-}
 
 app.get('/store/:idn', async (req, res) => { 
     
@@ -292,43 +281,60 @@ app.get('/logout', async (req, res) => {
 })
 
 
-app.get('/payment/:id', async (req, res) => {
-    if (!req.params.id || !req.session.uid) {
-        res.redirect('/?error=Parametros invalidos!')
-        return
-    }
-    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    if ('pass' in user == true) {
-        delete user.security
-    }
-    res.render('payment', { host: `${webConfig.host}`, user: user })
-})
 
 app.get('/console/:id', functions.authGetState, async (req, res) => {
-    let serverID = req.params.id
+    let storeID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
+    let store = await db.findOne(({ colecao: 'stores', doc: storeID }))
 
-    if (!user.stores.find(docRef => docRef.id === serverID)) {
+    if (!user.stores.find(docRef => docRef.id === storeID)) {
         res.redirect('/dashboard?error=Voce não tem permissão para acessar essa loja!')
         return
     }
 
-    if (!server || !user) {
+    if (!store || !user) {
         res.redirect('/?error=Erro ao recuperar o servidor ou o seu usuario!')
         return
     }
 
     
-    let lastSells = await secDb.getRecentFiles('analytics', serverID)
+    let lastSells = await secDb.getRecentFiles('analytics', storeID)
 
-    // let analytics = await db.findOne({ colecao: "analytics", doc: req.params.id })
-
-    // let comprasConcluidas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas completas"], functions.formatDate))
-    // let comprasCanceladas = JSON.stringify(await functions.getDatesLast7Days(analytics["vendas canceladas"], functions.formatDate))
-
+    let analyticsData = {
+        "7days":{
+            prodSeles: "300",
+            amoutSales: "3000",
+            bestProd: "produto 1",
+            chart:{
+                labels: ['1', '2', '3', '4', '5', '6', '7'],
+                data: [1200, 1900, 3000, 5060, 4200, 3500, 2800]
+            }
+        },
+        "30days":{
+            prodSeles: "3000",
+            amoutSales: "30000",
+            bestProd: "produto 2",
+            chart:{
+                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
+                    '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
+                data: [1200, 1900, 3000, 5060, 4200, 3500, 2800, 3300, 4100, 5500,
+                    4800, 5200, 6100, 5700, 4900, 5300, 6200, 5800, 4600, 5100,
+                    6300, 5600, 4700, 5900, 6500, 5400, 4500, 5200, 6000, 5300]
+            }
+        },
+        "total":{
+            prodSeles: "5000",
+            amoutSales: "52000",
+            bestProd: "produto 3",
+            chart:{
+                labels: ['1'],
+                data: [1200]
+            }
+        } 
+    }
     
-    res.render('painel', { host: `${webConfig.host}`, user: user, server: server, serverString: JSON.stringify(server), chatItens: [] })
+
+    res.render('painel', { host: `${webConfig.host}`, user: user, store: store, storeString: JSON.stringify(store), chatItens: [] , analyticsData: JSON.stringify(analyticsData)}, )
 })
 const processPurchases = (purchases) => {
     return purchases
@@ -357,130 +363,194 @@ console.log('Compras por dia:', result.dailyPurchases);
 console.log('Produto mais comprado:', mostPurchasedProduct);
 
 
-app.get('/server/sales/:id', functions.authGetState, async (req, res) => {
-    let serverID = req.params.id
+app.get('/console/sales/:id', functions.authGetState, async (req, res) => {
+    let storeID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    if ('pass' in user == true) {
-        delete user.security
-    }
-    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (!server) {
-        return
-    }
-    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
-    if (verifyPerms.error == true) {
-        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
+    let store = await db.findOne(({ colecao: 'stores', doc: storeID }))
+    if (!user.stores.find(docRef => docRef.id === storeID)) {
+        res.redirect('/dashboard?error=Voce não tem permissão para acessar essa loja!')
         return
     }
 
-    if ('botConfig' in verifyPerms.perms && verifyPerms.perms.botConfig == false) {
-        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
+    if (!store || store.error == true) {
+        res.redirect('/?error=Erro ao recuperar o servidor!')
         return
     }
-    let bankData = server.bankData ? server.bankData : null
-
-    const guilds = client.guilds.cache;
-    const isBotInServer = guilds.has(serverID);
-    if (!isBotInServer) {
-        res.redirect(`/addbot/${serverID}`)
+    if (!user || user.error == true) {
+        res.redirect('/?error=Erro ao recuperar o usuario!')
         return
     }
-    let guild = guilds.get(serverID)
-    const channels = guild.channels.cache;
-
-    const textChannels = channels.filter(channel => channel.type === 0);
-    let adminServer = db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
-    let chatItens = []
-    if (adminServer && 'ticketOptions' in adminServer) {
-        chatItens = adminServer.ticketOptions.motivos
-    }
-    const roles = guild.roles.cache;
-    const filteredRoles = roles.filter(role => {
-        return role.name !== '@everyone' && role.managed !== true;
-    });
-    const roleObjects = filteredRoles.map(role => {
-        return {
-            name: role.name,
-            id: role.id
-        };
-    });
-
-
-    let productsSimple = 'products' in server ? server.products.filter(product => {
-        let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal';
-        return typeProduct != 'multiple';
-    }).map(product => {
-        let estoqueNumber = 0
-        let typeProduct = 'typeProduct' in product ? product.typeProduct : 'normal'
-        switch (typeProduct) {
-            case 'single':
-                estoqueNumber = product.estoque
-                break;
-            case 'subscription':
-
-                break;
-            case 'normal':
-                estoqueNumber = product.estoque.length
-                break;
-        }
-        return {
-            name: product.productName,
-            desc: `Preço: ${functions.formatarMoeda(product.price)} • Estoque: ${estoqueNumber}`,
-            value: product.productID
-        }
-    }) : []
-
-    res.render('sales', { perms: verifyPerms.perms, chatItens: chatItens, host: `${webConfig.host}`, bankData: bankData, user: user, server: server, cargosString: JSON.stringify(roleObjects), channels: textChannels, channelsString: JSON.stringify(textChannels), formatarMoeda: functions.formatarMoeda, productString: JSON.stringify(productsSimple) })
+    
+    res.render('sales',{store: store, user: user, storeString: JSON.stringify(store)})
 })
 
 
-app.get('/server/personalize/:id', functions.authGetState, async (req, res) => {
-    let serverID = req.params.id
+
+app.get('/console/customize/:id', functions.authGetState, async (req, res) => {
+    let storeID = req.params.id
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-    if ('pass' in user == true) {
-        delete user.security
-    }
-    let server = await db.findOne(({ colecao: 'servers', doc: serverID }))
-    if (server.plan == 'inicial') {
-        res.redirect(`/server/${serverID}?error=Seu plano não dá acesso a essa funcionalidade`)
-        return
-    }
-    let verifyPerms = await functions.verifyPermissions(user.id, server.id, Discord, client)
-    if (verifyPerms.error == true) {
-        res.redirect('/dashboard?error=Erro ao verificar a permissão do bot')
-        return
-    }
+    let store = await db.findOne(({ colecao: 'stores', doc: storeID }))
+    
+    res.render('customize', { user: user, store: store })
+})
 
-    if (verifyPerms.error == false && verifyPerms.perms.botEdit == false) {
-        res.redirect(`/dashboard?error=Você não tem permissão para editar esse bot`)
-        return
+
+app.get('/console/integrations/:id', functions.authGetState, async (req, res) => {
+    let storeID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let store = await db.findOne(({ colecao: 'stores', doc: storeID }))
+    let lastServerID = "integrations" in store ? "discord" in store.integrations ? store.integrations.discord.lastServerID : null : null
+    let discordConnected = false
+    let discordEnabled = "integrations" in store ? "discord" in store.integrations ? store.integrations.discord.enabled : false : false
+    let produtosServerDiscord = []
+    let discordTextChannels = []
+    let serverName = ''
+
+
+    if (discordEnabled) {
+        const guilds = client.guilds.cache;
+        const isBotInServer = guilds.has(lastServerID )
+        let guild = guilds.get(lastServerID)
+        if (!guild || !isBotInServer) {
+            discordEnabled = false
+        }else{
+            serverName = guild.name
+            const channels = guild.channels.cache;
+            discordTextChannels = await channels.filter(channel => channel.type === 0);
+            
+            discordConnected = isBotInServer
+            
+            let discordServer = "integrations" in store ? "discord" in store.integrations ? "servers" in store.integrations.discord ? store.integrations.discord.servers[lastServerID] : {} : {} : {} 
+            
+            if (discordServer) {
+
+                produtosServerDiscord = await (discordServer.products).map(product => {
+                    return {
+                        ...product,
+                        channelName: channels.find(channel => channel.id === product.channelID).name,
+                        productName: store.products.find(prod => prod.id === product.productID).name,
+                        productLogo: store.products.find(prod => prod.id === product.productID).logo,
+                        productPrice: functions.formatarMoeda(store.products.find(prod => prod.id === product.productID).price),
+                        productStock: store.products.find(prod => prod.id === product.productID).stock,
+                        productType: store.products.find(prod => prod.id === product.productID).type == "normal",
+                        formatUpDate: product.updatedAt ? new Date(product.updatedAt).toLocaleString() : "Nenhuma atualização",
+                        
+                    } 
+                })
+            }
+        }
     }
-    const guilds = client.guilds.cache;
-    const isBotInServer = guilds.has(serverID);
-    if (!isBotInServer) {
-        res.redirect(`/addbot/${serverID}`)
-        return
-    }
-    let guild = guilds.get(serverID)
-    const roles = guild.roles.cache;
-    const filteredRoles = roles.filter(role => {
-        return role.name !== '@everyone' && role.managed !== true;
-    });
-    const roleObjects = filteredRoles.map(role => {
+    
+    let inputSelectProducts = await ("products" in store ? store.products : []).map( product => {
         return {
-            name: role.name,
-            id: role.id
-        };
-    });
-    const channels = guild.channels.cache;
+            value: product.id,
+            name: product.name,
+            desc: `${functions.formatarMoeda(product.price)} • ${"stockAmount" in product.stock ? product.stock.stockAmount : product.stock.stockItems.length} em estoque`
+        }
+    })
+    
+    discordTextChannels = await discordTextChannels.map(channel => {
+        return {
+            value: channel.id,
+            name: channel.name,
+            desc: channel.topic
+        }
+    })
 
-    const textChannels = channels.filter(channel => channel.type === 0);
-    let adminServer = await db.findOne({ colecao: 'servers', doc: process.env.ADMINSERVER })
-    let chatItens = []
-    if (adminServer && 'ticketOptions' in adminServer) {
-        chatItens = adminServer.ticketOptions.motivos
+    res.render('integrations', { user: user, store: store, discordConnected: discordConnected,produtosServerDiscord: produtosServerDiscord, discordTextChannels: discordTextChannels,inputSelectProducts: inputSelectProducts, serverName: serverName})
+})
+
+app.get('/console/logs/:id', functions.authGetState, async (req, res) => {
+    let storeID = req.params.id
+    let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
+    let store = await db.findOne(({ colecao: 'stores', doc: storeID }))
+
+    let discordIntegration = "integrations" in store && "discord" in store.integrations ? store.integrations.discord : {}
+    let discordIntegrationServers = "servers" in discordIntegration ? discordIntegration.servers : []
+    let lastServerID = discordIntegrationServers[discordIntegration.lastServerID]
+    let webhookRef = null
+    if (!lastServerID) {
+        res.redirect('/console/integrations/' + storeID + '?error=Servidor não encontrado!')
+        return
     }
-    res.render('personalize', { host: `${webConfig.host}`, channels: textChannels, chatItens: chatItens, cargos: roleObjects, user: user, server: server })
+    let createDiscordWebhook = new Promise(async (resolve, reject) => {
+        try {
+            if(discordIntegration.lastServerID) {
+                const guilds = client.guilds.cache;
+                if (!guilds) {
+                    reject(null)
+                }
+                const isBotInServer = guilds.has(lastServerID )
+                let guild = guilds.get(lastServerID)
+                if (!guild || !isBotInServer) {
+                    reject(null)
+                }
+                let discordChannel = guild.channels.cache.find(channel => channel.name === '📋・Logs')
+                if (!discordChannel) {
+                    let categoria = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && (c.name === 'staff' || c.name === 'Staff' || c.name === 'logs' || c.name === 'Logs'))
+                    if (!categoria) {
+                        categoria = await guild.channels.create({
+                            name: 'Logs',
+                            type: Discord.ChannelType.GuildCategory,
+                        })
+                    }
+                    discordChannel = await guild.channels.create({
+                        name: '📋・Logs',
+                        type: Discord.ChannelType.GuildText,
+                        permissionOverwrites: [{
+                            id: guild.roles.everyone,
+                            deny: [Discord.PermissionsBitField.Flags.ViewChannel],
+                        }]
+                    })
+                }
+                let webhook = await discordChannel.createWebhook({ name: `discord-webhook-sdkapps-logs` })
+                
+                if (webhook) {
+                    resolve(webhook)
+                }else{
+                    reject(null)
+                }
+            }else{
+                reject(null)
+            }
+        } catch (error) {
+            reject(null)
+        }
+    })
+    createDiscordWebhook.then(webhook => {
+        if (webhook) {
+            webhookRef = webhook
+        }
+    }).catch(error => {
+        webhookRef = null
+    })
+    let webhook
+    let hasFile = await secDb.hasFile("/stores/" + storeID, 'webhook-sdkapps-logs')
+
+    if (!hasFile) {
+        await secDb.set("/stores/" + storeID, 'webhook-sdkapps-logs', {
+            webhook: webhookRef,
+            logs: [],
+            lastUpdate: Date.now(),
+            lastServerID: lastServerID.id
+        }).then(data => {
+            console.log(data);
+            webhook = data
+        }).catch(error => {
+            console.log(error);
+        })
+    }else{
+        await secDb.get("/stores/" + storeID, 'webhook-sdkapps-logs').then(data => {
+            webhook = data
+        }).catch(error => {
+            console.log(error);
+        })
+        
+    }
+    
+  
+    
+    res.render('logs', { user: user, store: store, webhookRef: webhookRef, webhook: webhook, webhookRefString: JSON.stringify(webhookRef), webhookString: JSON.stringify(webhook)})
 })
 
 app.get('/server/backups/:id', functions.authGetState, async (req, res) => {
@@ -1884,17 +1954,24 @@ app.post('/get/server', functions.authPostState, async (req, res) => {
 
 app.post('/statusBotVendas', functions.authPostState, async (req, res) => {
     try {
-        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
-        if (server) {
-            if (req.body.type == 'bot') {
-                db.update('servers', req.body.serverID, {
-                    botActive: req.body.active
-                })
-            } else {
-                db.update('servers', req.body.serverID, {
-                    vendasActive: req.body.active
-                })
+        let store = await db.findOne({ colecao: "stores", doc: req.body.storeID })
+        if (store) {
+            let storeFunctions = store.functions
+            if (!req.body.type || !storeFunctions) {
+                if (!res.headersSent) {
+                    res.status(200).json({ success: false, data: 'Erro ao tentar mudar o estado!' })
+                }
+                return
+            } 
+            if (req.body.type == 'Vendas') {
+                storeFunctions.onSale = req.body.active
             }
+            if (req.body.type == 'Site') {
+                storeFunctions.onView = req.body.active
+            }
+            db.update('stores', req.body.storeID, {
+                functions: storeFunctions
+            })
             if (!res.headersSent) {
                 res.status(200).json({ success: true, data: `${req.body.type} ${req.body.active == true ? 'ativado' : 'desativado'} com sucesso!` })
             }

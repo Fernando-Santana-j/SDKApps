@@ -100,8 +100,9 @@ const set = (subfolder, filename, data) => {
     writableStream.write(jsonData);
     writableStream.end();
 
-    writableStream.on('finish', () => {
-      resolve('Dados atualizados com sucesso!');
+    writableStream.on('finish', (res) => {
+      
+      resolve(res);
     });
 
     writableStream.on('error', (error) => {

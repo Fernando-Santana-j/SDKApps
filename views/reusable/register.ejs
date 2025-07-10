@@ -1,34 +1,11 @@
 <style>
     #register-popup-content {
-        width: 40em;
-        height: 50em;
         display: flex;
         flex-direction: column;
-
-    }
-
-    #register-popup-top {
-        display: flex;
-        width: 100%;
         justify-content: space-between;
-
-    }
-
-    #register-popup-top-title {
-        display: flex;
         gap: 1em;
-        margin-right: 1.2em;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    #register-popup-top-title-logo img {
-        width: 5em;
-        height: 5em;
-    }
-
-    #register-popup-top-title-text {
-        margin-bottom: 0.3em !important;
+        width: 100%;
+        height: 100%;
     }
 
     #register-popup-main-content {
@@ -102,29 +79,16 @@
         object-fit: contain;
 
     }
+    #register-button{
+        width: 100%;
+    }
+    #register-popup-others{
+        margin-bottom: 1em;
+    }
 </style>
 
-<div id="register-popup-containner" class="popup-containner">
-    <div id="register-popup-content" class="popup-content">
-        <div id="register-popup-top">
-            <div style="width: 3em;"></div>
-            <div id="register-popup-top-title">
-                <div id="register-popup-top-title-logo">
-                    <img src="/public/img/Logos/logo-color-1.png">
-                </div>
-                <div id="register-popup-top-title-text" class="title-col">
-                    Juntar-se a SDK
-                </div>
-            </div>
-            <div class="popup-close-button" id="register-popup-close">
-                <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#fff"
-                        d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
-                    </path>
-                </svg>
-            </div>
-        </div>
-
+<custom-popup id="register-popup-containner" width="100%" height="100%" max-width="40em" max-height="50em" title="Juntar-se a SDK" closable="true">
+    <div id="register-popup-content">
         <div id="register-popup-main-content">
             <div id="register-popup-main-content-inputs">
                 <div id="register-popup-main-content-inputs-email">
@@ -170,20 +134,20 @@
             </div>
         </div>
     </div>
-</div>
+</custom-popup>
 
 <script>
 
     document.addEventListener('keypress', async (event) => {
         if (event.key === 'Enter') {
-            if (document.getElementById('register-popup-containner').classList.contains('active')) {
+            if (document.getElementById('register-popup-containner').PopupIsOpen() == true) {
                 document.getElementById('register-button').click()
             }
         }
     })
 
     document.getElementById('change-login-button').addEventListener('click', () => {
-        closePopup(document.getElementById('register-popup-containner'), document.getElementById('register-popup-content'))
-        openPopup(document.getElementById('login-popup-containner'), document.getElementById('login-popup-content'))
+        document.getElementById('register-popup-containner').close()
+        document.getElementById('login-popup-containner').open()
     })
 </script>

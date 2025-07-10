@@ -59,8 +59,8 @@ module.exports = {
     },
     update: async (colecao, doc, data) => {
         let firebaseData = db.collection(colecao).doc(doc)
-        await firebaseData.update(data);
-        return
+        let res = await firebaseData.update(data);
+        return res
     },
     delete: async (colecao, doc,) => {
         let firebaseData = db.collection(colecao).doc(doc)

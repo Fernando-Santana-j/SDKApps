@@ -65,32 +65,16 @@
     <div id="body-containner">
         <div id="containner">
             <main id="main-containner">
-                <div id="popup-content">
-                    <div>
-                        <h1 class="title-col" style="font-weight: bold; font-size: 2em;"><%= type == 'email' ? 'Verifique seu email!' : 'Verificação multifatorial.' %></h1>
-                        <p class="desc-col" style="font-weight: normal; font-size: 1em; margin-top: 1em;"> <%= type == 'email'? 'Foi enviada uma mensagem com um codigo para o e-mail cadastrado dessa conta, não será possível logar na conta se o email não for verificado!' : 'Acesse seu aplicativo autenticador e digite o token de autenticação de 6 dígitos abaixo!' %></p>
-                    </div>
-                    <div id="inpusts-containner">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                        <input type="number" maxlength="1" min="1" class="inputs-code">
-                    </div>
-                    <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
-                        <button style="height: 3em; width: 15em;" id="resend-code" class="button-padrao">Reenviar
-                            codigo</button>
-                    </div>
-                </div>
+                <%- include('./reusable/codeConfirm.ejs') %>
             </main>
         </div>
     </div>
     <%- include('./reusable/script.ejs') %>
-        <script>
+        <!-- <script>
+            location.href = '/dashboard'
             const inputs = document.querySelectorAll('.inputs-code');
 
-            let type = '<%= type %>'
+            let type = '<%#= type %>'
 
             let colorChangeTimeout;
 
@@ -211,7 +195,7 @@
                 }
 
             })
-        </script>
+        </script> -->
         <script src="/public/js/"></script>
 </body>
 

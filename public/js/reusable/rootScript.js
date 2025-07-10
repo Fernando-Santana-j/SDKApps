@@ -1,3 +1,44 @@
+// Initialize loader for page transitions
+function initializeLoader() {
+    // Show loader when page starts loading
+    if (window.globalLoader) {
+        window.globalLoader.show('Carregando página...');
+    }
+
+    // Hide loader when page is fully loaded
+    window.addEventListener('load', () => {
+        if (window.globalLoader) {
+            window.globalLoader.hide();
+        }
+    });
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && !link.target && !e.ctrlKey && !e.shiftKey && !e.metaKey && window.globalLoader) {
+            window.globalLoader.show('Carregando página...');
+        }
+    });
+}
+
+// Wait for both DOM and loader to be ready
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', () => {
+//         if (window.globalLoader) {
+//             initializeLoader();
+//         } else {
+//             // If loader isn't ready yet, wait for it
+//             const checkLoader = setInterval(() => {
+//                 if (window.globalLoader) {
+//                     clearInterval(checkLoader);
+//                     initializeLoader();
+//                 }
+//             }, 100);
+//         }
+//     });
+// } else {
+//     initializeLoader();
+// }
+
+
 var urlParams = {};
 var url = new URL(window.location.href);
 var searchParams = new URLSearchParams(url.search);
@@ -5,53 +46,16 @@ var searchParams = new URLSearchParams(url.search);
 searchParams.forEach((value, key) => {
     urlParams[key] = value;
 });
-
 if ('error' in urlParams && urlParams.error.length > 0) {
-    errorNotify(urlParams.error);
 
     searchParams.delete('error');
 
     var newUrl = url.origin + url.pathname + (searchParams.toString() ? '?' + searchParams.toString() : '');
     window.history.replaceState(null, '', newUrl);
+    errorNotify(urlParams.error)
 }
 
-
-
-
-
-
-
-
-//closePopup
-
-function openPopup(popupContainner,popupContent) {
-    popupContainner.classList.add('active');
-    requestAnimationFrame(() => {
-        popupContent.classList.add('active');
-    });
-}
-function closePopup(popupContainer, popupContent) {
-    popupContent.classList.remove('active');
-    setTimeout(() => {
-        popupContainer.classList.remove('active');
-    }, 100);
-}
-
-
-
-document.addEventListener('click',async (event) => {
-    const popupContainer = await event.target.closest('.popup-containner');
-    const popupContent = await event.target.closest('.popup-content');
-    // if (popupContainer && !popupContent && !popupContainer.classList.contains('noClose')) {
-    //     closePopup(popupContainer, await popupContainer.querySelector('.popup-content'));
-    // }
-    if (popupContainer && event.target.closest('.popup-close-button')) {
-        closePopup(popupContainer, popupContent);
-    }
-});
-
-
-
+gsap.registerPlugin(window.CustomEase);
 
 
 
@@ -189,4 +193,13 @@ function copyText(texto) {
         }
         
     }
+}
+
+
+
+function formatarMoeda(centavos) {
+    return (centavos / 100).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
 }

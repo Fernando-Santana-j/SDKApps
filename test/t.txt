@@ -1,0 +1,262 @@
+ /* Image Upload Styles */
+            .image-upload-container {
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1rem;
+                align-items: stretch;
+            }
+
+            .image-upload-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .background-upload {
+                flex: 1;
+            }
+
+            .logo-upload {
+                width: 15em;
+            }
+
+            .image-preview-container {
+                position: relative;
+                width: 100%;
+                height: 15em;
+                border-radius: var(--border-radius-min);
+                overflow: hidden;
+                background-color: var(--tertiary-color);
+                border: 2px dashed rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .preview-card {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                cursor: pointer;
+                transition: var(--transition-standard);
+            }
+
+            .preview-card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: var(--transition-standard);
+            }
+
+            .preview-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.7);
+                opacity: 0;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(4px);
+            }
+
+            .preview-overlay .upload-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+                color: var(--white-color);
+                text-align: center;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+                padding: 1rem;
+            }
+
+            .upload-icon-container {
+                position: relative;
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .upload-icon-container i {
+                font-size: 2rem;
+                color: var(--accent);
+                z-index: 2;
+                transition: all 0.3s ease;
+            }
+
+            .upload-icon-circle {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border: 2px dashed var(--accent);
+                border-radius: 50%;
+                animation: rotate 10s linear infinite;
+            }
+
+            .preview-overlay .upload-content span {
+                font-size: 1rem;
+                font-weight: 500;
+                color: var(--white-color);
+            }
+
+            .preview-overlay .upload-content p {
+                font-size: 0.8rem;
+                opacity: 0.8;
+                color: var(--text-gray-color-secundary);
+            }
+
+            .image-preview-container:hover .preview-overlay,
+            .image-preview-container.drag-over .preview-overlay {
+                opacity: 1;
+            }
+
+            .image-preview-container:hover .preview-overlay .upload-content,
+            .image-preview-container.drag-over .preview-overlay .upload-content {
+                transform: translateY(0);
+            }
+
+            .image-preview-container:hover,
+            .image-preview-container.drag-over {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(174, 0, 255, 0.15);
+                background-color: rgba(174, 0, 255, 0.05);
+            }
+
+            .image-preview-container.drag-over .upload-icon-container i {
+                transform: scale(1.1);
+                color: var(--accent-hover);
+            }
+
+            .file-input {
+                display: none;
+            }
+
+
+
+            @keyframes rotate {
+                from {
+                    transform: rotate(0deg);
+                }
+
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes previewAppear {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .preview-card img.preview-active {
+                animation: previewAppear 0.3s ease forwards;
+            }
+
+            @media (max-width: 768px) {
+                .image-upload-container {
+                    flex-direction: column;
+                }
+
+                .background-upload,
+                .logo-upload {
+                    flex: 1;
+                }
+
+                .upload-features {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+            }
+
+
+            <div class="image-upload-wrapper logo-upload">
+                                <div class="image-preview-container"
+                                    onclick="document.getElementById('logoUpload').click()"
+                                    ondrop="handleDrop(event, 'logoUpload')" ondragover="handleDragOver(event)"
+                                    ondragenter="handleDragEnter(event)">
+                                    <div class="preview-card" id="logoPreview">
+                                        <div class="preview-overlay">
+                                            <div class="upload-content">
+                                                <div class="upload-icon-container">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                    <div class="upload-icon-circle"></div>
+                                                </div>
+                                                <span>Clique ou arraste uma imagem</span>
+                                                <p>Suporta PNG, JPG e GIF</p>
+                                            </div>
+                                        </div>
+                                        <img src="" alt="Logo Preview" style="display: none;">
+                                    </div>
+                                </div>
+                                <input type="file" id="logoUpload" accept="image/*" class="file-input"
+                                    onchange="handleImageUpload(this, 'logoPreview')">
+                            </div>
+
+                            function handleDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragEnter(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event, inputId) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('drag-over');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const input = document.getElementById(inputId);
+                input.files = files;
+                handleImageUpload(input, inputId === 'backgroundUpload' ? 'backgroundPreview' : 'logoPreview');
+            }
+        }
+
+        function handleImageUpload(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const previewImg = preview.querySelector('img');
+            const overlay = preview.querySelector('.preview-overlay');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    previewImg.classList.add('preview-active');
+                    overlay.style.opacity = '0';
+
+                    // Animate the preview appearance
+                    gsap.fromTo(previewImg,
+                        { scale: 0.95, opacity: 0 },
+                        { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
+                    );
+
+                    // Animate the overlay fade out
+                    gsap.to(overlay,
+                        { opacity: 0, duration: 0.2, ease: "power2.out" }
+                    );
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }

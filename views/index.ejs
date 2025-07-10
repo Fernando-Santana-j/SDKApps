@@ -5,23 +5,13 @@
     <%- include('./reusable/head.ejs') %>
         <title>SDKApps Junte-se hoje mesmo!</title>
         <link rel="stylesheet" href="/public/css/style.css">
+        <meta name="google-signin-client_id" content="AIzaSyCiodUSjgz96XHFFozpuukVzVPAE0bvJe4.apps.googleusercontent.com">
 </head>
 
 <body>
-
-    <custom-popup id="meuPopup" title="Título do Popup" closable="true">
-        <h3>Conteúdo do Popup</h3>
-        <p>Este é um exemplo de conteúdo que será inserido dentro da div popup-content-body.</p>
-        <p>Você pode adicionar qualquer HTML aqui.</p>
-        <button id="botaoInterno">Um botão de exemplo</button>
-      </custom-popup>
-      <script> 
-        document.getElementById('meuPopup').open();
-      </script>
     <%- include('./reusable/register.ejs') %>
         <%- include('./reusable/login.ejs') %>
             <%- include('./reusable/codeConfirm.ejs') %>
-            
                 <header>
                     <div class="container header-content">
                         <div class="logo">SDKApps</div>
@@ -318,9 +308,9 @@
                             if (session.success == true) {
                                 if (redirect == true) {
                                     if (session.emailVerify == false) {
-                                        closePopup(document.getElementById('register-popup-containner'), document.getElementById('register-popup-content'))
-                                        closePopup(document.getElementById('login-popup-containner'), document.getElementById('register-popup-content'))
-                                        openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
+                                        document.getElementById('register-popup-containner').close()
+                                        document.getElementById('login-popup-containner').close()
+                                        document.getElementById('code-confirm-popup-containner').open()
                                     } else {
                                         location.href = '/dashboard'
                                     }
@@ -374,10 +364,15 @@
 
                             auth.onAuthStateChanged(async function (user) {
                                 if (user) {
+                                    await loginGoogle(user, false)
                                     showEnterButtonLogin()
-                                    mensageNotify("Detectamos que você já está logado com o google!")
+                                    mensageNotify("Detectamos que você está logado com o google!")
                                     googleLoginSession = true
-                                    loginGoogle(user, false)
+                                    if (document.getElementById('register-popup-containner').isOpen == true || document.getElementById('login-popup-containner').isOpen == true) {
+                                        setTimeout(() => {
+                                            location.href = '/dashboard'
+                                        }, 300)
+                                    }
                                 }
                             });
                         })
@@ -450,8 +445,8 @@
                             }).then(response => { return response.json() })
                             if (session.success == true) {
                                 userID = session.userID
-                                closePopup(document.getElementById('register-popup-containner'), document.getElementById('register-popup-content'))
-                                openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
+                                document.getElementById('register-popup-containner').close()
+                                document.getElementById('code-confirm-popup-containner').open()
                             } else {
                                 errorNotify(session.data)
                                 e.target.innerHTML = 'Cadastrar-se'
@@ -496,8 +491,8 @@
                             }).then(response => { return response.json() })
                             if (session.success == true) {
                                 userID = session.userID
-                                closePopup(document.getElementById('login-popup-containner'), document.getElementById('register-popup-content'))
-                                openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
+                                document.getElementById('login-popup-containner').close()
+                                document.getElementById('code-confirm-popup-containner').open()
                             } else {
                                 errorNotify(session.data)
                                 e.target.innerHTML = 'Entrar'

@@ -221,9 +221,9 @@ module.exports = {
                 let emailVerifyExist = securityExist ? 'emailVerify' in user.security : false;
                 
                 // Verificação de email
-                if ((emailVerifyExist == true && user.security.emailVerify == false) || emailVerifyExist == false) {
-                    return res.redirect(`/security/code/email?ref=${encodedRef}`);
-                }
+                // if ((emailVerifyExist == true && user.security.emailVerify == false) || emailVerifyExist == false) {
+                //     return res.redirect(`/security/code/email?ref=${encodedRef}`);
+                // }
                 
                 // Verificação 2FA
                 let securityExist2FA = securityExist ? 'data2fa' in user.security : false;
@@ -438,7 +438,12 @@ module.exports = {
         });
         return contagemDatas
     },
-    formatDate: async (data) => {
+    formatDate: (data) => {
+        console.log(data);
+        
+        data = new Date(parseInt(data));
+        console.log(data);
+        
         const dia = String(data.getDate()).padStart(2, '0');
         const mes = String(data.getMonth() + 1).padStart(2, '0');
         const ano = data.getFullYear();
@@ -461,8 +466,7 @@ module.exports = {
         const dbChannel = await client.guilds.cache.get(botConfig.dbServer).channels.cache.get(botConfig.dbChannel);
 
         const dbres = await dbChannel.send({ files: [attachment] });
-
-        return dbres.attachments.first().url;
+        return dbres.attachments.first().url
     },
     addFreeMonthSubscription: async (subscriptionID,) => {
         try {

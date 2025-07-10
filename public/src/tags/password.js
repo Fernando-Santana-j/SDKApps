@@ -16,7 +16,7 @@ passwordInputStyles.replaceSync(`
         font-size: 1.2em;
         padding: 0.5em;
         width: 100%;
-        height: 2.5em;
+        height: 2em;
         background-color: var(--color-text-primary);
         color: var(--primary-color);
         border: none;
@@ -65,7 +65,7 @@ class CustomPasswordInput extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['placeholder', 'name', 'value', 'required'];
+        return ['placeholder', 'name', 'value', 'required', 'height'];
     }
 
     connectedCallback() {
@@ -89,6 +89,7 @@ class CustomPasswordInput extends HTMLElement {
                 <input 
                     type="password" 
                     class="password-input__field"
+                    style="height: ${this.getAttribute('height') || '2em' } !important;"
                     placeholder="${this.getAttribute('placeholder') || 'Digite sua senha...'}"
                     name="${this.getAttribute('name') || ''}"
                     ${this.getAttribute('required') ? 'required' : ''}
@@ -156,6 +157,9 @@ class CustomPasswordInput extends HTMLElement {
                 break;
             case 'required':
                 this.input.required = newValue !== null;
+                break;
+            case 'height':
+                this.input.style.height = `${newValue} !important`;
                 break;
         }
     }

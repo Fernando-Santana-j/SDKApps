@@ -160,8 +160,10 @@ router.post('/auth/login/google', async (req, res) => {
     try {
 
         let user = req.body.user
-        if (user && 'email' in user) {
+
+        if (user && 'email' in user && user.email.length > 0) {
             let findUser = await db.findOne({ colecao: 'users', where: ['email', '==', user.email] })
+           
             if (findUser && findUser.error == false) {
                 await functions.auth(req, res, findUser.id)
                 if (!res.headersSent) {
@@ -188,14 +190,19 @@ router.post('/auth/login/google', async (req, res) => {
                 }).then(async () => {
                     let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
                     req.session.code = newCode
-                    let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: email.replace(/@.+$/, '') })
-                    await functions.sendEmail(email, 'Verificação de email SDK!', htmlEmail)
+                    let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.email.replace(/@.+$/, '') })
+                    await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
 
                     if (!res.headersSent) {
                         res.status(200).json({ success: true, userID: docRef.id, emailVerify: false })
                     }
                 })
             }
+        }else{
+            if (!res.headersSent) {
+                res.status(200).json({ success: false, data: 'Não foi possivel fazer login com o google, tente novamente!' })
+            }
+            return
         }
     } catch (error) {
         console.log(error);

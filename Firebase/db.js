@@ -12,6 +12,7 @@ let app = initializeApp({
 
 const db = getFirestore();
 
+
 module.exports = db
 
 module.exports.app = app

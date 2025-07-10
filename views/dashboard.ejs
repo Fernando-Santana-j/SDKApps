@@ -7,7 +7,7 @@
 </head>
 <body>
     <div id="body-containner">
-        <div id="popup-create-new-store-containner" class="popup-containner">
+        <custom-popup  title="Criar nova loja" id="popup-create-new-store-containner" class="popup-containner">
             <div id="popup-create-new-store-content" class="popup-content">
                 <div id="animation-check-containner" style="display: none;">
                     
@@ -15,21 +15,7 @@
                 
 
                 <div id="popup-create-new-store-form">
-                    <div id="popup-create-new-store-title">
-                        <div style="width: 3em;"></div>
-                        <div id="popup-create-new-store-title-text" class="title-col">
-                            Criar nova loja
-                        </div>
-                        <div class="popup-close-button" id="popup-create-new-store-close">
-                            <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#fff"
-                                    d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
-                                </path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="linha"></div>
+                    
                     <h1 class="desc-col"  id="popup-create-new-store-error"></h1>
                     <div id="popup-create-new-store-inputs">
                        
@@ -67,7 +53,7 @@
                     <button class="button-padrao" id="create-store-button">Criar loja</button>
                 </div>
             </div>
-        </div>
+        </custom-popup>
         <%- include('./reusable/topHeader.ejs',{user:user}) %>
         <div class="container">
             <header>
@@ -88,7 +74,6 @@
             <div class="stores-grid" id="storesGrid"></div>
                 
     
-            <!-- Estado vazio -->
             <div class="empty-state" id="emptyState">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="floating">
@@ -110,7 +95,6 @@
         </div>
     
     
-        <!-- Tooltip -->
         <div class="tooltip" id="tooltip"></div>
     </div>
     

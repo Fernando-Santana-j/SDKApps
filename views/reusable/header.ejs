@@ -1,487 +1,241 @@
-<style>
-    #header {
-        box-shadow: 0 0 20px var(--menu-color);
-        border-top: 1px solid var(--secundary-color-purple);
-        height: 100%;
-        background-color: var(--menu-color);
-        padding: 1em;
-        z-index: 99;
-
-        #header-containner {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            margin-top: 1em;
-
-            #header-up-content {
-                display: flex;
-                gap: 1em;
-                width: 100%;
-                justify-content: center;
-
-                #header-up-server {
-                    width: 13em;
-                    padding: 1em;
-                    height: 4.5em;
-                    box-shadow: var(--purple-box-shadow-small);
-                    border-radius: var(--border-radius-mid);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.6em;
-                    background-color: var(--tertiary-color);
-                    transition: 0.5s;
-                    border: 1px solid var(--tert-color-purple);
-                    opacity: 1;
-                    cursor: pointer;
-                    user-select: none;
-                    -webkit-user-drag: none;
-                    transform: scale(1);
-
-                    &:hover {
-                        box-shadow: var(--purple-box-shadow-medium);
-                        transform: scale(1.1);
-                        transition: 0.5s;
-                    }
-
-                    #header-up-server-pic img {
-                        width: 3.5em;
-                        height: 3.5em;
-                        border-radius: var(--border-radius-max);
-                    }
-
-                    #header-up-server-name {
-                        font-size: 1.2em;
-                        font-weight: bold;
-                        color: var(--white-color);
-                        font-family: 'poppins', sans-serif;
-                        text-wrap: nowrap;
-                        text-overflow: ellipsis;
-                        overflow: hidden;
-                    }
-                }
-            }
-        }
-    }
-
-
-    #header-nav-content {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        justify-content: left;
-        margin-top: 5em;
-        padding: 0.5em;
-
-        #header-nav-list {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
-
-            .header-nav-list-link {
-                padding: 0.8rem 1rem;
-                transition: 0.7s;
-                user-select: none;
-                -webkit-user-drag: none;
-                border-radius: var(--border-radius-mid);
-
-                &:hover {
-                    background: linear-gradient(90deg, var(--main-color-purple), var(--accent));
-                    color: white;
-                    transform: translateX(10px);
-                }
-
-                .header-nav-list-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.6em;
-                    gap: 1rem;
-
-                    color: var(--text-secondary);
-                    text-decoration: none;
-                    border-radius: 10px;
-                    transition: all 0.3s ease;
-
-                    .list-item-icon {
-                        width: 2.5em;
-
-                    }
-
-                    .list-item-name {
-                        font-size: large;
-                        color: var(--color-text-primary);
-                        font-family: 'ubuntu', sans-serif;
-                        font-weight: 500;
-                    }
-                }
-            }
-        }
-    }
-
-    #header-menu {
-        position: fixed;
-        top: 5.5em;
-        left: 1em;
-        width: 3em;
-        z-index: 9999;
-        transition: 0.7s;
-        opacity: 1;
-        cursor: pointer;
-        user-select: none;
-        -webkit-user-drag: none;
-
-        &:hover {
-            opacity: 0.7;
-            transition: 0.7s;
-        }
-    }
-
-    .premium-idic {
-        width: 2em;
-    }
-
-    .menuActive {
-        background: linear-gradient(90deg, var(--main-color-purple), var(--accent));
-        color: white;
-    }
-
-    .list-item-name {
-        width: 100%;
-        display: flex;
-        gap: 1em;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .list-item-icon * {
-        fill: var(--color-fill) !important;
-    }
-</style>
-<%- include('./topHeader.ejs') %>
-    <div id="header-menu" class="flex-center" style="display: none;">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0,0,256,256">
-            <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt"
-                stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0"
-                font-family="none" font-weight="none" font-size="none" text-anchor="none"
-                style="mix-blend-mode: normal">
-                <g transform="scale(5.12,5.12)">
-                    <path
-                        d="M5,8c-0.72127,-0.0102 -1.39216,0.36875 -1.75578,0.99175c-0.36361,0.623 -0.36361,1.39351 0,2.01651c0.36361,0.623 1.0345,1.00195 1.75578,0.99175h40c0.72127,0.0102 1.39216,-0.36875 1.75578,-0.99175c0.36361,-0.623 0.36361,-1.39351 0,-2.01651c-0.36361,-0.623 -1.0345,-1.00195 -1.75578,-0.99175zM5,23c-0.72127,-0.0102 -1.39216,0.36875 -1.75578,0.99175c-0.36361,0.623 -0.36361,1.39351 0,2.01651c0.36361,0.623 1.0345,1.00195 1.75578,0.99175h40c0.72127,0.0102 1.39216,-0.36875 1.75578,-0.99175c0.36361,-0.623 0.36361,-1.39351 0,-2.01651c-0.36361,-0.623 -1.0345,-1.00195 -1.75578,-0.99175zM5,38c-0.72127,-0.0102 -1.39216,0.36875 -1.75578,0.99175c-0.36361,0.623 -0.36361,1.39351 0,2.01651c0.36361,0.623 1.0345,1.00195 1.75578,0.99175h40c0.72127,0.0102 1.39216,-0.36875 1.75578,-0.99175c0.36361,-0.623 0.36361,-1.39351 0,-2.01651c-0.36361,-0.623 -1.0345,-1.00195 -1.75578,-0.99175z">
-                    </path>
-                </g>
-            </g>
-        </svg>
+<link rel="stylesheet" href="/public/css/header.css">
+<!-- Mobile Menu Button -->
+<div id="header-menu" class="flex-center">
+    <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
-    <header id="header" class="main-header">
-        <div id="header-containner">
-            <a href="/dashboard" id="header-up-content">
-                <div id="header-up-server">
-                    <div id="header-up-server-pic" class="flex-center">
-                        <img src="<%= server.server_pic %>">
-                    </div>
-                    <p id="header-up-server-name">
-                        <%= server.name %>
-                    </p>
+</div>
+
+<!-- Overlay when mobile menu is open -->
+<div class="menu-overlay"></div>
+
+<header id="header" class="main-header">
+    <div id="header-container">
+        <div id="sdk-logo-header-top">
+            <a href="/" class="logo">SDKApps</a>
+        </div> 
+
+        <a href="/dashboard" id="header-up-content" data-tooltip="Clique para ir para o dashboard"
+            data-tooltip-position="right" data-tooltip-title="<%= store.IDName %>">
+            <div id="header-up-server">
+                <div class="logo-glow"></div>
+                <div id="header-up-server-pic" class="flex-center">
+                    <img src="<%= store.style.logo %>" alt="<%= store.displayName %> Logo">
                 </div>
-            </a>
+                <p id="header-up-server-name">
+                    <%= store.displayName %>
+                </p>
+            </div>
+        </a>
 
-
-            <nav id="header-nav-content">
-                <ul id="header-nav-list">
-                    <a href="/console/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 1 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(10.66667,10.66667)">
-                                            <path
-                                                d="M4,2c-1.09306,0 -2,0.90694 -2,2v7c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-7c0,-1.09306 -0.90694,-2 -2,-2zM15,2c-1.09306,0 -2,0.90694 -2,2v3c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-3c0,-1.09306 -0.90694,-2 -2,-2zM4,4h5v7h-5zM15,4h5v3h-5zM15,11c-1.09306,0 -2,0.90694 -2,2v7c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-7c0,-1.09306 -0.90694,-2 -2,-2zM15,13h5v7h-5zM4,15c-1.09306,0 -2,0.90694 -2,2v3c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-3c0,-1.09306 -0.90694,-2 -2,-2zM4,17h5v3h-5z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Painel
-                            </div>
-                        </li>
-                    </a>
-                    <a href="/server/sales/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 2 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(5.12,5.12)">
-                                            <path
-                                                d="M10,7c-3.8537,0 -7,3.1463 -7,7c0,3.8537 3.1463,7 7,7c3.8537,0 7,-3.1463 7,-7c0,-3.8537 -3.1463,-7 -7,-7zM36,7v2h7.74023l-7.77539,8.55078l-3.96484,-3.96484l-11,11l-3.97266,-3.97266l-13.70508,12.65234l1.35547,1.46875l12.29492,-11.34766l4.02734,4.02734l11,-11l4.03516,4.03516l8.96484,-9.86328v7.41406h2v-11zM10,9c2.7723,0 5,2.2277 5,5c0,2.7723 -2.2277,5 -5,5c-2.7723,0 -5,-2.2277 -5,-5c0,-2.7723 2.2277,-5 5,-5zM9.49023,11.2832l-1.81055,1.81055h1.41406v3.62305h1.8125v-5.43359zM39,20v24h2v-24zM45,22v22h2v-22zM27,25v19h2v-19zM33,25v19h2v-19zM15,30v14h2v-14zM21,31v13h2v-13zM9,35v9h2v-9zM3,39v5h2v-5z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Vendas
-                            </div>
-                        </li>
-                    </a>
-                    <a href="/server/permissions/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 3 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(5.12,5.12)">
-                                            <path
-                                                d="M23,5c-1.09375,0 -2,0.90625 -2,2v5h-14.33203c-2.54687,0 -4.66797,2.01953 -4.66797,4.53125v22.9375c0,2.51172 2.12109,4.53125 4.66797,4.53125h36.66406c2.54688,0 4.66797,-2.01953 4.66797,-4.53125v-22.9375c0,-2.51172 -2.12109,-4.53125 -4.66797,-4.53125h-13.33203v-5c0,-1.09375 -0.90625,-2 -2,-2zM23,7h5v5.83203c-0.01953,0.10938 -0.01953,0.21875 0,0.32422v1.84375h-5v-1.83203c0.01953,-0.10937 0.01953,-0.21875 0,-0.32422zM6.66797,14h14.33203v1c0,1.09375 0.90625,2 2,2h5c1.09375,0 2,-0.90625 2,-2v-1h13.33203c1.50391,0 2.66797,1.14063 2.66797,2.53125v22.9375c0,1.39063 -1.16406,2.53125 -2.66797,2.53125h-36.66406c-1.50391,0 -2.66797,-1.14062 -2.66797,-2.53125v-22.9375c0,-1.39062 1.16406,-2.53125 2.66797,-2.53125zM14.96094,18c-2.04297,0 -3.58594,0.94922 -4.23437,2.375c-0.58203,1.27734 -0.5,2.77344 -0.16797,4.28516c-0.20312,0.34375 -0.33594,0.74609 -0.27734,1.25c0.07422,0.58594 0.23438,1.05859 0.52734,1.42969c0.08984,0.11719 0.23828,0.10938 0.34766,0.19531c0.09766,0.41406 0.19531,0.83203 0.36719,1.17188c0.11719,0.23438 0.24609,0.44922 0.38672,0.64063c0.01563,0.02344 0.05078,0.03906 0.0625,0.05859c0.00391,0.35547 0.00391,0.70313 -0.01953,1.0625c-0.06641,0.13281 -0.21484,0.30859 -0.66016,0.52734c-0.48047,0.23828 -1.17187,0.47656 -1.90234,0.78516c-0.73437,0.3125 -1.51953,0.71094 -2.17969,1.37109c-0.65625,0.66016 -1.13672,1.61719 -1.21094,2.78516c0,0.02344 0,0.04297 0,0.0625v1c0,0.55078 0.44922,1 1,1h16c0.55078,0 1,-0.44922 1,-1v-1c0,-0.01953 0,-0.03906 0,-0.0625c-0.07422,-1.16797 -0.55078,-2.12109 -1.20703,-2.78125c-0.65625,-0.66406 -1.44141,-1.05859 -2.16797,-1.375c-0.73047,-0.3125 -1.42187,-0.54687 -1.89844,-0.78516c-0.44141,-0.21875 -0.59375,-0.39453 -0.66016,-0.52734c-0.02344,-0.36328 -0.02344,-0.70703 -0.01953,-1.06641c0.01563,-0.02344 0.05078,-0.04297 0.0625,-0.0625c0.14453,-0.19531 0.26953,-0.40625 0.38672,-0.64062c0.16406,-0.33984 0.25391,-0.75781 0.34766,-1.16797c0.11328,-0.08203 0.25781,-0.07812 0.34766,-0.19141c0.29297,-0.37109 0.45313,-0.84375 0.52734,-1.42969c0.05859,-0.51172 -0.07812,-0.91797 -0.28516,-1.26172c0.20313,-0.71875 0.46094,-1.59766 0.375,-2.69531c-0.05078,-0.67187 -0.22266,-1.38281 -0.67187,-2c-0.40625,-0.5625 -1.08594,-0.95703 -1.875,-1.125c-0.61719,-0.5625 -1.42187,-0.82812 -2.30078,-0.82812zM14.96094,20c0.75391,0 1.07422,0.25781 1.05859,0.23438c0.15625,0.26563 0.42578,0.44922 0.73047,0.49219c0.45703,0.0625 0.62109,0.19922 0.76953,0.40234c0.14844,0.20313 0.26172,0.54688 0.29297,0.98047c0.07031,0.86719 -0.19531,2.00781 -0.35937,2.5c-0.13281,0.39063 -0.01172,0.82031 0.30469,1.08203c0.00391,0.01172 -0.02344,-0.04297 -0.02734,-0.01953c-0.03516,0.28516 -0.08203,0.34375 -0.08984,0.36328c-0.35547,0.13281 -0.60547,0.45313 -0.64453,0.82813c-0.02734,0.26563 -0.15234,0.66016 -0.29687,0.95313c-0.07422,0.14844 -0.15234,0.27344 -0.20312,0.34375c-0.03516,0.04688 -0.04297,0.04688 -0.00781,0.02344c-0.28125,0.18359 -0.44922,0.5 -0.44922,0.83203c0,0.59375 -0.02344,1.11328 0.04297,1.85547c0.00781,0.08594 0.02734,0.17578 0.05859,0.25781c0.32031,0.85156 1.03125,1.32813 1.69531,1.65625c0.66406,0.33203 1.36719,0.56641 2,0.83594c0.63281,0.26953 1.17188,0.57422 1.53516,0.94141c0.34766,0.34766 0.55078,0.75781 0.60547,1.4375h-13.95312c0.05469,-0.67578 0.25781,-1.08594 0.60938,-1.4375c0.35938,-0.36719 0.91016,-0.66797 1.54297,-0.9375c0.63281,-0.27344 1.33984,-0.50781 2.00781,-0.83984c0.66406,-0.32812 1.37891,-0.80469 1.69531,-1.65625c0.03516,-0.08203 0.05469,-0.17187 0.0625,-0.25781c0.06641,-0.74219 0.04297,-1.26172 0.04297,-1.85547c0,-0.33984 -0.17578,-0.65625 -0.46094,-0.83984c0.04297,0.02734 0.02734,0.02734 -0.00781,-0.02344c-0.05469,-0.07031 -0.13281,-0.19531 -0.20703,-0.34375c-0.14844,-0.29687 -0.27734,-0.6875 -0.30469,-0.94531c-0.04297,-0.375 -0.28906,-0.69531 -0.64453,-0.82812c-0.00781,-0.01953 -0.05469,-0.07422 -0.08984,-0.36328c-0.00391,-0.03516 -0.04297,0.03516 -0.03516,0.02734c0.30078,-0.24609 0.43359,-0.64844 0.33203,-1.02734c-0.37109,-1.43359 -0.36328,-2.71094 -0.01953,-3.46875c0.34375,-0.75391 0.89453,-1.20312 2.41406,-1.20312zM26,21v2h18v-2zM26,25v2h14v-2zM26,29v2h11v-2zM26,33v2h14v-2z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Permissões
-                            </div>
-                        </li>
-                    </a>
-                    <a href="/server/personalize/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 4 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(8.53333,8.53333)">
-                                            <path
-                                                d="M15,3c-6.61557,0 -12,5.38443 -12,12c0,6.61557 5.38443,12 12,12c6.61557,0 12,-5.38443 12,-12c0,-6.61557 -5.38443,-12 -12,-12zM15,5c5.53469,0 10,4.46531 10,10c0,5.53469 -4.46531,10 -10,10c-5.53469,0 -10,-4.46531 -10,-10c0,-5.53469 4.46531,-10 10,-10zM10.5,13c-0.82843,0 -1.5,0.67157 -1.5,1.5c0,0.82843 0.67157,1.5 1.5,1.5c0.82843,0 1.5,-0.67157 1.5,-1.5c0,-0.82843 -0.67157,-1.5 -1.5,-1.5zM19.5,13c-0.82843,0 -1.5,0.67157 -1.5,1.5c0,0.82843 0.67157,1.5 1.5,1.5c0.82843,0 1.5,-0.67157 1.5,-1.5c0,-0.82843 -0.67157,-1.5 -1.5,-1.5zM11.99414,18.99219c-0.42506,0.02385 -0.78843,0.31419 -0.90551,0.72351c-0.11707,0.40932 0.03781,0.84789 0.38598,1.0929c0.80431,0.58452 2.00872,1.19141 3.52539,1.19141c1.51667,0 2.72155,-0.60637 3.52539,-1.19141c0.28901,-0.21034 0.44382,-0.5589 0.40609,-0.91435c-0.03773,-0.35545 -0.26225,-0.66375 -0.58897,-0.80874c-0.32672,-0.14498 -0.70598,-0.10461 -0.99485,0.1059c-0.57016,0.41496 -1.36432,0.80859 -2.34766,0.80859c-0.98333,0 -1.77792,-0.39312 -2.34961,-0.80859c-0.16123,-0.12099 -0.35526,-0.19043 -0.55664,-0.19922c-0.03318,-0.00165 -0.06643,-0.00165 -0.09961,0z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Personalizar Bot
-                                <div class="premium-idic"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                        <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                            stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                            stroke-dasharray="" stroke-dashoffset="0" font-family="none"
-                                            font-weight="none" font-size="none" text-anchor="none"
-                                            style="mix-blend-mode: normal">
-                                            <g transform="scale(5.33333,5.33333)">
-                                                <path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604">
-                                                </path>
-                                                <path
-                                                    d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z"
-                                                    fill="#ff9800"></path>
-                                            </g>
-                                        </g>
-                                    </svg></div>
-                            </div>
-                        </li>
-                    </a>
-                    <a href="/server/analytics/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 5 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(8.53333,8.53333)">
-                                            <path
-                                                d="M13.01172,4.99219c-0.552,0 -1,0.448 -1,1v17h5v-17c0,-0.552 -0.448,-1 -1,-1zM1.01172,6.99219v20h25v-2h-23v-18zM20.01172,6.99219c-0.552,0 -1,0.448 -1,1v15h5v-15c0,-0.552 -0.448,-1 -1,-1zM6.01172,10.99219c-0.552,0 -1,0.448 -1,1v11h5v-11c0,-0.552 -0.448,-1 -1,-1z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Análises
-                                <div class="premium-idic"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                        <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                            stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                            stroke-dasharray="" stroke-dashoffset="0" font-family="none"
-                                            font-weight="none" font-size="none" text-anchor="none"
-                                            style="mix-blend-mode: normal">
-                                            <g transform="scale(5.33333,5.33333)">
-                                                <path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604">
-                                                </path>
-                                                <path
-                                                    d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z"
-                                                    fill="#ff9800"></path>
-                                            </g>
-                                        </g>
-                                    </svg></div>
-                            </div>
-                        </li>
-                    </a>
-
-                    <a href="/server/ticket/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 6 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 510 510"
-                                    style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
-                                    <g>
-                                        <path
-                                            d="M488.468 345.72C501.347 340.733 510 328.041 510 314.136v-64.334c0-19.068-15.513-34.582-34.582-34.582h-3.531c10.468-13.552 9.502-33.148-2.921-45.572l-45.491-45.491c-9.831-9.831-24.924-12.688-37.558-7.108-6.786 2.998-14.871 1.485-20.118-3.762-5.247-5.248-6.76-13.333-3.764-20.118 5.581-12.633 2.725-27.727-7.108-37.559l-45.49-45.491c-13.482-13.481-35.422-13.483-48.906 0L55.431 215.22H34.582C15.513 215.22 0 230.734 0 249.802v64.334c0 13.905 8.653 26.598 21.532 31.583 6.917 2.679 11.565 9.465 11.565 16.886s-4.648 14.208-11.565 16.886C8.653 384.48 0 397.173 0 411.076v64.333c0 19.068 15.513 34.582 34.582 34.582h440.836c19.069 0 34.582-15.514 34.582-34.582v-64.333c0-13.903-8.652-26.596-21.531-31.585-6.918-2.679-11.566-9.465-11.566-16.886s4.648-14.207 11.565-16.885zM281.744 31.334a4.587 4.587 0 0 1 6.48-.001l45.49 45.491c1.139 1.139 1.492 2.836.878 4.225-7.963 18.031-3.947 39.512 9.993 53.451 13.94 13.94 35.421 17.955 53.453 9.992 1.387-.612 3.085-.26 4.224.879l45.49 45.49a4.587 4.587 0 0 1 .001 6.48l-17.88 17.879h-78.162L224.784 88.293zm-78.173 78.172L309.286 215.22H97.856zM30 475.409v-64.333c0-1.611.951-3.061 2.366-3.609 18.381-7.119 30.73-25.147 30.73-44.862s-12.35-37.743-30.732-44.862c-1.414-.547-2.364-1.997-2.364-3.607v-64.334a4.588 4.588 0 0 1 4.582-4.582H375v234.771H34.582A4.587 4.587 0 0 1 30 475.409zm450-161.273c0 1.61-.95 3.06-2.365 3.608-18.381 7.119-30.732 25.147-30.732 44.862s12.35 37.743 30.731 44.861c1.415.548 2.366 1.999 2.366 3.609v64.333a4.588 4.588 0 0 1-4.582 4.582H405V245.22h70.418a4.588 4.588 0 0 1 4.582 4.582z"
-                                            opacity="1" class=""></path>
-                                        <path
-                                            d="M105 284.991h225v30H105zM105 344.991h225v30H105zM105 404.991h225v30H105z"
-                                            opacity="1"></path>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Tickets
-                                <div class="premium-idic"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                        <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                            stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                            stroke-dasharray="" stroke-dashoffset="0" font-family="none"
-                                            font-weight="none" font-size="none" text-anchor="none"
-                                            style="mix-blend-mode: normal">
-                                            <g transform="scale(5.33333,5.33333)">
-                                                <path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604">
-                                                </path>
-                                                <path
-                                                    d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z"
-                                                    fill="#ff9800"></path>
-                                            </g>
-                                        </g>
-                                    </svg></div>
-                            </div>
-                        </li>
-                    </a>
-                    <a href="/server/backups/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 7 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="50"
-                                    style="position: relative; left: -0.2em;" height="50" version="1.1"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="" viewBox="0 0 48 48"
-                                    style="enable-background:new 0 0 512 512" xml:space="preserve" class="">
-                                    <g>
-                                        <path
-                                            d="M24.53 27.47a.763.763 0 0 0-1.06 0l-2 2a.75.75 0 0 0 1.06 1.06l.72-.72V34a.75.75 0 0 0 1.5 0v-4.19l.72.72a.768.768 0 0 0 1.06 0 .75.75 0 0 0 0-1.06z"
-                                            fill="#ffffff" opacity="1" data-original="#000000"
-                                            data-darkreader-inline-fill="" style="--darkreader-inline-fill: #181a1b;"
-                                            class=""></path>
-                                        <path
-                                            d="M36.5 13.25H22.93a.738.738 0 0 1-.67-.417L21.083 10.5a2.224 2.224 0 0 0-2.013-1.25H11.5a2.252 2.252 0 0 0-2.25 2.25v21a2.252 2.252 0 0 0 2.25 2.25h5.723a7.742 7.742 0 0 0 13.554 0H36.5a2.252 2.252 0 0 0 2.25-2.25v-17a2.252 2.252 0 0 0-2.25-2.25zm-12.5 24A6.25 6.25 0 1 1 30.25 31 6.257 6.257 0 0 1 24 37.25zm13.25-4.75a.75.75 0 0 1-.75.75h-5.086a7.75 7.75 0 1 0-14.828 0H11.5a.75.75 0 0 1-.75-.75v-21a.75.75 0 0 1 .75-.75h7.57a.738.738 0 0 1 .67.417l1.05 2.083H17a.75.75 0 0 0 0 1.5h19.5a.75.75 0 0 1 .75.75z"
-                                            fill="#ffffff" opacity="1" data-original="#000000"
-                                            data-darkreader-inline-fill="" style="--darkreader-inline-fill: #181a1b;"
-                                            class=""></path>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Backups
-                                <div class="premium-idic"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                        <g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                            stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                            stroke-dasharray="" stroke-dashoffset="0" font-family="none"
-                                            font-weight="none" font-size="none" text-anchor="none"
-                                            style="mix-blend-mode: normal">
-                                            <g transform="scale(5.33333,5.33333)">
-                                                <path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604">
-                                                </path>
-                                                <path
-                                                    d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z"
-                                                    fill="#ff9800"></path>
-                                            </g>
-                                        </g>
-                                    </svg></div>
-                            </div>
-                        </li>
-                    </a>
-                    <!-- <a href="/server/cupom/<%#= server.id %>" class="header-nav-list-link <%#= index == 7 ? 'menuActive' : '' %>">
+        <!-- Navigation Menu -->
+        <nav id="header-nav-content">
+            <ul id="header-nav-list">
+                <a href="/console/<%= store.id %>" class="header-nav-list-link <%= index == 1 ? 'menuActive' : '' %>">
                     <li class="header-nav-list-item">
                         <div class="list-item-icon flex-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 682.667 682.667" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><defs><clipPath id="a" clipPathUnits="userSpaceOnUse"><path d="M0 512h512V0H0Z" opacity="1" data-original="#000000"></path></clipPath></defs><g clip-path="url(#a)" transform="matrix(1.33333 0 0 -1.33333 0 682.667)"><path d="M0 0c11.716-11.716 11.716-30.711 0-42.427-11.716-11.715-30.71-11.715-42.426 0-11.716 11.716-11.716 30.711 0 42.427C-30.71 11.716-11.716 11.716 0 0Z" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(233.654 318.507)" class="SvgNoFill" fill="none" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke=""></path><path d="M0 0c11.716-11.716 11.716-30.711 0-42.427-11.715-11.715-30.71-11.715-42.426 0-11.716 11.716-11.716 30.711 0 42.427C-30.71 11.716-11.715 11.716 0 0Z" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(403.36 318.507)" fill="none" class="SvgNoFill" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke=""></path><path d="m0 0 42.426-212.132" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(276.081 403.36)" fill="none" class="SvgNoFill" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke=""></path><path d="m0 0-188.654-188.654c11.716-11.716 11.716-30.71 0-42.427-11.717-11.716-30.71-11.716-42.427 0l-21.213-21.213c-11.716-11.716-11.716-30.71 0-42.426l169.706-169.706c11.716-11.716 30.71-11.716 42.426 0l21.213 21.213c-11.716 11.717-11.716 30.711 0 42.427 11.717 11.716 30.711 11.716 42.427 0l188.654 188.654c11.716 11.716 11.716 30.71 0 42.426L42.426 0C30.71 11.716 11.716 11.716 0 0Z" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(276.081 488.213)" fill="none" class="SvgNoFill" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke=""></path><path d="m0 0 21.213-21.213" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(87.427 257.132)" fill="none" class="SvgNoFill" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke=""></path><path d="m0 0 42.426-42.426" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(151.066 193.493)" fill="none" class="SvgNoFill" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke="" ></path><path d="m0 0 21.213-21.213" style="stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10; stroke-dasharray: none; stroke-opacity: 1; --darkreader-inline-stroke: #e8e6e3;" transform="translate(235.919 108.64)" fill="none" stroke="#000000" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-dasharray="none" stroke-opacity="" data-original="#000000" data-darkreader-inline-stroke="" class="SvgNoFill"></path></g></g></svg>
+                            <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
+                                <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
+                                    stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
+                                    stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
+                                    font-size="none" text-anchor="none" style="mix-blend-mode: normal">
+                                    <g transform="scale(10.66667,10.66667)">
+                                        <path
+                                            d="M4,2c-1.09306,0 -2,0.90694 -2,2v7c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-7c0,-1.09306 -0.90694,-2 -2,-2zM15,2c-1.09306,0 -2,0.90694 -2,2v3c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-3c0,-1.09306 -0.90694,-2 -2,-2zM4,4h5v7h-5zM15,4h5v3h-5zM15,11c-1.09306,0 -2,0.90694 -2,2v7c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-7c0,-1.09306 -0.90694,-2 -2,-2zM15,13h5v7h-5zM4,15c-1.09306,0 -2,0.90694 -2,2v3c0,1.09306 0.90694,2 2,2h5c1.09306,0 2,-0.90694 2,-2v-3c0,-1.09306 -0.90694,-2 -2,-2zM4,17h5v3h-5z">
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
                         <div class="list-item-name">
-                            Cupom
-                            <div class="premium-idic"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M36,36h-24l-5,-20l10,8l7,-13l7,13l10,-8z" fill="#f1b604"></path><path d="M12,36h24v5h-24zM24,7c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM42,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2zM6,12c-1.10457,0 -2,0.89543 -2,2c0,1.10457 0.89543,2 2,2c1.10457,0 2,-0.89543 2,-2c0,-1.10457 -0.89543,-2 -2,-2z" fill="#ff9800"></path></g></g></svg></div>
+                            Painel
                         </div>
                     </li>
-                </a>  -->
-                    <a href="/server/config/<%= server.id %>"
-                        class="header-nav-list-link <%= index == 8 ? 'menuActive' : '' %>">
-                        <li class="header-nav-list-item">
-                            <div class="list-item-icon flex-center">
-                                <svg class="SvgFill" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0,0,256,256">
-                                    <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1"
-                                        stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10"
-                                        stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none"
-                                        font-size="none" text-anchor="none" style="mix-blend-mode: normal">
-                                        <g transform="scale(5.12,5.12)">
-                                            <path
-                                                d="M22.20508,2c-0.48953,0.00026 -0.90693,0.35484 -0.98633,0.83789l-0.97266,5.95508c-1.16958,0.34023 -2.28485,0.7993 -3.33594,1.37109l-4.91406,-3.50977c-0.39728,-0.28369 -0.94131,-0.23911 -1.28711,0.10547l-3.89062,3.88672c-0.3432,0.34344 -0.39015,0.88376 -0.11133,1.28125l3.45703,4.94531c-0.58061,1.05722 -1.04985,2.17878 -1.39844,3.35938l-5.92969,0.98633c-0.4815,0.0811 -0.83404,0.49805 -0.83398,0.98633v5.5c-0.00088,0.48518 0.3466,0.901 0.82422,0.98633l5.93359,1.05078c0.3467,1.17855 0.81296,2.30088 1.39453,3.35937l-3.5,4.89648c-0.28369,0.39728 -0.23911,0.94131 0.10547,1.28711l3.88867,3.89063c0.34265,0.34275 0.88175,0.39048 1.2793,0.11328l4.95508,-3.46875c1.05419,0.57517 2.17218,1.03762 3.3457,1.38086l0.99023,5.96289c0.08025,0.48228 0.49742,0.83584 0.98633,0.83594h5.5c0.4858,0.00071 0.90184,-0.34778 0.98633,-0.82617l1.06055,-5.98633c1.16868,-0.3485 2.28142,-0.8178 3.33008,-1.39648l4.98828,3.5c0.39749,0.27882 0.93781,0.23187 1.28125,-0.11133l3.88867,-3.89258c0.34612,-0.34687 0.38995,-0.89343 0.10352,-1.29102l-3.55664,-4.9375c0.56867,-1.04364 1.02681,-2.14972 1.36719,-3.31055l6.01758,-1.05469c0.47839,-0.08448 0.82689,-0.50053 0.82617,-0.98633v-5.5c-0.00026,-0.48953 -0.35484,-0.90693 -0.83789,-0.98633l-6.00781,-0.98242c-0.34266,-1.15945 -0.80206,-2.26356 -1.37109,-3.30664l3.50781,-4.99805c0.27882,-0.39749 0.23187,-0.93781 -0.11133,-1.28125l-3.89062,-3.88867c-0.34687,-0.34612 -0.89343,-0.38995 -1.29102,-0.10352l-4.92383,3.54102c-1.04908,-0.57636 -2.16255,-1.04318 -3.33398,-1.38867l-1.04687,-5.98437c-0.08364,-0.47917 -0.49991,-0.82867 -0.98633,-0.82812zM23.05664,4h3.80859l0.99609,5.68555c0.06772,0.38959 0.35862,0.70269 0.74219,0.79883c1.46251,0.36446 2.83609,0.94217 4.08984,1.70117c0.34265,0.20761 0.77613,0.1907 1.10156,-0.04297l4.67969,-3.36328l2.69336,2.69336l-3.33203,4.74805c-0.22737,0.3236 -0.24268,0.75079 -0.03906,1.08984c0.75149,1.25092 1.32146,2.61583 1.68555,4.07031c0.0969,0.38717 0.41473,0.67966 0.80859,0.74414l5.70703,0.93359v3.80859l-5.71875,1.00391c-0.3899,0.06902 -0.70237,0.36157 -0.79687,0.74609c-0.35988,1.45263 -0.93019,2.8175 -1.68164,4.06836c-0.20617,0.34256 -0.18851,0.775 0.04492,1.09961l3.37891,4.68945l-2.69336,2.69531l-4.74023,-3.32617c-0.32527,-0.22783 -0.75452,-0.24163 -1.09375,-0.03516c-1.24752,0.75899 -2.62251,1.33943 -4.08008,1.70898c-0.38168,0.09622 -0.67142,0.40737 -0.74023,0.79492l-1.00977,5.6875h-3.81445l-0.94141,-5.66211c-0.06549,-0.39365 -0.35874,-0.7107 -0.74609,-0.80664c-1.46338,-0.36069 -2.84314,-0.93754 -4.10547,-1.69531c-0.33857,-0.20276 -0.76473,-0.18746 -1.08789,0.03906l-4.70312,3.29492l-2.69531,-2.69922l3.32422,-4.64648c0.23221,-0.3254 0.24834,-0.75782 0.04102,-1.09961c-0.76602,-1.26575 -1.34535,-2.6454 -1.71094,-4.11523c-0.09555,-0.38244 -0.40684,-0.67307 -0.79492,-0.74219l-5.63086,-1v-3.81445l5.62695,-0.93555c0.39312,-0.06519 0.71002,-0.35754 0.80664,-0.74414c0.36873,-1.4749 0.94778,-2.85432 1.71094,-4.11719c0.20562,-0.33876 0.19183,-0.76697 -0.03516,-1.0918l-3.28516,-4.69531l2.69727,-2.69531l4.66211,3.33203c0.32413,0.23112 0.75447,0.248 1.0957,0.04297c1.25566,-0.75415 2.63862,-1.32636 4.10352,-1.68555c0.38927,-0.09584 0.68369,-0.41486 0.74805,-0.81055zM25,17c-4.40643,0 -8,3.59357 -8,8c0,4.40643 3.59357,8 8,8c4.40643,0 8,-3.59357 8,-8c0,-4.40643 -3.59357,-8 -8,-8zM25,19c3.32555,0 6,2.67445 6,6c0,3.32555 -2.67445,6 -6,6c-3.32555,0 -6,-2.67445 -6,-6c0,-3.32555 2.67445,-6 6,-6z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                            <div class="list-item-name">
-                                Configurações
-                            </div>
-                        </li>
+                </a>
+                <a href="/console/sales/<%= store.id %>"
+                    class="header-nav-list-link <%= index == 2 ? 'menuActive' : '' %>">
+                    <li class="header-nav-list-item">
+                        <div class="list-item-icon flex-center">
+                            <svg class="SvgFillStroke SvgNoFill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16v5"/><path d="M16 14v7"/><path d="M20 10v11"/><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/><path d="M4 18v3"/><path d="M8 14v7"/></svg>
+                        </div>
+                        <div class="list-item-name">
+                            Vendas
+                        </div>
+                    </li>
+                </a>
+                <a href="/console/customize/<%= store.id %>" class="header-nav-list-link <%= index == 3 ? 'menuActive' : '' %>">
+                    <li class="header-nav-list-item">
+                        <div class="list-item-icon flex-center">
+                            <svg class="SvgNoFill SvgFillStroke" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path class="SvgNoFill" d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/><path d="m15 5 3 3"/></svg>
+                        </div>
+                        <div class="list-item-name">
+                            Customizar
+                        </div>
+                    </li>
+                </a>
+                <a href="/console/integrations/<%= store.id %>" class="header-nav-list-link <%= index == 4 ? 'menuActive' : '' %>">
+                    <li class="header-nav-list-item">
+                        <div class="list-item-icon flex-center">
+                            <svg class="SvgNoFill SvgFillStroke" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg>
+                        </div>
+                        <div class="list-item-name">
+                            Integrações
+                        </div>
+                    </li>
+                </a>
+                <a href="/console/logs/<%= store.id %>" class="header-nav-list-link <%= index == 5 ? 'menuActive' : '' %>">
+                    <li class="header-nav-list-item">
+                        <div class="list-item-icon flex-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="SvgNoFill SvgFillStroke" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-notepad-text-icon lucide-notepad-text"><path d="M8 2v4"/><path d="M12 2v4"/><path d="M16 2v4"/><rect width="16" height="18" x="4" y="4" rx="2"/><path d="M8 10h6"/><path d="M8 14h8"/><path d="M8 18h5"/></svg>
+                        </div>
+                        <div class="list-item-name">
+                            Logs
+                        </div>
+                    </li>
+                </a>
+            </ul>
+        </nav>
+
+        <div id="header-profile-container">
+            <div id="header-profile-content" class="profile-dropdown">
+                <div id="profile-pic" class="flex-center">
+                    <img src="<%= user.profile_pic ? user.profile_pic : '/public/img/Logos/LOGO-PIXEL.gif' %>">
+                </div>
+                <p id="profile-display-name">
+                    <%= user.username %>
+                </p>
+                <div class="dropdown-icon"><svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class=""><path d="m18 15-6-6-6 6"/></svg></div>
+
+                <div class="dropdown-content">
+                    <a href="/profile/<%= user.id %>">
+                        <i class="fa-solid fa-user"></i> Perfil
                     </a>
-                </ul>
-            </nav>
-
+                    <a href="/settings">
+                        <i class="fa-solid fa-gear"></i> Configurações
+                    </a>
+                    <a href="/logout" class="logout-link">
+                        <i class="fa-solid fa-sign-out-alt"></i> Sair
+                    </a>
+                </div>
+            </div>
         </div>
-    </header>
-    <script>
-        verifyHeaderSize(window.innerWidth)
-        window.addEventListener('resize', function () {
-            verifyHeaderSize(window.innerWidth)
-        });
-        function verifyHeaderSize(width) {
-            if (width < 1040) {
-                document.getElementById('header').style.display = 'none'
-                document.getElementById('header-menu').style.display = 'block'
-                document.getElementById('header-containner').style.marginTop = '2.5em'
-            } else {
-                document.getElementById('header').style.display = 'flex'
-                document.getElementById('header-menu').style.display = 'none'
-                document.getElementById('header-containner').style.marginTop = '1em'
-            }
-        }
-        document.getElementById('header-menu').addEventListener('click', () => {
-            if (document.getElementById('header').style.display == 'none') {
-                document.getElementById('header').style.display = 'flex'
-            } else {
-                document.getElementById('header').style.display = 'none'
-            }
-        })
+    </div>
+</header>
 
+<script>
+ document.addEventListener('DOMContentLoaded', function () {
+  const menuBtn = document.getElementById('header-menu');
+  const header = document.getElementById('header');
+  const menuOverlay = document.querySelector('.menu-overlay');
+  const hamburger = document.querySelector('.hamburger');
+  menuBtn.addEventListener('click', function () {
+      const isOpen = header.classList.toggle('open');
+      hamburger.classList.toggle('active');
+      menuOverlay.classList.toggle('active');
+      gsap.to("#header", {
+          duration: 0.5,
+          left: isOpen ? 0 : -300,
+          ease: "power3.out"
+      });
+  });
+  menuOverlay.addEventListener('click', function () {
+      header.classList.remove('open');
+      hamburger.classList.remove('active');
+      menuOverlay.classList.remove('active');
+      gsap.to("#header", {
+          duration: 0.5,
+          left: -300,
+          ease: "power3.in"
+      });
+  });
 
-    </script>
+  const profileDropdown = document.getElementById('header-profile-content');
+  const dropdownContent = document.querySelector('.dropdown-content');
+  const dropdownIcon = document.querySelector('.dropdown-icon');
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .dropdown-content {
+      overflow: hidden;
+      clip-path: inset(0 0 0 0);
+      position: relative;
+    }
+  `;
+  document.head.appendChild(style);
+
+  gsap.set(dropdownContent, { 
+    height: 0, 
+    opacity: 0, 
+    display: 'none',
+    clipPath: "inset(100% 0 0 0)"
+  });
+
+  profileDropdown.addEventListener('click', function () {
+      const isVisible = dropdownContent.classList.toggle('visible');
+      
+      if (isVisible) {
+          dropdownContent.style.display = 'block';
+    
+          const height = dropdownContent.scrollHeight;
+          gsap.set(dropdownContent, { height: height, opacity: 0 });
+          gsap.fromTo(dropdownContent,
+              { clipPath: "inset(100% 0 0 0)", opacity: 0 },
+              { 
+                  clipPath: "inset(0 0 0 0)", 
+                  opacity: 1, 
+                  duration: 0.3, 
+                  ease: "power3.out" 
+              }
+          );
+      } else {
+          gsap.to(dropdownContent, {
+              clipPath: "inset(100% 0 0 0)",
+              opacity: 0,
+              duration: 0.3,
+              ease: "power3.in",
+              onComplete: () => {
+                  setTimeout(() => {
+                    dropdownContent.style.display = 'none';
+                    gsap.set(dropdownContent, { height: 0 });
+                  }, 200);
+              }
+          });
+      }
+      
+      // Rotação do ícone do dropdown
+      gsap.to(dropdownIcon, {
+          duration: 0.3,
+          rotation: isVisible ? 180 : 0,
+          ease: "back.in(1.7)"
+      });
+  });
+
+  const menuItems = document.querySelectorAll('.header-nav-list-link');
+  menuItems.forEach(item => {
+      item.addEventListener('mouseenter', function () {
+          if (!item.classList.contains('menuActive')) {
+              
+              gsap.to(item.querySelector('.list-item-icon'), {
+                  duration: 0.4,
+                  rotation: 5,
+                  scale: 1.1,
+                  ease: "back.out(1.7)"
+              });
+          }
+      });
+      item.addEventListener('mouseleave', function () {
+          if (!item.classList.contains('menuActive')) {
+              gsap.to(item.querySelector('.list-item-icon'), {
+                  duration: 0.4,
+                  rotation: 0,
+                  scale: 1,
+                  ease: "back.out(1.7)"
+              });
+          }
+      });
+  });
+});
+</script>

@@ -159,7 +159,7 @@ async function sendCodeEmail() {
     })
     if (session.success == true) {
         successNotify('Foi enviado um email para o seu email!')
-        openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
+        // openPopup(document.getElementById('code-confirm-popup-containner'), document.getElementById('code-confirm-popup-content'))
     } else {
         errorNotify(session.data)
     }
@@ -177,7 +177,7 @@ document.querySelectorAll('.init-button').forEach(button => {
             return
         }
 
-        openPopup(document.getElementById('login-popup-containner'), document.getElementById('login-popup-content'))
+        // openPopup(document.getElementById('login-popup-containner'), document.getElementById('login-popup-content'))
     })
 })
 
@@ -192,7 +192,7 @@ document.getElementById('buttons-register').addEventListener('click', () => {
         return
     }
 
-    openPopup(document.getElementById('register-popup-containner'), document.getElementById('register-popup-content'))
+    document.getElementById('register-popup-containner').open()
 })
 
 document.getElementById('buttons-login').addEventListener('click', () => {
@@ -206,5 +206,5 @@ document.getElementById('buttons-login').addEventListener('click', () => {
         return
     }
 
-    openPopup(document.getElementById('login-popup-containner'), document.getElementById('login-popup-content'))
+    document.getElementById('login-popup-containner').open()
 })

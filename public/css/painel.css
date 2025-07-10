@@ -61,14 +61,14 @@ body{
     border-radius: 15px;
     padding: 1.5rem;
     position: relative;
-
+    min-width: 12em;
     overflow: hidden;
     border: 1px solid rgba(138, 43, 226, 0.2);
     transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
     box-shadow: 0 0 30px rgba(138, 43, 226, 0.3);
 }
 
@@ -88,9 +88,7 @@ body{
     background: linear-gradient(90deg, var(--secundary-color-purple), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    
     mask-image: linear-gradient(90deg, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
     -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
 }
@@ -152,4 +150,190 @@ body{
 
 .quick-actions-title{
     font-weight: 400;
+}
+#integration-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 1em;
+
+}
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-active .status-indicator {
+    background-color: var(--green-color);
+    box-shadow: 0 0 10px var(--green-color);
+}
+
+.status-inactive .status-indicator {
+    background-color: var(--red-color);
+    box-shadow: 0 0 10px var(--red-color);
+}
+
+.status-pending .status-indicator {
+    background-color: var(--attention-color);
+    box-shadow: 0 0 10px var(--attention-color);
+    animation: pulse 1.5s infinite;
+}
+
+#integration-row{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.integration-col{
+    display: flex;
+    overflow: hidden;
+    cursor: pointer;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--secundary-color);
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--text-gray-color-primary);
+    transition: all 0.3s ease;
+    width: 100%;
+    border-radius: 2px;
+    &:hover{
+        background-color: var(--tertiary-color);
+        box-shadow: 0 0 30px rgba(138, 43, 226, 0.3);
+        transform: scale(1) !important;
+    }
+}
+.integration-col-item-logo{
+    width: 2.4em;
+    height: 1.8em;
+}
+.integration-col-item-name{
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+.integration-col-item{
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.integration-col-item-logo-containner{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+    border-radius: 50%;
+    background: var(--primary-color-opacity);
+    overflow: hidden;
+    width: 3.2em;
+    height: 3.2em;
+}
+
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-active {
+    background-color: rgba(74, 222, 128, 0.15);
+    color: var(--green-color);
+}
+
+.status-inactive {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--red-color);
+}
+
+.status-pending {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--attention-color);
+}
+.funcionamento-mensage-text{
+    text-align: center;
+    color: var(--color-text-primary) !important;
+    font-weight: 300;
+    font-size: 1em;
+}
+#funcionamento-content{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.funcionamento-mensage-text{
+    padding: 1em;
+    border-radius: var(--border-radius-mid);
+}
+
+#funcionamento-mensage-text-pending{
+    background-color: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--attention-color);
+}
+#funcionamento-mensage-text{
+    background-color: rgba(74, 222, 128, 0.15);
+    border: 1px solid var(--green-color);
+}
+#funcionamento-controlls{
+    display: flex;
+    flex-direction: column;
+    gap:4em;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 1em;
+}
+#funcionamento-controll-store, #funcionamento-controll-site{
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+.funcionamento-controll-label{
+    color: var(--color-text-primary);
+    font-weight: 500;
+    font-size: 1.2em;
+
+}
+
+@media screen and (max-width:1250px) {
+    .index-stats-grid{
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(5, 1fr); 
+    }
+    .integracoes-containner{
+        grid-area: 2 / 1 / 4 / 4 !important;
+    }
+    .funcionamento-containner{
+        grid-area: 4 / 1 / 6 / 4 !important;
+    }
+    .vendas-totais-containner{
+        grid-area: 1 / 1 / 2 / 2;
+    }
+    .produtos-vendidos-containner{
+        grid-area: 1 / 2 / 2 / 3;
+    }
+    .produtos-mais-vendidos-containner{
+        grid-area: 1 / 3 / 2 / 4;
+    }  
 }

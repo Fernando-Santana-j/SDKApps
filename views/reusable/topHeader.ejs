@@ -192,9 +192,9 @@
 </style>
 <div id="top-header-containner" class="top-header">
     <div id="top-header-left-content">
-        <div id="top-header-logo" class="logo">
+        <a id="top-header-logo" href="/" class="logo">
             SDKApps
-        </div>
+        </a>
     </div>
     <div id="mini-menu">
         <div id="top-header-mid">
@@ -239,7 +239,7 @@
         <div id="profile-pic" class="flex-center">
             <img src="<%= user.profile_pic ? user.profile_pic : '/public/img/Logos/LOGO-PIXEL.gif' %>">
         </div>
-        <p id="profile-display-name"><%= user.displayName %></p>
+        <p id="profile-display-name"><%= user.username  %></p>
     </div>
     <div id="top-header-profile-options" style="display: none;">
         <div id="top-header-profile-options-content">

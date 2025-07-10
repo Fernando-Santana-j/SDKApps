@@ -1,0 +1,1864 @@
+<html lang="pt-br">
+
+<head>
+    <%- include('./reusable/head.ejs') %>
+        <title>
+            <%= store.displayName %> - Integrações
+        </title>
+        <link rel="stylesheet" href="/public/css/integrations.css">
+        <style>
+
+
+
+
+        </style>
+</head>
+
+<body>
+
+    <div class="console-containner">
+        <%- include('./reusable/body.ejs',{index:4}) %>
+            <div class="console-content">
+
+                <main class="main-content">
+                    <div class="dashboard-header">
+                        <div class="page-title-container">
+                            <h1 class="page-title">Central de Integrações</h1>
+                            <p class="page-description">Conecte seus produtos a diferentes plataformas para
+                                automatizar sua divulgação.</p>
+                        </div>
+                    </div>
+
+                    <!-- Seção do Discord -->
+                    <section class="section-container integration-section fade-in" id="discord-section">
+                        <div class="section-header">
+                            <div class="section-title-container">
+                                <div class="card-icon discord" style="margin-right: 1rem;">
+                                    <svg viewBox="0 -28.5 256 256" width="25" height="25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid"><g><path d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" fill="#5865F2" fill-rule="nonzero"></path></g></svg>
+                                </div>
+                                <h2 class="section-title">Discord</h2>
+                            </div>
+                            <div class="section-status">
+                                <div class="card-status status-disconnected">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                    </svg>
+                                    <span>Desconectado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-description">Conecte ao Discord para enviar seus produtos automaticamente
+                            para canais específicos em seu servidor.</p>
+
+                        <div class="discord-connect-container" style="margin: 1.5rem 0;">
+                            <button class="cta-button" id="discord-connect-btn" style="margin-right: 1rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M15 17h3a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1V7a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2H7">
+                                    </path>
+                                    <line x1="7" y1="12" x2="12" y2="12"></line>
+                                    <polyline points="17 12 19 14 21 12"></polyline>
+                                </svg>
+                                <span>Conectar ao Discord</span>
+                            </button>
+                            <span class="discord-status">Clique para conectar sua conta e escolher o
+                                servidor.</span>
+                        </div>
+
+                        <!-- Abas para produtos publicados e configuração -->
+                        <div class="tabs-container" style="margin-bottom: 1.5rem;">
+                            <div class="tabs-header"
+                                style="display: flex; border-bottom: 1px solid var(--hover-color); margin-bottom: 1rem;">
+                                <button class="tab-button active" id="published-tab" data-tab="published"
+                                    style="background: none; border: none; color: var(--text-primary); padding: 0.8rem 1.5rem; cursor: pointer; position: relative; font-weight: 500;">
+                                    Produtos Publicados
+                                </button>
+                                <button class="tab-button" id="add-product-tab" data-tab="add-product"
+                                    style="background: none; border: none; color: var(--text-gray-color-secundary); padding: 0.8rem 1.5rem; cursor: pointer; position: relative; font-weight: 500;">
+                                    Adicionar Produto
+                                </button>
+                            </div>
+
+                            <!-- Painel de produtos publicados -->
+                            <div class="tab-panel active" id="published-panel" data-tab="published">
+
+                                <div class="products-grid"
+                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                                
+
+                                    <% if (produtosServerDiscord.length===0) { %>
+                                        <div class="empty-products-container"
+                                            style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; text-align: center; background: rgba(255, 255, 255, 0.02); border-radius: 8px; margin: 1rem 0;">
+                                            <div class="empty-illustration" style="margin-bottom: 1.5rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"
+                                                    viewBox="0 0 24 24" fill="none"
+                                                    stroke="var(--text-gray-color-primary)" stroke-width="1"
+                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                    style="opacity: 0.6;">
+                                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                                    <path d="M9 8h.01M15 15h.01"></path>
+                                                    <path d="M9 12h6"></path>
+                                                </svg>
+                                            </div>
+                                            <h3
+                                                style="font-size: 1.2rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-primary);">
+                                                Nenhum produto publicado</h3>
+                                            <p
+                                                style="color: var(--text-gray-color-secundary); margin-bottom: 1.5rem; max-width: 500px;">
+                                                Você ainda não publicou nenhum produto no Discord. Adicione um produto
+                                                para compartilhá-lo automaticamente em seu servidor.</p>
+                                            <button class="cta-button" id="add-first-product-btn"
+                                                style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                                Adicionar Produto
+                                            </button>
+                                        </div>
+                                        <% } else { %>
+                                            <% produtosServerDiscord.forEach(produto=> { %> 
+                                                <div class="product-card card">
+                                                    <div class="card-header"
+                                                        style="display: flex; align-items: center; gap: 1rem;">
+                                                        <div
+                                                            style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                                                            <img src="<%= produto.productLogo %>" alt="<%= produto.productName %>"
+                                                                style="width: 100%; height: 100%; object-fit: cover;">
+                                                        </div>
+                                                        <div style="flex-grow: 1;">
+                                                            <h4 style="margin: 0 0 0.2rem 0; font-size: 1rem;">
+                                                                <%= produto.productName %>
+                                                            </h4>
+                                                            <div
+                                                                style="display: flex; align-items: center; gap: 0.5rem;">
+                                                                <span
+                                                                    style="font-size: 0.8rem; color: var(--text-gray-color-primary);">Canal:</span>
+                                                                <span
+                                                                    style="font-size: 0.8rem; padding: 0.15rem 0.5rem; background: rgba(88, 101, 242, 0.2); border-radius: 12px; color: var(--main-color-purple);">
+                                                                    <%= produto.channelName %>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body" style="padding-top: 0.5rem;">
+                                                        <div class="product-settings" style="margin-bottom: 0.8rem;">
+                                                            <div
+                                                                style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                                                <span
+                                                                    style="font-size: 0.85rem; color: var(--text-gray-color-secundary);">Preço:</span>
+                                                                <span style="font-size: 0.85rem;">
+                                                                    <%= produto.productPrice %>
+                                                                </span>
+                                                            </div>
+                                                            <div
+                                                                style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                                                <span
+                                                                    style="font-size: 0.85rem; color: var(--text-gray-color-secundary);">Tipo:</span>
+                                                                <span style="font-size: 0.85rem;">
+                                                                    <%= produto.productType == "normal" ? "Normal" : produto.productType == "single" ? "Single" : "Assinatura" %>
+                                                                </span>
+                                                            </div>
+                                                            <div style="display: flex; justify-content: space-between;">
+                                                                <span
+                                                                    style="font-size: 0.85rem; color: var(--text-gray-color-secundary);">Última
+                                                                    atualização:</span>
+                                                                <span style="font-size: 0.85rem;">
+                                                                    <%= produto.formatUpDate %>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-footer"
+                                                            style="display: flex; justify-content: space-between; padding-top: 0.8rem; border-top: 1px solid var(--hover-color);">
+
+                                                            <button class="secondary-button edit-product-btn"
+                                                                data-product-id="<%= produto.productID %>" data-discordRef-id="<%= produto.id %>">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                    height="16" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path
+                                                                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
+                                                                    </path>
+                                                                    <path
+                                                                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
+                                                                    </path>
+                                                                </svg>
+                                                                Editar
+                                                            </button>
+                                                            <button class="cta-button send-now-btn"
+                                                                data-product-id="<%= produto.productID %>" data-discordRef-id="<%= produto.id %>">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                    height="16" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                                    <polygon points="22 2 15 22 11 13 2 9 22 2">
+                                                                    </polygon>
+                                                                </svg>
+                                                                Enviar Agora
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                                    <% } %>
+                                </div>
+                            </div>
+
+                            <!-- Painel de adicionar produto -->
+                            <div class="tab-panel" id="add-product-panel" data-tab="add-product"
+                                style="display: none; height: auto; overflow: visible;">
+                                <div class="card"
+                                    style="background-color: var(rgba(255, 255, 255, 0.03)); padding: 1.5rem; height: auto; overflow: visible; margin-bottom: 2rem;">
+                                    <h3 style="margin-top: 0; margin-bottom: 1.5rem; font-size: 1.2rem;">Configurar
+                                        Envio de Produto</h3>
+                                    <div id="discord-prod-dropdown-containner">
+                                        <div class="discord-prod-dropdown-item">
+                                            <label class="lable-padrao">Selecione o produto</label>
+                                            <custom-dropdown id="discord-product" options-json="<%= JSON.stringify(inputSelectProducts) %>"></custom-dropdown>
+                                        </div>
+                                        <div class="discord-prod-dropdown-item">
+                                            <label class="lable-padrao">Canal para envio</label>
+                                            <custom-dropdown id="discord-channel" options-json="<%= JSON.stringify(discordTextChannels) %>"></custom-dropdown>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="toggle-switch">
+                                            <span class="toggle-label">Atualização automática quando o produto for editado</span>
+                                            <toggle-switch id="auto-update-toggle" name="auto-update" checked></toggle-switch>
+                                        </div>
+                                    </div>
+
+                                    <!-- <div class="form-group">
+                                        <label class="lable-padrao">Tipo de visualização</label>
+                                        <div class="radio-group">
+                                            <label class="radio-container">
+                                                <input type="radio" name="embed-type" value="default"
+                                                    class="radio-input" checked>
+                                                <span class="radio-custom"></span>
+                                                <span class="radio-label">Embed padrão do Discord</span>
+                                            </label>
+                                            <label class="radio-container">
+                                                <input type="radio" name="embed-type" value="image" class="radio-input">
+                                                <span class="radio-custom"></span>
+                                                <span class="radio-label">Imagem personalizada</span>
+                                            </label>
+                                        </div>
+                                    </div> -->
+
+                                    <div class="form-group">
+                                        <label class="lable-padrao">Campos a incluir</label>
+                                        <div class="checkbox-group"
+                                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;">
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="name" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Nome</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="price" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Preço</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="description" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Descrição</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="image" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Imagem</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="link" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Link de compra</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="stock">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Estoque</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="category">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Categoria</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="rating">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Avaliação</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="server" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Servidor</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input field-checkbox"
+                                                    value="date" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Data</span>
+                                            </label>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="lable-padrao">Prévia do embed</label>
+                                        <div style="border-radius: var(--border-radius-mid); overflow: visible; background-color: rgba(255, 255, 255, 0.02); padding: 1rem; margin-top: 0.5rem; min-height: 300px; display: block; position: relative; height: auto;"
+                                            id="embed-preview">
+                                            <div class="discord-embed-container" style="background-color: #2f3136; border-left: 4px solid var(--main-color-purple); border-radius: 4px; overflow: hidden; margin-bottom: 15px; max-width: 520px; ">
+                        
+                                                <div style="padding:10px;" id="embed-content">
+                                                </div>
+                                            </div>
+                                            <div style="width: 100%; margin-top: 10px; display: flex; justify-content: start;" class="button-container">
+                                                <button class="buy-button" style="width: 10em; background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 8px 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.3s ease;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                                                        <circle cx="9" cy="21" r="1"></circle>
+                                                        <circle cx="20" cy="21" r="1"></circle>
+                                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                                    </svg>
+                                                    Comprar
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div
+                                        style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.5rem;">
+                                        <div style="display: flex; align-items: start; gap: 0.5rem; flex: 1;">
+                                            <button class="secondary-button"  id="delete-product-btn">Deletar produto</button>
+                                        </div>
+                                        <button class="secondary-button" id="cancel-product-btn">Cancelar</button>
+                                        <button class="cta-button" id="save-product-btn">Salvar e Enviar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Seção do Telegram -->
+                    <section class="section-container integration-section fade-in" id="telegram-section">
+                        <div class="section-header">
+                            <div class="section-title-container">
+                                <div class="card-icon"
+                                    style="background-color: rgba(0, 136, 204, 0.2); color: #0088cc; margin-right: 1rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path
+                                            d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.299c-.146.658-.537.818-1.084.51l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.658-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.918z" />
+                                    </svg>
+                                </div>
+                                <h2 class="section-title">Telegram</h2>
+                            </div>
+                            <div class="section-status">
+                                <span class="tag tag-new">Em breve</span>
+                            </div>
+                        </div>
+
+                        <p class="section-description">Compartilhe produtos, atualizações e notificações diretamente
+                            com seus clientes pelo Telegram.</p>
+
+                        <div class="alert alert-info" style="margin: 1.5rem 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="alert-icon">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <div class="alert-content">
+                                <div class="alert-title">Recurso em desenvolvimento</div>
+                                <div class="alert-message">A integração com o Telegram está atualmente em
+                                    desenvolvimento e estará disponível em breve. Fique atento às atualizações!
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Seção de API Personalizada -->
+                    <!-- <section class="section-container integration-section fade-in" id="api-section">
+                        <div class="section-header">
+                            <div class="section-title-container">
+                                <div class="card-icon"
+                                    style="background: linear-gradient(90deg, #bb86fc, #ae00ff); margin-right: 1rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="16 18 22 12 16 6"></polyline>
+                                        <polyline points="8 6 2 12 8 18"></polyline>
+                                    </svg>
+                                </div>
+                                <h2 class="section-title">API Personalizada</h2>
+                            </div>
+                            <div class="section-status">
+                                <div class="card-status status-active">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                        fill="#4ade80" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                    </svg>
+                                    <span>Ativo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="section-description">Utilize nossa API REST para integrar produtos diretamente com
+                            suas próprias aplicações e serviços personalizados.</p>
+
+                        <div class="content-grid" style="margin-top: 1.5rem;">
+                            <div class="card stagger-item">
+                                <div class="card-header">
+                                    <div class="card-title-container">
+                                        <div class="card-icon" style="background-color: rgba(138, 43, 226, 0.15);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path
+                                                    d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="card-title">API Keys</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-description">
+                                        Gerencie suas chaves de API para autenticar suas integrações com nossa
+                                        plataforma.
+                                    </p>
+                                    <div class="form-group">
+                                        <label class="lable-padrao">Chave de API atual</label>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="flex: 1; position: relative;">
+                                                <input type="password" class="input-padrao" style="padding-right: 6rem;"
+                                                    id="api-key-field"
+                                                    value="sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly>
+                                            </div>
+                                            <button class="secondary-button" id="copy-api-key">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                    </path>
+                                                </svg>
+                                                <span>Copiar</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="cta-button" id="regenerate-api-key">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 4v6h6"></path>
+                                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                            </svg>
+                                            <span>Gerar Nova Chave</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card stagger-item">
+                                <div class="card-header">
+                                    <div class="card-title-container">
+                                        <div class="card-icon" style="background-color: rgba(138, 43, 226, 0.15);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M17 3a2.85 2.85 0 1 1 0 5.7"></path>
+                                                <path d="M10 10a2.85 2.85 0 1 1 0 5.7"></path>
+                                                <path d="M3 17a2.85 2.85 0 1 1 0 5.7"></path>
+                                                <path d="M17 3v13a2 2 0 0 1-2 2H8"></path>
+                                                <path d="M10 10v10a2 2 0 0 1-2 2H3"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="card-title">Webhooks</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-description">
+                                        Configure webhooks para receber atualizações em tempo real quando eventos
+                                        ocorrerem na plataforma.
+                                    </p>
+                                    <div class="form-group">
+                                        <label class="lable-padrao">URL do Webhook</label>
+                                        <div style="position: relative;">
+                                            <input type="text" class="input-padrao" id="webhook-url"
+                                                placeholder="https://seuapp.com.br/api/webhook"
+                                                value="https://meuapp.com.br/webhook/produtos">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="lable-padrao">Eventos para notificar</label>
+                                        <div class="checkbox-group"
+                                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem;">
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Produto criado</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Produto atualizado</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input" checked>
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Produto excluído</span>
+                                            </label>
+                                            <label class="checkbox-container">
+                                                <input type="checkbox" class="checkbox-input">
+                                                <span class="checkbox-custom"></span>
+                                                <span class="checkbox-label">Estoque baixo</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="cta-button" id="save-webhook">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path
+                                                    d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z">
+                                                </path>
+                                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                                <polyline points="7 3 7 8 15 8"></polyline>
+                                            </svg>
+                                            <span>Salvar Configurações</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card stagger-item">
+                                <div class="card-header">
+                                    <div class="card-title-container">
+                                        <div class="card-icon" style="background-color: rgba(138, 43, 226, 0.15);">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                                                </path>
+                                                <polyline points="14 2 14 8 20 8"></polyline>
+                                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                <polyline points="10 9 9 9 8 9"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="card-title">Documentação</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-description">
+                                        Acesse nossa documentação detalhada para aprender como utilizar todas as
+                                        funcionalidades da API.
+                                    </p>
+                                    <div class="feature-list" style="margin: 1rem 0;">
+                                        <div class="feature-item"
+                                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            <span>Autenticação e autorização</span>
+                                        </div>
+                                        <div class="feature-item"
+                                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            <span>Endpoints para produtos</span>
+                                        </div>
+                                        <div class="feature-item"
+                                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            <span>Tratamento de erros</span>
+                                        </div>
+                                        <div class="feature-item"
+                                            style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            <span>Exemplos de código</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="#" class="secondary-button" target="_blank" rel="noopener noreferrer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                </path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                            <span>Ver Documentação</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section> -->
+                </main>
+            </div>
+
+            <%- include('./reusable/script.ejs') %>
+            <div>
+                <div id="storeProducts" hidden data="<%= JSON.stringify(store.products) %>"></div>
+                <script>
+                    let storeProducts = JSON.parse((document.getElementById('storeProducts').getAttribute('data')).replace(/&#34;/g, '"'))
+                    let discordConnected = "<%= discordConnected %>"
+                    let serverName = "<%= serverName %>"
+                </script>
+            </div>
+            <script>
+               const storeID = location.pathname.replace('/console/integrations/', "");
+                
+               async function atualizarPreview() {
+                    console.log("Atualizando preview com ordem correta...");
+
+                    const previewContainer = document.getElementById('embed-preview');
+                    if (!previewContainer) {
+                        console.error("Container de preview não encontrado");
+                        return;
+                    }
+
+                    // Verificar se um produto foi selecionado
+                    const produtoSelecionado = document.getElementById('discord-product').value;
+
+                    if (!produtoSelecionado) {
+                        // Nenhum produto selecionado, mostrar mensagem
+                        previewContainer.innerHTML = `
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; width: 100%; text-align: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-gray-color-primary)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.6;">
+                                    <path d="M21 16V8.00002C21 6.93915 20.5786 5.92173 19.8284 5.17159C19.0783 4.42144 18.0609 4 17 4H7C5.93913 4 4.92172 4.42144 4.17157 5.17159C3.42143 5.92173 3 6.93915 3 8.00002V16C3 17.0609 3.42143 18.0783 4.17157 18.8284C4.92172 19.5786 5.93913 20 7 20H17C18.0609 20 19.0783 19.5786 19.8284 18.8284C20.5786 18.0783 21 17.0609 21 16Z"></path>
+                                    <path d="M3 9H21"></path>
+                                    <path d="M9 20V9"></path>
+                                </svg>
+                                <h3 style="color: var(--text-gray-color-primary); font-weight: 500; margin-bottom: 0.5rem;">Selecione um produto</h3>
+                                <p style="color: var(--text-gray-color-secundary); max-width: 300px; font-size: 0.9rem;">Escolha um produto no campo acima para visualizar como ficará o embed do Discord.</p>
+                            </div>
+                        `;
+
+                        // Animação da mensagem
+                        gsap.fromTo(previewContainer.children[0],
+                            { opacity: 0, y: 20 },
+                            { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
+                        );
+
+                        return; // Não continuar com o restante da função
+                    }else{
+                        previewContainer.innerHTML = `
+                        <div class="discord-embed-container" style="background-color: #2f3136; border-left: 4px solid var(--main-color-purple); border-radius: 4px; overflow: hidden; margin-bottom: 15px; max-width: 520px; ">
+                        
+                        <div style="padding:10px;" id="embed-content">
+                        </div>
+                    </div>
+                    <div style="width: 100%; margin-top: 10px; display: flex; justify-content: start;" class="button-container">
+                        <button class="buy-button" style="width: 10em; background-color: #2ecc71; color: white; border: none; border-radius: 4px; padding: 8px 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.3s ease;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            Comprar
+                        </button>
+                    </div>
+                        `;
+                    }
+
+                    // Obter os campos marcados
+                    const fieldCheckboxes = document.querySelectorAll('.field-checkbox:checked');
+                    const checkedFields = Array.from(fieldCheckboxes).map(cb => cb.value);
+
+                    // Se é a primeira execução, salvar o conteúdo anterior
+                    const isFirstRun = !previewContainer.hasAttribute('data-initialized');
+
+                    // Verificar elementos que já existiam antes
+                    const previousCheckedFields = isFirstRun ? [] :
+                        JSON.parse(previewContainer.getAttribute('data-checked-fields') || '[]');
+
+                    // Salvar campos atuais para comparação na próxima execução
+                    previewContainer.setAttribute('data-checked-fields', JSON.stringify(checkedFields));
+
+                    // Identificar campos novos e removidos
+                    const newFields = checkedFields.filter(field => !previousCheckedFields.includes(field));
+                    const removedFields = previousCheckedFields.filter(field => !checkedFields.includes(field));
+
+                    // Marcar como inicializado
+                    previewContainer.setAttribute('data-initialized', 'true');
+
+                    // Criar um container Discord mais compacto, semelhante a uma mensagem
+                    if (!isFirstRun)  {
+                       
+                        removedFields.forEach(field => {
+                            const element = previewContainer.querySelector(`[data-field="${field}"]`);
+                            if (element) {
+                                gsap.to(element, {
+                                    opacity: 0,
+                                    height: 0,
+                                    marginTop: 0,
+                                    marginBottom: 0,
+                                    padding: 0,
+                                    duration: 0.3,
+                                    ease: "power2.inOut",
+                                    onComplete: () => {
+                                        element.remove();
+                                    }
+                                });
+                            }
+                        });
+
+                    }
+
+                    // Pegar o container do conteúdo
+                    const embedContent = previewContainer.querySelector('#embed-content');
+                    
+                    
+                    
+                    let currentProductID = document.getElementById("discord-product").value
+
+                    let storeProd = await fetch(`/product/get`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ storeID: storeID, productID: currentProductID })
+                    }).then(res => res.json())
+
+                    if (storeProd.success == false) {
+                        errorNotify(storeProd.data);
+                        return;
+                    }
+
+                    storeProd = storeProd.data;
+                    const agora = new Date();
+                    let formatDate = `${String(agora.getDate()).padStart(2, '0')}/${String(agora.getMonth() + 1).padStart(2, '0')}/${agora.getFullYear()}, ${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+
+                    let produto = {
+                        nome: "Nome do produto",
+                        id: "null",
+                        estoque: 0,
+                        preco: "R$ 0,00",
+                        tipoEntrega: "Entrega automática",
+                        servidor: "Nome do servidor",
+                        data: "00/00/0000, 00:00",
+                        categoria: "null",
+                        avaliacao: "0/5",
+                        descricao: "Descricao do produto",
+                        imagem: "/public/img/Logos/CAPA-PIXEL.gif"
+                    }
+                    if (storeProd) {
+                        produto = {
+                            nome: storeProd.name,
+                            id: storeProd.id,
+                            estoque: "stockAmount" in storeProd.stock ? storeProd.stock.stockAmount : storeProd.stock.stockItems.length,
+                            preco: (storeProd.price / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                            tipoEntrega: "Entrega automática",
+                            servidor: serverName,
+                            data: formatDate,
+                            categoria: "null",
+                            avaliacao: "0/5",
+                            descricao: storeProd.description,
+                            imagem: storeProd.background
+                        }
+                    }
+
+                    // =========== NOVA ORDEM DOS ELEMENTOS ===========
+                    // 1. Nome (novo)
+                    // 2. ID
+                    // 3. Descrição
+                    // 4. Info Container (preço, estoque, etc) - Agora antes da imagem
+                    // 5. Imagem
+                    // 6. Footer (servidor e data)
+
+                    // Nome do produto (acima da descrição)
+                    if (checkedFields.includes('name')) {
+                        const nameDiv = document.createElement('div');
+                        nameDiv.setAttribute('data-field', 'name');
+                        nameDiv.style = 'font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem;';
+                        nameDiv.textContent = produto.nome;
+                        embedContent.appendChild(nameDiv);
+                        if (newFields && newFields.includes('name')) {
+                            gsap.from(nameDiv, {
+                                opacity: 0,
+                                y: -10,
+                                duration: 0.4,
+                                ease: "power2.out"
+                            });
+                        }
+                    }
+
+                    
+
+                    // Descrição antes do info-container
+                    if (checkedFields.includes('description')) {
+                        const descDiv = document.createElement('div');
+                        descDiv.setAttribute('data-field', 'description');
+                        descDiv.style = 'font-size: 0.85rem; margin-bottom: 0.7rem; color: #dcddde;';
+                        descDiv.textContent = produto.descricao;
+                        embedContent.appendChild(descDiv);
+
+                        // Animação para descrição
+                        if (newFields.includes('description')) {
+                            gsap.from(descDiv, {
+                                opacity: 0,
+                                y: 15,
+                                duration: 0.5,
+                                ease: "back.out(1.7)"
+                            });
+                        }
+                    }
+
+                    const needsInfoContainer = ['stock', 'price', 'deliveryType', 'rating']
+                        .some(field => checkedFields.includes(field));
+
+                    if (needsInfoContainer) {
+                        const infoContainer = document.createElement('div');
+                        infoContainer.setAttribute('data-field', 'info-container');
+                        infoContainer.style = 'display: flex; flex-wrap: wrap; gap: 8px; margin: 0.5rem 0 1rem 0;';
+                        embedContent.appendChild(infoContainer);
+
+                        // Array de campos para o info container
+                        const infoFields = [
+                            { key: 'price', label: 'Preço', value: produto.preco },
+                            { key: 'stock', label: 'Estoque', value: produto.estoque },
+                            { key: 'deliveryType', label: 'Tipo de entrega', value: produto.tipoEntrega, icon: true },
+                            { key: 'rating', label: 'Avaliação', value: produto.avaliacao, stars: true }
+                        ];
+
+                        // Adicionar apenas os campos selecionados ao container
+                        infoFields.forEach(field => {
+                            if (checkedFields.includes(field.key)) {
+                                const itemDiv = document.createElement('div');
+                                itemDiv.setAttribute('data-field', field.key);
+                                itemDiv.style = 'display: flex; flex-direction: column; flex: 1 0 30%; min-width: 80px; max-width: calc(33.333% - 6px);';
+
+                                if (field.icon) {
+                                    itemDiv.innerHTML = `
+                                <span style="font-size: 0.75rem; color: var(--text-gray-color-primary);">${field.label}:</span>
+                                <span style="display: flex; align-items: center; font-weight: 600; font-size: 0.85rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; color: #ffd700;">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    ${field.value}
+                                </span>
+                            `;
+                                } else if (field.stars) {
+                                    // Converter valor de avaliação (4.5/5) em número de estrelas
+                                    const ratingValue = parseFloat(field.value.split('/')[0]);
+                                    const maxRating = parseFloat(field.value.split('/')[1] || 5);
+                                    const fullStars = Math.floor(ratingValue);
+                                    const hasHalfStar = ratingValue % 1 >= 0.5;
+                                    const emptyStars = Math.floor(maxRating - ratingValue);
+
+                                    // Gerar HTML para as estrelas
+                                    let starsHTML = '';
+
+                                    // Estrelas cheias
+                                    for (let i = 0; i < fullStars; i++) {
+                                        starsHTML += `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#ffd700" stroke="#ffd700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                `;
+                                    }
+
+                                    // Estrela meia
+                                    if (hasHalfStar) {
+                                        starsHTML += `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" style="margin-right: 2px;">
+                                        <defs>
+                                            <linearGradient id="halfStar" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="50%" stop-color="#ffd700"/>
+                                                <stop offset="50%" stop-color="transparent"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#halfStar)" stroke="#ffd700" stroke-width="1"/>
+                                    </svg>
+                                `;
+                                    }
+
+                                    // Estrelas vazias
+                                    for (let i = 0; i < emptyStars; i++) {
+                                        starsHTML += `
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="transparent" stroke="#ffd700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                `;
+                                    }
+
+                                    itemDiv.innerHTML = `
+                                <span style="font-size: 0.75rem; color: var(--text-gray-color-primary);">${field.label}:</span>
+                                <span style="display: flex; align-items: center; font-weight: 600; font-size: 0.85rem;">
+                                    ${starsHTML}
+                                </span>
+                            `;
+                                } else {
+                                    itemDiv.innerHTML = `
+                                <span style="font-size: 0.75rem; color: var(--text-gray-color-primary);">${field.label}:</span>
+                                <span style="font-weight: 600; font-size: 0.85rem;">${field.value}</span>
+                            `;
+                                }
+
+                                infoContainer.appendChild(itemDiv);
+
+                                // Animação especial para cada tipo de campo
+                                if (newFields.includes(field.key)) {
+                                    // Animação especial para o preço
+                                    if (field.key === 'price') {
+                                        gsap.from(itemDiv, {
+                                            opacity: 0,
+                                            scale: 0.7,
+                                            duration: 0.5,
+                                            ease: "elastic.out(1.2, 0.5)"
+                                        });
+                                    } else {
+                                        gsap.from(itemDiv, {
+                                            opacity: 0,
+                                            y: 20,
+                                            duration: 0.4,
+                                            ease: "back.out(1.7)"
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Imagem (agora DEPOIS do info-container)
+                    if (checkedFields.includes('image')) {
+                        const imageDiv = document.createElement('div');
+                        imageDiv.setAttribute('data-field', 'image');
+                        imageDiv.style = 'width: 100%; height: 180px; border-radius: 4px; overflow: hidden; margin-bottom: 0.75rem;';
+                        imageDiv.innerHTML = `<img src="${produto.imagem}" alt="Produto" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        embedContent.appendChild(imageDiv);
+
+                        // Animação para imagem
+                        if (newFields.includes('image')) {
+                            gsap.from(imageDiv, {
+                                opacity: 0,
+                                scale: 0.9,
+                                duration: 0.6,
+                                ease: "elastic.out(1, 0.5)"
+                            });
+                        }
+                    }
+
+                    // Footer (servidor e data)
+                    const needsFooter = checkedFields.includes('server') || checkedFields.includes('date');
+
+                    if (needsFooter) {
+                        const footerDiv = document.createElement('div');
+                        footerDiv.setAttribute('data-field', 'footer');
+                        footerDiv.style = 'font-weight: 600; margin-top: 0.5rem; display: flex; align-items: center; padding-top: 0.5rem; font-size: 0.8rem;';
+
+                        let footerHTML = '';
+
+                        if (checkedFields.includes('server')) {
+                            footerHTML += `
+                        <span style="display: flex; align-items: center;">
+                            <img src="https://cdn.discordapp.com/icons/752332316847120455/a_46e9ce1dbe206a2e56a6639c0bd157b8.webp" style="width: 16px; height: 16px; border-radius: 50%; margin-right: 4px;">
+                            ${produto.servidor}
+                        </span>
+                    `;
+                        }
+
+                        if (checkedFields.includes('date')) {
+                            // Adicionar o separador apenas quando server e date estiverem ambos ativos
+                            const separator = checkedFields.includes('server') ? '&nbsp;•&nbsp;' : '';
+                            footerHTML += `
+                        <span style="color: var(--text-gray-color-primary);">
+                            ${separator}${produto.data}
+                        </span>
+                    `;
+                        }
+
+                        footerDiv.innerHTML = footerHTML;
+                        embedContent.appendChild(footerDiv);
+
+                        // Animação para o footer
+                        if (newFields.includes('server') || newFields.includes('date')) {
+                            gsap.from(footerDiv, {
+                                opacity: 0,
+                                y: 10,
+                                duration: 0.4,
+                                ease: "power3.out"
+                            });
+                        }
+                    }
+
+                    // Atualizar a visibilidade do botão de compra
+                    const botaoComprar = previewContainer.querySelector('.buy-button');
+                    if (botaoComprar) {
+                        if (checkedFields.includes('link')) {
+                            botaoComprar.style.display = 'flex';
+                            if (newFields.includes('link')) {
+                                gsap.from(botaoComprar, {
+                                    opacity: 0,
+                                    y: 10,
+                                    duration: 0.4,
+                                    ease: "back.out(1.5)"
+                                });
+                            }
+                        } else {
+                            botaoComprar.style.display = 'none';
+                        }
+                    }
+
+                    // Ajustar altura e tamanho do container
+                    const screenWidth = window.innerWidth;
+                    let maxWidth = '520px';
+
+                    if (screenWidth < 768) {
+                        maxWidth = '100%';
+                    } else if (screenWidth < 1024) {
+                        maxWidth = '80%';
+                    }
+
+                    const discordContainer = previewContainer.querySelector('.discord-embed-container');
+                    if (discordContainer) {
+                        discordContainer.style.maxWidth = maxWidth;
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Inicialização
+                    gsap.registerPlugin(ScrollTrigger);
+
+                    const checkboxes = document.querySelectorAll('.field-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.addEventListener('change', function () {
+                            console.log(`Checkbox ${this.value} alterado: ${this.checked ? 'marcado' : 'desmarcado'}`);
+                            atualizarPreview();
+                        });
+                    });
+
+
+                    // Inicializar o preview após um pequeno atraso para garantir que todos os elementos estejam carregados
+                    setTimeout(atualizarPreview, 500);
+                    window.addEventListener('resize', function () {
+                        atualizarPreview();
+                    });
+
+
+                    function resetProductForm() {
+                        document.getElementById('discord-product').value = '';
+                        document.getElementById('discord-channel').value = '';
+                        const checkboxes = document.querySelectorAll('.field-checkbox')
+                        checkboxes.forEach(checkbox => {
+                            checkbox.checked = true;
+                            if (checkbox.value == "category" || checkbox.value == "stock" || checkbox.value == "rating") {
+                                checkbox.checked = false;
+                            }
+                        });
+                        document.getElementById("add-product-tab").innerText = "Adicionar produto"
+                        document.getElementById("save-product-btn").innerText = "Salvar e Enviar"
+                    }
+
+                    // Event listener para o botão de adicionar primeiro produto
+                    const addFirstProductBtn = document.getElementById('add-first-product-btn');
+                    if (addFirstProductBtn) {
+                        addFirstProductBtn.addEventListener('click', function () {
+                            // Selecionar a aba de adicionar produto
+                            if (addProductTab) {
+                                addProductTab.click();
+                            }
+                        });
+                    }
+                    const produtoSelect = document.getElementById('discord-product');
+                    if (produtoSelect) {
+                        produtoSelect.addEventListener('change', function () {
+                            console.log("Produto selecionado: ", this.value);
+                            atualizarPreview();
+                        });
+
+                        // Verificar estado inicial
+                        if (!produtoSelect.value) {
+                            // Não tem produto selecionado inicialmente, atualizar preview
+                            setTimeout(() => {
+                                atualizarPreview();
+                            }, 300);
+                        }
+                    }
+
+
+
+                    let discordConnectBtn = document.getElementById('discord-connect-btn');
+                    const publishedTab = document.getElementById('published-tab');
+                    const addProductTab = document.getElementById('add-product-tab');
+                    const publishedPanel = document.getElementById('published-panel');
+                    const addProductPanel = document.getElementById('add-product-panel');
+                    const saveProductBtn = document.getElementById('save-product-btn');
+                    const cancelProductBtn = document.getElementById('cancel-product-btn');
+
+                    const sendNowBtns = document.querySelectorAll('.send-now-btn');
+                    const editProductBtns = document.querySelectorAll('.edit-product-btn');
+
+                    // Variável para controlar se estamos em modo de edição
+                    let isEditingProduct = false;
+                    let currentEditingProductId = null;
+
+                    // Funções para a gestão de abas
+                    function switchTab(tabName) {
+                        console.log(`Mudando para a aba: ${tabName}`);
+
+                        // Remover classes ativas
+                        publishedTab.classList.remove('active');
+                        addProductTab.classList.remove('active');
+
+                        // Ocultar todos os painéis
+                        publishedPanel.style.display = 'none';
+                        addProductPanel.style.display = 'none';
+
+                        // Referência à seção do Discord para garantir altura adequada
+                        const discordSection = document.getElementById('discord-section');
+                        if (discordSection) {
+                            // Garantir que a seção tenha altura automática
+                            discordSection.style.height = 'auto';
+                            discordSection.style.overflow = 'visible';
+                        }
+
+                        // Ativar aba e painel correspondente
+                        if (tabName === 'published') {
+                            publishedTab.classList.add('active');
+                            publishedTab.style.color = 'var(--text-primary)';
+                            addProductTab.style.color = 'var(--text-gray-color-secundary)';
+                            publishedPanel.style.display = 'block';
+
+                            // Animar produtos na lista
+                            gsap.fromTo('.product-card',
+                                { y: 15, opacity: 0 },
+                                { y: 0, opacity: 1, stagger: 0.1, duration: 0.4, ease: "power1.out" }
+                            );
+
+                            // Resetar estado de edição quando volta para lista
+                            if (isEditingProduct) {
+                                resetProductForm();
+                            }
+                        } else if (tabName === 'add-product') {
+                            addProductTab.classList.add('active');
+                            addProductTab.style.color = 'var(--text-primary)';
+                            publishedTab.style.color = 'var(--text-gray-color-secundary)';
+
+                            // Configurar o painel antes de exibi-lo
+                            addProductPanel.style.display = 'block';
+                            addProductPanel.style.height = 'auto';
+                            addProductPanel.style.overflow = 'visible';
+
+                            // Resetar qualquer altura explicitamente definida no card
+                            const card = addProductPanel.querySelector('.card');
+                            if (card) {
+                                card.style.height = 'auto';
+                                card.style.overflow = 'visible';
+                                card.style.minHeight = 'auto';
+                            }
+
+                            // Garantir que o preview esteja visível e com altura adequada
+                            const previewContainer = document.getElementById('embed-preview');
+                            if (previewContainer) {
+                                previewContainer.style.overflow = 'visible';
+                                previewContainer.style.height = 'auto';
+                            }
+
+                            // Remover animação do container inteiro que estava causando bugs
+                            // Em vez disso, apenas garantir que os elementos estejam visíveis
+                            document.querySelectorAll('#add-product-panel .form-group').forEach(group => {
+                                group.style.opacity = '1';
+                                group.style.transform = 'translateY(0)';
+                            });
+
+                            // Atualizar o preview do embed quando a aba é aberta
+                            setTimeout(() => {
+                                // Verificar se existe um produto selecionado
+                                const produtoSelecionado = document.getElementById('discord-product').value;
+
+                                // Atualizar o preview - isso vai mostrar a mensagem se não tiver produto selecionado
+                                atualizarPreview();
+
+                                // Animar o container do preview para chamar atenção apenas se um produto estiver selecionado
+                                if (produtoSelecionado) {
+                                    const previewContainer = document.getElementById('embed-preview');
+                                    if (previewContainer) {
+                                        previewContainer.style.transition = 'all 0.3s ease';
+                                        previewContainer.style.boxShadow = '0 0 15px rgba(46, 204, 113, 0.5)';
+                                        setTimeout(() => {
+                                            previewContainer.style.boxShadow = 'none';
+                                        }, 1000);
+                                    }
+                                }
+                            }, 100);
+                        }
+
+                        // Verificar alturas periodicamente por um tempo para garantir ajuste correto
+                        let checkCount = 0;
+                        const heightCheckInterval = setInterval(() => {
+                            checkCount++;
+                            if (checkCount >= 5) clearInterval(heightCheckInterval);
+                        }, 300);
+                    }
+
+                    function initDiscordTabs() {
+                        // Se estamos na página de integração do Discord
+                        if (publishedTab && addProductTab) {
+                            // Iniciar com a aba de produtos publicados
+                            switchTab('published');
+                        }
+                    }
+
+                    initializeAnimations();
+
+                    // Event Listeners
+                    discordConnectBtn.addEventListener('click', connectDiscord);
+                    if (publishedTab) publishedTab.addEventListener('click', () => switchTab('published'));
+                    if (addProductTab) addProductTab.addEventListener('click', () => switchTab('add-product'));
+                    if (saveProductBtn) saveProductBtn.addEventListener('click', saveProductConfig);
+                    if (cancelProductBtn) cancelProductBtn.addEventListener('click', () => {
+                        // Resetar o formulário para estado de adição
+                        resetProductForm();
+                        // Voltar para a aba de produtos
+                        switchTab('published');
+                    });
+
+
+                    sendNowBtns.forEach(btn => {
+                        btn.addEventListener('click', sendProductNow);
+                    });
+
+                    editProductBtns.forEach(btn => {
+                        btn.addEventListener('click', editProduct);
+                    });
+
+                    // Inicializar menu responsivo
+                    initMobileMenu();
+
+                    function sendProductNow(e) {
+                        const productCard = e.currentTarget.closest('.product-card');
+                        let button = e.currentTarget;
+                        let channel = button.getAttribute
+                        // Substituir o botão por um loader
+                        const originalContent = e.currentTarget.innerHTML;
+                        e.currentTarget.innerHTML = '<div class="loader" style="margin: 0;"></div>';
+                        e.currentTarget.disabled = true;
+
+                        fetch('/sendMessage/product', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                productID: button.getAttribute('data-product-id'),
+                                discordRef: button.getAttribute('data-discordRef-id'),
+                                storeID: storeID
+                            })
+                            
+                        }).then(res => res.json()).then(data => {
+                            console.log(data);
+                            
+                            if (data.success === true) {
+                                successNotify(data.data)
+                            }else{
+                                errorNotify(data.data);
+                            }
+                            e.target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                                    <polygon points="22 2 15 22 11 13 2 9 22 2">
+                                                                    </polygon>
+                                                                </svg> Enviar Agora`;
+                            e.target.disabled = false;
+
+
+                            // Atualizar a informação de última atualização
+                            const lastUpdateElement = productCard.querySelector('.product-settings div:last-child span:last-child');
+                            lastUpdateElement.textContent = 'Agora';
+
+                            
+                        }).catch(err => {
+                            console.log(err);
+                            
+                            errorNotify("Erro ao enviar a mensagem do produto!");
+                        })
+                    }
+
+                    async function editProduct(e) {
+                        const productCard = e.currentTarget.closest('.product-card');
+                        let productId = e.currentTarget.getAttribute('data-product-id');
+                        let discordRef = e.currentTarget.getAttribute('data-discordRef-id');
+
+                        let product = await fetch(`/integrations/discord/getProduct`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ storeID: storeID, productID: productId, discordRef: discordRef })
+                        }).then(res => res.json())
+                        
+                        if (product.success == false) {
+                            errorNotify(product.data);
+                            return;
+                        }
+
+                        product = product.data;
+
+                        document.getElementById('discord-product').value = product.productID;
+                                                
+
+                        
+                        isEditingProduct = true;
+                        currentEditingProductId = productId;
+
+                        // Atualizar título e botão
+                        const formTitle = document.querySelector('#add-product-panel h3');
+                        if (formTitle) {
+                            formTitle.textContent = 'Editar Produto no Discord';
+                        }
+
+                        if (saveProductBtn) {
+                            saveProductBtn.textContent = 'Salvar Alterações';
+                        }
+
+                        // Mudar texto da aba
+                        if (addProductTab) {
+                            addProductTab.textContent = 'Editar Produto';
+                        }
+
+                        // Mudar para a aba de adição/edição
+                        switchTab('add-product');
+                        
+                    }
+
+                    async function saveProductConfig() {
+                        // Obter valores do formulário
+                        const product = document.getElementById('discord-product').value;
+                        const channel = document.getElementById('discord-channel').value;
+                        const autoUpdate = document.getElementById('auto-update-toggle').checked;
+                        const embedType = null
+                        const selectedFields = Array.from(document.querySelectorAll('.field-checkbox:checked')).map(cb => cb.value);
+
+                   
+                        // Verificar se os campos obrigatórios foram preenchidos
+                        if (!product || !channel) {
+                            errorNotify('Por favor, preencha todos os campos obrigatórios.');
+                            return;
+                        }
+
+
+                        // Mostrar loader no botão
+                        saveProductBtn.innerHTML = '<div class="loader" style="margin: 0;"></div>';
+                        saveProductBtn.disabled = true;
+
+
+                        
+
+                        await fetch(isEditingProduct ? '/integrations/discord/editProduct' : '/integrations/discord/addProduct', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                                storeID: storeID,
+                                productID: product,
+                                channelID: channel,
+                                autoUpdate: autoUpdate,
+                                embedType: embedType != null ? embedType : 1,
+                                selectedFields: selectedFields
+                             })
+                        }).then(res => res.json()).then(data => {
+
+                            if (data.success == true) {
+                                successNotify(data.data);
+                            } else {
+                                errorNotify(data.data);
+                            }
+
+                            saveProductBtn.innerHTML = isEditing ? 'Salvar Alterações' : 'Salvar e Enviar';
+                            saveProductBtn.disabled = false;
+
+                            // Voltar para a aba de produtos
+                            switchTab('published');
+
+                            // Notificar sucesso
+                            const productName = document.querySelector(`#discord-product .dropdown__select-option selected[value="${product}"]`).textContent;
+                            const channelName = document.querySelector(`#discord-channel .dropdown__select-option selected[value="${channel}"]`).textContent;
+
+                            // Limpar o formulário e resetar o estado
+                            resetProductForm();
+
+                            // Mensagem diferente baseada se é edição ou criação
+                            if (isEditing) {
+                                // Destacar o card do produto editado
+                                const productCards = document.querySelectorAll('.product-card');
+                                let editedCard = null;
+
+                                // Encontrar o card correspondente ao produto editado
+                                for (const card of productCards) {
+                                    const cardProductName = card.querySelector('h4').textContent;
+                                    if (cardProductName === productName) {
+                                        editedCard = card;
+                                        break;
+                                    }
+                                }
+
+                                if (editedCard) {
+                                    // Atualizar o canal, se foi alterado
+                                    const channelElement = editedCard.querySelector('.card-header span:last-of-type');
+                                    if (channelElement && channelName) {
+                                        channelElement.textContent = channelName;
+                                    }
+
+                                    // Atualizar a informação de tipo de visualização
+                                    const typeElement = editedCard.querySelector('.product-settings div:nth-child(2) span:last-child');
+                                    if (typeElement) {
+                                        typeElement.textContent = embedType === 'image' ? 'Imagem Personalizada' : 'Embed Padrão';
+                                    }
+
+                                    // Atualizar a informação de atualização automática
+                                    const updateElement = editedCard.querySelector('.product-settings div:nth-child(3) span:last-child');
+                                    if (updateElement) {
+                                        if (autoUpdate) {
+                                            updateElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Automática';
+                                            updateElement.style.color = 'var(--success-color)';
+                                        } else {
+                                            updateElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Manual';
+                                            updateElement.style.color = 'var(--error-color)';
+                                        }
+                                    }
+
+                                    // Atualizar a data de última atualização
+                                    const lastUpdateElement = editedCard.querySelector('.product-settings div:last-child span:last-child');
+                                    if (lastUpdateElement) {
+                                        lastUpdateElement.textContent = 'Agora';
+                                    }
+
+                                    // Destacar o card brevemente para mostrar que foi atualizado
+                                    gsap.to(editedCard, {
+                                        backgroundColor: 'rgba(88, 101, 242, 0.1)',
+                                        duration: 0.3,
+                                        ease: "power1.in",
+                                        onComplete: () => {
+                                            gsap.to(editedCard, {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                                duration: 0.7,
+                                                ease: "power1.out"
+                                            });
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                    }
+
+                    // Inicialização de animações base
+                    function initializeAnimations() {
+                        // Removido animação dos elementos com fade-in
+                        const fadeElements = document.querySelectorAll('.fade-in');
+                        fadeElements.forEach(el => {
+                            el.classList.add('active');
+                        });
+
+                        // Removido animação stagger - todos elementos visíveis imediatamente
+                        const staggerItems = document.querySelectorAll('.stagger-item');
+                        staggerItems.forEach(item => {
+                            item.classList.add('active');
+                        });
+
+                        // Título e subtítulo visíveis imediatamente
+                        const title = document.querySelector('.dashboard-title');
+                        if (title) {
+                            title.style.opacity = 1;
+                            title.style.transform = 'translateY(0)';
+                        }
+
+                        const subtitle = document.querySelector('.dashboard-subtitle');
+                        if (subtitle) {
+                            subtitle.style.opacity = 1;
+                            subtitle.style.transform = 'translateY(0)';
+                        }
+                    }
+
+                    // Conectar ao Discord
+                    function connectDiscord() {
+                        console.log("Conectando ao Discord...");
+
+                        // Mostrar estado de carregamento
+                        discordConnectBtn.innerHTML = '<div class="loader"></div>';
+                        discordConnectBtn.disabled = true;
+
+                        // Extrair o storeID da URL
+                        
+
+                        // Calcular tamanho e posição da popup
+                        const width = 600;
+                        const height = 800;
+                        const left = (window.innerWidth - width) / 2;
+                        const top = (window.innerHeight - height) / 2;
+
+                        // Abrir popup para autenticação do Discord
+                        const popup = window.open(
+                            `/discord/addbot/${storeID}?popup=true`,
+                            'discord-auth',
+                            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+                        );
+
+                        // Verificar se a popup foi aberta com sucesso
+                        if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+                            // Popup foi bloqueada
+                            discordConnectBtn.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M15 17h3a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1V7a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2H7"></path>
+                                    <line x1="7" y1="12" x2="12" y2="12"></line>
+                                    <polyline points="17 12 19 14 21 12"></polyline>
+                                </svg>
+                                <span>Conectar ao Discord</span>`;
+                            discordConnectBtn.disabled = false;
+
+                            // Exibir notificação de erro em vez de alert
+                            if (typeof errorNotify === 'function') {
+                                errorNotify('Popup bloqueada', 'O navegador bloqueou a popup. Por favor, permita popups para este site e tente novamente.');
+                            } else {
+                                alert("O navegador bloqueou a popup. Por favor, permita popups para este site e tente novamente.");
+                            }
+                            return;
+                        }
+
+                        // Definir intervalo para verificar se a popup foi fechada
+                        const checkPopupClosed = setInterval(() => {
+                            if (popup.closed) {
+                                clearInterval(checkPopupClosed);
+                                // Verificar se o bot foi adicionado ao servidor
+                                checkBotAddedToServer(storeID);
+                            }
+                        }, 500);
+                    }
+
+                    // Função para verificar se o bot foi adicionado ao servidor
+                    function checkBotAddedToServer(storeID) {
+                        // Verificar se a variável discordConnected já está disponível globalmente
+                        if (typeof discordConnected !== 'undefined' && discordConnected) {
+                            // Se já estamos conectados, apenas atualizar a UI
+                            updateDiscordUIConnected();
+                            return;
+                        }
+
+                        // Caso contrário, tentar verificar com o servidor
+                        fetch(`/discord/check-bot-status/${storeID}`)
+                            .then(response => {
+                                // Se o endpoint não existe (404) ou qualquer outro erro,
+                                // vamos assumir que não está conectado
+                                if (!response.ok) {
+                                    // Se for 404, podemos apenas considerar não conectado silenciosamente
+                                    if (response.status === 404) {
+                                        if (typeof warningNotify === 'function') {
+                                            warningNotify('Endpoint não encontrado', 'O endpoint de verificação do Discord não está disponível.');
+                                        }
+                                        return { success: false, botAdded: false };
+                                    }
+                                    console.log(`Status da resposta: ${response.status} ${response.statusText}`);
+                                    return { success: false, botAdded: false };
+                                }
+
+                                // Verificar o tipo de conteúdo
+                                const contentType = response.headers.get('content-type');
+                                if (!contentType || !contentType.includes('application/json')) {
+                                    console.log('Resposta não é JSON, assumindo não conectado');
+                                    return { success: false, botAdded: false };
+                                }
+
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data && data.success && data.botAdded) {
+                                    // Bot adicionado com sucesso, atualizar UI
+                                    updateDiscordUIConnected();
+                                } else {
+                                    // Bot não adicionado ou resposta inválida
+                                    updateDiscordUIDisconnected();
+                                }
+                            })
+                            .catch(error => {
+                                console.log("Erro ao verificar status do bot, assumindo não conectado:", error);
+                                if (typeof errorNotify === 'function') {
+                                    errorNotify('Erro na conexão', 'Ocorreu um erro ao verificar o status da conexão com o Discord.');
+                                }
+                                updateDiscordUIDisconnected();
+                            });
+                    }
+
+                    if (discordConnected) {
+                        updateDiscordUIConnected()
+                        document.querySelector(".tabs-container").style.display = "block";
+                    } else {
+                        document.querySelector(".tabs-container").style.display = "none";
+                    }
+                    // Atualizar UI para mostrar que está conectado
+                    function updateDiscordUIConnected() {
+                        // Exibir notificação de sucesso
+                        if (typeof sucessNotify === 'function') {
+                            successNotify('Discord conectado com sucesso!', 'O bot foi adicionado ao seu servidor com sucesso.');
+                        }
+
+                        // Atualizar status do card
+                        const statusBadge = document.querySelector('#discord-section .section-status .card-status');
+                        statusBadge.classList.remove('status-disconnected');
+                        statusBadge.classList.add('status-connected');
+                        statusBadge.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#4ade80" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                            </svg>
+                            <span>Conectado</span>`;
+
+                        // Atualizar botão
+                        discordConnectBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <span>Reconectar</span>`;
+                        discordConnectBtn.disabled = false;
+
+                        // Status de conexão
+                        const discordStatus = document.querySelector('.discord-status');
+                        if (discordStatus) {
+                            discordStatus.textContent = "Conexão estabelecida com o servidor do Discord";
+                            discordStatus.style.color = "var(--success-color)";
+                        }
+
+                        // Efeito de destaque na seção
+                        gsap.to('#discord-section', {
+                            boxShadow: '0 0 20px rgba(88, 101, 242, 0.3)',
+                            duration: 0.4
+                        });
+
+                        gsap.to('#discord-section', {
+                            boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
+                            duration: 2,
+                            delay: 1
+                        });
+                    }
+
+                    // Atualizar UI para mostrar que está desconectado
+                    function updateDiscordUIDisconnected() {
+                        // Verificar se a tentativa de conexão falhou (não primeira visita)
+                        const wasConnectionAttempted = discordConnectBtn.disabled;
+
+                        // Se houve uma tentativa de conexão, exibir notificação de erro
+                        if (wasConnectionAttempted && typeof errorNotify === 'function') {
+                            errorNotify('Erro na conexão com Discord', 'Não foi possível conectar ao servidor do Discord. Tente novamente mais tarde.');
+                        }
+
+                        // Atualizar botão
+                        discordConnectBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 17h3a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-1V7a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v2H7"></path>
+                                <line x1="7" y1="12" x2="12" y2="12"></line>
+                                <polyline points="17 12 19 14 21 12"></polyline>
+                            </svg>
+                            <span>Conectar ao Discord</span>`;
+                        discordConnectBtn.disabled = false;
+
+                        // Status de conexão
+                        const discordStatus = document.querySelector('.discord-status');
+                        if (discordStatus) {
+                            discordStatus.textContent = "Clique para conectar sua conta e escolher o servidor.";
+                            discordStatus.style.color = "";
+                        }
+                    }
+
+                    // Configuração para menus responsivos
+                    function initMobileMenu() {
+                        // Adicionar toggle de menu para mobile
+                        const mobileToggle = document.createElement('button');
+                        mobileToggle.classList.add('btn', 'btn-icon-outline');
+                        mobileToggle.style.position = 'fixed';
+                        mobileToggle.style.top = '1rem';
+                        mobileToggle.style.left = '1rem';
+                        mobileToggle.style.zIndex = '101';
+                        mobileToggle.style.display = 'none';
+                        mobileToggle.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+                        document.body.appendChild(mobileToggle);
+
+                        // Evento para abrir/fechar menu
+                        mobileToggle.addEventListener('click', () => {
+                            const sidebar = document.querySelector('.sidebar');
+                            sidebar.classList.toggle('open');
+
+                            // Animar ícone
+                            if (sidebar.classList.contains('open')) {
+                                gsap.to(mobileToggle.querySelector('svg'), {
+                                    rotation: 90,
+                                    duration: 0.3
+                                });
+                            } else {
+                                gsap.to(mobileToggle.querySelector('svg'), {
+                                    rotation: 0,
+                                    duration: 0.3
+                                });
+                            }
+                        });
+
+                        // Verificar tamanho de tela e ajustar menu
+                        function checkScreenSize() {
+                            if (window.innerWidth <= 768) {
+                                mobileToggle.style.display = 'flex';
+                            } else {
+                                mobileToggle.style.display = 'none';
+                                const sidebar = document.querySelector('.sidebar');
+                                if (sidebar) {
+                                    sidebar.classList.remove('open');
+                                    if (mobileToggle.querySelector('svg')) {
+                                        gsap.set(mobileToggle.querySelector('svg'), { rotation: 0 });
+                                    }
+                                }
+                            }
+                        }
+
+                        // Verificar tamanho inicial
+                        checkScreenSize();
+
+                        // Listener para redimensionamento
+                        window.addEventListener('resize', checkScreenSize);
+
+                        // Fechar menu ao clicar fora
+                        document.addEventListener('click', (e) => {
+                            const sidebar = document.querySelector('.sidebar');
+                            const mobileToggleBtn = mobileToggle;
+
+                            if (sidebar && sidebar.classList.contains('open') &&
+                                !sidebar.contains(e.target) &&
+                                e.target !== mobileToggleBtn &&
+                                !mobileToggleBtn.contains(e.target)) {
+                                sidebar.classList.remove('open');
+
+                                if (mobileToggleBtn.querySelector('svg')) {
+                                    gsap.to(mobileToggleBtn.querySelector('svg'), {
+                                        rotation: 0,
+                                        duration: 0.3
+                                    });
+                                }
+                            }
+                        });
+                    }
+
+                    // Remover completamente o código duplicado e comentado 
+                });
+
+
+
+
+
+
+                // Evitar que o formulário cause scroll ao submeter
+                const embedForm = document.querySelector('form[id*="embed-form"]');
+                if (embedForm) {
+                    embedForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        return false;
+                    });
+                }
+
+                // Também aplicar aos cliques nos próprios labels das caixas
+                const checkboxLabels = document.querySelectorAll('label[for^="field-"]');
+                checkboxLabels.forEach(label => {
+                    label.addEventListener('click', function (e) {
+                        // Não impedir o comportamento padrão aqui para permitir marcar/desmarcar,
+                        // mas restaurar a posição de scroll depois
+                        const scrollPos = window.scrollY;
+
+                        setTimeout(() => {
+                            window.scrollTo(0, scrollPos);
+                        }, 10);
+                    });
+                });
+
+                // Adicionar event listener aos checkboxes para atualizar o preview quando alterados
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Salvar a posição de scroll antes de qualquer interação
+                    let lastScrollPosition = 0;
+
+                    // Capturar todos os checkboxes de campos
+                    const fieldCheckboxes = document.querySelectorAll('.field-checkbox');
+
+                    // Função para atualizar o preview sem afetar o scroll
+                    
+
+                    // Função para lidar com eventos de scroll
+                    function handleScroll() {
+                        // Atualizar a última posição conhecida durante scroll natural
+                        if (!document.body.hasAttribute('data-updating-preview')) {
+                            lastScrollPosition = window.scrollY;
+                        }
+                    }
+
+                    // Adicionar listener para eventos de scroll
+                    window.addEventListener('scroll', handleScroll);
+
+                    // Adicionar aos checkboxes
+                    
+
+                    // Selecionar campos a incluir no embed
+                    const fieldsSection = document.querySelector('.inclusion-fields');
+                    if (fieldsSection) {
+                        fieldsSection.addEventListener('click', function (e) {
+                            // Verificar se clicou em um label ou área próxima a checkboxes
+                            if (e.target.tagName === 'LABEL' ||
+                                e.target.closest('.field-option') ||
+                                e.target.closest('.checkbox-container')) {
+
+                                // Salvar posição antes da interação
+                                lastScrollPosition = window.scrollY;
+
+                                // Esperar a interação terminar antes de restaurar
+                                setTimeout(() => {
+                                    window.scrollTo(0, lastScrollPosition);
+                                }, 20);
+                            }
+                        }, true); // Usar captura para pegar o evento antes de elementos filhos
+                    }
+                });
+
+               
+            </script>
+</body>
+
+</html>
