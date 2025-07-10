@@ -1,5 +1,6 @@
 configurar o login com o google no firebase
 Adicionar a url de redirecionamento no dominio/auth/google https://console.cloud.google.com > API e servicos > credenciais > web client  
 Adicionar as pastas do Store na pasta uploads
-
+No logout fazer ele apagar o token salvo no firebase
+ver questao do limite de imagens por guilda no servidor db
 
