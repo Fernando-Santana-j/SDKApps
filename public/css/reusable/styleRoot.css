@@ -139,7 +139,11 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
 }
+input[type=number] { 
+   -moz-appearance: textfield;
+   appearance: textfield;
 
+}
 ::-webkit-scrollbar {
     width: 10px;
 }
@@ -460,6 +464,10 @@ label {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    user-select: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+    -moz-user-select: none;
 }
 
 .button-padrao::before {
@@ -505,7 +513,6 @@ label {
     height: 100%;
     border-radius: var(--border-radius-mid);
 }
-
 
 .itens-col {
     padding: 1em;
@@ -1038,7 +1045,10 @@ input[type=radio]:checked~.label-radius {
     align-items: center;
     justify-content: center;
     gap: 1em;
-
+    user-select: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+    -moz-user-select: none;
 }
 
 .cta-button:hover {
@@ -1048,6 +1058,9 @@ input[type=radio]:checked~.label-radius {
 
 .secondary-button {
     background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--secundary-color-purple);
     border: 2px solid var(--main-color-purple);
     padding: 0.8rem 1.5rem;
@@ -1055,6 +1068,9 @@ input[type=radio]:checked~.label-radius {
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-standard);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .secondary-button:hover {

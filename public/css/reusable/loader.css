@@ -14,7 +14,21 @@
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
+.loader-container-fit{
 
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color-opacity);
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.loader-container-fit.active,
 .loader-container.active {
   opacity: 1;
   pointer-events: all;

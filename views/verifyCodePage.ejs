@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Pass</title>
+    <%- include('./reusable/head.ejs') %>
+        <style>
+            body {
+                background-color: var(--secundary-color-purple);
+            }
+        </style>
+</head>
+
+<body>
+    <div>
+        <div id="containner"></div>
+        <%- include('./reusable/script.ejs') %>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const refParams = params.get('ref');
+                    
+                    await CodeVerifier.verify({
+                        onSuccess: () => {
+                            successNotify('Código verificado com sucesso')
+                        },
+                        onError: (msg) => {
+                            errorNotify(msg)
+                        },
+                        force: true, // Optional: force verification even if session exists
+                        type: 'email', // Optional: verification type
+                        redirect: refParams ? refParams : "/dashboard",
+                        others: null
+                    });
+                } catch (error) {
+                    console.error('Erro ao verificar código:', error);
+                    errorNotify('Erro ao iniciar verificação de código');
+                }
+            });
+        </script>
+    </div>
+</body>
+
+</html>

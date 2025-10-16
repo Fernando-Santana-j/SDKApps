@@ -1,5 +1,6 @@
 #store-banner-section{
     width: 100%;
+    height: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -35,7 +36,7 @@
 }
 #store-banner-title-containner{
     width: 100%;
-    height: calc(100% - 10em);
+    height: 500px;
     z-index: 2;
     top: 0;
     left: 0;
@@ -53,19 +54,6 @@
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #low-level-product-store-containner{
     background-color: var(--cor-fundo);
     min-height: 100vh;
@@ -76,75 +64,41 @@
     position: relative;
     padding-top: 2em;
 }
-.loja__overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--cor-fundo);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-}
 
-.loja__loader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
-}
-
-.loja__loader-spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(138, 43, 226, 0.3);
-    border-top: 4px solid var(--cor-principal);
-    border-radius: 50%;
-    animation: girar 1.5s linear infinite;
-}
-
-.loja__loader-bar-container {
-    width: 250px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.loja__loader-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--cor-principal-escura), var(--cor-principal-clara));
-    border-radius: 4px;
-    transition: width 0.5s ease;
-}
-
-.loja__loader-text {
-    color: var(--cor-texto-secundaria);
-    font-size: 1.2rem;
-    font-family: 'poppins';
-    letter-spacing: 1px;
-}
-
-/* Layout principal */
-.loja__container {
-    margin-top: 2em;
-    position: relative;
-    max-width: 1400px;
-    margin: 0 auto;
-    overflow: hidden;
-    padding: 0 var(--espacamento-padrao);
-    visibility: hidden; /* Ficará visível após o carregamento */
+/* Classes de Animação */
+.fade-in {
     opacity: 0;
-    z-index: 2;
-    padding-bottom: 5em;
-    transition: opacity 1s ease;
-    
+    animation: aparecer 0.5s forwards;
 }
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+.delay-3 {
+    animation-delay: 0.3s;
+}
+
+.delay-4 {
+    animation-delay: 0.4s;
+}
+
+.delay-5 {
+    animation-delay: 0.5s;
+}
+
+
+
+
+
+
+
+
+
 
 /* Cabeçalho */
 .loja__cabecalho {
@@ -169,14 +123,7 @@
     display: flex;
     margin-left: 1em;
 }
-.loja__titulo::after{
-    content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" stroke="currentColor" viewBox="0 0 24 24" fill="none"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg> ');
-    color: var(--cor-principal-clara);
-    
-    display: block;
-    position: relative;
-    left: 1em;  
-}
+
 #loja__title-icon{
 
     margin-left: 2em;
@@ -391,6 +338,8 @@
     margin-top: 0.5rem;
     background: var(--cor-principal-clara);
     transition: width 0.3s ease;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .loja__card-destaque:hover .loja__nome-produto::after {
@@ -401,6 +350,8 @@
     color: var(--cor-texto-terciaria);
     margin-bottom: 1.5rem;
     line-height: 1.6;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .loja__preco-wrapper {
@@ -680,6 +631,37 @@
     box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
 }
 
+.loja__container {
+    margin-top: 2em;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: 0 var(--espacamento-padrao);
+    opacity: 1;
+    z-index: 2;
+    padding-bottom: 5em;
+    transition: opacity 1s ease;
+    
+}
+.loja__titulo-icone{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.loja__titulo-icone svg{
+    width: 1em !important;
+    height: 1em !important;
+    stroke: var(--cor-principal-clara);
+}
+
+
+
+
+
+
+
+
 /* Animações */
 @keyframes aparecer {
     from {
@@ -754,42 +736,6 @@
         height: 250px;
     }
 }
-
-/* Classes de Animação */
-.fade-in {
-    opacity: 0;
-    animation: aparecer 0.5s forwards;
-}
-
-.delay-1 {
-    animation-delay: 0.1s;
-}
-
-.delay-2 {
-    animation-delay: 0.2s;
-}
-
-.delay-3 {
-    animation-delay: 0.3s;
-}
-
-.delay-4 {
-    animation-delay: 0.4s;
-}
-
-.delay-5 {
-    animation-delay: 0.5s;
-}
-
-
-
-
-
-
-
-
-
-
 
 
 

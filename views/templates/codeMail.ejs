@@ -1,0 +1,143 @@
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            display: table;
+            padding: 1em;
+        }
+
+        .content {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .email-content {
+            width: 100%;
+            max-width: 600px;
+            background-color: #1E1E1E;
+            padding: 1em;
+            border-radius: 10px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .email-content img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.5em;
+            margin-top: 1.5em;
+        }
+
+        p {
+            font-weight: normal;
+            color: #fff;
+            text-align: start;
+            font-size: 1em;
+            margin: 1em 0;
+        }
+
+        .button {
+            display: inline-block;
+            font-size: 1.2em;
+            font-weight: 400;
+            color: #fff !important;
+            text-decoration: none;
+            background-color: #654BCB;
+            border-radius: 20px;
+            padding: 1em 2em;
+            cursor: pointer;
+            margin: 1em;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #4c3ba7;
+        }
+
+        .footer {
+            margin-top: 1em;
+        }
+
+        .footer p {
+            font-size: 1em;
+            color: #d6d6d6;
+            margin: 0;
+        }
+
+        .footer .signature {
+            font-size: 1.2em;
+            font-family: 'Great Vibes', cursive;
+            color: #fff;
+            margin: 0;
+        }
+
+        #code {
+            margin-top: 3em;
+            margin-bottom: 2em;
+            border-radius: 10px;
+            border: 2px solid #d6d6d6;
+            padding: 2.5em;
+            text-align: center;
+        }
+
+        .code-item {
+            font-size: 2em;
+            padding: 0.5em;
+            border-radius: 5px;
+            background-color: #404040;
+            color: #FFF;
+            font-weight: 900;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="email-content">
+                <img src="https://res.cloudinary.com/dmfgy0ccd/image/upload/v1726657603/CAPA-PIXEL_ftgohk.gif"
+                    alt="Banner">
+                <h1>Verificação de e-mail da sua conta SDK!</h1>
+                <p style="margin-top: 1.5em;">Olá, <%= name %></p>
+                <p>Abaixo está o código de acesso para verificar o seu e-mail. Nenhum usuário irá conseguir logar na
+                    conta caso o e-mail não seja verificado!</p>
+                <div id="code">
+                    <table style="margin: 0 auto; border-collapse: separate; border-spacing: 1em;">
+                        <tr>
+                            <td class="code-item"><%= code[0] %></td>
+                            <td class="code-item"><%= code[1] %></td>
+                            <td class="code-item"><%= code[2] %></td>
+                            <td class="code-item"><%= code[3] %></td>
+                            <td class="code-item"><%= code[4] %></td>
+                            <td class="code-item"><%= code[5] %></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="<%= webConfig.host %>/security/email" class="button"
+                    title="Clique para ver mais detalhes sobre o acesso!">Ir para a plataforma</a>
+                <div class="footer">
+                    <p>Cumprimentos,</p>
+                    <p class="signature">SDKApps</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html> 

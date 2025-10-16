@@ -1,0 +1,25 @@
+<% if (user && user.isOwner == true) { %>
+    <style>
+
+        #owner-control-containner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            z-index: 9999999;
+            justify-content: start;
+            padding: 1em;
+            align-items: start;
+        }
+
+        #owner-control-button {
+
+            width: 100%;
+            max-width: 15em;
+        }
+    </style>
+
+    <div id="owner-control-containner">
+        <a class="secondary-button" href="<%= `/console/${store.id}` %>">Ir para o console</a>
+    </div>
+<% } %>

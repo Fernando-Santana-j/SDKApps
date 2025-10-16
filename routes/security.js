@@ -79,6 +79,8 @@ router.post('/security/pass/verify', functions.authPostState, async (req, res) =
     }
 })
 
+
+
 router.get('/security/code/:type', functions.authGetState, async (req, res) => {
     let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
     let v2faQ = `req.cookies.verify2fa_${req.session.uid}`
@@ -139,6 +141,30 @@ router.post('/security/2fa/create', functions.authPostState, async (req, res) =>
     }
 })
 
+router.post('/security/code/page' , functions.authPostState, async (req, res) => {
+    try {
+        res.render('verifyCodePage.ejs', {  type: req.params.type })
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+router.post('/security/code/generate', async (req, res,) => {
+    try {
+        const { email, userName } = req.body;
+        
+        if (!email) {
+            return res.json({ success: false, data: 'Email não fornecido.' });
+        }
+
+        const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+        req.session.code = newCode;
+        req.session.codeExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, data: 'Erro ao gerar código.' });
+    }
+})
 
 
 router.post('/security/code/verify', async (req, res,) => {
@@ -255,23 +281,6 @@ router.post('/security/pass/resend', async (req, res) => {
             }
             return
         }
-
-        if (user && 'security' in user && 'pass' in user.security) {
-            let adminPass = await functions.descriptografar(user.security.pass.admin, process.env.CRIPTOKEYADMIN)
-            let geralPass = await functions.descriptografar(user.security.pass.geral, process.env.CRIPTOKEYPUBLIC)
-
-            let htmlEmail = await functions.readTemplate('passMail.ejs', { adminPass: adminPass, geralPass: geralPass, name: user.displayName })
-            await functions.sendEmail(user.email, '⚠️ | Senhas, cuidado ao exibir, apagar após salvar.', htmlEmail)
-            req.session.resendPass = true
-            if (!res.headersSent) {
-                res.status(200).json({ success: true, data: 'Senhas enviadas!' })
-            }
-        }else{
-            if (!res.headersSent) {
-                res.status(200).json({ success: false, data: 'redirect' })
-            }
-        }
-
     } catch (error) {
         console.log(error);
 
@@ -279,34 +288,33 @@ router.post('/security/pass/resend', async (req, res) => {
             res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
         }
     }
+})
 
-
-
-    router.post('/security/email/send', async (req, res) => {
-        try {
-            let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
-            let user = await db.findOne({ colecao: 'users', doc: req.session.uid })
-            
-            if (newCode && newCode.length == 6) {
-                let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.displayName })
-                await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
-                if (!res.headersSent) {
-                    res.status(200).json({ success: true, data: 'Codigo enviado!' })
-                }
-            } else {
-                if (!res.headersSent) {
-                    res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
-                }
-            }
-        } catch (error) {
-            console.log(error);
-    
-            if (!res.headersSent) {
-                res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
-            }
+router.post('/security/email/send', async (req, res) => {
+    try {
+        let user = await db.findOne({ colecao: 'users', doc: req.session.uid });
+        if (!user) {
+            return res.json({ success: false, data: 'Usuário não encontrado.' });
         }
-    
-    })})
+
+        const newCode = ('' + Math.floor(100000 + Math.random() * 900000)).slice(-6);
+        req.session.code = newCode;
+        req.session.codeExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
+
+        await functions.sendEmail(
+            user.email, 
+            'Verificação de email SDK!', 
+            'codeMail', 
+            { code: newCode, name: user.displayName || 'Usuário' }
+        );
+
+        res.json({ success: true, data: 'Código enviado!' });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, data: 'Erro ao enviar código.' });
+    }
+});
+
 router.post('/security/email/resend', async (req, res) => {
     try {
         let newCode = null
@@ -322,7 +330,7 @@ router.post('/security/email/resend', async (req, res) => {
         }
 
         if (newCode && newCode.length == 6) {
-            let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.displayName })
+            let htmlEmail = await functions.sendEmail(user.email, 'Verificação de email SDK!', { code: newCode, name: user.displayName })
             await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
             if (!res.headersSent) {
                 res.status(200).json({ success: true, data: 'Codigo enviado!' })
@@ -339,8 +347,10 @@ router.post('/security/email/resend', async (req, res) => {
             res.status(200).json({ success: false, data: 'Erro ao enviar o codigo!' })
         }
     }
-
 })
+
+
+
 router.get('/control/login/:id/:session/:ip/:user', functions.authGetState, async (req, res) => {
     let { user, id } = req.params
 
@@ -441,6 +451,64 @@ router.post('/security/pass/create', functions.authPostState, async (req, res) =
     }
 })
 
+// Code verification routes
+router.post('/code/generate', async (req, res) => {
+    try {
+        const { email, userName } = req.body;
+        
+        if (!email) {
+            return res.json({ success: false, data: 'Email não fornecido.' });
+        }
+
+        // Generate a random 6-digit code
+        const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Store the code in session
+        req.session.code = newCode;
+        req.session.codeExpiry = Date.now() + (10 * 60 * 1000); // 10 minutes expiry
+
+        // Send email with code
+        await functions.sendEmail(email, 'Verificação de email SDK!', { code: newCode, name: userName || 'Usuário' });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error generating verification code:', error);
+        res.json({ success: false, data: 'Erro ao gerar código de verificação.' });
+    }
+});
+
+router.post('/code/verify', (req, res) => {
+    try {
+        const { code } = req.body;
+        
+        if (!code) {
+            return res.json({ success: false, data: 'Código não fornecido.' });
+        }
+
+        // Check if code exists and hasn't expired
+        if (!req.session.verificationCode || !req.session.codeExpiry) {
+            return res.json({ success: false, data: 'Código expirado ou inválido. Solicite um novo código.' });
+        }
+
+        if (Date.now() > req.session.codeExpiry) {
+            delete req.session.verificationCode;
+            delete req.session.codeExpiry;
+            return res.json({ success: false, data: 'Código expirado. Solicite um novo código.' });
+        }
+
+        // Verify code
+        if (code === req.session.verificationCode) {
+            delete req.session.verificationCode;
+            delete req.session.codeExpiry;
+            res.json({ success: true });
+        } else {
+            res.json({ success: false, data: 'Código inválido.' });
+        }
+    } catch (error) {
+        console.error('Error verifying code:', error);
+        res.json({ success: false, data: 'Erro ao verificar código.' });
+    }
+});
 
 
 module.exports = router

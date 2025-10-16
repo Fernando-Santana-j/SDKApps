@@ -3,268 +3,200 @@
 
 <head>
     <%- include('../reusable/head.ejs') %>
-        <style>
-            :root {
-                --cor-principal: #8a2be2;
-                --cor-principal-clara: #bb86fc;
-                --cor-principal-escura: #4a148c;
-                --cor-destaque: #03dac6;
-                --cor-fundo: #121212;
-                --cor-superficie: #1e1e1e;
-                --cor-superficie-2: #2d2d2d;
-                --cor-erro: #cf6679;
-                --cor-texto-principal: #ffffff;
-                --cor-texto-secundaria: #e1e1e1;
-                --cor-texto-terciaria: rgba(255, 255, 255, 0.7);
-                --espacamento-padrao: 1rem;
-                --borda-arredondada: 12px;
-                --transicao-padrao: all 0.3s ease;
-            }
-        </style>
-        <title></title>
-        <link rel="stylesheet" href="/public/css/store/products.css">
-        <link rel="stylesheet" href="/public/css/store/storeRoot.css">
+        <%- include('./reusable/storeHead.ejs') %>
+            <link rel="stylesheet" href="/public/css/store/products.css">
+
+            <title>
+                <%= store.displayName %>
+            </title>
+
 </head>
 
 <body>
-    <div id="body-containner">
+    <%- include('./reusable/storeLoader.ejs') %>
+        <div id="body-containner">
 
-        <div id="containner">
-            <%- include('./reusable/storeMenu.ejs') %>
-            <%- include('./reusable/storeCart.ejs') %>
-                <div class="loja__overlay" id="loja__overlay">
-                    <div class="loja__loader">
-                        <div class="loja__loader-spinner"></div>
-                        <div class="loja__loader-bar-container">
-                            <div class="loja__loader-bar" id="loja__loader-bar"></div>
-                        </div>
-
-                    </div>
-                </div>
-                <main id="main-containner">
-                    <section id="store-banner-section" class="store-background-type1">
-                        <div id="store-banner-content">
-                            <img id="store-banner-content-img" src="/public/img/Logos/CAPA-PIXEL.gif" alt="">
-                            <div id="store-banner-overlay"></div>
-                        </div>
-                        <div id="store-banner-title-containner">
-                            <h1 id="store-banner-title" class="title-col">
-                                <%= store.displayName %>
-                            </h1>
-                        </div>
-                    </section>
-                    <div id="low-level-product-store-containner">
-
-                        <div class="loja__container" id="loja__container">
-                            <header class="loja__cabecalho">
-                                <h1 class="loja__titulo">Produtos</h1>
-                                <div id="loja__title-separador"></div>
-                                <div class="loja__busca-wrapper">
-                                    <label for="loja__busca-input" class="loja__busca-icone NoSelectDrag"><svg
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" class="lucide lucide-search">
-                                            <circle cx="11" cy="11" r="8" />
-                                            <path d="m21 21-4.3-4.3" />
-                                        </svg></label>
-                                    <input type="text" class="loja__busca-input" id="loja__busca-input"
-                                        placeholder="Buscar produtos...">
-                                    <div id="loja__busca-clear" title="Apagar busca">
-                                        <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path fill="#fff"
-                                                d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
-                                            </path>
-                                        </svg>
+            <div id="containner">
+                <%- include('./reusable/storeMenu.ejs') %>
+                    <%- include('./reusable/storeCart.ejs') %>
+                        <%- include('./reusable/storeOwnerControl.ejs') %>
+                            <main id="main-containner">
+                                <section id="store-banner-section" class="store-background-type1">
+                                    <div id="store-banner-content">
+                                        <img id="store-banner-content-img" src="/public/img/Logos/CAPA-PIXEL.gif"
+                                            alt="">
+                                        <div id="store-banner-overlay"></div>
                                     </div>
+                                    <div id="store-banner-title-containner">
+                                        <h1 id="store-banner-title" class="title-col">
+                                            <%= store.displayName %>
+                                        </h1>
+                                    </div>
+                                </section>
+                                <div id="low-level-product-store-containner">
+
+                                    <div class="loja__container" id="loja__container">
+                                        <header class="loja__cabecalho">
+                                            <h1 class="loja__titulo"
+                                                style="display: flex; gap: 0.8em; justify-content: center; align-items: center;">
+                                                Produtos <div class="loja__titulo-icone"><svg
+                                                        xmlns="http://www.w3.org/2000/svg" stroke="currentColor"
+                                                        viewBox="0 0 24 24" fill="none" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                                                        <path d="M12 22V12" />
+                                                        <polyline points="3.29 7 12 12 20.71 7" />
+                                                        <path d="m7.5 4.27 9 5.15" />
+                                                    </svg> </div>
+                                            </h1>
+                                            <div id="loja__title-separador"></div>
+                                            <div class="loja__busca-wrapper">
+                                                <label for="loja__busca-input"
+                                                    class="loja__busca-icone NoSelectDrag"><svg
+                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                        class="lucide lucide-search">
+                                                        <circle cx="11" cy="11" r="8" />
+                                                        <path d="m21 21-4.3-4.3" />
+                                                    </svg></label>
+                                                <input type="text" class="loja__busca-input" id="loja__busca-input"
+                                                    placeholder="Buscar produtos...">
+                                                <div id="loja__busca-clear" title="Apagar busca">
+                                                    <svg enable-background="new 0 0 512 512" viewBox="0 0 512 512"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill="#fff"
+                                                            d="m292.2 256 109.9-109.9c10-10 10-26.2 0-36.2s-26.2-10-36.2 0l-109.9 109.9-109.9-109.9c-10-10-26.2-10-36.2 0s-10 26.2 0 36.2l109.9 109.9-109.9 109.9c-10 10-10 26.2 0 36.2 5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5l109.9-109.9 109.9 109.9c5 5 11.55 7.5 18.1 7.5s13.1-2.5 18.1-7.5c10-10 10-26.2 0-36.2z">
+                                                        </path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </header>
+
+                                        <section class="loja__secao-search" id="loja__secao-search"
+                                            style="display: none;">
+                                            <h2 class="loja__titulo-secao">Resultados da Busca</h2>
+                                            <div class="loja__grid-produtos" id="loja__grid-busca"></div>
+                                        </section>
+
+                                        <section class="loja__secao-destaques" id="loja__secao-destaques">
+                                            <h2 class="loja__titulo-secao">Produtos em Destaque</h2>
+                                            <div class="loja__grid-destaques" id="loja__grid-destaques"></div>
+                                        </section>
+
+                                        <div class="loja__separador">
+                                            <span class="loja__separador-animado"></span>
+                                        </div>
+                                        <section class="loja__secao-produtos" id="loja__secao-produtos">
+                                            <h2 class="loja__titulo-secao">Todos os Produtos</h2>
+                                            <div class="loja__grid-produtos" id="loja__grid-produtos"></div>
+                                        </section>
+                                    </div>
+
+
                                 </div>
-                            </header>
-
-                            <section class="loja__secao-search" id="loja__secao-search" style="display: none;">
-                                <h2 class="loja__titulo-secao">Resultados da Busca</h2>
-                                <div class="loja__grid-produtos" id="loja__grid-busca"></div>
-                            </section>
-
-                            <section class="loja__secao-destaques" id="loja__secao-destaques" style="display: none;">
-                                <h2 class="loja__titulo-secao">Produtos em Destaque</h2>
-                                <div class="loja__grid-destaques" id="loja__grid-destaques"></div>
-                            </section>
-
-                            <div class="loja__separador">
-                                <span class="loja__separador-animado"></span>
-                            </div>
-                            <section class="loja__secao-produtos" id="loja__secao-produtos" style="display: none;">
-                                <h2 class="loja__titulo-secao">Todos os Produtos</h2>
-                                <div class="loja__grid-produtos" id="loja__grid-produtos"></div>
-                            </section>
-                        </div>
-
-
-                    </div>
-                </main>
+                            </main>
+            </div>
         </div>
-    </div>
-    <script>
+        <script>
 
-        const produtos = [
-            {
-                id: 1,
-                nome: "Produto destaque 1",
-                preco: 349.90,
-                precoAntigo: 499.90,
-                estoque: 8,
-                estoqueTotal: 20,
-                imagem: "/public/img/Logos/CAPA-PIXEL.gif",
-                tag: "Lançamento",
-                destaque: true,
-                descricao: "DEscricao testtesttesttesttesttesttesttesttesttesttesttesttesttest",
-                visualizacoes: 1245
-            },
-            {
-                id: 2,
-                nome: "Produto destaque 2",
-                preco: 1299.90,
-                precoAntigo: 1599.90,
-                estoque: 5,
-                estoqueTotal: 15,
-                imagem: "/public/img/Logos/CAPA-PIXEL.gif",
-                tag: "Exclusivo",
-                destaque: true,
-                descricao: "2",
-                visualizacoes: 879
-            },
-            {
-                id: 3,
-                nome: "test",
-                preco: 2499.90,
-                precoAntigo: 2999.90,
-                estoque: 3,
-                estoqueTotal: 10,
-                imagem: "/public/img/Logos/CAPA-PIXEL.gif",
-                tag: "Edição Limitada",
-                destaque: true,
-                descricao: "fwa",
-                visualizacoes: 1672
-            },
-            {
-                id: 4,
-                nome: "prod 1",
-                preco: 189.90,
-                estoque: 20,
-                estoqueTotal: 25,
-                imagem: "/public/img/Logos/CAPA-PIXEL.gif",
-                tag: "Promoção"
-            },
-            {
-                id: 5,
-                nome: "prod 2",
-                preco: 399.90,
-                estoque: 5,
-                estoqueTotal: 15,
-                imagem: "/public/img/Logos/CAPA-PIXEL.gif"
-            },
+            const produtos = [
+                {
+                    id: 1,
+                    name: "Featured Product 1",
+                    price: 349.90,
+                    oldPrice: 499.90,
+                    stock: 8,
+                    totalStock: 20,
+                    image: "/public/img/Logos/CAPA-PIXEL.gif",
+                    tag: "New Release",
+                    featured: true,
+                    description: "Description testtesttesttesttesttesttesttesttesttesttesttesttesttest",
+                    views: 1245
+                },
+                {
+                    id: 2,
+                    name: "Featured Product 2",
+                    price: 1299.90,
+                    oldPrice: 1599.90,
+                    stock: 5,
+                    totalStock: 15,
+                    image: "/public/img/Logos/CAPA-PIXEL.gif",
+                    tag: "Exclusive",
+                    featured: true,
+                    description: "2",
+                    views: 879
+                },
+                {
+                    id: 3,
+                    name: "test",
+                    price: 2499.90,
+                    oldPrice: 2999.90,
+                    stock: 3,
+                    totalStock: 10,
+                    image: "/public/img/Logos/CAPA-PIXEL.gif",
+                    tag: "Limited Edition",
+                    featured: true,
+                    description: "fwa",
+                    views: 1672
+                },
+                {
+                    id: 4,
+                    name: "prod 1",
+                    price: 189.90,
+                    stock: 20,
+                    totalStock: 25,
+                    image: "/public/img/Logos/CAPA-PIXEL.gif",
+                    tag: "Sale"
+                },
+                {
+                    id: 5,
+                    name: "prod 2",
+                    price: 399.90,
+                    stock: 5,
+                    totalStock: 15,
+                    image: "/public/img/Logos/CAPA-PIXEL.gif"
+                },
 
-        ];
-
-        function simularCarregamento() {
-            const overlay = document.getElementById('loja__overlay');
-            const loaderBar = document.getElementById('loja__loader-bar');
-            const container = document.querySelector('.loja__container');
-            let progresso = 0;
-
-            // Animação da barra de progresso com GSAP
-            const tl = gsap.timeline();
-
-            tl.to(loaderBar, {
-                width: '30%',
-                duration: 0.8,
-                ease: "power2.inOut"
-            })
-                .to(loaderBar, {
-                    width: '60%',
-                    duration: 1.2,
-                    ease: "power2.inOut"
-                })
-                .to(loaderBar, {
-                    width: '85%',
-                    duration: 0.8,
-                    ease: "power2.inOut"
-                })
-                .to(loaderBar, {
-                    width: '100%',
-                    duration: 0.5,
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        gsap.to(overlay, {
-                            opacity: 0,
-                            duration: 0.5,
-                            onComplete: () => {
-                                overlay.style.display = 'none';
-
-                                container.style.visibility = 'visible';
-                                gsap.to(container, {
-                                    opacity: 1,
-                                    duration: 0.8
-                                });
+            ];
 
 
-                                const cards = document.querySelectorAll('.loja__card-destaque, .loja__card-produto');
 
-                                cards.forEach((card, index) => {
-                                    gsap.fromTo(card,
-                                        {
-                                            opacity: 0,
-                                            y: 30
-                                        },
-                                        {
-                                            opacity: 1,
-                                            y: 0,
-                                            duration: 0.6,
-                                            delay: 0.1 * (index % 5),
-                                            ease: "power2.out"
-                                        }
-                                    );
-                                });
-                            }
-                        });
-                    }
-                });
-        }
+            function renderizarDestaques() {
+                const containerDestaques = document.getElementById('loja__grid-destaques');
 
-        function renderizarDestaques() {
-            const containerDestaques = document.getElementById('loja__grid-destaques');
+                const produtosDestaque = produtos.filter(produto => produto.featured);
+                document.getElementById('loja__secao-search').style.display = 'none'
+                document.getElementById('loja__secao-destaques').style.display = 'block'
+                setTimeout(() => {
+                    document.getElementById('loja__secao-destaques').style.opacity = 1;
+                }, 500);
 
-            const produtosDestaque = produtos.filter(produto => produto.destaque);
-            document.getElementById('loja__secao-search').style.display = 'none'
-            document.getElementById('loja__secao-destaques').style.display = 'block'
-            setTimeout(() => {
-                document.getElementById('loja__secao-destaques').style.opacity = 1;
-            }, 500);
+                containerDestaques.innerHTML = '';
 
-            containerDestaques.innerHTML = '';
+                produtosDestaque.forEach((produto, index) => {
+                    const desconto = produto.oldPrice ? Math.round((1 - produto.price / produto.oldPrice) * 100) : 0;
+                    const percentualEstoque = (produto.stock / produto.totalStock) * 100;
 
-            produtosDestaque.forEach((produto, index) => {
-                const desconto = produto.precoAntigo ? Math.round((1 - produto.preco / produto.precoAntigo) * 100) : 0;
-                const percentualEstoque = (produto.estoque / produto.estoqueTotal) * 100;
-
-                const cardHTML = `
+                    const cardHTML = `
             <div class="loja__card-destaque fade-in delay-${index + 1}">
                 <div class="loja__imagem-wrapper">
-                    <img src="${produto.imagem}" alt="${produto.nome}" class="loja__imagem-produto">
+                    <img src="${produto.image}" alt="${produto.name}" class="loja__imagem-produto">
                     <div class="loja__gradiente-imagem"></div>
                     <div class="loja__contador-visualizacoes">
                         <span class="loja__indicador-online"></span>
-                        <span>${produto.visualizacoes} visualizando</span>
+                        <span>${produto.views} Visualizações</span>
                     </div>
                 </div>
                 ${produto.tag ? `<span class="loja__tag-produto">${produto.tag}</span>` : ''}
                 <div class="loja__detalhes-destaque">
-                    <h3 class="loja__nome-produto">${produto.nome}</h3>
-                    <p class="loja__descricao-produto">${produto.descricao}</p>
+                    <h3 class="loja__nome-produto">${produto.name}</h3>
+                    <p class="loja__descricao-produto">${produto.description}</p>
                     <div class="loja__preco-wrapper">
-                        <span class="loja__preco-atual">R$ ${produto.preco.toFixed(2).replace('.', ',')}</span>
-                        ${produto.precoAntigo ? `
-                            <span class="loja__preco-antigo">R$ ${produto.precoAntigo.toFixed(2).replace('.', ',')}</span>
+                        <span class="loja__preco-atual">R$ ${produto.price.toFixed(2).replace('.', ',')}</span>
+                        ${produto.oldPrice ? `
+                            <span class="loja__preco-antigo">R$ ${produto.oldPrice.toFixed(2).replace('.', ',')}</span>
                             <span class="loja__tag-economia">Economize ${desconto}%</span>
                         ` : ''}
                     </div>
@@ -272,183 +204,170 @@
                         <div class="loja__barra-estoque">
                             <div class="loja__nivel-estoque" style="width: ${percentualEstoque}%"></div>
                         </div>
-                        <span class="loja__texto-estoque">${produto.estoque} unidades</span>
+                        <span class="loja__texto-estoque">${produto.stock} units</span>
                     </div>
-                    <button class="loja__botao-comprar">Adicionar ao Carrinho</button>
+                    <button class="loja__botao-comprar" data-id="${produto.id}">Adicionar ao Carrinho</button>
                 </div>
             </div>
         `;
 
-                containerDestaques.innerHTML += cardHTML;
-            });
-        }
+                    containerDestaques.innerHTML += cardHTML;
+                });
+            }
 
-        function renderizarProdutos() {
-            const containerProdutos = document.getElementById('loja__grid-produtos');
-            const produtosRegulares = produtos.filter(produto => !produto.destaque);
-            document.getElementById('loja__secao-search').style.display = 'none'
-            document.getElementById('loja__secao-produtos').style.display = 'block'
-            setTimeout(() => {
-                document.getElementById('loja__secao-produtos').style.opacity = 1;
-            }, 500);
-            containerProdutos.innerHTML = '';
+            function renderizarProdutos() {
+                const containerProdutos = document.getElementById('loja__grid-produtos');
+                const produtosRegulares = produtos.filter(produto => !produto.featured);
+                document.getElementById('loja__secao-search').style.display = 'none'
+                document.getElementById('loja__secao-produtos').style.display = 'block'
+                setTimeout(() => {
+                    document.getElementById('loja__secao-produtos').style.opacity = 1;
+                }, 500);
+                containerProdutos.innerHTML = '';
 
-            produtosRegulares.forEach((produto, index) => {
-                const percentualEstoque = (produto.estoque / produto.estoqueTotal) * 100;
+                produtosRegulares.forEach((produto, index) => {
+                    const percentualEstoque = (produto.stock / produto.totalStock) * 100;
 
-                const cardHTML = `
+                    const cardHTML = `
             <div class="loja__card-produto fade-in delay-${(index % 5) + 1}">
                 <div class="loja__thumb-produto">
-                    <img src="${produto.imagem}" alt="${produto.nome}">
+                    <img src="${produto.image}" alt="${produto.name}">
                 </div>
                 ${produto.tag ? `<span class="loja__tag-regular">${produto.tag}</span>` : ''}
                 <div class="loja__info-produto">
-                    <h3 class="loja__titulo-produto">${produto.nome}</h3>
-                    <div class="loja__preco-produto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                    <h3 class="loja__nome-produto">${produto.name}</h3>
+                    <div class="loja__preco-produto">R$ ${produto.price.toFixed(2).replace('.', ',')}</div>
                     <div class="loja__estoque-produto">
                         <div class="loja__barra-estoque-produto">
                             <div class="loja__nivel-estoque-produto" style="width: ${percentualEstoque}%"></div>
                         </div>
-                        <span class="loja__texto-estoque-produto">${produto.estoque} unidades</span>
+                        <span class="loja__texto-estoque-produto">${produto.stock} unidades</span>
                     </div>
-                    <button class="loja__botao-produto">Comprar</button>
+                    <button class="loja__botao-comprar" data-id="${produto.id}">Comprar</button>
                 </div>
             </div>
         `;
 
-                containerProdutos.innerHTML += cardHTML;
-            });
-        }
-
-        function searchProducts() {
-            const termoBusca = document.getElementById('loja__busca-input').value.toLowerCase().trim();
-
-            if (termoBusca === '') {
-                renderizarDestaques();
-                renderizarProdutos();
-                document.getElementById("loja__busca-clear").style.opacity = 0;
-                return;
+                    containerProdutos.innerHTML += cardHTML;
+                });
             }
 
-            const searchContainner = document.getElementById('loja__grid-busca');
-            searchContainner.innerHTML = '';
+            function searchProducts() {
+                const termoBusca = document.getElementById('loja__busca-input').value.toLowerCase().trim();
 
-            document.getElementById("loja__busca-clear").style.opacity = 1;
+                if (termoBusca === '') {
+                    renderizarDestaques();
+                    renderizarProdutos();
+                    document.getElementById("loja__busca-clear").style.opacity = 0;
+                    return;
+                }
 
-            document.getElementById('loja__secao-destaques').style.display = 'none'
-            document.getElementById('loja__secao-produtos').style.display = 'none'
-            document.getElementById('loja__secao-search').style.display = 'block'
-            setTimeout(() => {
-                document.getElementById('loja__secao-search').style.opacity = 1;
-            }, 500);
+                const searchContainner = document.getElementById('loja__grid-busca');
+                searchContainner.innerHTML = '';
 
-            const produtosFiltrados = produtos.filter(produto =>
-                produto.nome.toLowerCase().includes(termoBusca)
-            );
-            console.log(produtosFiltrados);
+                document.getElementById("loja__busca-clear").style.opacity = 1;
+
+                document.getElementById('loja__secao-destaques').style.display = 'none'
+                document.getElementById('loja__secao-produtos').style.display = 'none'
+                document.getElementById('loja__secao-search').style.display = 'block'
+                setTimeout(() => {
+                    document.getElementById('loja__secao-search').style.opacity = 1;
+                }, 500);
+
+                const produtosFiltrados = produtos.filter(produto =>
+                    produto.nome.toLowerCase().includes(termoBusca)
+                );
+                console.log(produtosFiltrados);
 
 
-            if (produtosFiltrados.length > 0) {
-                produtosFiltrados.forEach((produto, index) => {
-                    const percentualEstoque = (produto.estoque / produto.estoqueTotal) * 100;
-                    searchContainner.innerHTML += `
+                if (produtosFiltrados.length > 0) {
+                    produtosFiltrados.forEach((produto, index) => {
+                        const percentualEstoque = (produto.stock / produto.totalStock) * 100;
+                        searchContainner.innerHTML += `
                     <div class="loja__card-produto fade-in delay-${(index % 5) + 1}">
                         <div class="loja__thumb-produto">
-                            <img src="${produto.imagem}" alt="${produto.nome}">
+                            <img src="${produto.image}" alt="${produto.name}">
                         </div>
                         ${produto.tag ? `<span class="loja__tag-regular">${produto.tag}</span>` : ''}
                         <div class="loja__info-produto">
-                            <h3 class="loja__titulo-produto">${produto.nome}</h3>
-                            <div class="loja__preco-produto">R$ ${produto.preco.toFixed(2).replace('.', ',')}</div>
+                            <h3 class="loja__nome-produto">${produto.name} </h3>
+                            <div class="loja__preco-produto">R$ ${produto.price.toFixed(2).replace('.', ',')}</div>
                             <div class="loja__estoque-produto">
                                 <div class="loja__barra-estoque-produto">
                                     <div class="loja__nivel-estoque-produto" style="width: ${percentualEstoque}%"></div>
                                 </div>
-                                <span class="loja__texto-estoque-produto">${produto.estoque} unidades</span>
+                                <span class="loja__texto-estoque-produto">${produto.stock} unidades</span>
                 
                                 </div>
-                            <button class="loja__botao-produto">Comprar</button>
+                            <button class="loja__botao-comprar" data-id="${produto.id}">Comprar</button>
                         </div>
                     </div>
                 `;
-                })
-            } else {
-                searchContainner.innerHTML = '<p class="loja__sem-resultados">Nenhum produto encontrado.</p>';
+                    })
+                } else {
+                    searchContainner.innerHTML = '<p class="loja__sem-resultados">Nenhum produto encontrado.</p>';
+                }
+
             }
 
-        }
-
-        document.getElementById('loja__busca-input').addEventListener('input', searchProducts);
+            document.getElementById('loja__busca-input').addEventListener('input', searchProducts);
 
 
-        document.getElementById("loja__busca-clear").addEventListener('click', () => {
-            document.getElementById('loja__busca-input').value = '';
-            searchProducts();
-        })
-
-        document.addEventListener('DOMContentLoaded', () => {
-            simularCarregamento();
-
-            if (document.getElementById('loja__busca-input').value.trim() !== '') {
+            document.getElementById("loja__busca-clear").addEventListener('click', () => {
+                document.getElementById('loja__busca-input').value = '';
                 searchProducts();
-            } else {
-                document.getElementById("loja__busca-clear").style.opacity = 0;
-                renderizarDestaques();
-                renderizarProdutos();
-            }
+            })
 
+            document.addEventListener('DOMContentLoaded', () => {
 
-            document.getElementById('loja__grid-destaques').addEventListener('click', (e) => {
-                if (e.target.classList.contains('loja__botao-comprar')) {
-                    const card = e.target.closest('.loja__card-destaque');
-                    const nomeProduto = card.querySelector('.loja__nome-produto').textContent;
-
-                    const btn = e.target;
-                    btn.textContent = "✓ Adicionado!";
-                    btn.style.backgroundColor = "#03dac6";
-
-                    gsap.to(btn, {
-                        scale: 1.05,
-                        duration: 0.2,
-                        yoyo: true,
-                        repeat: 1
-                    });
-
-                    setTimeout(() => {
-                        btn.textContent = "Adicionar ao Carrinho";
-                        btn.style.backgroundColor = "";
-                    }, 2000);
-
+                if (document.getElementById('loja__busca-input').value.trim() !== '') {
+                    searchProducts();
+                } else {
+                    document.getElementById("loja__busca-clear").style.opacity = 0;
+                    renderizarDestaques();
+                    renderizarProdutos();
                 }
+
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('loja__botao-comprar')) {
+                        const card = e.target.closest('.loja__card-destaque') || e.target.closest('.loja__card-produto');
+                        const nomeProduto = card.querySelector('.loja__nome-produto').textContent;
+
+                        let produtoId = e.target.getAttribute('data-id');
+                        let produto = produtos.find(p => p.id == produtoId);
+
+                        const btn = e.target;
+                        let inicialContent = btn.textContent;
+                        btn.textContent = "✓ Adicionado!";
+                        btn.style.backgroundColor = "#03dac6";
+
+                        gsap.to(btn, {
+                            scale: 1.05,
+                            duration: 0.2,
+                            yoyo: true,
+                            repeat: 1
+                        });
+
+                        setTimeout(() => {
+                            btn.textContent = inicialContent;
+                            btn.style.backgroundColor = "";
+                        }, 2000);
+
+
+                        window.addToCart(produto);
+
+
+                    }
+                });
+
+
             });
+        </script>
+        <%- include('../reusable/script.ejs') %>
+            <script src="/public/js/store/scriptRoot.js"></script>
+            <script src="/public/js/store/products.js"></script>
 
-            document.getElementById('loja__grid-produtos').addEventListener('click', (e) => {
-                if (e.target.classList.contains('loja__botao-produto')) {
-                    const card = e.target.closest('.loja__card-produto');
-                    const nomeProduto = card.querySelector('.loja__titulo-produto').textContent;
-                    const btn = e.target;
-                    btn.textContent = "✓ Adicionado!";
-                    btn.style.backgroundColor = "#03dac6";
-
-                    gsap.to(btn, {
-                        scale: 1.05,
-                        duration: 0.2,
-                        yoyo: true,
-                        repeat: 1
-                    });
-
-                    setTimeout(() => {
-                        btn.textContent = "Adicionar ao Carrinho";
-                        btn.style.backgroundColor = "";
-                    }, 2000);
-
-                }
-            });
-        });
-    </script>
-    <%- include('../reusable/script.ejs') %>
-        <script src="/public/js/store/products.js"></script>
-        <script src="/public/js/store/scriptRoot.js"></script>
 </body>
 
 </html>

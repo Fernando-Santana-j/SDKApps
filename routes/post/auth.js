@@ -82,7 +82,7 @@ router.post('/auth/register', async (req, res) => {
                 }
             }
         }).then(async () => {
-            let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: email.replace(/@.+$/, '') })
+            let htmlEmail = await functions.sendEmail(user.email, 'Verificação de email SDK!', { code: newCode, name: user.displayName })
             await functions.sendEmail(email, 'Verificação de email SDK!', htmlEmail)
             if (!res.headersSent) {
                 res.status(200).json({ success: true, userID: docRef.id })
@@ -139,7 +139,7 @@ router.post('/auth/login', async (req, res) => {
         let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
         req.session.code = newCode
 
-        let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.username ? user.username : email.replace(/@.+$/, '') })
+        let htmlEmail = await functions.sendEmail(user.email, 'Verificação de email SDK!', { code: newCode, name: user.displayName })
         await functions.sendEmail(email, 'Verificação de email SDK!', htmlEmail)
         if (!res.headersSent) {
             res.status(200).json({ success: true, userID: user.id })
@@ -170,11 +170,22 @@ router.post('/auth/login/google', async (req, res) => {
                     if (findUser.security.emailVerify == false) {
                         let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
                         req.session.code = newCode
-                        let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: findUser.username ? findUser.username : findUser.email.replace(/@.+$/, '')  })
+                        let htmlEmail = await functions.sendEmail(user.email, 'Verificação de email SDK!', { code: newCode, name: user.displayName })
                         await functions.sendEmail(findUser.email, 'Verificação de email SDK!', htmlEmail)
                     }
+                    db.update('users', findUser.id, {
+                        email: user.email,
+                        username: 'displayName' in user ? user.displayName : user.email.replace(/@.+$/, ''),
+                        provider: 'google',
+                        security: {
+                            emailVerify: false,
+                        },
+                        profile_pic: user.profile_pic
+
+                    })
                     res.status(200).json({ success: true, userID: findUser.id, emailVerify: findUser.security.emailVerify})
                 }
+                
             } else {
                 let docRef = await dataBase.collection('users').doc()
                 docRef.set({
@@ -185,12 +196,14 @@ router.post('/auth/login/google', async (req, res) => {
                         provider: 'google',
                         security: {
                             emailVerify: false,
-                        }
+                        },
+                        profilePic: user.photoURL || null
+
                     }
                 }).then(async () => {
                     let newCode = ('' + Math.floor(Math.random() * 1e6)).slice(-6)
                     req.session.code = newCode
-                    let htmlEmail = await functions.readTemplate('codeMail.ejs', { newCode: Array.from(newCode), name: user.email.replace(/@.+$/, '') })
+                    let htmlEmail = await functions.sendEmail(user.email, 'Verificação de email SDK!', { code: newCode, name: user.displayName })
                     await functions.sendEmail(user.email, 'Verificação de email SDK!', htmlEmail)
 
                     if (!res.headersSent) {

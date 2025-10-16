@@ -18,7 +18,7 @@ function setInitialPosition() {
     const menuRect = menuContent.getBoundingClientRect();
     const activeRect = activeItem.getBoundingClientRect();
 
-    menuLine.style.width = `${activeRect.width + 10}px`;
+    menuLine.style.width = `${activeRect.width + 15}px`;
     menuLine.style.left = `${activeRect.left - menuRect.left - 5}px`;
 
     if (menuLine.style.opacity === '0' || !menuLine.style.opacity) {
@@ -34,6 +34,7 @@ function moveLineToItem(item) {
 
     menuLine.style.width = `${itemRect.width + 10}px`;
     menuLine.style.left = `${itemRect.left - menuRect.left - 5}px`;
+    
 }
 
 menuItems.forEach(item => {
@@ -41,7 +42,6 @@ menuItems.forEach(item => {
     item.addEventListener('mouseleave', () => moveLineToItem(activeItem));
 
     item.addEventListener('click', (e) => {
-        e.preventDefault();
         activeItem.classList.remove('active');
         item.classList.add('active');
         activeItem = item;

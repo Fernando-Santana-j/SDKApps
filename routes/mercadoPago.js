@@ -4,11 +4,62 @@ const functions = require('../functions')
 const db = require('../Firebase/models')
 const axios = require('axios')
 
-let client = require('../Discord/discordIndex').client
-const { Payment, MercadoPagoConfig } = require('mercadopago');
+let clientDiscord = require('../Discord/discordIndex').client
+const { Payment, MercadoPagoConfig, Preference } = require('mercadopago');
+let mercadoPago = require('mercadopago');
 const mercadoPagoData = require('../config/mercadoPagoData.json');
 const webConfig = require('../config/web-config');
 
+
+const Mercadoclient = new MercadoPagoConfig({ accessToken: "TEST-5422321950640583-081017-c4a168dbc487cc205f5a5f28448051a8-1968643066" });
+
+
+
+router.post('/mercadopago/createPreference', async (req, res) => {
+  const {itens , paymentAccept} = req.body;
+
+    if (!itens || !Array.isArray(itens) || itens.length === 0) {
+        return res.status(400).json({ error: 'Dados inválidos' });
+    }
+    let excluded_payment_types = [
+      { id: 'credit_card' },
+      { id: 'debit_card' },
+      { id: 'ticket' } ,
+      { id: "pix"}
+    ]
+    if (paymentAccept) {
+        switch (paymentAccept) {
+            case 'card':
+                excluded_payment_types = excluded_payment_types.filter((item) => item.id !== 'credit_card' && item.id !== 'debit_card');
+                break;
+            case 'pix':
+                excluded_payment_types = excluded_payment_types.filter((item) => item.id !== 'pix');
+                break;
+            case 'boleto':
+                excluded_payment_types = excluded_payment_types.filter((item) => item.id !== 'ticket');
+                break;
+        }
+    }
+
+  const preferences = {
+    items: itens,
+    payment_methods: {
+      excluded_payment_types: excluded_payment_types
+    }
+  };
+
+  try {
+    const preference = new Preference(Mercadoclient);
+    const response = await preference.create({ body: preferences }); // <-- IMPORTANTE
+    if (!response || !response.id) {
+        res.json({success: false, data: 'Resposta inválida do Mercado Pago' });
+    }
+    res.json({ id: response.id, success: true });
+  } catch (error) {
+    console.error('Erro Mercado Pago:', error);
+    res.json({success: false, data: 'Erro ao criar preferência', detalhe: error });
+  }
+});
 
 router.post('/mercadopago/webhook', async (req, res) => {
     let resposta = req.body
@@ -53,7 +104,7 @@ router.post('/mercadopago/webhook', async (req, res) => {
                                         require("../Discord/discordIndex").sendDiscordMensageUser(metadataC.user, '✅ Pagamento concluido!', `O pagamento da sua ultima cobrança foi concluido com sucesso.`, null, null)
                                         require("../Discord/discordIndex").sendDiscordMensageUser(metadataC.userCobrador, '✅ cobranca paga!', `O usuario com id ${metadataC.user} pagou a sua ultima cobrança.`, null, null)
                                         try {
-                                            const channel = await client.channels.fetch(metadataC.channelID);
+                                            const channel = await clientDiscord.channels.fetch(metadataC.channelID);
                                             const message = await channel.messages.fetch(metadataC.mensageID);
                                             await message.edit({
                                                 components: []
@@ -166,57 +217,6 @@ router.post('/mercadopago/webhook', async (req, res) => {
     }
 })
 
-router.post('/mercadopago/add', async (req, res) => {
-    try {
-        let token = await (req.body.token).trim()
-        const Mercadoclient = new MercadoPagoConfig({ accessToken: token, options: { timeout: 5000 } });
-        const payment = new Payment(Mercadoclient);
-        const body = {
-            transaction_amount: 1.00,
-            description: `Valid token`,
-            payment_method_id: 'pix',
-            external_reference: '',
-            payer: mercadoPagoData.payer,
-            // notification_url: mercadoPagoData.notification_url + '/test',
-        };
-        let test = await payment.create({ body })
-        if (test) {
-            let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
-            let bankData = {}
-            if (server.bankData) {
-                bankData = server.bankData
-            }
-            bankData.mercadoPagoToken = token
-            db.update('servers', req.body.serverID, {
-                bankData: bankData
-            })
-            res.status(200).json({ success: true, data: 'Token pix adicionado' })
-        } else {
-            res.status(200).json({ success: false, data: 'Token pix Invalido' })
-        }
-
-    } catch (error) {
-        console.log(error);
-        res.status(200).json({ success: false, data: 'Token pix Invalido' })
-    }
-})
-
-
-
-
-router.post('/mercadopago/desative', async (req, res) => {
-    try {
-        let server = await db.findOne({ colecao: "servers", doc: req.body.serverID })
-        let bankData = await server.bankData
-        bankData.mercadoPagoToken = ''
-        db.update('servers', req.body.serverID, {
-            bankData: bankData
-        })
-        res.status(200).json({ success: true, data: 'Pix desativado!' })
-    } catch (error) {
-        res.status(200).json({ success: false, data: 'Erro ao desativar o pix' })
-    }
-})
 
 router.post('/pix/create', async (req, res) => {
     try {
@@ -229,7 +229,7 @@ router.post('/pix/create', async (req, res) => {
 
 
 
-        const Mercadoclient = new MercadoPagoConfig({ accessToken: webConfig.mercadoPagoToken, options: { timeout: 5000 } });
+        
         const payment = new Payment(Mercadoclient);
 
         let amount = itemPlan.price
@@ -266,5 +266,7 @@ router.post('/pix/create', async (req, res) => {
         }
     }
 })
+
+
 
 module.exports = router

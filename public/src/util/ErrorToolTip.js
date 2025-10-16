@@ -115,5 +115,12 @@ class ErrorTooltip {
         const errorIds = Array.from(this.errors.keys());
         await Promise.all(errorIds.map(id => this.hide(id)));
     }
+    
 }
-const errorTooltip = new ErrorTooltip();
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ErrorTooltip;
+}
+
+if (typeof window !== 'undefined') {
+    window.ErrorTooltip = ErrorTooltip;
+}

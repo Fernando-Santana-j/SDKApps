@@ -17,6 +17,7 @@ const botConfig = require('./config/bot-config.js');
 const { default: axios } = require("axios");
 
 const functions = require('./functions.js');
+const storeFunctions = require('./functions/storeFunctions.js');
 
 const cors = require('cors');
 
@@ -54,11 +55,11 @@ app.use(bodyParser.json())
 app.use(express.static('views'));
 // app.use(express.static('public'));
 app.use(express.static('uploads'));
-// app.use(express.static('templates'));
+app.use(express.static('templates'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/config', express.static(path.join(__dirname, 'config')));
-// app.use('/templates', express.static(path.join(__dirname, 'templates')));
+app.use('/templates', express.static(path.join(__dirname, 'templates')));
 
 
 app.set('views', path.join(__dirname, '/views'))
@@ -134,6 +135,11 @@ const securityRoutes = require('./routes/security.js');
 app.use('/', securityRoutes);
 
 
+let storeRoutes = require('./routes/storeRoutes.js');
+
+app.use('/', storeRoutes);
+
+
 
 //TODO POST ROUTES
 
@@ -151,28 +157,7 @@ app.use('/', require('./routes/post/store.js'));
 
 
 
-app.get('/store/:idn', async (req, res) => { 
-    
-    let store = await db.findOne({ colecao: 'stores', where: ['IDName', '==', req.params.idn] })
-    
-    if (!store || store.error == true) {
-        store = await db.findOne({ colecao: 'stores', doc: req.params.idn })
-    }
 
-    let result = await storeVerify(store)
-
-    if (result && result.error == true) {
-        res.redirect(`/?error=${result.message}`)
-        return
-    }
-
-    delete store.storeData
-    delete store.integrations
-    delete store.functions
-    
-    res.render('./store/products', { store: store })
-
-})
 
 
 
@@ -189,8 +174,11 @@ app.get('/dashboard', functions.authGetState, async (req, res) => {
     if ('stores' in user && user.stores.length > 0) {
         for (let index = 0; index < user.stores.length; index++) {
             const store = user.stores[index];
+            
             let storeDoc = await store.get()
-            let storeData = storeDoc.data()
+            
+            let storeData = await storeDoc.data()
+
             await stores.push({
                 id: storeData.id,
                 name: storeData.displayName,
@@ -257,11 +245,28 @@ app.get('/user/config', functions.authGetState, async (req, res) => {
 
 app.get('/logout', async (req, res) => {
     try {
-        try {
-            res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
-            res.cookie('verifyEmail', '', { httpOnly: true, expires: new Date(0) });
-            res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
-        } catch (error) { }
+        res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
+        res.cookie('verifyEmail', '', { httpOnly: true, expires: new Date(0) });
+        res.cookie('verify2fa', '', { httpOnly: true, expires: new Date(0) });
+        res.cookie('authToken', '', { httpOnly: true, expires: new Date(0) });
+        res.cookie('connect.sid', '', { httpOnly: true, expires: new Date(0) });
+        res.cookie('loginAttempts', '', { httpOnly: true, expires: new Date(0) });
+        
+
+        const { getAuth, signOut } = require("firebase/auth");
+
+        const auth = getAuth();
+
+        
+        await signOut(auth)
+            .then(() => {
+            console.log("Usuário deslogado com sucesso!");
+            // Redirecionar ou atualizar a interface
+            })
+            .catch((error) => {
+            console.error("Erro ao deslogar:", error);
+            });
+        
         if (req.session.uid) {
             const sessionID = req.session.id;
             req.sessionStore.destroy(sessionID, (err) => {
@@ -271,6 +276,8 @@ app.get('/logout', async (req, res) => {
                     res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}&logout=true`)
                 }
             })
+            
+            
 
         } else {
             res.redirect(`${req.query.redirect ? req.query.redirect : '/'}?error=${req.query.error ? req.query.error : ''}&logout=true`)

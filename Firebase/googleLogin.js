@@ -9,6 +9,7 @@ const auth = getAuth();
 module.exports = {
     googleLogin: async (req, res) => {
         let userdata = JSON.parse(req.body.user)
+        console.log(userdata)
         if (req.session.uid) {
             return
         }

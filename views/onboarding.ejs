@@ -245,7 +245,7 @@
                             <label class="lable-padrao" style="font-size: 1.1em; font-weight: 500" for="store-link">Link
                                 da sua loja: </label>
                             <button id="link-copy-button" class="button-padrao">
-                                https://sdkapps.com.br/loja/loja-exemplo
+                                https://sdkapps.com.br/store/loja-exemplo
                             </button>
                         </div>
                     </div>
@@ -267,12 +267,32 @@
             <div class="onboarding-containner" id="feedback-onboarding-containner"></div>
         </div>
     </div>
+    <script src="/public/src/util/tooltip.js"></script>
 
     <%- include('./reusable/script.ejs') %>
+        <script>
+            let errorToolTip = new window.ErrorTooltip();
+        </script>
+    
         <script src="/public/js/onboarding.js"></script>
 
         <script>
+            document.getElementById("id-name").addEventListener("change", function () {
+                document.getElementById("link-copy-button").textContent = "https://sdkapps.com.br/store/" + this.value;
+            });
+            document.getElementById("link-copy-button").addEventListener("mousedown", function (e) {
+                if (e.button === 1) {
+                    window.open(this.textContent, '_blank');
+                }
+            })
+            document.getElementById("link-copy-button").addEventListener("click", function () {
 
+                navigator.clipboard.writeText(this.textContent).then(() => {
+                    successNotify('Link copiado com sucesso!');
+                }).catch(err => {
+                    errorNotify('Erro ao copiar o link');
+                });
+            });
 
             document.getElementById('finish-onboarding').addEventListener('click', async (event) => {
                 let formData = new FormData();
@@ -286,13 +306,13 @@
                 }));
                 formData.append('StoreBackGround', document.getElementById('image-background-input').files[0]);
                 formData.append('StoreLogo', document.getElementById('image-logo-input').files[0]);
-                
+
                 let session = await fetch('/store/create', {
                     method: 'POST',
                     credentials: 'include',
                     body: formData,
                 }).then(response => { return response.json() })
-                
+
                 document.getElementById("feedbackCreateStore").style.display = 'flex'
                 const feedbackAnimation = new feedbackAction('#feedbackCreateStore')
                 if (session.success == true) {
@@ -301,7 +321,7 @@
                         localStorage.removeItem('OnboardingStep')
                         setTimeout(() => {
                             window.location.href = '/store/' + session.storeID
-                        },1000)
+                        }, 1000)
                     });
                 } else {
                     feedbackAnimation.show('error', 'Erro ao criar loja', session.data, () => {
@@ -309,7 +329,7 @@
                             document.getElementById("feedbackCreateStore").style.display = 'none'
                         }, 1000)
                     });
-                    
+
                 }
             })
 
@@ -381,32 +401,34 @@
             });
 
             let OnboardingData = JSON.parse(localStorage.getItem("OnboardingData"))
-            const savedLogoFile = 'logo' in OnboardingData ? OnboardingData.logo : null;
-            const savedBackgroundFile = 'background' in OnboardingData ? OnboardingData.background : null;
+            if (OnboardingData) {
+                const savedLogoFile = 'logo' in OnboardingData ? OnboardingData.logo : null;
+                const savedBackgroundFile = 'background' in OnboardingData ? OnboardingData.background : null;
 
-            if (savedLogoFile) {
-                fetch(savedLogoFile)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10) +'.jpg', { type: blob.type });
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        document.getElementById('image-logo-input').files = dataTransfer.files;
+                if (savedLogoFile) {
+                    fetch(savedLogoFile)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10) + '.jpg', { type: blob.type });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            document.getElementById('image-logo-input').files = dataTransfer.files;
 
-                        document.getElementById('image-logo-preview').src = savedLogoFile;
-                    });
-            }
-            if (savedBackgroundFile) {
-                fetch(savedBackgroundFile)
-                    .then(res => res.blob())
-                    .then(blob => {
-                        const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10), { type: blob.type });
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        document.getElementById('image-background-input').files = dataTransfer.files;
+                            document.getElementById('image-logo-preview').src = savedLogoFile;
+                        });
+                }
+                if (savedBackgroundFile) {
+                    fetch(savedBackgroundFile)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const file = new File([blob], 'file_' + Math.random().toString(36).substr(2, 10), { type: blob.type });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(file);
+                            document.getElementById('image-background-input').files = dataTransfer.files;
 
-                        document.getElementById('image-background-preview').src = savedBackgroundFile;
-                    });
+                            document.getElementById('image-background-preview').src = savedBackgroundFile;
+                        });
+                }
             }
         </script>
 </body>

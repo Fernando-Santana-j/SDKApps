@@ -379,9 +379,7 @@
     opacity: 1;
 }
 
-/* SVG fill color */
 .list-item-icon * {
-    fill: var(--color-fill) !important;
     transition: 0.3s;
 }
 

@@ -277,7 +277,7 @@
                             style="text-decoration: underline;">Fernando Santana</a>.
                     </div>
                 </footer>
-
+         
                 <%- include('./reusable/script.ejs') %>
                     <script src="https://accounts.google.com/gsi/client"></script>
 
@@ -290,7 +290,39 @@
                         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
                         import { getAuth, GoogleAuthProvider, onAuthStateChanged, browserSessionPersistence, setPersistence, signInWithRedirect, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js';
 
+
+
+                        function handlePopupWindow(popupWindow, onClose) {
+                            if (!popupWindow) return;
+                            
+                            const loader = new Loader({
+                                text: "Autenticando...",
+                                appendToBody:true,
+                                progressText:"Aguarde enquanto processamos sua solicitação..."
+                            });
+
+                            loader.show();
+                            if (popupWindow = "bypass") {
+                                window.loaderLoginPopup = loader
+                            }else{
+                                const checkWindow = setInterval(() => {
+                                    if (popupWindow.closed) {
+                                        clearInterval(checkWindow);
+                                        loader.hide()
+                                        if (onClose) onClose();
+                                    }
+                                }, 500);
+                                 return checkWindow;
+                            }
+
+                           
+                        }
+
+
                         async function loginGoogle(user, redirect) {
+                            if (!("email" in user) || !user.email || user.email.length == 0) { 
+                                return errorNotify('Erro ao logar com google!')
+                            }
                             let session = await fetch('/auth/login/google', {
                                 method: 'POST',
                                 credentials: 'include',
@@ -300,6 +332,7 @@
                                 body: JSON.stringify({
                                     user: {
                                         email: user.email,
+                                        profile_pic: user.photoURL,
                                         username: user.displayName ? user.displayName : user.email.replace(/@.+$/, ''),
                                     }
                                 })
@@ -307,13 +340,14 @@
 
                             if (session.success == true) {
                                 if (redirect == true) {
-                                    if (session.emailVerify == false) {
-                                        document.getElementById('register-popup-containner').close()
-                                        document.getElementById('login-popup-containner').close()
-                                        document.getElementById('code-confirm-popup-containner').open()
-                                    } else {
-                                        location.href = '/dashboard'
-                                    }
+                                    location.href = '/dashboard'
+                                    // if (session.emailVerify == false) {
+                                    //     document.getElementById('register-popup-containner').close()
+                                    //     document.getElementById('login-popup-containner').close()
+                                    //     document.getElementById('code-confirm-popup-containner').open()
+                                    // } else {
+                                    //     location.href = '/dashboard'
+                                    // }
                                 }
                                 showEnterButtonLogin()
                             } else {
@@ -334,7 +368,17 @@
                         });
                         const provider = new GoogleAuthProvider();
 
+                        // Configurações importantes para evitar fechamento prematuro:
+                        provider.setCustomParameters({
+                        prompt: 'select_account',
+                        ux_mode: 'popup'
+                        });
+
+                        // Forçar recriação do token
+                         // Idioma do popup
+
                         const auth = getAuth();
+                        auth.languageCode = 'pt-BR';
 
                         async function showEnterButtonLogin() {
                             let enterButton = document.getElementById("enter-button")
@@ -363,6 +407,7 @@
                             }
 
                             auth.onAuthStateChanged(async function (user) {
+
                                 if (user) {
                                     await loginGoogle(user, false)
                                     showEnterButtonLogin()
@@ -376,16 +421,64 @@
                                 }
                             });
                         })
+                        
+                       document.getElementById("google-login").addEventListener("click", async () => {
+    try {
+        handlePopupWindow("bypass");
+        
+        // 1. Aguarda o resultado do popup
+       
+    const result = await signInWithPopup(auth, provider);
+        console.log("Resultado do login:", result);
+        
+        // 2. Extrai o usuário diretamente do resultado
+        const user = result.user;
+        
+        // 3. Chama a função de login corretamente
+        loginGoogle(user, true); // Remove o .user pois já é o objeto
 
-                        document.addEventListener('click', async (e) => {
-                            let target = e.target
-                            if (target.closest('.googleLoginClass')) {
-                                let user = await signInWithPopup(auth, provider)
-                                loginGoogle(user.user, true)
-                            }
+        
 
-                        })
+    } catch (error) {
+        console.error("Erro detalhado:", {
+            code: error.code,
+            message: error.message,
+            email: error.customData?.email
+        });
 
+        // 4. Tratamento específico de erros
+        if (error.code === 'auth/popup-closed-by-user') {
+            window.loaderLoginPopup?.hide();
+            errorNotify('Popup fechado pelo usuário!');
+        } 
+        else if (error.code === 'auth/popup-blocked') {
+            errorNotify('Popup bloqueado!');
+        }
+        else {
+            // Trate outros erros
+            errorNotify(`Erro inesperado: ${error.message}`);
+        }
+    }
+});
+                        
+
+    const openDiscordLogin = async () => {
+        let discordLogin = window.open('/redirect/discord', '_blank', 'width=500,height=600');
+        handlePopupWindow(discordLogin);
+
+        window.addEventListener('message', (event) => {
+            if (event.data.includes('uid')) {
+                let uid = event.data.replace('uid=', '')
+                if (uid && uid.length > 2) {
+                    location.href = `/dashboard`
+                } else {
+                    errorNotify('Erro ao logar com discord!')
+                }
+            }
+        });
+    };
+
+   
 
                     </script>
                     <script>
@@ -396,20 +489,6 @@
                         if (sessionUser) {
                             userID = sessionUser.uid
                         }
-
-                        const openDiscordLogin = async () => {
-                            let discordLogin = await window.open('/redirect/discord', '_blank', 'width=500,height=600');
-                            window.addEventListener('message', (event) => {
-                                if (event.data.includes('uid')) {
-                                    let uid = event.data.replace('uid=', '')
-                                    if (uid && uid.length > 2) {
-                                        location.href = `/dashboard`
-                                    } else {
-                                        errorNotify('Erro ao logar com discord!')
-                                    }
-                                }
-                            });
-                        };
 
 
 

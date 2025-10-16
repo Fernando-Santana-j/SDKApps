@@ -158,4 +158,4 @@ const remove = (subfolder, filename) => {
 };
 
 // Exporta todas as funções
-module.exports = { get, set, has, hasFile, create, remove,getRecentFiles };
+module.exports = { get, set, has, hasFile, create, remove,getRecentFiles,getFilePath };

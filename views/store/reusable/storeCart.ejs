@@ -65,6 +65,195 @@
         left: 100%;
 
     }
+
+    #store-popup-cart-containner {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        height: 100vh;
+        backdrop-filter: blur(5px);
+        z-index: 999998;
+        transition: var(--transition-standard);
+    }
+
+    #store-popup-cart-content {
+        position: absolute;
+        top: 0;
+        right: -100%;
+        width: 30em;
+        height: 100%;
+        background-color: var(--secundary-color);
+        transition: var(--transition-long);
+        padding: 2em;
+        display: flex;
+        flex-direction: column;
+        gap: 2em;
+    }
+
+    #store-cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #store-cart-close {
+        cursor: pointer;
+        transition: var(--transition-standard);
+    }
+
+    #store-cart-close:hover {
+        transform: rotate(90deg);
+        color: var(--red-color);
+    }
+
+    #store-cart-items {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    .store-cart-item {
+        background-color: var(--tertiary-color);
+        border-radius: var(--border-radius-min);
+        padding: 1em;
+        display: flex;
+        gap: 1em;
+        transform: translateX(100%);
+        animation: slideIn 0.5s forwards;
+    }
+
+    .store-cart-item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--border-radius-min);
+        object-fit: cover;
+    }
+    .store-cart-item-image-containner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .store-cart-item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 60%;
+    }
+
+    .store-cart-item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+    }
+
+    .quantity-btn {
+        width: 25px;
+        height: 25px;
+        border-radius: var(--border-radius-max);
+        border: none;
+        background: var(--main-color-purple);
+        color: white;
+        cursor: pointer;
+        padding-top: 0.2em;
+        transition: var(--transition-standard);
+    }
+
+    .quantity-btn:hover {
+        transform: scale(1.1);
+        box-shadow: var(--purple-box-shadow-small);
+    }
+
+    #store-cart-footer {
+        border-top: 1px solid var(--tertiary-color);
+        padding-top: 1em;
+    }
+
+    .cart-total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5em;
+    }
+
+    .empty-cart-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 1.5em;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s forwards;
+    }
+
+    .empty-cart-message svg {
+        width: 4em;
+        height: 4em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        top: 0.6em;
+        color: var(--text-gray-color-primary);
+        opacity: 0.8;
+    }
+
+    .empty-cart-message h3 {
+        color: var(--text-gray-color-primary);
+        font-weight: 500;
+    }
+
+    .empty-cart-message p {
+        color: var(--text-gray-color-secundary);
+        text-align: center;
+    }
+
+    .store-cart-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+    }
+
+    .delete-item-btn {
+        color: var(--red-color);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: var(--border-radius-max);
+        transition: var(--transition-standard);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-item-btn:hover {
+        background: var(--red-opacity-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    @keyframes slideIn {
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .show-cart {
+        right: 0 !important;
+    }
 </style>
 
 <div id="store-cart-float-icon-containner" data-itens="2">
@@ -81,11 +270,237 @@
     </div>
 </div>
 
-<div id="store-popup-cart-containner" style="display: none;">
+<div id="store-popup-cart-containner">
     <div id="store-popup-cart-content">
-        <div id="store-cart-content-icon">
-            <img src="/public/img/icons/shopping_cart.png">
+        <div id="store-cart-header">
+            <h2>Seu Carrinho</h2>
+            <div id="store-cart-close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
         </div>
 
+        <div id="store-cart-items">
+            <!-- Items will be dynamically inserted here -->
+        </div>
+
+        <div id="store-cart-footer">
+            <div class="cart-total-row">
+                <span>Subtotal</span>
+                <span>R$ 99,90</span>
+            </div>
+            <div class="cart-total-row">
+                <span>Frete</span>
+                <span>R$ 0,00</span>
+            </div>
+            <div class="cart-total-row">
+                <h3>Total</h3>
+                <h3>R$ 99,90</h3>
+            </div>
+            <button class="cta-button" style="width: 100%; margin-top: 1em;">
+                Finalizar Compra
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+        </div>
     </div>
 </div>
+
+<script>
+    let storeIDCart = location.pathname.split('/')[2]; 
+    const cartIcon = document.getElementById('store-cart-float-icon-containner');
+    const cartPopup = document.getElementById('store-popup-cart-containner');
+    const cartContent = document.getElementById('store-popup-cart-content');
+    const cartItemsContainer = document.getElementById('store-cart-items');
+    const cartItemsCount = document.getElementById('store-cart-float-icon-itens');
+
+    // Array para armazenar os produtos do carrinho
+    let cartComplete = localStorage.getItem('cartItems');
+    let cartItems = []
+
+    if (cartComplete) {
+        let cart = JSON.parse(cartComplete);
+        cart[storeIDCart] ? cartItems = cart[storeIDCart] : cartItems[storeIDCart] = [];
+    }
+
+    function updateCartUI() {
+        cartItemsContainer.innerHTML = '';
+        
+        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        cartItemsCount.textContent = totalItems;
+        cartIcon.dataset.itens = totalItems;
+
+        if (cartItems.length === 0) {
+            cartItemsContainer.innerHTML = `
+                <div class="empty-cart-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="21" r="1"></circle>
+                        <circle cx="19" cy="21" r="1"></circle>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                    <h3>Seu carrinho está vazio</h3>
+                    <p>Explore nossa loja e descubra produtos incríveis!</p>
+                    <button class="cta-button" onclick="closeCart()" style="width: 25em; height: 6em; ">
+                        Continuar Comprando
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 3 6 6-6 6"></path>
+                            <path d="M21 9H9C4 9 3 4 3 4"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        } else {
+            cartItems.forEach(item => {
+                cartItemsContainer.innerHTML += `
+                    <div class="store-cart-item" data-id="${item.id}">
+                        <div class="store-cart-item-image-containner" >
+                            <img src="${item.image}" class="store-cart-item-image" alt="${item.name}">    
+                        </div>
+                        <div class="store-cart-item-info">
+                            <div style="margin-bottom: 1em;">
+                                <h4 class="ellipsis-text">${item.name}</h4>
+                                <p class="desc-col" style="text-align: start ; overflow: hidden; text-overflow: ellipsis;">${item.description}</p>
+                            </div>
+                            <div class="store-cart-item-actions">
+                                <span class="mini-title-col" style="text-align: start; margin-left: auto">R$ ${(item.price * item.quantity).toFixed(2)}</span>
+                                <div class="store-cart-item-quantity">
+                                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                    <span>${item.quantity}</span>
+                                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                    
+                                </div>
+                                <button class="delete-item-btn" onclick="removeFromCart(${item.id})" title="Remover item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 6h18"></path>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        updateTotals();
+    }
+
+    function updateLocalStorage() {
+        let cartData = JSON.parse(localStorage.getItem('cartItems')) || {};
+        cartData[storeIDCart] = cartItems;
+        localStorage.setItem('cartItems', JSON.stringify(cartData));
+    }
+
+    function updateTotals() {
+        const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const shipping = 0;
+        const total = subtotal + shipping;
+
+        document.getElementById('store-cart-footer').innerHTML = cartItems.length === 0 ? '' : `
+            <div class="cart-total-row">
+                <span>Subtotal</span>
+                <span>R$ ${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="cart-total-row">
+                <span>Frete</span>
+                <span>R$ ${shipping.toFixed(2)}</span>
+            </div>
+            <div class="cart-total-row">
+                <h3>Total</h3>
+                <h3>R$ ${total.toFixed(2)}</h3>
+            </div>
+            <a class="cta-button" style="width: 100%; margin-top: 1em;" href="/store/${storeIDCart}/checkout">
+                Finalizar Compra
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+        `;
+    }
+
+    function updateQuantity(itemId, change) {
+        const itemIndex = cartItems.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1) {
+            const newQuantity = cartItems[itemIndex].quantity + change;
+            if (newQuantity > 0) {
+                cartItems[itemIndex].quantity = newQuantity;
+            } else {
+                cartItems.splice(itemIndex, 1);
+            }
+            updateCartUI();
+            updateLocalStorage()
+        }
+    }
+
+    function addToCart(product) {
+        const existingItem = cartItems.find(item => item.id === product.id);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cartItems.push({...product, quantity: 1});
+        }
+        updateCartUI();
+        updateLocalStorage()
+    }
+
+    window.addToCart = addToCart; // Torna a função global para acesso externo
+
+
+    function removeFromCart(itemId) {
+        const itemIndex = cartItems.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1) {
+            const item = cartItems[itemIndex];
+            cartItems.splice(itemIndex, 1);
+            
+            updateLocalStorage()
+            // Adiciona animação de fade out antes de remover
+            const itemElement = document.querySelector(`.store-cart-item[data-id="${itemId}"]`);
+            if (itemElement) {
+                itemElement.style.transition = 'all 0.3s ease';
+                itemElement.style.opacity = '0';
+                itemElement.style.transform = 'translateX(50px)';
+                
+                setTimeout(() => {
+                    updateCartUI();
+                }, 300);
+            } else {
+                updateCartUI();
+            }
+        }
+    }
+
+    // Inicializa o carrinho
+    updateCartUI();
+
+    function openCart() {
+        cartPopup.style.display = 'block';
+        cartIcon.style.display = 'none';
+        setTimeout(() => {
+            cartPopup.classList.add('show-cart');
+            cartContent.classList.add('show-cart');
+        }, 50);
+    }
+
+    function closeCart() {
+        cartPopup.classList.remove('show-cart');
+        cartContent.classList.remove('show-cart');
+        setTimeout(() => {
+            cartPopup.style.display = 'none';
+            cartIcon.style.display = 'block';
+        }, 300);
+    }
+
+    document.getElementById('store-cart-float-icon-content').addEventListener('click', openCart);
+    document.getElementById('store-cart-close').addEventListener('click', closeCart);
+
+    // Close cart when clicking outside
+    cartPopup.addEventListener('click', (e) => {
+        if (e.target === cartPopup) {
+            closeCart();
+        }
+    });
+
+    // Add keyboard support for closing (Esc key)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && cartPopup.style.display === 'block') {
+            closeCart();
+        }
+    });
+</script>

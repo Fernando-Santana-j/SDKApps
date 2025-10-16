@@ -99,3 +99,34 @@
     -moz-box-shadow: 0px 10px 40px 10px var(--secundary-color);
     box-shadow: 0px 10px 40px 10px var(--secundary-color);
 }
+
+
+
+#store-banner-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#store-banner-content-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1);
+    animation: zoomBanner 20s infinite alternate;
+}
+
+#store-banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        var(--cor-principal),
+        var(--cor-destaque)
+    );
+    opacity: 0.5;
+}

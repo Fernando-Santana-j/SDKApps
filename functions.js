@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const stripe = require('stripe')(require('./config/web-config').stripe);
 const db = require('./Firebase/models');
+const database = require('./Firebase/db');
 const webConfig = require('./config/web-config')
 const path = require(`path`);
 const botConfig = require('./config/bot-config');
@@ -528,8 +529,142 @@ module.exports = {
             db.delete(`preServers`, data.metadata.serverID)
         } catch (error) { }
     },
-    sendEmail: async (email, subject, html) => {
+    sendEmail: async (email, subject, htmlType, data) => {
         try {
+            let htmlTemplate = ''
+            if (htmlType == 'codeMail') {
+                let code = [...Array.from(data.code)]
+                htmlTemplate = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de Verificação</title>
+    <style>
+        /* Estilos compatíveis com Gmail */
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+            
+            .digit-input {
+                width: 25px !important;
+                height: 30px !important;
+                font-size: 14px !important;
+            }
+        }
+    </style>
+</head>
+<body style="margin:0; padding:20px; background-color:#121212; font-family: Arial, sans-serif; color:#f5f5f5;">
+    <!-- Container principal usando tabela para compatibilidade -->
+    <table class="email-container" align="center" border="0" cellpadding="0" cellspacing="0" width="500" style="max-width:500px; margin:0 auto; background:#1e1e1e; border-radius:16px; overflow:hidden; border:1px solid #404040; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+        <!-- Header com Banner -->
+        <tr>
+            <td class="email-header" style="background: linear-gradient(135deg, #8a2be2 0%, #4a148c 100%); padding:0; position:relative; overflow:hidden;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td class="banner-container" align="center" style="width:100%; height:150px;">
+                            <img id="bannerImage" src="https://res.cloudinary.com/dmfgy0ccd/image/upload/v1726657603/CAPA-PIXEL_ftgohk.gif" alt="Banner" style="width:100%; height:100%; object-fit:cover; border-radius:12px 12px 0px 0px; display:block;">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Corpo do Email -->
+        <tr>
+            <td class="email-body" style="padding:30px 25px; text-align:center;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td class="logo-section" style="margin-bottom:25px;">
+                            <h1 class="email-title" style="font-size:24px; font-weight:700; color:#f5f5f5; margin-bottom:8px;">Código de Verificação</h1>
+                            <p class="email-subtitle" style="font-size:14px; color:#bbbbbb; margin-bottom:25px; line-height:1.4;">
+                                Use o código abaixo para verificar sua conta
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <table class="code-container" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:#1a1a2e; border-radius:12px; padding:25px 20px; margin:25px 0; border:1px solid #404040; position:relative;">
+                                <tr>
+                                    <td align="center">
+                                        <div class="code-label" style="font-size:12px; color:#bbbbbb; margin-bottom:20px; font-weight:500; text-transform:uppercase; letter-spacing:1px;">Código de 6 dígitos</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <!-- Tabela para os dígitos do código -->
+                                        <table  border-collapse: separate; border-spacing: 10px; border="0" cellpadding="0" cellspacing="0" align="center" class="verification-code">
+                                            <tr>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[0]}</td>
+                                                <td style="padding: 0 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[1]}</td>
+                                                <td style="padding: 0 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[2]}</td>
+                                                <td style="padding: 0 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[3]}</td>
+                                                <td style="padding: 0 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[4]}</td>
+                                                <td style="padding: 0 8px; font-size: 0; line-height: 0;">&nbsp;</td>
+                                                <td class="code-digit" style="width:50px; height:60px; padding-top: 3px; background:linear-gradient(135deg, #1e1e1e 0%, #121212 100%); border:2px solid #8a2be2; border-radius:8px; text-align:center; font-size:24px; font-weight:800; color: #fff; font-family:'Courier New', monospace; box-shadow:0 4px 12px rgba(138,43,226,0.2); margin:0 4px;">${code[5]}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <div class="code-info" style="font-size:12px; color:#bbbbbb; margin-top:15px; font-style:italic;">Válido por 10 minutos</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                            <table class="instructions" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:rgba(21,21,21,0.5); border-radius:10px; padding:20px; margin:20px 0; border-left:3px solid #8a2be2; text-align:left;">
+                                <tr>
+                                    <td>
+                                        <h3 style="color:#f5f5f5; margin-bottom:12px; font-size:16px; font-weight:600;">Como usar:</h3>
+                                        <p style="color:#bbbbbb; font-size:14px; line-height:1.5;">
+                                            Digite este código na página de verificação para confirmar sua identidade e acessar sua conta.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+            <td class="email-footer" style="background:#121212; padding:20px; text-align:center; color:#bbbbbb; font-size:12px; border-top:1px solid #404040;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td class="footer-links" style="margin:15px 0;">
+                            <a href="#" style="color:#8a2be2; text-decoration:none; margin:0 10px; font-weight:500;">Suporte</a>
+                            <a href="#" style="color:#8a2be2; text-decoration:none; margin:0 10px; font-weight:500;">Privacidade</a>
+                            <a href="#" style="color:#8a2be2; text-decoration:none; margin:0 10px; font-weight:500;">Termos</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p style="margin:15px 0 0;">
+                                © 2025 SDKApps - Este email foi gerado automaticamente
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`
+            }
+
             const transporter = await nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -541,7 +676,7 @@ module.exports = {
                 from: 'SDKApps <sdkapps2023@gmail.com>',
                 to: email,
                 subject: subject,
-                html: html,
+                html: htmlTemplate,
                 headers: {
                     'X-Mailer': 'Nodemailer',
                     'List-Unsubscribe': '<mailto:unsubscribe@skapps.com.br>',
@@ -568,10 +703,6 @@ module.exports = {
         decrypted += decipher.final('utf8');
         return decrypted;
     },
-    readTemplate: async (relativePath, data) => {
-        let caminho = await path.join(__dirname, '/templates', relativePath)
-        return await ejs.renderFile(caminho, data);
-    },
     createUser: async (userData) => {
         try {
             let docRef = await dataBase.collection('users').doc()
@@ -583,6 +714,14 @@ module.exports = {
             console.log(error);
             
         }
+    },
+    includesStorageRef: async (refArray, refID) =>{
+        if (!Array.isArray(refArray) || !refID) {
+            return false;
+        }
+        
+        let result = await refArray.find(ref => ref.id === refID);
+        return result ? true : false;
     }
 }
 
