@@ -118,6 +118,7 @@ const produtoRoutes = require('./stripe/productsRoutes.js');
 
 app.use('/', produtoRoutes);
 
+
 //TODO SEGURANCA ROUTES
 
 
@@ -125,6 +126,14 @@ const securityRoutes = require('./routes/security.js');
 const { error } = require("console");
 
 app.use('/', securityRoutes);
+
+
+
+app.get('/sitemap.xml', (req, res) => {
+    res.setHeader('Content-Type', 'application/xml');
+    res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 
 
 app.get('/', async (req, res) => {
