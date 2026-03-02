@@ -17,5 +17,6 @@
     ],
     "pinned": true,
     "banner":"https://res.cloudinary.com/dmfgy0ccd/image/upload/v1726657603/CAPA-PIXEL_ftgohk.gif",
-    "complete": false
+    "complete": false,
+    "banner-fit": "cover"
 }
