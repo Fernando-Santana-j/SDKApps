@@ -1,0 +1,21 @@
+{
+    "visible": true,
+    "name": "SDKApps",
+    "description": "Plataforma de e-commerce desenvolvida integralmente por mim, com integração nativa ao Discord para automatização de vendas e gerenciamento de clientes, utilizando arquitetura escalável e orientada a alto desempenho.",
+    "type":"company",
+    "status": "development",
+    "deploy": "sdkapps.com.br",
+    "technologies": [
+        "JavaScript",
+        "Node.js",
+        "CSS",
+        "EJS",
+        "API",
+        "Firebase",
+        "Server",
+        "Hosting"
+    ],
+    "pinned": true,
+    "banner":"https://res.cloudinary.com/dmfgy0ccd/image/upload/v1726657603/CAPA-PIXEL_ftgohk.gif",
+    "complete": false
+}
